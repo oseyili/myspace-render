@@ -179,7 +179,7 @@ export default function App() {
 
   const [selectedFacilities, setSelectedFacilities] = useState([]);
   const [statusMessage, setStatusMessage] = useState(
-    "Search a much larger real hotel list, filter your stay, and continue with trusted booking partners."
+    "Discover more hotel choices, compare your options with ease, and continue securely with trusted booking partners."
   );
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -268,7 +268,7 @@ export default function App() {
       if (Number(data.total || 0) > 0) {
         setStatusMessage(
           data.message ||
-            `Showing page ${targetPage}. Found ${Number(data.total || 0)} hotel results.`
+            `Showing ${Number(data.total || 0)} hotel options for your search.`
         );
       } else {
         setStatusMessage(
@@ -423,7 +423,7 @@ export default function App() {
             </div>
 
             <div style={{ opacity: 0.92, marginBottom: 16 }}>
-              This version searches a broader hotel area and supports pagination, so cities like London are no longer restricted to one tiny batch of results.
+              Find the right hotel faster with a larger selection of stays, simple filters, and trusted booking options.
             </div>
 
             <div
