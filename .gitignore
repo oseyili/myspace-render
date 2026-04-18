@@ -1,0 +1,48 @@
+﻿# =========================
+# Secrets / env files
+# =========================
+.env
+.env.*
+backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
+frontend/.env.local
+frontend/.env.development
+frontend/.env.production
+
+# =========================
+# Python cache / virtual env
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# =========================
+# Databases / local app data
+# =========================
+*.db
+*.sqlite
+*.sqlite3
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# Node / Next.js build output
+# =========================
+node_modules/
+.next/
+out/
+
+# =========================
+# OS / editor
+# =========================
+.DS_Store
+Thumbs.db
+.vscode/
