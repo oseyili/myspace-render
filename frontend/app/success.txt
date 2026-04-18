@@ -1,0 +1,168 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+const API_BASE = "http://127.0.0.1:5050";
+
+type ConfirmResponse = {
+  success: boolean;
+  error?: string;
+  booking?: {
+    id: string;
+    hotel_name: string;
+    guest: string;
+    email: string;
+    checkin: string;
+    checkout: string;
+    guests: number;
+    total: number;
+    status: string;
+    created_at: string;
+  };
+};
+
+function gbp(value: number) {
+  return `£${Number(value || 0).toFixed(2)}`;
+}
+
+export default function SuccessPage() {
+  const [message, setMessage] = useState("Confirming payment...");
+  const [booking, setBooking] = useState<ConfirmResponse["booking"] | null>(null);
+
+  useEffect(() => {
+    const run = async () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const bookingId = params.get("booking_id");
+
+        if (!bookingId) {
+          setMessage("Missing booking ID.");
+          return;
+        }
+
+        const res = await fetch(
+          `${API_BASE}/api/confirm-payment?booking_id=${encodeURIComponent(bookingId)}`,
+          { cache: "no-store" }
+        );
+        const data: ConfirmResponse = await res.json();
+
+        if (data.success && data.booking) {
+          setBooking(data.booking);
+          setMessage("Payment confirmed and booking marked as paid.");
+        } else {
+          setMessage(data.error || "Could not confirm payment.");
+        }
+      } catch {
+        setMessage("Payment confirmation failed.");
+      }
+    };
+
+    run();
+  }, []);
+
+  return (
+    <main style={styles.page}>
+      <section style={styles.card}>
+        <div style={styles.badge}>PAYMENT SUCCESS</div>
+        <h1 style={styles.title}>Booking Payment Complete</h1>
+        <p style={styles.message}>{message}</p>
+
+        {booking ? (
+          <div style={styles.summaryBox}>
+            <div style={styles.row}><strong>Booking ID:</strong> {booking.id}</div>
+            <div style={styles.row}><strong>Hotel:</strong> {booking.hotel_name}</div>
+            <div style={styles.row}><strong>Guest:</strong> {booking.guest}</div>
+            <div style={styles.row}><strong>Email:</strong> {booking.email}</div>
+            <div style={styles.row}><strong>Check-in:</strong> {booking.checkin}</div>
+            <div style={styles.row}><strong>Check-out:</strong> {booking.checkout}</div>
+            <div style={styles.row}><strong>Guests:</strong> {booking.guests}</div>
+            <div style={styles.row}><strong>Total Paid:</strong> {gbp(booking.total)}</div>
+            <div style={styles.row}><strong>Status:</strong> {booking.status}</div>
+          </div>
+        ) : null}
+
+        <div style={styles.actions}>
+          <a href="/" style={styles.primaryLink}>Back to Booking Page</a>
+          <a href="/admin" style={styles.secondaryLink}>Open Admin Dashboard</a>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+const styles: Record<string, React.CSSProperties> = {
+  page: {
+    minHeight: "100vh",
+    background: "linear-gradient(180deg, #081120 0%, #0b1730 35%, #0f1d3a 100%)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "24px",
+    fontFamily: "Arial, sans-serif",
+  },
+  card: {
+    width: "100%",
+    maxWidth: "720px",
+    background: "rgba(18, 30, 56, 0.95)",
+    border: "1px solid #24314f",
+    borderRadius: "20px",
+    padding: "28px",
+    color: "#e5eefc",
+  },
+  badge: {
+    display: "inline-block",
+    padding: "8px 12px",
+    borderRadius: "999px",
+    background: "#17315d",
+    color: "#9fd3ff",
+    fontSize: "12px",
+    fontWeight: 700,
+    letterSpacing: "0.08em",
+    marginBottom: "14px",
+  },
+  title: {
+    margin: 0,
+    fontSize: "34px",
+    fontWeight: 800,
+  },
+  message: {
+    marginTop: "12px",
+    color: "#c7d8f7",
+    lineHeight: 1.6,
+  },
+  summaryBox: {
+    marginTop: "18px",
+    background: "#0b1a37",
+    border: "1px solid #2a3a5c",
+    borderRadius: "16px",
+    padding: "18px",
+  },
+  row: {
+    padding: "8px 0",
+    borderBottom: "1px solid #1f2e4f",
+    color: "#dbeafe",
+  },
+  actions: {
+    display: "flex",
+    gap: "12px",
+    flexWrap: "wrap",
+    marginTop: "20px",
+  },
+  primaryLink: {
+    textDecoration: "none",
+    padding: "12px 16px",
+    borderRadius: "12px",
+    background: "linear-gradient(90deg, #2563eb 0%, #06b6d4 100%)",
+    color: "#ffffff",
+    fontWeight: 700,
+  },
+  secondaryLink: {
+    textDecoration: "none",
+    padding: "12px 16px",
+    borderRadius: "12px",
+    background: "#0b1a37",
+    border: "1px solid #2a3a5c",
+    color: "#ffffff",
+    fontWeight: 700,
+  },
+};
