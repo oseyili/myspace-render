@@ -3,11 +3,29 @@
 import { useMemo, useState } from "react";
 
 type Hotel = {
+  id: string;
   name: string;
   city: string;
+  country: string;
+  location: string;
+  address: string;
   price: number;
   rating: number;
   image: string;
+  lat: number;
+  lng: number;
+  facilities: string[];
+  summary: string;
+};
+
+type SearchResponse = {
+  items: Hotel[];
+  page: number;
+  page_size: number;
+  total: number;
+  has_more: boolean;
+  message?: string;
+  detail?: string;
 };
 
 const API_BASE =
@@ -31,15 +49,17 @@ function todayPlus(days: number) {
   return d.toISOString().slice(0, 10);
 }
 
-function formatMoney(value: number, country: string) {
+function currencyForCountry(country: string) {
   const lowered = (country || "").toLowerCase();
+  if (lowered.includes("united kingdom") || lowered.includes("uk")) return "GBP";
+  if (lowered.includes("france") || lowered.includes("germany") || lowered.includes("italy") || lowered.includes("spain")) return "EUR";
+  if (lowered.includes("nigeria")) return "NGN";
+  if (lowered.includes("united arab emirates") || lowered.includes("uae")) return "AED";
+  return "USD";
+}
 
-  let currency = "USD";
-  if (lowered.includes("united kingdom") || lowered.includes("uk")) currency = "GBP";
-  else if (lowered.includes("france") || lowered.includes("germany") || lowered.includes("italy")) currency = "EUR";
-  else if (lowered.includes("nigeria")) currency = "NGN";
-  else if (lowered.includes("uae") || lowered.includes("dubai")) currency = "AED";
-
+function formatMoney(value: number, country: string) {
+  const currency = currencyForCountry(country);
   try {
     return new Intl.NumberFormat("en-GB", {
       style: "currency",
@@ -51,10 +71,14 @@ function formatMoney(value: number, country: string) {
   }
 }
 
-function buildMapsUrl(hotel: Hotel) {
+function mapsUrl(hotel: Hotel) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `${hotel.name} ${hotel.city}`
+    `${hotel.name} ${hotel.address}`
   )}`;
+}
+
+function hotelKey(hotel: Hotel) {
+  return `${hotel.id}|${hotel.name}|${hotel.address}`;
 }
 
 export default function HomePage() {
@@ -68,14 +92,18 @@ export default function HomePage() {
   const [guests, setGuests] = useState(1);
   const [rooms, setRooms] = useState(1);
 
-  const [loadingSearch, setLoadingSearch] = useState(false);
+  const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
   const [statusMessage, setStatusMessage] = useState(
     "Search a much larger real hotel list, filter your stay, and continue with trusted booking partners."
   );
+  const [loadingSearch, setLoadingSearch] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [selected, setSelected] = useState<Hotel | null>(null);
-  const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
 
   const effectiveDestination = useMemo(() => {
     return city.trim() || destination.trim() || locationText.trim() || "London";
@@ -84,21 +112,33 @@ export default function HomePage() {
   function toggleFacility(facility: string) {
     setSelectedFacilities((current) =>
       current.includes(facility)
-        ? current.filter((item) => item !== facility)
+        ? current.filter((x) => x !== facility)
         : [...current, facility]
     );
   }
 
-  async function searchHotels() {
-    setLoadingSearch(true);
-    setHotels([]);
-    setSelected(null);
-    setStatusMessage("Searching live hotel inventory...");
+  async function fetchHotels(targetPage: number, append: boolean) {
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoadingSearch(true);
+      setStatusMessage("Searching live hotel inventory...");
+    }
 
     try {
-      const url = `${API_BASE}/api/hotels?city=${encodeURIComponent(effectiveDestination)}`;
+      const params = new URLSearchParams();
+      params.set("destination", effectiveDestination);
+      params.set("country", country.trim());
+      params.set("city", city.trim() || effectiveDestination);
+      params.set("location", locationText.trim());
+      params.set("page", String(targetPage));
+      params.set("page_size", "24");
 
-      const response = await fetch(url, {
+      if (selectedFacilities.length > 0) {
+        params.set("facilities", selectedFacilities.join(","));
+      }
+
+      const response = await fetch(`${API_BASE}/api/hotels?${params.toString()}`, {
         method: "GET",
         cache: "no-store",
         headers: {
@@ -111,25 +151,63 @@ export default function HomePage() {
         throw new Error(`Backend returned ${response.status}: ${text}`);
       }
 
-      const data = await response.json();
-      const items: Hotel[] = Array.isArray(data) ? data : [];
+      const data: SearchResponse = await response.json();
+      const items = Array.isArray(data.items) ? data.items : [];
 
-      setHotels(items);
-
-      if (items.length > 0) {
-        setSelected(items[0]);
-        setStatusMessage(`Loaded ${items.length} hotel result(s) for ${effectiveDestination}.`);
+      if (append) {
+        setHotels((current) => {
+          const merged = [...current];
+          for (const hotel of items) {
+            const exists = merged.some((item) => hotelKey(item) === hotelKey(hotel));
+            if (!exists) merged.push(hotel);
+          }
+          return merged;
+        });
       } else {
-        setStatusMessage("No matching hotels were found for this search. Please try another destination.");
+        setHotels(items);
+        setSelected(items[0] || null);
+      }
+
+      setPage(Number(data.page || targetPage));
+      setTotalResults(Number(data.total || 0));
+      setHasMore(Boolean(data.has_more));
+
+      if (Number(data.total || 0) > 0) {
+        setStatusMessage(
+          data.message ||
+            `Showing page ${targetPage}. Found ${Number(data.total || 0)} hotel results.`
+        );
+      } else {
+        setStatusMessage(
+          data.detail ||
+            "No matching hotels were found for this search. Please try another destination."
+        );
       }
     } catch (error) {
       console.error("Hotel search failed:", error);
-      setHotels([]);
-      setSelected(null);
+      if (!append) {
+        setHotels([]);
+        setSelected(null);
+        setTotalResults(0);
+        setHasMore(false);
+      }
       setStatusMessage("Hotel search is temporarily unavailable. Please try again shortly.");
     } finally {
       setLoadingSearch(false);
+      setLoadingMore(false);
     }
+  }
+
+  async function searchHotels() {
+    setPage(1);
+    setHasMore(false);
+    setTotalResults(0);
+    await fetchHotels(1, false);
+  }
+
+  async function loadMoreHotels() {
+    if (!hasMore || loadingMore) return;
+    await fetchHotels(page + 1, true);
   }
 
   return (
@@ -230,7 +308,7 @@ export default function HomePage() {
             </div>
 
             <div style={{ opacity: 0.92, marginBottom: 16 }}>
-              This version uses your live backend and keeps the larger portal layout online.
+              This version searches a broader hotel area and supports pagination, so cities like London are no longer restricted to one tiny batch of results.
             </div>
 
             <div
@@ -241,7 +319,7 @@ export default function HomePage() {
               }}
             >
               <StatCard label="Loaded Results" value={String(hotels.length)} />
-              <StatCard label="Total Found" value={String(hotels.length)} />
+              <StatCard label="Total Found" value={String(totalResults)} />
               <StatCard label="Selected Hotel" value={selected ? selected.name : "None"} />
             </div>
           </div>
@@ -482,16 +560,22 @@ export default function HomePage() {
                   <>
                     <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 10 }}>{selected.name}</div>
                     <div style={{ marginBottom: 8 }}>
-                      <strong>City:</strong> {selected.city}
+                      <strong>Location:</strong> {selected.location}
                     </div>
                     <div style={{ marginBottom: 8 }}>
-                      <strong>Price:</strong> {formatMoney(selected.price, country)} per night
+                      <strong>Address:</strong> {selected.address}
                     </div>
-                    <div style={{ marginBottom: 12 }}>
+                    <div style={{ marginBottom: 8 }}>
+                      <strong>Price:</strong> {formatMoney(selected.price, selected.country)} per night
+                    </div>
+                    <div style={{ marginBottom: 8 }}>
                       <strong>Rating:</strong> {selected.rating} / 5
                     </div>
+                    <div style={{ marginBottom: 12 }}>
+                      <strong>Facilities:</strong> {selected.facilities.join(", ")}
+                    </div>
                     <a
-                      href={buildMapsUrl(selected)}
+                      href={mapsUrl(selected)}
                       target="_blank"
                       rel="noreferrer"
                       style={{
@@ -544,6 +628,7 @@ export default function HomePage() {
                 maxHeight: 560,
                 overflowY: "auto",
                 paddingRight: 4,
+                marginBottom: 12,
               }}
             >
               {hotels.length === 0 ? (
@@ -565,12 +650,11 @@ export default function HomePage() {
                 </div>
               ) : (
                 hotels.map((hotel, index) => {
-                  const isSelected =
-                    selected?.name === hotel.name && selected?.city === hotel.city;
+                  const isSelected = selected ? hotelKey(selected) === hotelKey(hotel) : false;
 
                   return (
                     <button
-                      key={`${hotel.name}-${hotel.city}-${index}`}
+                      key={`${hotel.id}-${index}`}
                       type="button"
                       onClick={() => setSelected(hotel)}
                       style={{
@@ -596,9 +680,11 @@ export default function HomePage() {
                         <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 6 }}>
                           {hotel.name}
                         </div>
-                        <div style={{ color: "#5f6f84", marginBottom: 6 }}>{hotel.city}</div>
+                        <div style={{ color: "#5f6f84", marginBottom: 6 }}>
+                          {hotel.location}, {hotel.city}
+                        </div>
                         <div style={{ marginBottom: 4 }}>
-                          <strong>{formatMoney(hotel.price, country)}</strong> per night
+                          <strong>{formatMoney(hotel.price, hotel.country)}</strong> per night
                         </div>
                         <div>Rating: {hotel.rating} / 5</div>
                       </div>
@@ -607,6 +693,24 @@ export default function HomePage() {
                 })
               )}
             </div>
+
+            <button
+              type="button"
+              onClick={loadMoreHotels}
+              disabled={!hasMore || loadingMore}
+              style={{
+                width: "100%",
+                background: hasMore ? "#0d2667" : "#cbd5e1",
+                color: "#fff",
+                border: "none",
+                borderRadius: 16,
+                padding: "14px 18px",
+                fontWeight: 800,
+                cursor: !hasMore || loadingMore ? "not-allowed" : "pointer",
+              }}
+            >
+              {loadingMore ? "Loading more..." : hasMore ? "Load More Hotels" : "No More Hotels"}
+            </button>
           </div>
         </section>
       </div>
