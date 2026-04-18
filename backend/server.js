@@ -87,5 +87,5 @@ app.post("/auth/login", async (req, res) => {
 
 app.get("/", (req, res) => res.json({ status: "myspace-backend running" }));
 
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT || 3010);
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
