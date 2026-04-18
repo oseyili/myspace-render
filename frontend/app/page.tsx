@@ -10,7 +10,9 @@ type Hotel = {
   image: string;
 };
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+const API_BASE =
+  (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "") ||
+  "https://hotel-backend-1-ee5z.onrender.com";
 
 const FACILITIES = [
   "Free WiFi",
@@ -34,7 +36,7 @@ function formatMoney(value: number, country: string) {
 
   let currency = "USD";
   if (lowered.includes("united kingdom") || lowered.includes("uk")) currency = "GBP";
-  else if (lowered.includes("europe") || lowered.includes("france") || lowered.includes("germany")) currency = "EUR";
+  else if (lowered.includes("france") || lowered.includes("germany") || lowered.includes("italy")) currency = "EUR";
   else if (lowered.includes("nigeria")) currency = "NGN";
   else if (lowered.includes("uae") || lowered.includes("dubai")) currency = "AED";
 
@@ -94,19 +96,19 @@ export default function HomePage() {
     setStatusMessage("Searching live hotel inventory...");
 
     try {
-      if (!API_BASE) {
-        throw new Error("NEXT_PUBLIC_API_URL is missing.");
-      }
-
       const url = `${API_BASE}/api/hotels?city=${encodeURIComponent(effectiveDestination)}`;
 
       const response = await fetch(url, {
         method: "GET",
         cache: "no-store",
+        headers: {
+          Accept: "application/json",
+        },
       });
 
       if (!response.ok) {
-        throw new Error(`Backend returned ${response.status}`);
+        const text = await response.text();
+        throw new Error(`Backend returned ${response.status}: ${text}`);
       }
 
       const data = await response.json();
@@ -120,7 +122,8 @@ export default function HomePage() {
       } else {
         setStatusMessage("No matching hotels were found for this search. Please try another destination.");
       }
-    } catch {
+    } catch (error) {
+      console.error("Hotel search failed:", error);
       setHotels([]);
       setSelected(null);
       setStatusMessage("Hotel search is temporarily unavailable. Please try again shortly.");
