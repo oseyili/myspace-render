@@ -1,8 +1,0 @@
-services:
-  - type: web
-    name: myspace-hotel-backend
-    env: python
-    plan: free
-    rootDir: backend
-    buildCommand: pip install -r requirements.txt
-    startCommand: python -m uvicorn hotel_app:app --host 0.0.0.0 --port 10000

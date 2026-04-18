@@ -1,0 +1,10 @@
+[
+  {
+    "id": "dfb358fa-92ee-43a7-8045-d9729bb96e5a",
+    "hotelId": "123",
+    "roomNumber": "101",
+    "roomType": "Deluxe",
+    "price": 120,
+    "createdAt": "2025-12-19T07:24:18.670Z"
+  }
+]
