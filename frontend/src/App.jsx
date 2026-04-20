@@ -17,45 +17,46 @@ const FACILITY_OPTIONS = [
 const GUIDE_ITEMS = [
   {
     city: "London",
-    text: "Best for theatre breaks, museums, shopping streets, and easy transport links.",
+    text: "Best for classic city stays, theatre breaks, museums, and central transport links.",
   },
   {
     city: "Dubai",
-    text: "Best for luxury stays, sunshine breaks, resort pools, and modern waterfront areas.",
+    text: "Best for luxury towers, shopping weekends, resort pools, and modern waterfront stays.",
   },
   {
     city: "Paris",
-    text: "Best for romantic weekends, boutique hotels, stylish neighbourhoods, and culture-led trips.",
+    text: "Best for romantic breaks, walkable neighbourhoods, boutique hotels, and culture-led trips.",
   },
   {
     city: "Lagos",
-    text: "Best for business travel, city energy, family visits, and fast-moving schedules.",
+    text: "Best for business travel, city energy, fast-moving schedules, and family visits.",
   },
 ];
 
 const FAQS = [
   {
     q: "How do I search for hotels?",
-    a: "Enter your destination, travel dates, guests, and rooms, then press Search Hotels.",
+    a: "Enter destination details, dates, and guest count, then press Search Hotels to load live stays from your connected hotel backend.",
   },
   {
-    q: "Can I filter by facilities?",
-    a: "Yes. Pick the facilities you want first, then search to narrow your results.",
+    q: "Can I narrow results by facilities?",
+    a: "Yes. Select the facilities you want first, then search. Only matching stays remain in the available hotel list.",
   },
   {
     q: "How do I reserve a stay?",
-    a: "Choose a hotel from the list, review the selected stay card, then press Reserve Now.",
+    a: "Choose a hotel from the available list, review its details, then use the reserve button to continue on the booking partner page.",
   },
   {
-    q: "Why is the layout simpler now?",
-    a: "The design is intentionally shorter and cleaner so customers reach booking faster.",
+    q: "Will I still see a large hotel database?",
+    a: "Yes. This design keeps a large live hotel list while presenting it in a cleaner, more customer-friendly layout.",
   },
 ];
 
 const PAGE_CONTENT = {
   guides: {
     title: "Explore Travel Guides",
-    intro: "Quick destination tips to help customers decide faster.",
+    intro:
+      "Quick destination guidance helps customers decide faster before they continue to a booking partner.",
     sections: GUIDE_ITEMS.map((item) => ({
       title: item.city,
       body: item.text,
@@ -63,7 +64,8 @@ const PAGE_CONTENT = {
   },
   faq: {
     title: "Frequently Asked Questions",
-    intro: "Helpful answers before continuing to a booking partner.",
+    intro:
+      "These answers help customers understand the booking flow, hotel filters, and reserve process clearly.",
     sections: FAQS.map((item) => ({
       title: item.q,
       body: item.a,
@@ -71,22 +73,67 @@ const PAGE_CONTENT = {
   },
   terms: {
     title: "Terms and Conditions",
-    intro: "Please review these points before reserving a stay.",
+    intro:
+      "Please review important details before continuing to a booking partner.",
     sections: [
       {
         title: "Booking information",
         body:
-          "Prices, room types, taxes, and availability can change quickly. Final details are confirmed on the partner booking page.",
+          "Prices, room types, taxes, and availability can change quickly. Final booking details are confirmed on the partner booking page.",
       },
       {
         title: "Guest details",
         body:
-          "Please use correct traveller names, dates, rooms, and guest counts to avoid booking errors.",
+          "Please use correct traveller names, dates, and guest counts before reserving a stay to avoid booking errors.",
       },
       {
         title: "Third-party completion",
         body:
-          "My Space Hotel helps customers search, compare, and select stays. Final booking completion happens on the selected partner site.",
+          "My Space Hotel helps customers search, compare, and select stays. Reservation completion happens on the selected booking partner site.",
+      },
+    ],
+  },
+  cancellation: {
+    title: "Cancellation Policy",
+    intro:
+      "Cancellation rules vary depending on hotel, room type, supplier, and travel dates.",
+    sections: [
+      {
+        title: "Before you reserve",
+        body:
+          "Always review the cancellation wording shown for the chosen stay before confirming payment.",
+      },
+      {
+        title: "Flexible and non-refundable stays",
+        body:
+          "Some stays allow changes or refunds while others do not. Read the room conditions carefully on the partner page.",
+      },
+      {
+        title: "Date-sensitive pricing",
+        body:
+          "Special offers may have stricter cancellation terms, especially around peak dates or limited-rate inventory.",
+      },
+    ],
+  },
+  protection: {
+    title: "Booking Protection",
+    intro:
+      "Use these checks to stay accurate and confident before continuing to reserve.",
+    sections: [
+      {
+        title: "Check dates and guests",
+        body:
+          "Make sure arrival, departure, guest count, and number of rooms are correct before clicking reserve.",
+      },
+      {
+        title: "Review the selected stay",
+        body:
+          "Confirm hotel name, area, price, and facilities match your expectations before continuing.",
+      },
+      {
+        title: "Use trusted partner links",
+        body:
+          "Reserve only through the booking button shown inside My Space Hotel so customers follow the correct partner route.",
       },
     ],
   },
@@ -139,111 +186,73 @@ function buildAffiliateLink(hotel) {
   return `https://www.booking.com/searchresults.html?ss=${hotelName}%20${city}`;
 }
 
-function safeOpenExternal(url) {
-  if (!url) return;
-  try {
-    const parsed = new URL(url);
-    window.open(parsed.toString(), "_blank", "noopener,noreferrer");
-  } catch (error) {
-    console.error("Invalid external URL:", error);
-    alert("That booking link is not available right now. Please try another hotel.");
-  }
-}
-
-function appShell() {
+function shellStyle() {
   return {
     minHeight: "100vh",
     background:
-      "radial-gradient(circle at top left, #eef4ff 0%, #edf2f9 42%, #e7edf7 100%)",
+      "radial-gradient(circle at top left, #f6f9ff 0%, #eef3fa 48%, #e8eef7 100%)",
     padding: "20px",
     fontFamily:
       'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    color: "#10224d",
+    color: "#102863",
   };
 }
 
-function panelStyle(dark = false) {
-  return dark
-    ? {
-        background: "linear-gradient(180deg, #102a72 0%, #0d225b 100%)",
-        borderRadius: "28px",
-        border: "1px solid rgba(255,255,255,0.08)",
-        boxShadow: "0 18px 40px rgba(13,34,91,0.25)",
-      }
-    : {
-        background: "rgba(255,255,255,0.88)",
-        borderRadius: "28px",
-        border: "1px solid #d9e3f3",
-        boxShadow: "0 14px 34px rgba(16,34,77,0.08)",
-        backdropFilter: "blur(10px)",
-      };
+function glassCard() {
+  return {
+    background: "rgba(255,255,255,0.84)",
+    borderRadius: "28px",
+    border: "1px solid #d8e2f2",
+    boxShadow: "0 12px 30px rgba(16,40,99,0.08)",
+    backdropFilter: "blur(10px)",
+  };
+}
+
+function darkCard() {
+  return {
+    background: "linear-gradient(180deg, #163b97 0%, #102d75 100%)",
+    borderRadius: "30px",
+    color: "#ffffff",
+    boxShadow: "0 18px 40px rgba(16,45,117,0.26)",
+  };
 }
 
 function inputStyle(dark = false) {
   return {
     width: "100%",
-    height: "54px",
+    height: "56px",
     borderRadius: "16px",
-    border: dark ? "1px solid rgba(255,255,255,0.12)" : "1px solid #d7e1f1",
-    background: dark ? "rgba(255,255,255,0.10)" : "#f6f9fe",
-    color: dark ? "#ffffff" : "#10224d",
-    padding: "0 14px",
+    border: dark ? "1px solid rgba(255,255,255,0.12)" : "1px solid #d8e2f2",
+    background: dark ? "rgba(255,255,255,0.14)" : "#f7faff",
+    color: dark ? "#ffffff" : "#102863",
+    padding: "0 16px",
     fontSize: "15px",
     outline: "none",
     boxSizing: "border-box",
   };
 }
 
-function chipStyle(active) {
+function pillButton(background, color, border = "none") {
   return {
-    minHeight: "42px",
+    border,
     borderRadius: "999px",
-    border: active ? "1px solid #2e67e6" : "1px solid #d6e0f0",
-    background: active ? "#e8f0ff" : "#ffffff",
-    color: active ? "#18429c" : "#31466f",
-    padding: "0 14px",
-    fontSize: "14px",
-    fontWeight: 800,
-    cursor: "pointer",
-  };
-}
-
-function primaryButton() {
-  return {
-    height: "54px",
-    borderRadius: "16px",
-    border: 0,
-    background: "linear-gradient(90deg, #2d67e5, #2ab7d8)",
-    color: "#ffffff",
-    fontSize: "15px",
+    background,
+    color,
+    padding: "13px 18px",
     fontWeight: 900,
-    cursor: "pointer",
-    padding: "0 18px",
-  };
-}
-
-function secondaryButton() {
-  return {
-    height: "46px",
-    borderRadius: "14px",
-    border: "1px solid #d6e0f2",
-    background: "#ffffff",
-    color: "#16397e",
     fontSize: "14px",
-    fontWeight: 800,
     cursor: "pointer",
-    padding: "0 16px",
   };
 }
 
-function tinyLabel(text, dark = false) {
+function sectionLabel(text, color = "#6078a6") {
   return (
     <div
       style={{
         fontSize: "12px",
         letterSpacing: "0.18em",
         textTransform: "uppercase",
-        color: dark ? "#bdd0ff" : "#6a7ea8",
+        color,
         fontWeight: 800,
         marginBottom: "8px",
       }}
@@ -253,7 +262,7 @@ function tinyLabel(text, dark = false) {
   );
 }
 
-function ModalPage({ pageKey, onClose }) {
+function FullPageOverlay({ pageKey, onClose }) {
   if (!pageKey || !PAGE_CONTENT[pageKey]) return null;
   const page = PAGE_CONTENT[pageKey];
 
@@ -262,7 +271,7 @@ function ModalPage({ pageKey, onClose }) {
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(7,19,49,0.55)",
+        background: "rgba(10,24,63,0.55)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -272,14 +281,14 @@ function ModalPage({ pageKey, onClose }) {
     >
       <div
         style={{
-          width: "min(840px, 100%)",
-          maxHeight: "88vh",
+          width: "min(920px, 100%)",
+          maxHeight: "90vh",
           overflowY: "auto",
-          background: "#ffffff",
-          borderRadius: "28px",
-          border: "1px solid #d9e3f3",
-          boxShadow: "0 24px 60px rgba(16,34,77,0.22)",
-          padding: "24px",
+          background: "#f8fbff",
+          borderRadius: "30px",
+          border: "1px solid #d8e2f2",
+          boxShadow: "0 20px 48px rgba(16,40,99,0.22)",
+          padding: "26px",
         }}
       >
         <div
@@ -291,62 +300,72 @@ function ModalPage({ pageKey, onClose }) {
           }}
         >
           <div>
-            {tinyLabel("Information")}
+            {sectionLabel("Information page")}
             <h2
               style={{
                 margin: 0,
-                fontSize: "32px",
-                lineHeight: 1.05,
+                fontSize: "34px",
+                lineHeight: 1.08,
                 fontWeight: 900,
-                color: "#10224d",
+                color: "#102863",
               }}
             >
               {page.title}
             </h2>
           </div>
 
-          <button type="button" onClick={onClose} style={secondaryButton()}>
+          <button
+            type="button"
+            onClick={onClose}
+            style={pillButton("#ffffff", "#16397e", "1px solid #cad7ef")}
+          >
             Close
           </button>
         </div>
 
         <p
           style={{
-            margin: "14px 0 0",
-            color: "#5f7398",
-            fontSize: "16px",
+            margin: "16px 0 0",
+            color: "#5d7298",
+            fontSize: "17px",
             lineHeight: 1.6,
           }}
         >
           {page.intro}
         </p>
 
-        <div style={{ display: "grid", gap: "12px", marginTop: "18px" }}>
+        <div
+          style={{
+            display: "grid",
+            gap: "14px",
+            marginTop: "20px",
+          }}
+        >
           {page.sections.map((section) => (
             <div
               key={section.title}
               style={{
-                background: "#f8fbff",
-                borderRadius: "20px",
-                border: "1px solid #dbe6f5",
-                padding: "16px",
+                background: "#ffffff",
+                borderRadius: "22px",
+                border: "1px solid #dbe5f6",
+                padding: "18px",
               }}
             >
               <div
                 style={{
-                  fontSize: "19px",
+                  fontSize: "20px",
                   fontWeight: 900,
-                  color: "#10224d",
+                  color: "#102863",
                 }}
               >
                 {section.title}
               </div>
               <div
                 style={{
-                  marginTop: "8px",
-                  color: "#5f7398",
-                  fontSize: "15px",
+                  marginTop: "10px",
+                  fontSize: "16px",
                   lineHeight: 1.6,
+                  color: "#5b7196",
                 }}
               >
                 {section.body}
@@ -373,7 +392,7 @@ export default function App() {
 
   const [selectedFacilities, setSelectedFacilities] = useState([]);
   const [statusText, setStatusText] = useState(
-    "Search cleaner, choose faster, and reserve with a smoother partner handoff."
+    "More choice, clearer comparisons, and a faster path to booking with trusted partners."
   );
   const [errorText, setErrorText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -397,7 +416,7 @@ export default function App() {
 
   const activeHotel = selectedHotel || filteredHotels[0] || null;
   const activePartner = activeHotel ? detectAffiliatePartner(activeHotel) : "Booking partner";
-  const activeLink = activeHotel ? buildAffiliateLink(activeHotel) : "";
+  const activeLink = activeHotel ? buildAffiliateLink(activeHotel) : null;
 
   function updateSearch(field, value) {
     setSearch((current) => ({
@@ -431,13 +450,15 @@ export default function App() {
         guests: search.guests || "1",
         rooms: search.rooms || "1",
         page: "1",
-        page_size: "40",
+        page_size: "60",
         facilities: selectedFacilities.join(","),
       });
 
       const response = await fetch(`${API_BASE}/api/hotels?${params.toString()}`, {
         method: "GET",
-        headers: { Accept: "application/json" },
+        headers: {
+          Accept: "application/json",
+        },
       });
 
       if (!response.ok) {
@@ -451,53 +472,52 @@ export default function App() {
       setStatusText(
         payload?.message ||
           (items.length
-            ? `${items.length} hotel options found for ${destination}.`
+            ? `Showing ${items.length} hotel options for ${destination}.`
             : `No hotels matched this search for ${destination}.`)
       );
     } catch (error) {
       console.error("Hotel search failed:", error);
       setHotels([]);
-      setErrorText("Live hotel results could not load on this attempt.");
-      setStatusText("Search did not connect properly. Please try again.");
+      setErrorText("Failed to fetch live hotel results. Please try again.");
+      setStatusText("Search could not connect to live hotel results on this attempt.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div style={appShell()}>
-      <ModalPage pageKey={openPage} onClose={() => setOpenPage(null)} />
+    <div style={shellStyle()}>
+      <FullPageOverlay pageKey={openPage} onClose={() => setOpenPage(null)} />
 
-      <div style={{ maxWidth: "1420px", margin: "0 auto" }}>
+      <div style={{ maxWidth: "1500px", margin: "0 auto" }}>
         <section
           style={{
-            ...panelStyle(),
+            ...glassCard(),
             padding: "18px",
-            marginBottom: "16px",
+            marginBottom: "14px",
           }}
         >
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1.2fr 0.8fr",
+              gridTemplateColumns: "1.12fr 0.88fr",
               gap: "16px",
               alignItems: "stretch",
             }}
           >
             <div
               style={{
-                ...panelStyle(true),
-                padding: "22px",
-                color: "#ffffff",
+                ...darkCard(),
+                padding: "24px",
               }}
             >
-              {tinyLabel("Worldwide hotel bookings", true)}
+              {sectionLabel("Worldwide Hotel Bookings", "#c6d6ff")}
 
               <h1
                 style={{
                   margin: 0,
-                  fontSize: "56px",
-                  lineHeight: 0.95,
+                  fontSize: "58px",
+                  lineHeight: 0.96,
                   letterSpacing: "-0.05em",
                   fontWeight: 900,
                 }}
@@ -507,14 +527,14 @@ export default function App() {
 
               <p
                 style={{
-                  margin: "14px 0 0",
-                  fontSize: "17px",
+                  margin: "16px 0 0",
+                  fontSize: "18px",
                   lineHeight: 1.55,
-                  color: "#e4edff",
-                  maxWidth: "720px",
+                  color: "#e5edff",
+                  maxWidth: "760px",
                 }}
               >
-                Find a stay faster, compare more clearly, and move to booking without all the clutter.
+                Search a wider hotel database, compare faster, and move to booking with less clutter and a cleaner customer journey.
               </p>
 
               <div
@@ -528,12 +548,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setOpenPage("guides")}
-                  style={{
-                    ...secondaryButton(),
-                    background: "#f0c84b",
-                    border: "none",
-                    color: "#2a2310",
-                  }}
+                  style={pillButton("#f0c84b", "#1f1c15")}
                 >
                   Travel Guides
                 </button>
@@ -541,7 +556,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setOpenPage("faq")}
-                  style={secondaryButton()}
+                  style={pillButton("rgba(255,255,255,0.12)", "#ffffff", "1px solid rgba(255,255,255,0.18)")}
                 >
                   FAQ
                 </button>
@@ -549,25 +564,22 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setOpenPage("terms")}
-                  style={secondaryButton()}
+                  style={pillButton("rgba(255,255,255,0.12)", "#ffffff", "1px solid rgba(255,255,255,0.18)")}
                 >
                   Terms
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    window.location.href = `mailto:${SUPPORT_EMAIL}`;
-                  }}
+                <a
+                  href={`mailto:${SUPPORT_EMAIL}`}
                   style={{
-                    ...secondaryButton(),
-                    background: "rgba(255,255,255,0.12)",
-                    color: "#ffffff",
-                    border: "1px solid rgba(255,255,255,0.18)",
+                    ...pillButton("rgba(255,255,255,0.12)", "#ffffff", "1px solid rgba(255,255,255,0.18)"),
+                    textDecoration: "none",
+                    display: "inline-flex",
+                    alignItems: "center",
                   }}
                 >
-                  Support
-                </button>
+                  Customer Support
+                </a>
               </div>
 
               <div
@@ -585,8 +597,8 @@ export default function App() {
                     padding: "14px",
                   }}
                 >
-                  <div style={{ fontSize: "13px", color: "#cfe0ff" }}>Results</div>
-                  <div style={{ marginTop: "8px", fontSize: "26px", fontWeight: 900 }}>
+                  <div style={{ fontSize: "13px", color: "#d8e4ff" }}>Visible Choices</div>
+                  <div style={{ fontSize: "24px", fontWeight: 900, marginTop: "8px" }}>
                     {filteredHotels.length}
                   </div>
                 </div>
@@ -598,9 +610,9 @@ export default function App() {
                     padding: "14px",
                   }}
                 >
-                  <div style={{ fontSize: "13px", color: "#cfe0ff" }}>Selected</div>
-                  <div style={{ marginTop: "8px", fontSize: "26px", fontWeight: 900 }}>
-                    {activeHotel ? "1" : "0"}
+                  <div style={{ fontSize: "13px", color: "#d8e4ff" }}>Partner</div>
+                  <div style={{ fontSize: "20px", fontWeight: 900, marginTop: "8px" }}>
+                    {activePartner}
                   </div>
                 </div>
 
@@ -611,18 +623,9 @@ export default function App() {
                     padding: "14px",
                   }}
                 >
-                  <div style={{ fontSize: "13px", color: "#cfe0ff" }}>Partner</div>
-                  <div
-                    style={{
-                      marginTop: "8px",
-                      fontSize: "20px",
-                      fontWeight: 900,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {activePartner}
+                  <div style={{ fontSize: "13px", color: "#d8e4ff" }}>Selected</div>
+                  <div style={{ fontSize: "24px", fontWeight: 900, marginTop: "8px" }}>
+                    {activeHotel ? 1 : 0}
                   </div>
                 </div>
               </div>
@@ -630,15 +633,15 @@ export default function App() {
 
             <div
               style={{
-                ...panelStyle(),
+                ...glassCard(),
                 padding: "20px",
               }}
             >
-              {tinyLabel("Search")}
+              {sectionLabel("Search")}
               <h2
                 style={{
                   margin: 0,
-                  fontSize: "28px",
+                  fontSize: "30px",
                   lineHeight: 1.1,
                   fontWeight: 900,
                 }}
@@ -646,7 +649,7 @@ export default function App() {
                 Search hotels
               </h2>
 
-              <form onSubmit={handleSearch} style={{ marginTop: "14px" }}>
+              <form onSubmit={handleSearch} style={{ marginTop: "16px" }}>
                 <div style={{ display: "grid", gap: "10px" }}>
                   <input
                     value={search.destination}
@@ -676,10 +679,17 @@ export default function App() {
                     />
                   </div>
 
+                  <input
+                    value={search.location}
+                    onChange={(e) => updateSearch("location", e.target.value)}
+                    placeholder="Area or location"
+                    style={inputStyle()}
+                  />
+
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
+                      gridTemplateColumns: "1fr 1fr 1fr",
                       gap: "10px",
                     }}
                   >
@@ -695,52 +705,57 @@ export default function App() {
                       onChange={(e) => updateSearch("checkOut", e.target.value)}
                       style={inputStyle()}
                     />
-                  </div>
-
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr 1fr",
-                      gap: "10px",
-                    }}
-                  >
-                    <input
-                      value={search.location}
-                      onChange={(e) => updateSearch("location", e.target.value)}
-                      placeholder="Area"
-                      style={inputStyle()}
-                    />
                     <input
                       type="number"
                       min="1"
                       value={search.guests}
                       onChange={(e) => updateSearch("guests", e.target.value)}
-                      placeholder="Guests"
                       style={inputStyle()}
                     />
+                  </div>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 160px",
+                      gap: "10px",
+                    }}
+                  >
                     <input
                       type="number"
                       min="1"
                       value={search.rooms}
                       onChange={(e) => updateSearch("rooms", e.target.value)}
-                      placeholder="Rooms"
                       style={inputStyle()}
                     />
-                  </div>
 
-                  <button type="submit" disabled={loading} style={primaryButton()}>
-                    {loading ? "Searching..." : "Search Hotels"}
-                  </button>
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      style={{
+                        height: "56px",
+                        borderRadius: "16px",
+                        border: 0,
+                        background: "linear-gradient(90deg, #2d67e5, #2ab7d8)",
+                        color: "#ffffff",
+                        fontSize: "15px",
+                        fontWeight: 900,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {loading ? "Searching..." : "Search Hotels"}
+                    </button>
+                  </div>
 
                   <div
                     style={{
-                      background: "#f6f9fe",
+                      background: "#f6f9ff",
                       borderRadius: "16px",
-                      border: "1px solid #dbe5f5",
+                      border: "1px solid #dbe5f6",
                       padding: "12px 14px",
-                      color: "#5f7398",
+                      color: "#5d7298",
                       fontSize: "14px",
-                      lineHeight: 1.5,
+                      lineHeight: 1.45,
                     }}
                   >
                     {statusText}
@@ -751,11 +766,11 @@ export default function App() {
                       style={{
                         background: "#fff2f2",
                         borderRadius: "16px",
-                        border: "1px solid #f0c7c7",
+                        border: "1px solid #f1cccc",
                         padding: "12px 14px",
-                        color: "#a33636",
+                        color: "#b43d3d",
                         fontSize: "14px",
-                        fontWeight: 800,
+                        fontWeight: 700,
                       }}
                     >
                       {errorText}
@@ -769,43 +784,43 @@ export default function App() {
 
         <section
           style={{
-            ...panelStyle(),
-            padding: "16px",
-            marginBottom: "16px",
+            ...glassCard(),
+            padding: "18px",
+            marginBottom: "14px",
           }}
         >
           <div
             style={{
-              display: "flex",
+              display: "grid",
+              gridTemplateColumns: "1fr auto",
+              gap: "16px",
               alignItems: "center",
-              justifyContent: "space-between",
-              gap: "12px",
-              flexWrap: "wrap",
             }}
           >
             <div>
-              {tinyLabel("Facilities")}
+              {sectionLabel("Choose what matters most")}
               <h2
                 style={{
                   margin: 0,
-                  fontSize: "24px",
-                  lineHeight: 1.1,
+                  fontSize: "28px",
+                  lineHeight: 1.15,
                   fontWeight: 900,
                 }}
               >
-                Filter before you choose
+                Start with the features that matter to you
               </h2>
             </div>
 
             <div
               style={{
-                color: "#60749a",
-                fontSize: "14px",
-                lineHeight: 1.5,
-                maxWidth: "560px",
+                color: "#65799e",
+                fontSize: "15px",
+                lineHeight: 1.45,
+                maxWidth: "460px",
+                textAlign: "right",
               }}
             >
-              Fewer clicks, cleaner selection, better hotel matches.
+              Keep the large hotel database, but narrow it quickly with simple facility filters.
             </div>
           </div>
 
@@ -814,17 +829,28 @@ export default function App() {
               display: "flex",
               gap: "10px",
               flexWrap: "wrap",
-              marginTop: "14px",
+              marginTop: "16px",
             }}
           >
             {FACILITY_OPTIONS.map((facility) => {
               const active = selectedFacilities.includes(facility);
+
               return (
                 <button
                   key={facility}
                   type="button"
                   onClick={() => toggleFacility(facility)}
-                  style={chipStyle(active)}
+                  style={{
+                    minHeight: "44px",
+                    borderRadius: "999px",
+                    border: active ? "2px solid #2f67e8" : "1px solid #d2ddef",
+                    background: active ? "#e8f0ff" : "#ffffff",
+                    color: "#17356f",
+                    fontSize: "14px",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    padding: "0 14px",
+                  }}
                 >
                   {facility}
                 </button>
@@ -836,31 +862,32 @@ export default function App() {
         <section
           style={{
             display: "grid",
-            gridTemplateColumns: "1.02fr 0.98fr",
-            gap: "16px",
+            gridTemplateColumns: "1.03fr 0.97fr",
+            gap: "14px",
+            marginBottom: "14px",
           }}
         >
           <div
             style={{
-              ...panelStyle(),
-              padding: "18px",
+              ...glassCard(),
+              padding: "20px",
             }}
           >
-            {tinyLabel("Selected hotel")}
+            {sectionLabel("Selected hotel")}
             <h2
               style={{
                 margin: 0,
-                fontSize: "28px",
+                fontSize: "30px",
                 lineHeight: 1.1,
                 fontWeight: 900,
               }}
             >
-              Your main booking card
+              Main booking view
             </h2>
 
             <div
               style={{
-                marginTop: "14px",
+                marginTop: "16px",
                 background: "#ffffff",
                 borderRadius: "24px",
                 border: "1px solid #dbe5f6",
@@ -870,13 +897,13 @@ export default function App() {
               {!activeHotel ? (
                 <div
                   style={{
-                    padding: "28px",
-                    color: "#5f7398",
+                    padding: "26px",
+                    color: "#5b7196",
                     fontSize: "16px",
                     lineHeight: 1.6,
                   }}
                 >
-                  Search first, then pick a hotel from the list. Your chosen stay will appear here with one clear reserve action.
+                  Search first, then choose a stay from the hotel list. Your selected hotel will appear here with one clear reserve action.
                 </div>
               ) : (
                 <>
@@ -902,28 +929,24 @@ export default function App() {
                         display: "flex",
                         justifyContent: "space-between",
                         gap: "12px",
-                        alignItems: "flex-start",
-                        flexWrap: "wrap",
+                        alignItems: "start",
                       }}
                     >
-                      <div style={{ minWidth: 0, flex: 1 }}>
+                      <div>
                         <div
                           style={{
                             fontSize: "28px",
                             lineHeight: 1.1,
                             fontWeight: 900,
-                            color: "#10224d",
                           }}
                         >
-                          {activeHotel.name || "Selected Hotel"}
+                          {activeHotel.name}
                         </div>
-
                         <div
                           style={{
                             marginTop: "8px",
-                            color: "#63779c",
+                            color: "#65789a",
                             fontSize: "15px",
-                            lineHeight: 1.5,
                           }}
                         >
                           {activeHotel.address ||
@@ -933,7 +956,7 @@ export default function App() {
 
                       <div
                         style={{
-                          background: "#eef4ff",
+                          background: "#edf3ff",
                           color: "#204ba9",
                           borderRadius: "16px",
                           padding: "12px 14px",
@@ -950,13 +973,13 @@ export default function App() {
                     <p
                       style={{
                         margin: "14px 0 0",
-                        color: "#5f7398",
+                        color: "#5b7196",
                         fontSize: "15px",
                         lineHeight: 1.6,
                       }}
                     >
                       {activeHotel.summary ||
-                        "A cleaner hotel choice with a direct route to final reservation."}
+                        "Comfortable hotel option with practical facilities and a clean route to final reservation."}
                     </p>
 
                     <div
@@ -969,12 +992,12 @@ export default function App() {
                     >
                       <div
                         style={{
-                          background: "#f6f9fe",
+                          background: "#eef4ff",
                           borderRadius: "16px",
                           padding: "12px",
                         }}
                       >
-                        <div style={{ color: "#6b7ea4", fontSize: "12px", fontWeight: 800 }}>
+                        <div style={{ color: "#65789a", fontSize: "12px", fontWeight: 800 }}>
                           Price
                         </div>
                         <div style={{ marginTop: "8px", fontSize: "24px", fontWeight: 900 }}>
@@ -984,12 +1007,12 @@ export default function App() {
 
                       <div
                         style={{
-                          background: "#f6f9fe",
+                          background: "#eef4ff",
                           borderRadius: "16px",
                           padding: "12px",
                         }}
                       >
-                        <div style={{ color: "#6b7ea4", fontSize: "12px", fontWeight: 800 }}>
+                        <div style={{ color: "#65789a", fontSize: "12px", fontWeight: 800 }}>
                           Partner
                         </div>
                         <div style={{ marginTop: "8px", fontSize: "20px", fontWeight: 900 }}>
@@ -999,12 +1022,12 @@ export default function App() {
 
                       <div
                         style={{
-                          background: "#f6f9fe",
+                          background: "#eef4ff",
                           borderRadius: "16px",
                           padding: "12px",
                         }}
                       >
-                        <div style={{ color: "#6b7ea4", fontSize: "12px", fontWeight: 800 }}>
+                        <div style={{ color: "#65789a", fontSize: "12px", fontWeight: 800 }}>
                           Rooms
                         </div>
                         <div style={{ marginTop: "8px", fontSize: "20px", fontWeight: 900 }}>
@@ -1016,29 +1039,27 @@ export default function App() {
                     <div
                       style={{
                         display: "flex",
-                        gap: "8px",
                         flexWrap: "wrap",
+                        gap: "8px",
                         marginTop: "16px",
                       }}
                     >
-                      {hotelFacilities(activeHotel)
-                        .slice(0, 6)
-                        .map((facility) => (
-                          <span
-                            key={`${activeHotel.id || activeHotel.name}-${facility}`}
-                            style={{
-                              background: "#f2f6fc",
-                              border: "1px solid #dbe5f6",
-                              color: "#24488f",
-                              borderRadius: "999px",
-                              padding: "7px 10px",
-                              fontSize: "13px",
-                              fontWeight: 700,
-                            }}
-                          >
-                            {facility}
-                          </span>
-                        ))}
+                      {hotelFacilities(activeHotel).slice(0, 6).map((facility) => (
+                        <span
+                          key={`${activeHotel.id || activeHotel.name}-${facility}`}
+                          style={{
+                            background: "#f2f6fc",
+                            border: "1px solid #dbe5f6",
+                            color: "#24488f",
+                            borderRadius: "999px",
+                            padding: "7px 10px",
+                            fontSize: "13px",
+                            fontWeight: 700,
+                          }}
+                        >
+                          {facility}
+                        </span>
+                      ))}
                     </div>
 
                     <div
@@ -1049,30 +1070,42 @@ export default function App() {
                         marginTop: "18px",
                       }}
                     >
-                      <button
-                        type="button"
-                        onClick={() => safeOpenExternal(activeLink)}
+                      <a
+                        href={activeLink}
+                        target="_blank"
+                        rel="noreferrer"
                         style={{
-                          ...primaryButton(),
-                          height: "52px",
+                          textDecoration: "none",
+                          borderRadius: "16px",
+                          background: "linear-gradient(90deg, #2d67e5, #2ab7d8)",
+                          color: "#ffffff",
+                          padding: "14px 18px",
+                          fontWeight: 900,
+                          fontSize: "15px",
+                          display: "inline-flex",
+                          alignItems: "center",
                         }}
                       >
-                        Reserve Now
-                      </button>
+                        Reserve This Stay
+                      </a>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          window.location.href = `mailto:${SUPPORT_EMAIL}`;
-                        }}
+                      <a
+                        href={`mailto:${SUPPORT_EMAIL}`}
                         style={{
-                          ...secondaryButton(),
-                          height: "52px",
+                          textDecoration: "none",
+                          borderRadius: "16px",
                           background: "#eff4fd",
+                          color: "#143882",
+                          padding: "14px 18px",
+                          fontWeight: 900,
+                          fontSize: "15px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          border: "1px solid #d6e0f2",
                         }}
                       >
-                        Contact Support
-                      </button>
+                        Affiliate Support
+                      </a>
                     </div>
                   </div>
                 </>
@@ -1082,39 +1115,39 @@ export default function App() {
 
           <div
             style={{
-              ...panelStyle(),
-              padding: "18px",
+              ...glassCard(),
+              padding: "20px",
             }}
           >
-            {tinyLabel("Available hotels")}
+            {sectionLabel("Available hotels")}
             <h2
               style={{
                 margin: 0,
-                fontSize: "28px",
+                fontSize: "30px",
                 lineHeight: 1.1,
                 fontWeight: 900,
               }}
             >
-              Compact result list
+              Large live hotel list
             </h2>
 
             <div
               style={{
-                marginTop: "10px",
-                color: "#60749a",
+                marginTop: "12px",
+                color: "#5d7298",
                 fontSize: "15px",
                 lineHeight: 1.55,
               }}
             >
-              Fewer visual blocks, tighter spacing, and a faster selection flow.
+              The large hotel database stays in place here, but the layout is cleaner and easier for customers to use.
             </div>
 
             <div
               style={{
-                marginTop: "14px",
-                height: "640px",
+                marginTop: "16px",
+                height: "760px",
                 overflowY: "auto",
-                paddingRight: "4px",
+                paddingRight: "6px",
                 display: "grid",
                 gap: "10px",
               }}
@@ -1123,15 +1156,15 @@ export default function App() {
                 <div
                   style={{
                     background: "#ffffff",
-                    borderRadius: "20px",
+                    borderRadius: "22px",
                     border: "1px dashed #cad9f2",
-                    padding: "22px",
-                    color: "#5f7398",
-                    fontSize: "15px",
+                    padding: "24px",
+                    color: "#5a7196",
+                    fontSize: "16px",
                     lineHeight: 1.6,
                   }}
                 >
-                  No hotel results loaded yet. Press Search Hotels to bring in live stays.
+                  No hotel results loaded yet. Use Search Hotels to bring in live stays, then choose one from the list.
                 </div>
               ) : (
                 filteredHotels.map((hotel, index) => {
@@ -1151,15 +1184,15 @@ export default function App() {
                         padding: "12px",
                         cursor: "pointer",
                         display: "grid",
-                        gridTemplateColumns: "92px 1fr auto",
+                        gridTemplateColumns: "102px 1fr auto",
                         gap: "12px",
                         alignItems: "center",
                       }}
                     >
                       <div
                         style={{
-                          width: "92px",
-                          height: "76px",
+                          width: "102px",
+                          height: "82px",
                           borderRadius: "14px",
                           overflow: "hidden",
                           background: "#dfe7f8",
@@ -1180,13 +1213,13 @@ export default function App() {
                         />
                       </div>
 
-                      <div style={{ minWidth: 0 }}>
+                      <div>
                         <div
                           style={{
-                            fontSize: "17px",
+                            fontSize: "18px",
                             lineHeight: 1.2,
                             fontWeight: 900,
-                            color: "#10224d",
+                            color: "#102863",
                           }}
                         >
                           {hotel.name || "Hotel Option"}
@@ -1194,13 +1227,10 @@ export default function App() {
 
                         <div
                           style={{
-                            marginTop: "5px",
-                            color: "#66799d",
-                            fontSize: "13px",
+                            marginTop: "6px",
+                            color: "#65789a",
+                            fontSize: "14px",
                             lineHeight: 1.45,
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
                           }}
                         >
                           {hotel.location ||
@@ -1210,7 +1240,7 @@ export default function App() {
 
                         <div
                           style={{
-                            marginTop: "7px",
+                            marginTop: "8px",
                             color: "#2f67e8",
                             fontSize: "12px",
                             fontWeight: 800,
@@ -1223,19 +1253,19 @@ export default function App() {
                       <div style={{ textAlign: "right" }}>
                         <div
                           style={{
-                            fontSize: "21px",
+                            fontSize: "22px",
                             lineHeight: 1.1,
                             fontWeight: 900,
-                            color: "#10224d",
+                            color: "#102863",
                           }}
                         >
                           {formatPrice(hotel.price)}
                         </div>
                         <div
                           style={{
-                            marginTop: "5px",
-                            color: "#5f7398",
-                            fontSize: "13px",
+                            marginTop: "6px",
+                            color: "#5b7196",
+                            fontSize: "14px",
                             fontWeight: 800,
                           }}
                         >
@@ -1243,7 +1273,7 @@ export default function App() {
                         </div>
                         <div
                           style={{
-                            marginTop: "7px",
+                            marginTop: "8px",
                             color: selected ? "#2f67e8" : "#17356f",
                             fontSize: "12px",
                             fontWeight: 900,
