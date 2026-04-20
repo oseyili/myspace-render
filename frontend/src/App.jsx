@@ -139,6 +139,69 @@ const PAGE_CONTENT = {
   },
 };
 
+const COUNTRY_TO_CURRENCY = {
+  "United Kingdom": "GBP",
+  UK: "GBP",
+  England: "GBP",
+  Scotland: "GBP",
+  Wales: "GBP",
+  "Northern Ireland": "GBP",
+  France: "EUR",
+  Germany: "EUR",
+  Spain: "EUR",
+  Italy: "EUR",
+  Portugal: "EUR",
+  Netherlands: "EUR",
+  Belgium: "EUR",
+  Austria: "EUR",
+  Ireland: "EUR",
+  Greece: "EUR",
+  Finland: "EUR",
+  Luxembourg: "EUR",
+  Malta: "EUR",
+  Cyprus: "EUR",
+  Estonia: "EUR",
+  Latvia: "EUR",
+  Lithuania: "EUR",
+  Slovakia: "EUR",
+  Slovenia: "EUR",
+  Croatia: "EUR",
+  Dubai: "AED",
+  "United Arab Emirates": "AED",
+  UAE: "AED",
+  Nigeria: "NGN",
+  Lagos: "NGN",
+  USA: "USD",
+  "United States": "USD",
+  "United States of America": "USD",
+  Canada: "CAD",
+  Switzerland: "CHF",
+  Japan: "JPY",
+  China: "CNY",
+  India: "INR",
+  Turkey: "TRY",
+  مصر: "EGP",
+  Egypt: "EGP",
+  Morocco: "MAD",
+  Kenya: "KES",
+  Ghana: "GHS",
+  "South Africa": "ZAR",
+  Qatar: "QAR",
+  Bahrain: "BHD",
+  Kuwait: "KWD",
+  Oman: "OMR",
+  Saudi: "SAR",
+  "Saudi Arabia": "SAR",
+  Thailand: "THB",
+  Singapore: "SGD",
+  Malaysia: "MYR",
+  Indonesia: "IDR",
+  Australia: "AUD",
+  "New Zealand": "NZD",
+  Brazil: "BRL",
+  Mexico: "MXN",
+};
+
 function normaliseHotels(payload) {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload;
@@ -159,10 +222,57 @@ function hotelFacilities(hotel) {
     .filter(Boolean);
 }
 
-function formatPrice(value) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return "—";
-  return `£${n}`;
+function inferCurrencyCode(hotel) {
+  const direct =
+    hotel?.currency ||
+    hotel?.currency_code ||
+    hotel?.currencyCode ||
+    hotel?.price_currency ||
+    hotel?.priceCurrency ||
+    hotel?.local_currency ||
+    hotel?.localCurrency;
+
+  if (typeof direct === "string" && /^[A-Z]{3}$/.test(direct.trim().toUpperCase())) {
+    return direct.trim().toUpperCase();
+  }
+
+  const countryCandidates = [
+    hotel?.country,
+    hotel?.country_name,
+    hotel?.countryName,
+    hotel?.destination_country,
+    hotel?.destinationCountry,
+    hotel?.city,
+  ].filter(Boolean);
+
+  for (const candidate of countryCandidates) {
+    const key = String(candidate).trim();
+    if (COUNTRY_TO_CURRENCY[key]) {
+      return COUNTRY_TO_CURRENCY[key];
+    }
+  }
+
+  return null;
+}
+
+function formatPrice(value, hotel) {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return "Price shown on reserve page";
+
+  const currencyCode = inferCurrencyCode(hotel);
+  if (!currencyCode) {
+    return "Price shown on reserve page";
+  }
+
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: currencyCode,
+      maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
+    }).format(amount);
+  } catch {
+    return `${amount} ${currencyCode}`;
+  }
 }
 
 function buildAffiliateLink(hotel) {
@@ -1160,10 +1270,10 @@ export default function App() {
                         }}
                       >
                         <div style={{ color: "#65789a", fontSize: "12px", fontWeight: 800 }}>
-                          Price
+                          Local price
                         </div>
                         <div style={{ marginTop: "8px", fontSize: "24px", fontWeight: 900 }}>
-                          {formatPrice(activeHotel.price)}
+                          {formatPrice(activeHotel.price, activeHotel)}
                         </div>
                       </div>
 
@@ -1463,7 +1573,7 @@ export default function App() {
                             color: "#102863",
                           }}
                         >
-                          {formatPrice(hotel.price)}
+                          {formatPrice(hotel.price, hotel)}
                         </div>
                         <div
                           style={{
