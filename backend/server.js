@@ -6,14 +6,42 @@ const { Pool } = require("pg");
 
 const app = express();
 
-app.use(cors());
+const ALLOWED_ORIGINS = [
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "https://myspace-hotel.com",
+  "https://www.myspace-hotel.com",
+  "https://myspace-hotel.vercel.app",
+  "https://hotel-frontend-vlwa.onrender.com",
+];
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (ALLOWED_ORIGINS.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: false,
+  })
+);
+
+app.options("*", cors());
 app.use(express.json());
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL
-    ? { rejectUnauthorized: false }
-    : false,
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
 });
 
 const CITY_COUNTRY_MAP = {
@@ -232,7 +260,9 @@ app.get("/api/hotels", (req, res) => {
       let matchesFacilities = true;
       if (facilities.length > 0) {
         const hotelFacilities = (hotel.facilities || []).map((x) => String(x).toLowerCase());
-        matchesFacilities = facilities.every((item) => hotelFacilities.includes(item));
+        matchesFacilities = facilities.every((item) => {
+          return hotelFacilities.some((facility) => facility.includes(item));
+        });
       }
 
       return matchesLocation && matchesFacilities;
@@ -333,7 +363,11 @@ app.post("/auth/login", async (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  return res.json({ status: "myspace-backend running" });
+  return res.json({
+    status: "myspace-backend running",
+    cors_allowed_origins: ALLOWED_ORIGINS,
+    hotels_endpoint: "/api/hotels",
+  });
 });
 
 const PORT = Number(process.env.PORT || 3010);
