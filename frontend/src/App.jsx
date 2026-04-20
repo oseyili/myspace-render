@@ -17,19 +17,19 @@ const FACILITY_OPTIONS = [
 const GUIDE_ITEMS = [
   {
     city: "London",
-    text: "Stay close to iconic landmarks, premium shopping, fast transport, and the city experiences travellers book for most.",
+    text: "Stay close to iconic landmarks, premium shopping, fast transport, and the city experiences travellers want most.",
   },
   {
     city: "Dubai",
-    text: "Choose from standout luxury hotels, waterfront towers, resort pools, and high-end stays built for memorable travel.",
+    text: "Choose standout luxury hotels, waterfront towers, resort pools, and high-end stays built for memorable travel.",
   },
   {
     city: "Paris",
-    text: "Find elegant boutique hotels, romantic neighbourhood stays, and stylish city breaks that turn a search into a booking.",
+    text: "Find elegant boutique hotels, romantic neighbourhood stays, and stylish city breaks worth booking with confidence.",
   },
   {
     city: "Lagos",
-    text: "Secure strong city hotels for business, family visits, and fast-moving travel plans without wasting time on weak matches.",
+    text: "Secure well-placed city hotels for business, family visits, and fast-moving travel plans without wasting time.",
   },
 ];
 
@@ -44,11 +44,11 @@ const FAQS = [
   },
   {
     q: "How do I complete my reservation?",
-    a: "Select your preferred hotel, review the details, and continue securely through the booking partner to complete your stay.",
+    a: "Select your preferred hotel, review the details, and continue securely through the reserve or pay link to complete your stay.",
   },
   {
     q: "Why use My Space Hotel?",
-    a: "My Space Hotel helps customers compare faster, choose with more confidence, and move to booking with less friction.",
+    a: "My Space Hotel helps you compare faster, choose with more confidence, and move to reservation with less friction.",
   },
 ];
 
@@ -56,7 +56,7 @@ const PAGE_CONTENT = {
   guides: {
     title: "Travel Guides",
     intro:
-      "Destination insight that helps customers choose faster and book with more confidence.",
+      "Destination insight that helps you choose faster and reserve with more confidence.",
     sections: GUIDE_ITEMS.map((item) => ({
       title: item.city,
       body: item.text,
@@ -65,7 +65,7 @@ const PAGE_CONTENT = {
   faq: {
     title: "Frequently Asked Questions",
     intro:
-      "Everything customers need to know before moving to reservation.",
+      "Everything you need to know before moving to reservation.",
     sections: FAQS.map((item) => ({
       title: item.q,
       body: item.a,
@@ -74,12 +74,12 @@ const PAGE_CONTENT = {
   terms: {
     title: "Booking Terms",
     intro:
-      "Important details to review before continuing to a booking partner.",
+      "Important details to review before continuing to a reserve or pay link.",
     sections: [
       {
         title: "Prices and availability",
         body:
-          "Hotel prices, room types, taxes, and availability can change quickly. Final booking details are confirmed on the partner page.",
+          "Hotel prices, room types, taxes, and availability can change quickly. Final reservation details are confirmed on the secure booking page.",
       },
       {
         title: "Guest details",
@@ -89,7 +89,7 @@ const PAGE_CONTENT = {
       {
         title: "Reservation completion",
         body:
-          "My Space Hotel helps customers search, compare, and select hotels. Final reservation completion happens with the selected booking partner.",
+          "My Space Hotel helps you search, compare, and choose hotels. Final reservation completion happens through the secure reserve or pay link.",
       },
     ],
   },
@@ -118,7 +118,7 @@ const PAGE_CONTENT = {
   protection: {
     title: "Booking Protection",
     intro:
-      "Simple checks that help customers book accurately and move forward with confidence.",
+      "Simple checks that help you book accurately and move forward with confidence.",
     sections: [
       {
         title: "Check dates and guests",
@@ -126,14 +126,14 @@ const PAGE_CONTENT = {
           "Confirm arrival, departure, guest count, and rooms before moving to reservation.",
       },
       {
-        title: "Review the selected hotel",
+        title: "Review your selected hotel",
         body:
           "Make sure the hotel, area, facilities, and pricing match what you want before continuing.",
       },
       {
-        title: "Use the booking button shown here",
+        title: "Use the reserve or pay button shown here",
         body:
-          "Reserve through the button inside My Space Hotel so customers follow the correct partner route.",
+          "Continue through the button inside My Space Hotel so you follow the correct booking route.",
       },
     ],
   },
@@ -163,17 +163,6 @@ function formatPrice(value) {
   const n = Number(value);
   if (!Number.isFinite(n)) return "—";
   return `£${n}`;
-}
-
-function detectAffiliatePartner(hotel) {
-  const source = String(
-    hotel?.affiliate_url || hotel?.booking_url || hotel?.url || ""
-  ).toLowerCase();
-
-  if (source.includes("expedia")) return "Expedia";
-  if (source.includes("hotels.com")) return "Hotels.com";
-  if (source.includes("trip.com")) return "Trip.com";
-  return "Booking.com";
 }
 
 function buildAffiliateLink(hotel) {
@@ -300,7 +289,7 @@ function FullPageOverlay({ pageKey, onClose }) {
           }}
         >
           <div>
-            {sectionLabel("Information page")}
+            {sectionLabel("Information")}
             <h2
               style={{
                 margin: 0,
@@ -400,7 +389,7 @@ export default function App() {
 
   const [selectedFacilities, setSelectedFacilities] = useState([]);
   const [statusText, setStatusText] = useState(
-    "Access live hotel availability, narrow choices faster, and move to booking through trusted partners with confidence."
+    "Access live hotel availability, narrow choices faster, and move to reservation with confidence."
   );
   const [errorText, setErrorText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -423,7 +412,6 @@ export default function App() {
   }, [hotels, selectedFacilities]);
 
   const activeHotel = selectedHotel || filteredHotels[0] || null;
-  const activePartner = activeHotel ? detectAffiliatePartner(activeHotel) : "Booking partner";
   const activeLink = activeHotel ? safeExternalLink(buildAffiliateLink(activeHotel)) : null;
 
   function updateSearch(field, value) {
@@ -480,7 +468,7 @@ export default function App() {
       setStatusText(
         payload?.message ||
           (items.length
-            ? `${items.length} live hotel options are ready for ${destination}. Refine your search and secure the stay that fits best.`
+            ? `${items.length} live hotel options are ready for ${destination}. Refine your search and reserve the stay that fits you best.`
             : `No stays matched this search for ${destination}. Adjust your destination or filters to reveal more options.`)
       );
     } catch (error) {
@@ -490,7 +478,7 @@ export default function App() {
         "Live hotel results could not load on this attempt. Please search again to continue."
       );
       setStatusText(
-        "Search is designed to help customers compare faster and book smarter once live results are available."
+        "Search is built to help you compare faster and reserve smarter once live results are available."
       );
     } finally {
       setLoading(false);
@@ -564,9 +552,8 @@ export default function App() {
                       fontWeight: 500,
                     }}
                   >
-                    Give yourself a better chance of finding the right hotel fast,
-                    comparing with clarity, and booking through trusted partners
-                    without the usual clutter.
+                    Find the right hotel faster, compare with more confidence,
+                    and move to a secure reserve or pay link without the usual clutter.
                   </p>
                 </div>
 
@@ -695,7 +682,7 @@ export default function App() {
                 <div>Access live global hotel inventory</div>
                 <div>Refine results instantly</div>
                 <div>Compare with confidence</div>
-                <div>Book through trusted partners</div>
+                <div>Reserve with ease</div>
               </div>
             </div>
 
@@ -727,7 +714,7 @@ export default function App() {
                   lineHeight: 1.55,
                 }}
               >
-                Search a wider hotel database, refine quickly, and move your best option into booking without wasted time.
+                Search a wider hotel database, refine quickly, and move your best option into reservation without wasted time.
               </p>
 
               <form onSubmit={handleSearch} style={{ marginTop: "14px" }}>
@@ -899,7 +886,7 @@ export default function App() {
                 maxWidth: "700px",
               }}
             >
-              Help customers reach the right stay faster by removing weak matches and focusing only on the facilities that matter most.
+              Focus on the features that matter most and bring the stays that fit your trip into view faster.
             </p>
 
             <div
@@ -977,7 +964,7 @@ export default function App() {
                   maxWidth: "560px",
                 }}
               >
-                Give customers a stronger reason to use the platform by combining broad hotel choice with faster filtering and a smoother route to booking.
+                A wider range of hotel choices gives you a stronger chance of finding the stay that feels right at the right moment.
               </p>
 
               <div
@@ -1015,7 +1002,7 @@ export default function App() {
                     padding: "18px",
                   }}
                 >
-                  <div style={{ fontSize: "13px", color: "#d8e4ff" }}>Booking readiness</div>
+                  <div style={{ fontSize: "13px", color: "#d8e4ff" }}>Reservation status</div>
                   <div
                     style={{
                       marginTop: "8px",
@@ -1055,7 +1042,7 @@ export default function App() {
                 fontWeight: 900,
               }}
             >
-              A clear booking view that keeps attention on the best option
+              A clear reservation view that keeps attention on your best option
             </h2>
 
             <div
@@ -1076,7 +1063,7 @@ export default function App() {
                     lineHeight: 1.7,
                   }}
                 >
-                  Start a search to reveal live hotel options, compare what matters, and move your chosen stay into a stronger booking position.
+                  Start a search to reveal live hotel options, compare what matters, and move your chosen stay into a stronger reservation position.
                 </div>
               ) : (
                 <>
@@ -1154,7 +1141,7 @@ export default function App() {
                       }}
                     >
                       {activeHotel.summary ||
-                        "A strong hotel option selected from live availability, designed to help customers move from comparison to booking with confidence."}
+                        "A strong hotel option selected from live availability, designed to help you move from comparison to reservation with confidence."}
                     </p>
 
                     <div
@@ -1188,10 +1175,10 @@ export default function App() {
                         }}
                       >
                         <div style={{ color: "#65789a", fontSize: "12px", fontWeight: 800 }}>
-                          Booking partner
+                          Booking route
                         </div>
                         <div style={{ marginTop: "8px", fontSize: "20px", fontWeight: 900 }}>
-                          {activePartner}
+                          Secure
                         </div>
                       </div>
 
@@ -1263,7 +1250,7 @@ export default function App() {
                             boxShadow: "0 10px 20px rgba(45,103,229,0.18)",
                           }}
                         >
-                          Reserve This Stay
+                          Reserve
                         </a>
                       ) : (
                         <button
@@ -1284,23 +1271,44 @@ export default function App() {
                         </button>
                       )}
 
-                      <a
-                        href={`mailto:${SUPPORT_EMAIL}`}
-                        style={{
-                          textDecoration: "none",
-                          borderRadius: "16px",
-                          background: "#eff4fd",
-                          color: "#143882",
-                          padding: "14px 18px",
-                          fontWeight: 900,
-                          fontSize: "15px",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          border: "1px solid #d6e0f2",
-                        }}
-                      >
-                        Affiliate Support
-                      </a>
+                      {activeLink ? (
+                        <a
+                          href={activeLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            textDecoration: "none",
+                            borderRadius: "16px",
+                            background: "#eff4fd",
+                            color: "#143882",
+                            padding: "14px 18px",
+                            fontWeight: 900,
+                            fontSize: "15px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            border: "1px solid #d6e0f2",
+                          }}
+                        >
+                          Pay
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled
+                          style={{
+                            borderRadius: "16px",
+                            background: "#eef4fd",
+                            color: "#8aa0c9",
+                            padding: "14px 18px",
+                            fontWeight: 900,
+                            fontSize: "15px",
+                            border: "1px solid #d6e0f2",
+                            cursor: "not-allowed",
+                          }}
+                        >
+                          Pay Unavailable
+                        </button>
+                      )}
                     </div>
                   </div>
                 </>
@@ -1323,7 +1331,7 @@ export default function App() {
                 fontWeight: 900,
               }}
             >
-              A wider hotel selection that helps customers stay in control
+              A wider hotel selection that helps you stay in control
             </h2>
 
             <div
@@ -1334,7 +1342,7 @@ export default function App() {
                 lineHeight: 1.6,
               }}
             >
-              Keep the strength of a large hotel database while presenting it in a way that feels sharper, faster, and more worth using.
+              Explore a stronger range of hotel choices in one place, compare with less friction, and bring the best options into view faster.
             </div>
 
             <div
@@ -1442,7 +1450,7 @@ export default function App() {
                             fontWeight: 800,
                           }}
                         >
-                          {detectAffiliatePartner(hotel)}
+                          ready to review
                         </div>
                       </div>
 
@@ -1500,7 +1508,7 @@ export default function App() {
               padding: "22px",
             }}
           >
-            {sectionLabel("Why customers choose it")}
+            {sectionLabel("Why choose My Space Hotel")}
             <h2
               style={{
                 margin: 0,
@@ -1509,7 +1517,7 @@ export default function App() {
                 fontWeight: 900,
               }}
             >
-              Give customers stronger reasons to search and book here
+              Why travellers choose My Space Hotel
             </h2>
 
             <div
@@ -1521,20 +1529,20 @@ export default function App() {
             >
               {[
                 {
-                  title: "Broader hotel choice",
-                  text: "A wider hotel database gives customers a better chance of finding the right stay without leaving the platform.",
+                  title: "More choice in one place",
+                  text: "Search a wider range of hotel options without jumping from site to site.",
                 },
                 {
-                  title: "Sharper filtering",
-                  text: "Facility-led search removes clutter fast and helps customers focus on what actually fits their trip.",
+                  title: "Smarter filtering",
+                  text: "Cut through noise quickly and focus on the stays that match what matters most to you.",
                 },
                 {
-                  title: "Clearer decisions",
-                  text: "One selected hotel view and one strong list layout make comparison easier and booking more direct.",
+                  title: "Clearer booking decisions",
+                  text: "Review one selected hotel in detail while keeping the rest of your options close at hand.",
                 },
                 {
-                  title: "Faster booking path",
-                  text: "The route from search to partner reservation is simple, visible, and ready to use when the customer is ready.",
+                  title: "A smoother path to reserve",
+                  text: "Move from search to reserve or pay with less friction and more confidence.",
                 },
               ].map((item) => (
                 <div
@@ -1570,7 +1578,7 @@ export default function App() {
               padding: "22px",
             }}
           >
-            {sectionLabel("Before booking")}
+            {sectionLabel("Before you continue")}
             <h2
               style={{
                 margin: 0,
@@ -1579,7 +1587,7 @@ export default function App() {
                 fontWeight: 900,
               }}
             >
-              Everything customers need before they continue
+              Everything you need before reservation
             </h2>
 
             <div
@@ -1600,13 +1608,13 @@ export default function App() {
                 {
                   key: "cancellation",
                   title: "Cancellation Policy",
-                  text: "Important cancellation guidance reviewed before customers continue to book.",
+                  text: "Important cancellation guidance to review before you move forward.",
                   background: "linear-gradient(180deg, #eef6ff, #f8fbff)",
                 },
                 {
                   key: "protection",
                   title: "Booking Protection",
-                  text: "Simple checks that help customers complete reservations with more confidence.",
+                  text: "Simple checks that help you complete reservation with more confidence.",
                   background: "linear-gradient(180deg, #eef8ff, #f8fcff)",
                 },
               ].map((item) => (
