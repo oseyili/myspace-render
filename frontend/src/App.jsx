@@ -57,6 +57,21 @@ function buildAffiliateLink(hotel) {
   return `https://www.booking.com/searchresults.html?ss=${city}&label=${name}`;
 }
 
+function inputStyle(size = "normal") {
+  return {
+    width: "100%",
+    minHeight: size === "large" ? "58px" : "56px",
+    borderRadius: "16px",
+    border: "1px solid rgba(255,255,255,0.14)",
+    background: "rgba(95,121,214,0.32)",
+    color: "#ffffff",
+    padding: "0 16px",
+    fontSize: "16px",
+    outline: "none",
+    boxSizing: "border-box",
+  };
+}
+
 export default function App() {
   const [search, setSearch] = useState({
     destination: "London",
@@ -117,8 +132,10 @@ export default function App() {
     setSelectedHotel(null);
 
     try {
+      const cityValue = search.destination || search.city || "London";
+
       const params = new URLSearchParams({
-        city: search.destination || search.city || "London",
+        city: cityValue,
         country: search.country || "United Kingdom",
         location: search.location || "",
         checkIn: search.checkIn,
@@ -144,7 +161,7 @@ export default function App() {
       setHotels(items);
       setStatusText(
         items.length
-          ? `Showing ${items.length} live hotel results for ${search.destination || search.city || "your destination"}.`
+          ? `Showing ${items.length} live hotel results for ${cityValue}.`
           : "No hotel results matched this search. Try a different destination or broader filters."
       );
     } catch (error) {
@@ -766,8 +783,10 @@ export default function App() {
                 gap: "16px",
               }}
             >
-              {visibleHotels.map((hotel) => {
-                const isSelected = selectedHotel?.id === hotel.id;
+              {visibleHotels.map((hotel, index) => {
+                const hotelKey = hotel.id || hotel.hotel_id || hotel.name || `hotel-${index}`;
+                const isSelected = selectedHotel?.id === hotel.id || selectedHotel?.name === hotel.name;
+
                 const facilityList = Array.isArray(hotel.facilities)
                   ? hotel.facilities
                   : String(hotel.facilities || "")
@@ -777,7 +796,7 @@ export default function App() {
 
                 return (
                   <article
-                    key={hotel.id || hotel.name}
+                    key={hotelKey}
                     style={{
                       background: "#ffffff",
                       borderRadius: "22px",
@@ -796,7 +815,10 @@ export default function App() {
                       }}
                     >
                       <img
-                        src={hotel.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80"}
+                        src={
+                          hotel.image ||
+                          "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80"
+                        }
                         alt={hotel.name || "Hotel"}
                         style={{
                           width: "100%",
@@ -826,7 +848,7 @@ export default function App() {
                               color: "#0d2259",
                             }}
                           >
-                            {hotel.name}
+                            {hotel.name || "Hotel Option"}
                           </h3>
                           <div
                             style={{
@@ -876,9 +898,9 @@ export default function App() {
                           minHeight: "34px",
                         }}
                       >
-                        {facilityList.slice(0, 4).map((facility) => (
+                        {facilityList.slice(0, 4).map((facility, facilityIndex) => (
                           <span
-                            key={`${hotel.id}-${facility}`}
+                            key={`${hotelKey}-${facility}-${facilityIndex}`}
                             style={{
                               background: "#f3f7fd",
                               color: "#27457f",
@@ -1142,19 +1164,4 @@ export default function App() {
       </div>
     </div>
   );
-}
-
-function inputStyle(size = "normal") {
-  return {
-    width: "100%",
-    minHeight: size === "large" ? "58px" : "56px",
-    borderRadius: "16px",
-    border: "1px solid rgba(255,255,255,0.14)",
-    background: "rgba(95,121,214,0.32)",
-    color: "#ffffff",
-    padding: "0 16px",
-    fontSize: "16px",
-    outline: "none",
-    boxSizing: "border-box",
-  };
 }
