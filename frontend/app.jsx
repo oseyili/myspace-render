@@ -140,13 +140,6 @@ export default function App() {
     error: "",
   });
   const [selectedFacilities, setSelectedFacilities] = useState([]);
-  const [pagination, setPagination] = useState({
-    currentPage: 0,
-    pageSize: 60,
-    total: 0,
-    hasMore: false,
-    lastMessage: "",
-  });
   const [form, setForm] = useState({
     destination: "London",
     country: "United Kingdom",
@@ -173,8 +166,7 @@ export default function App() {
     }
 
     return results.slice(0, 3).map((hotel) => {
-      const location =
-        hotel.location || hotel.city || hotel.country || "your destination";
+      const location = hotel.location || hotel.city || hotel.country || "your destination";
       return `${hotel.name} — ${location}`;
     });
   }, [results]);
@@ -194,7 +186,11 @@ export default function App() {
   const normalizeHotels = (payload) => {
     const candidates = Array.isArray(payload)
       ? payload
-      : payload?.items || payload?.hotels || payload?.results || payload?.data || [];
+      : payload?.items ||
+        payload?.hotels ||
+        payload?.results ||
+        payload?.data ||
+        [];
 
     if (!Array.isArray(candidates)) {
       return [];
@@ -222,9 +218,7 @@ export default function App() {
             item?.description ||
             "Compare this stay with other available choices."
         ),
-        bookingUrl: String(
-          item?.bookingUrl || item?.booking_url || item?.url || ""
-        ),
+        bookingUrl: String(item?.bookingUrl || item?.booking_url || item?.url || ""),
         image: String(item?.image || ""),
         facilities: Array.isArray(item?.facilities)
           ? item.facilities.map((entry) => String(entry))
@@ -237,14 +231,14 @@ export default function App() {
       .filter((hotel) => hotel.name);
   };
 
-  const fetchHotelsPage = async (pageNumber) => {
+  const fetchHotels = async () => {
     const query = new URLSearchParams({
       destination: form.destination,
       country: form.country,
       city: form.city,
       location: form.location,
-      page: String(pageNumber),
-      page_size: String(pagination.pageSize),
+      page: "1",
+      page_size: "60",
       facilities: selectedFacilities.join(","),
     }).toString();
 
@@ -256,14 +250,7 @@ export default function App() {
     }
 
     const data = await response.json();
-
-    return {
-      hotels: normalizeHotels(data),
-      total: Number(data?.total || 0),
-      hasMore: Boolean(data?.has_more),
-      page: Number(data?.page || pageNumber),
-      message: String(data?.message || ""),
-    };
+    return normalizeHotels(data);
   };
 
   const handleSearch = async () => {
@@ -273,18 +260,10 @@ export default function App() {
     setForm((prev) => ({ ...prev, selectedHotelPrice: "" }));
 
     try {
-      const firstPage = await fetchHotelsPage(1);
+      const hotels = await fetchHotels();
+      setResults(hotels);
 
-      setResults(firstPage.hotels);
-      setPagination((prev) => ({
-        ...prev,
-        currentPage: firstPage.page,
-        total: firstPage.total,
-        hasMore: firstPage.hasMore,
-        lastMessage: firstPage.message,
-      }));
-
-      if (firstPage.hotels.length === 0) {
+      if (hotels.length === 0) {
         setSearchState({
           loading: false,
           error:
@@ -293,43 +272,6 @@ export default function App() {
         return;
       }
 
-      setSearchState({ loading: false, error: "" });
-    } catch (error) {
-      setPagination((prev) => ({
-        ...prev,
-        currentPage: 0,
-        total: 0,
-        hasMore: false,
-        lastMessage: "",
-      }));
-      setSearchState({
-        loading: false,
-        error:
-          error?.message ||
-          `Unable to connect to the hotel search service at ${API_BASE}.`,
-      });
-    }
-  };
-
-  const handleLoadMore = async () => {
-    if (searchState.loading || !pagination.hasMore) {
-      return;
-    }
-
-    setSearchState({ loading: true, error: "" });
-
-    try {
-      const nextPage = pagination.currentPage + 1;
-      const nextBatch = await fetchHotelsPage(nextPage);
-
-      setResults((prev) => [...prev, ...nextBatch.hotels]);
-      setPagination((prev) => ({
-        ...prev,
-        currentPage: nextBatch.page,
-        total: nextBatch.total,
-        hasMore: nextBatch.hasMore,
-        lastMessage: nextBatch.message,
-      }));
       setSearchState({ loading: false, error: "" });
     } catch (error) {
       setSearchState({
@@ -423,8 +365,7 @@ export default function App() {
             <div style={styles.kickerLight}>WORLDWIDE HOTEL BOOKINGS</div>
             <h1 style={styles.brandTitle}>My Space Hotel</h1>
             <p style={styles.topText}>
-              Discover outstanding places to stay, enjoy a smoother search, and
-              book with confidence through trusted partners.
+              Discover outstanding places to stay, enjoy a smoother search, and book with confidence through trusted partners.
             </p>
 
             <div style={styles.topActions}>
@@ -434,19 +375,16 @@ export default function App() {
               <button style={styles.faqButton} onClick={() => setPage("faq")}>
                 Frequently Asked Questions
               </button>
-              <button
-                style={styles.supportButton}
-                onClick={() => setPage("support")}
-              >
+              <button style={styles.supportButton} onClick={() => setPage("support")}>
                 Customer Support
               </button>
             </div>
           </div>
 
           <div style={styles.topHighlight}>
-            <div style={styles.topHighlightValue}>{pagination.total || 0}</div>
+            <div style={styles.topHighlightValue}>{results.length}</div>
             <div style={styles.topHighlightText}>
-              total hotel choices found in your connected search database
+              hotels currently loaded from your connected live search database
             </div>
           </div>
         </section>
@@ -455,13 +393,10 @@ export default function App() {
           <div style={styles.priorityHeader}>
             <div>
               <div style={styles.kickerDarkOnLight}>CHOOSE WHAT MATTERS MOST</div>
-              <h2 style={styles.priorityTitle}>
-                Start with the features that matter to you most
-              </h2>
+              <h2 style={styles.priorityTitle}>Start with the features that matter to you most</h2>
             </div>
             <div style={styles.priorityHint}>
-              Pick your preferred facilities first, then search for stays that
-              match your trip.
+              Pick your preferred facilities first, then search for stays that match your trip.
             </div>
           </div>
 
@@ -488,26 +423,26 @@ export default function App() {
                 <div style={styles.kickerDark}>FIND YOUR STAY</div>
                 <h2 style={styles.heroTitle}>Find a stay worth coming back to</h2>
                 <p style={styles.heroText}>
-                  Search more hotel options, compare with ease, and choose the
-                  stay that feels right for your next trip.
+                  Search more hotel options, compare with ease, and choose the stay that feels right for your next trip.
                 </p>
               </div>
 
               <div style={styles.heroBadge}>
-                <div style={styles.heroBadgeNumber}>
-                  {selectedHotel ? "1" : "0"}
-                </div>
+                <div style={styles.heroBadgeNumber}>{selectedHotel ? "1" : "0"}</div>
                 <div style={styles.heroBadgeText}>stay selected</div>
               </div>
             </div>
 
             <div style={styles.statsGrid}>
               <StatCard label="Loaded Results" value={String(results.length)} />
-              <StatCard label="Total Found" value={String(pagination.total || 0)} />
               <StatCard
                 label="Selected Hotel"
                 value={selectedHotel ? selectedHotel.name : "None"}
                 small
+              />
+              <StatCard
+                label="Direct Booking Link"
+                value={selectedHotel?.bookingUrl ? "Available" : "Not yet"}
               />
             </div>
           </div>
@@ -578,24 +513,15 @@ export default function App() {
                 onClick={handleSearch}
                 disabled={searchState.loading}
               >
-                {searchState.loading && results.length === 0
-                  ? "Searching..."
-                  : "Search Hotels"}
+                {searchState.loading ? "Searching..." : "Search Hotels"}
               </button>
             </div>
 
             <div style={styles.searchMessage}>
-              More choice, clearer comparisons, and a faster path to booking
-              with trusted partners.
+              More choice, clearer comparisons, and a faster path to booking with trusted partners.
             </div>
 
-            {pagination.lastMessage ? (
-              <div style={styles.searchSubMessage}>{pagination.lastMessage}</div>
-            ) : null}
-
-            {searchState.error ? (
-              <div style={styles.errorBox}>{searchState.error}</div>
-            ) : null}
+            {searchState.error ? <div style={styles.errorBox}>{searchState.error}</div> : null}
           </div>
         </section>
 
@@ -647,32 +573,21 @@ export default function App() {
                         <div style={styles.previewImagePlaceholder}>Hotel image</div>
                       )}
 
-                      <div style={styles.previewHotelName}>
-                        {selectedHotel.name}
-                      </div>
+                      <div style={styles.previewHotelName}>{selectedHotel.name}</div>
                       <div style={styles.previewHotelArea}>
-                        {[selectedHotel.location, selectedHotel.address]
-                          .filter(Boolean)
-                          .join(" • ")}
+                        {[selectedHotel.location, selectedHotel.address].filter(Boolean).join(" • ")}
                       </div>
-                      <div style={styles.previewHotelSummary}>
-                        {selectedHotel.description}
-                      </div>
+                      <div style={styles.previewHotelSummary}>{selectedHotel.description}</div>
                       <div style={styles.previewMetaRow}>
-                        <div style={styles.previewHotelPrice}>
-                          {selectedHotel.price}
-                        </div>
+                        <div style={styles.previewHotelPrice}>{selectedHotel.price}</div>
                         {selectedHotel.rating ? (
-                          <div style={styles.ratingBadge}>
-                            Rating {selectedHotel.rating}
-                          </div>
+                          <div style={styles.ratingBadge}>Rating {selectedHotel.rating}</div>
                         ) : null}
                       </div>
                     </div>
                   ) : (
                     <div style={styles.placeholderText}>
-                      Search and choose a hotel to preview real stay details from
-                      the connected database.
+                      Search and choose a hotel to preview real stay details from the connected database.
                     </div>
                   )}
                 </div>
@@ -682,26 +597,20 @@ export default function App() {
                   {selectedHotel ? (
                     <div>
                       <div style={styles.mapTextLine}>
-                        <strong>Location:</strong>{" "}
-                        {selectedHotel.location || "Not provided"}
+                        <strong>Location:</strong> {selectedHotel.location || "Not provided"}
                       </div>
                       <div style={styles.mapTextLine}>
-                        <strong>City:</strong>{" "}
-                        {selectedHotel.city || "Not provided"}
+                        <strong>City:</strong> {selectedHotel.city || "Not provided"}
                       </div>
                       <div style={styles.mapTextLine}>
-                        <strong>Country:</strong>{" "}
-                        {selectedHotel.country || "Not provided"}
+                        <strong>Country:</strong> {selectedHotel.country || "Not provided"}
                       </div>
                       <div style={styles.mapTextLine}>
-                        <strong>Address:</strong>{" "}
-                        {selectedHotel.address || "Not provided"}
+                        <strong>Address:</strong> {selectedHotel.address || "Not provided"}
                       </div>
                       <div style={styles.mapTextLine}>
                         <strong>Booking link:</strong>{" "}
-                        {selectedHotel.bookingUrl
-                          ? "Available"
-                          : "Not supplied by search service"}
+                        {selectedHotel.bookingUrl ? "Available" : "Not supplied by search service"}
                       </div>
                     </div>
                   ) : (
@@ -729,25 +638,18 @@ export default function App() {
 
           <div style={styles.rightStack}>
             <div style={styles.whiteCardCompact}>
+              <div style={styles.kickerLight}>RESULTS</div>
               <div style={styles.resultsHeaderRow}>
-                <div>
-                  <div style={styles.kickerLight}>RESULTS</div>
-                  <h3 style={styles.cardTitle}>Available hotels</h3>
-                </div>
-                <div style={styles.resultsCount}>
-                  {results.length} loaded / {pagination.total || 0} found
-                </div>
+                <h3 style={styles.cardTitle}>Available hotels</h3>
+                <div style={styles.resultsCount}>{results.length} shown</div>
               </div>
 
               <div style={styles.resultsBoxCompact}>
-                {searchState.loading && results.length === 0 ? (
-                  <div style={styles.noResultsBox}>
-                    Searching connected hotel database...
-                  </div>
+                {searchState.loading ? (
+                  <div style={styles.noResultsBox}>Searching connected hotel database...</div>
                 ) : results.length === 0 ? (
                   <div style={styles.noResultsBox}>
-                    No hotel options are being shown yet. Search to load real
-                    results from your connected hotel database.
+                    No hotel options are being shown yet. Search to load real results from your connected hotel database.
                   </div>
                 ) : (
                   results.map((hotel) => (
@@ -763,9 +665,7 @@ export default function App() {
                         <div>
                           <div style={styles.resultName}>{hotel.name}</div>
                           <div style={styles.resultArea}>
-                            {[hotel.location, hotel.city]
-                              .filter(Boolean)
-                              .join(" • ")}
+                            {[hotel.location, hotel.city].filter(Boolean).join(" • ")}
                           </div>
                         </div>
                         <div style={styles.resultPrice}>{hotel.price}</div>
@@ -802,30 +702,12 @@ export default function App() {
                   ))
                 )}
               </div>
-
-              {results.length > 0 ? (
-                <div style={styles.loadMoreWrap}>
-                  {pagination.hasMore ? (
-                    <button
-                      style={styles.loadMoreButton}
-                      onClick={handleLoadMore}
-                      disabled={searchState.loading}
-                    >
-                      {searchState.loading ? "Loading more..." : "Load More Hotels"}
-                    </button>
-                  ) : (
-                    <div style={styles.noMoreText}>All available hotels are loaded</div>
-                  )}
-                </div>
-              ) : null}
             </div>
 
             <div style={styles.bookingCard}>
               <div style={styles.bookingTop}>
                 <div>
-                  <div style={styles.kickerBooking}>
-                    RESERVATION AND BOOKING
-                  </div>
+                  <div style={styles.kickerBooking}>RESERVATION AND BOOKING</div>
                   <h3 style={styles.bookingTitle}>Guest information</h3>
                 </div>
                 <div style={styles.bookingPill}>
@@ -851,9 +733,7 @@ export default function App() {
               <input
                 style={styles.fullInputLight}
                 value={form.selectedHotelPrice}
-                onChange={(e) =>
-                  updateField("selectedHotelPrice", e.target.value)
-                }
+                onChange={(e) => updateField("selectedHotelPrice", e.target.value)}
                 placeholder="Selected hotel price"
               />
 
@@ -871,8 +751,7 @@ export default function App() {
               </button>
 
               <div style={styles.bookingNote}>
-                Continue only when a real partner booking link is supplied by
-                your connected hotel database.
+                Continue only when a real partner booking link is supplied by your connected hotel database.
               </div>
             </div>
 
@@ -1321,16 +1200,6 @@ const styles = {
     lineHeight: 1.45,
   },
 
-  searchSubMessage: {
-    marginTop: "10px",
-    background: "rgba(255,255,255,0.08)",
-    borderRadius: "12px",
-    padding: "10px 12px",
-    color: "#dce7ff",
-    fontSize: "13px",
-    lineHeight: 1.45,
-  },
-
   errorBox: {
     marginTop: "10px",
     background: "rgba(255, 214, 214, 0.16)",
@@ -1763,30 +1632,6 @@ const styles = {
   noLinkText: {
     color: "#7f91aa",
     fontSize: "13px",
-    fontWeight: 700,
-  },
-
-  loadMoreWrap: {
-    marginTop: "12px",
-    display: "flex",
-    justifyContent: "center",
-  },
-
-  loadMoreButton: {
-    border: "none",
-    borderRadius: "12px",
-    padding: "13px 18px",
-    background: "linear-gradient(90deg, #2f67e6 0%, #25c1df 100%)",
-    color: "#ffffff",
-    fontSize: "15px",
-    fontWeight: 900,
-    cursor: "pointer",
-    boxShadow: "0 10px 20px rgba(47, 103, 230, 0.16)",
-  },
-
-  noMoreText: {
-    color: "#5d7494",
-    fontSize: "14px",
     fontWeight: 700,
   },
 
