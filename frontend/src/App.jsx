@@ -139,69 +139,6 @@ const PAGE_CONTENT = {
   },
 };
 
-const COUNTRY_TO_CURRENCY = {
-  "United Kingdom": "GBP",
-  UK: "GBP",
-  England: "GBP",
-  Scotland: "GBP",
-  Wales: "GBP",
-  "Northern Ireland": "GBP",
-  France: "EUR",
-  Germany: "EUR",
-  Spain: "EUR",
-  Italy: "EUR",
-  Portugal: "EUR",
-  Netherlands: "EUR",
-  Belgium: "EUR",
-  Austria: "EUR",
-  Ireland: "EUR",
-  Greece: "EUR",
-  Finland: "EUR",
-  Luxembourg: "EUR",
-  Malta: "EUR",
-  Cyprus: "EUR",
-  Estonia: "EUR",
-  Latvia: "EUR",
-  Lithuania: "EUR",
-  Slovakia: "EUR",
-  Slovenia: "EUR",
-  Croatia: "EUR",
-  Dubai: "AED",
-  "United Arab Emirates": "AED",
-  UAE: "AED",
-  Nigeria: "NGN",
-  Lagos: "NGN",
-  USA: "USD",
-  "United States": "USD",
-  "United States of America": "USD",
-  Canada: "CAD",
-  Switzerland: "CHF",
-  Japan: "JPY",
-  China: "CNY",
-  India: "INR",
-  Turkey: "TRY",
-  مصر: "EGP",
-  Egypt: "EGP",
-  Morocco: "MAD",
-  Kenya: "KES",
-  Ghana: "GHS",
-  "South Africa": "ZAR",
-  Qatar: "QAR",
-  Bahrain: "BHD",
-  Kuwait: "KWD",
-  Oman: "OMR",
-  Saudi: "SAR",
-  "Saudi Arabia": "SAR",
-  Thailand: "THB",
-  Singapore: "SGD",
-  Malaysia: "MYR",
-  Indonesia: "IDR",
-  Australia: "AUD",
-  "New Zealand": "NZD",
-  Brazil: "BRL",
-  Mexico: "MXN",
-};
-
 function normaliseHotels(payload) {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload;
@@ -222,56 +159,69 @@ function hotelFacilities(hotel) {
     .filter(Boolean);
 }
 
-function inferCurrencyCode(hotel) {
-  const direct =
-    hotel?.currency ||
-    hotel?.currency_code ||
-    hotel?.currencyCode ||
-    hotel?.price_currency ||
-    hotel?.priceCurrency ||
-    hotel?.local_currency ||
-    hotel?.localCurrency;
+function getLivePriceParts(hotel) {
+  const rawAmountCandidates = [
+    hotel?.price,
+    hotel?.amount,
+    hotel?.price_amount,
+    hotel?.priceAmount,
+    hotel?.gross_price,
+    hotel?.grossPrice,
+    hotel?.final_price,
+    hotel?.finalPrice,
+    hotel?.display_price_value,
+    hotel?.displayPriceValue,
+  ];
 
-  if (typeof direct === "string" && /^[A-Z]{3}$/.test(direct.trim().toUpperCase())) {
-    return direct.trim().toUpperCase();
-  }
+  const rawCurrencyCandidates = [
+    hotel?.currency,
+    hotel?.currency_code,
+    hotel?.currencyCode,
+    hotel?.price_currency,
+    hotel?.priceCurrency,
+    hotel?.display_currency,
+    hotel?.displayCurrency,
+  ];
 
-  const countryCandidates = [
-    hotel?.country,
-    hotel?.country_name,
-    hotel?.countryName,
-    hotel?.destination_country,
-    hotel?.destinationCountry,
-    hotel?.city,
-  ].filter(Boolean);
-
-  for (const candidate of countryCandidates) {
-    const key = String(candidate).trim();
-    if (COUNTRY_TO_CURRENCY[key]) {
-      return COUNTRY_TO_CURRENCY[key];
+  let amount = null;
+  for (const candidate of rawAmountCandidates) {
+    const numeric = Number(candidate);
+    if (Number.isFinite(numeric) && numeric > 0) {
+      amount = numeric;
+      break;
     }
   }
 
-  return null;
+  let currency = null;
+  for (const candidate of rawCurrencyCandidates) {
+    if (typeof candidate === "string") {
+      const trimmed = candidate.trim().toUpperCase();
+      if (/^[A-Z]{3}$/.test(trimmed)) {
+        currency = trimmed;
+        break;
+      }
+    }
+  }
+
+  if (!Number.isFinite(amount) || !currency) {
+    return null;
+  }
+
+  return { amount, currency };
 }
 
-function formatPrice(value, hotel) {
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) return "Price shown on reserve page";
-
-  const currencyCode = inferCurrencyCode(hotel);
-  if (!currencyCode) {
-    return "Price shown on reserve page";
-  }
+function formatLivePrice(hotel) {
+  const livePrice = getLivePriceParts(hotel);
+  if (!livePrice) return "View live price";
 
   try {
     return new Intl.NumberFormat(undefined, {
       style: "currency",
-      currency: currencyCode,
-      maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
-    }).format(amount);
+      currency: livePrice.currency,
+      maximumFractionDigits: livePrice.amount % 1 === 0 ? 0 : 2,
+    }).format(livePrice.amount);
   } catch {
-    return `${amount} ${currencyCode}`;
+    return `${livePrice.amount} ${livePrice.currency}`;
   }
 }
 
@@ -1270,10 +1220,10 @@ export default function App() {
                         }}
                       >
                         <div style={{ color: "#65789a", fontSize: "12px", fontWeight: 800 }}>
-                          Local price
+                          Live local price
                         </div>
                         <div style={{ marginTop: "8px", fontSize: "24px", fontWeight: 900 }}>
-                          {formatPrice(activeHotel.price, activeHotel)}
+                          {formatLivePrice(activeHotel)}
                         </div>
                       </div>
 
@@ -1573,7 +1523,7 @@ export default function App() {
                             color: "#102863",
                           }}
                         >
-                          {formatPrice(hotel.price, hotel)}
+                          {formatLivePrice(hotel)}
                         </div>
                         <div
                           style={{
