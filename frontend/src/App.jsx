@@ -85,20 +85,51 @@ function hotelFacilities(hotel) {
     .filter(Boolean);
 }
 
+function formatPrice(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "—";
+  return `£${n}`;
+}
+
+function detectAffiliatePartner(hotel) {
+  const source = String(
+    hotel?.affiliate_url || hotel?.booking_url || hotel?.url || ""
+  ).toLowerCase();
+
+  if (source.includes("booking")) return "Booking.com";
+  if (source.includes("expedia")) return "Expedia";
+  if (source.includes("hotels.com")) return "Hotels.com";
+  if (source.includes("trip.com")) return "Trip.com";
+  return "Booking.com";
+}
+
 function buildAffiliateLink(hotel) {
   if (hotel?.affiliate_url) return hotel.affiliate_url;
   if (hotel?.booking_url) return hotel.booking_url;
   if (hotel?.url) return hotel.url;
 
-  const city = encodeURIComponent(hotel?.city || "London");
   const hotelName = encodeURIComponent(hotel?.name || "Hotel");
+  const city = encodeURIComponent(hotel?.city || "London");
   return `https://www.booking.com/searchresults.html?ss=${hotelName}%20${city}`;
 }
 
-function formatPrice(value) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return "—";
-  return `£${n}`;
+function bookingRouteSummary(hotel) {
+  if (!hotel) {
+    return {
+      partner: "No partner selected yet",
+      routeText: "Search and choose a hotel to activate the booking route.",
+      statusText: "Waiting for hotel selection",
+      statusTone: "#5b7196",
+    };
+  }
+
+  const partner = detectAffiliatePartner(hotel);
+  return {
+    partner,
+    routeText: `Traffic will continue from My Space Hotel to ${partner} for final booking completion.`,
+    statusText: `${partner} booking route ready`,
+    statusTone: "#1b8c4c",
+  };
 }
 
 export default function App() {
@@ -136,6 +167,11 @@ export default function App() {
       });
     });
   }, [hotels, selectedFacilities]);
+
+  const bookingInfo = useMemo(
+    () => bookingRouteSummary(selectedHotel),
+    [selectedHotel]
+  );
 
   function updateSearch(field, value) {
     setSearch((current) => ({
@@ -855,6 +891,377 @@ export default function App() {
             </div>
           </section>
         ) : null}
+
+        <section
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "14px",
+            marginBottom: "14px",
+          }}
+        >
+          <div
+            style={{
+              background: "#f8fbff",
+              borderRadius: "28px",
+              border: "1px solid #d8e2f2",
+              padding: "20px",
+              boxShadow: "0 8px 22px rgba(16,40,99,0.08)",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "13px",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "#6078a6",
+                fontWeight: 800,
+                marginBottom: "8px",
+              }}
+            >
+              Affiliate booking route
+            </div>
+
+            <h2
+              style={{
+                margin: 0,
+                fontSize: "29px",
+                lineHeight: 1.1,
+                fontWeight: 900,
+              }}
+            >
+              Booking partner and reserve flow
+            </h2>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                gap: "10px",
+                marginTop: "16px",
+              }}
+            >
+              <div
+                style={{
+                  background: "#eef4ff",
+                  borderRadius: "18px",
+                  padding: "14px",
+                  border: "1px solid #d7e2f7",
+                }}
+              >
+                <div style={{ color: "#66789a", fontSize: "13px", fontWeight: 800 }}>
+                  Active partner
+                </div>
+                <div style={{ marginTop: "8px", fontSize: "20px", fontWeight: 900 }}>
+                  {bookingInfo.partner}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  background: "#eef4ff",
+                  borderRadius: "18px",
+                  padding: "14px",
+                  border: "1px solid #d7e2f7",
+                }}
+              >
+                <div style={{ color: "#66789a", fontSize: "13px", fontWeight: 800 }}>
+                  Route status
+                </div>
+                <div
+                  style={{
+                    marginTop: "8px",
+                    fontSize: "18px",
+                    fontWeight: 900,
+                    color: bookingInfo.statusTone,
+                  }}
+                >
+                  {bookingInfo.statusText}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  background: "#eef4ff",
+                  borderRadius: "18px",
+                  padding: "14px",
+                  border: "1px solid #d7e2f7",
+                }}
+              >
+                <div style={{ color: "#66789a", fontSize: "13px", fontWeight: 800 }}>
+                  Selected stay
+                </div>
+                <div style={{ marginTop: "8px", fontSize: "18px", fontWeight: 900 }}>
+                  {selectedHotel ? "Ready to reserve" : "Choose a hotel"}
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: "16px",
+                background: "#ffffff",
+                borderRadius: "22px",
+                border: "1px solid #dbe5f6",
+                padding: "18px",
+              }}
+            >
+              <div style={{ fontSize: "15px", color: "#5b7196", lineHeight: 1.6 }}>
+                {bookingInfo.routeText}
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: "12px",
+                  flexWrap: "wrap",
+                  marginTop: "16px",
+                }}
+              >
+                <button
+                  type="button"
+                  disabled={!selectedHotel}
+                  onClick={() => {
+                    if (selectedHotel) {
+                      window.open(buildAffiliateLink(selectedHotel), "_blank", "noopener,noreferrer");
+                    }
+                  }}
+                  style={{
+                    border: 0,
+                    borderRadius: "16px",
+                    background: selectedHotel
+                      ? "linear-gradient(90deg, #2d67e5, #2ab7d8)"
+                      : "#cad5ea",
+                    color: "#ffffff",
+                    padding: "14px 18px",
+                    fontWeight: 900,
+                    fontSize: "15px",
+                    cursor: selectedHotel ? "pointer" : "not-allowed",
+                  }}
+                >
+                  Reserve Now
+                </button>
+
+                <a
+                  href={`mailto:${SUPPORT_EMAIL}`}
+                  style={{
+                    textDecoration: "none",
+                    borderRadius: "16px",
+                    background: "#eff4fd",
+                    color: "#143882",
+                    padding: "14px 18px",
+                    fontWeight: 900,
+                    fontSize: "15px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    border: "1px solid #d6e0f2",
+                  }}
+                >
+                  Affiliate Support
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "#f8fbff",
+              borderRadius: "28px",
+              border: "1px solid #d8e2f2",
+              padding: "20px",
+              boxShadow: "0 8px 22px rgba(16,40,99,0.08)",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "13px",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "#6078a6",
+                fontWeight: 800,
+                marginBottom: "8px",
+              }}
+            >
+              Booking summary
+            </div>
+
+            <h2
+              style={{
+                margin: 0,
+                fontSize: "29px",
+                lineHeight: 1.1,
+                fontWeight: 900,
+              }}
+            >
+              Reserve the selected stay
+            </h2>
+
+            <div
+              style={{
+                marginTop: "16px",
+                background: "#ffffff",
+                borderRadius: "22px",
+                border: "1px solid #dbe5f6",
+                padding: "18px",
+                minHeight: "260px",
+              }}
+            >
+              {!selectedHotel ? (
+                <div
+                  style={{
+                    color: "#5b7196",
+                    fontSize: "16px",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  Choose a hotel from the results below to activate the reserve button,
+                  booking partner route, and final stay summary.
+                </div>
+              ) : (
+                <>
+                  <div style={{ fontSize: "25px", fontWeight: 900 }}>
+                    {selectedHotel.name}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: "8px",
+                      color: "#64789d",
+                      fontSize: "15px",
+                    }}
+                  >
+                    {selectedHotel.address ||
+                      `${selectedHotel.location || ""} ${selectedHotel.city || ""} ${selectedHotel.country || ""}`}
+                  </div>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                      gap: "10px",
+                      marginTop: "16px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: "#eef4ff",
+                        borderRadius: "16px",
+                        padding: "12px",
+                      }}
+                    >
+                      <div style={{ color: "#65789a", fontSize: "12px", fontWeight: 800 }}>
+                        Price
+                      </div>
+                      <div style={{ marginTop: "8px", fontSize: "21px", fontWeight: 900 }}>
+                        {formatPrice(selectedHotel.price)}
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        background: "#eef4ff",
+                        borderRadius: "16px",
+                        padding: "12px",
+                      }}
+                    >
+                      <div style={{ color: "#65789a", fontSize: "12px", fontWeight: 800 }}>
+                        Rating
+                      </div>
+                      <div style={{ marginTop: "8px", fontSize: "21px", fontWeight: 900 }}>
+                        {selectedHotel.rating || "4.0"}★
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        background: "#eef4ff",
+                        borderRadius: "16px",
+                        padding: "12px",
+                      }}
+                    >
+                      <div style={{ color: "#65789a", fontSize: "12px", fontWeight: 800 }}>
+                        Rooms
+                      </div>
+                      <div style={{ marginTop: "8px", fontSize: "21px", fontWeight: 900 }}>
+                        {search.rooms}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: "8px",
+                      marginTop: "16px",
+                    }}
+                  >
+                    {hotelFacilities(selectedHotel).slice(0, 6).map((facility) => (
+                      <span
+                        key={facility}
+                        style={{
+                          background: "#f2f6fc",
+                          border: "1px solid #dbe5f6",
+                          color: "#24488f",
+                          borderRadius: "999px",
+                          padding: "7px 10px",
+                          fontSize: "13px",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {facility}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "12px",
+                      flexWrap: "wrap",
+                      marginTop: "18px",
+                    }}
+                  >
+                    <a
+                      href={buildAffiliateLink(selectedHotel)}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        textDecoration: "none",
+                        borderRadius: "16px",
+                        background: "linear-gradient(90deg, #2d67e5, #2ab7d8)",
+                        color: "#ffffff",
+                        padding: "14px 18px",
+                        fontWeight: 900,
+                        fontSize: "15px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      Reserve This Stay
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedHotel(null)}
+                      style={{
+                        border: "1px solid #cfdbf1",
+                        borderRadius: "16px",
+                        background: "#ffffff",
+                        color: "#17356f",
+                        padding: "14px 18px",
+                        fontWeight: 900,
+                        fontSize: "15px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Clear Selection
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </section>
 
         <section
           style={{
