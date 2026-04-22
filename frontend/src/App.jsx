@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:5050";
 
@@ -9,7 +9,6 @@ const HOTELS = [
     city: "London",
     country: "United Kingdom",
     area: "Central London",
-    nights: 1,
     price: 185,
     currency: "GBP",
     rating: 8.8,
@@ -24,7 +23,6 @@ const HOTELS = [
     city: "London",
     country: "United Kingdom",
     area: "Canary Wharf",
-    nights: 1,
     price: 220,
     currency: "GBP",
     rating: 8.9,
@@ -39,7 +37,6 @@ const HOTELS = [
     city: "London",
     country: "United Kingdom",
     area: "West End",
-    nights: 1,
     price: 165,
     currency: "GBP",
     rating: 8.5,
@@ -54,7 +51,6 @@ const HOTELS = [
     city: "London",
     country: "United Kingdom",
     area: "Docklands",
-    nights: 1,
     price: 198,
     currency: "GBP",
     rating: 8.4,
@@ -69,7 +65,6 @@ const HOTELS = [
     city: "London",
     country: "United Kingdom",
     area: "Kensington",
-    nights: 1,
     price: 245,
     currency: "GBP",
     rating: 9.0,
@@ -84,7 +79,6 @@ const HOTELS = [
     city: "London",
     country: "United Kingdom",
     area: "Paddington",
-    nights: 1,
     price: 176,
     currency: "GBP",
     rating: 8.3,
@@ -93,7 +87,68 @@ const HOTELS = [
     summary:
       "A practical stay with great value and easy rail and airport access.",
   },
+  {
+    id: "ht-007",
+    name: "Mayfair Executive Stay",
+    city: "London",
+    country: "United Kingdom",
+    area: "Mayfair",
+    price: 310,
+    currency: "GBP",
+    rating: 9.1,
+    image:
+      "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=1400&q=80",
+    summary:
+      "Premium comfort in a polished central location for high-value city stays.",
+  },
+  {
+    id: "ht-008",
+    name: "Soho Corner Hotel",
+    city: "London",
+    country: "United Kingdom",
+    area: "Soho",
+    price: 205,
+    currency: "GBP",
+    rating: 8.6,
+    image:
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1400&q=80",
+    summary:
+      "Energetic surroundings, stylish rooms, and quick access to nightlife and dining.",
+  },
 ];
+
+const DEFAULT_FILTERS = {
+  city: "London",
+  country: "United Kingdom",
+  area: "",
+  checkin: "2026-04-25",
+  checkout: "2026-04-26",
+  rooms: "1",
+  guests: "1",
+};
+
+const INFO_PAGES = {
+  guides: {
+    title: "Travel Guides",
+    content:
+      "Explore destination-focused hotel stays, compare central and quiet districts, and move quickly to a reservation request without leaving the platform.",
+  },
+  faqs: {
+    title: "FAQs",
+    content:
+      "Reservation requests are submitted inside the app. Availability is confirmed by email. Customers are not sent to Booking.com or any other affiliate page.",
+  },
+  terms: {
+    title: "Booking Terms",
+    content:
+      "Displayed rates are indicative at request stage. Room availability is checked before confirmation. Payment is not requested until availability is confirmed.",
+  },
+  support: {
+    title: "Customer Support",
+    content:
+      "Support is available through reservations@myspace-hotel.com. Customers receive reservation updates by email from the official My Space Hotel mailbox.",
+  },
+};
 
 function formatMoney(value, currency) {
   try {
@@ -107,22 +162,24 @@ function formatMoney(value, currency) {
   }
 }
 
-function SearchBadge({ children, active = false }) {
+function PillButton({ label, active, onClick }) {
   return (
-    <div
+    <button
+      type="button"
+      onClick={onClick}
       style={{
         padding: "16px 24px",
         borderRadius: 999,
         background: active ? "#f0c53b" : "rgba(255,255,255,0.10)",
-        color: active ? "#081b4b" : "#ffffff",
-        fontWeight: 800,
+        color: active ? "#0b255f" : "#ffffff",
+        fontWeight: 900,
         fontSize: 17,
         border: "1px solid rgba(255,255,255,0.16)",
-        boxShadow: active ? "0 10px 24px rgba(240,197,59,0.28)" : "none",
+        cursor: "pointer",
       }}
     >
-      {children}
-    </div>
+      {label}
+    </button>
   );
 }
 
@@ -140,12 +197,7 @@ function HotelCard({ hotel, onReserve }) {
       <img
         src={hotel.image}
         alt={hotel.name}
-        style={{
-          width: "100%",
-          height: 240,
-          objectFit: "cover",
-          display: "block",
-        }}
+        style={{ width: "100%", height: 240, objectFit: "cover", display: "block" }}
       />
 
       <div style={{ padding: 24 }}>
@@ -213,6 +265,7 @@ function HotelCard({ hotel, onReserve }) {
         </div>
 
         <button
+          type="button"
           onClick={() => onReserve(hotel)}
           style={{
             width: "100%",
@@ -235,19 +288,8 @@ function HotelCard({ hotel, onReserve }) {
 }
 
 export default function App() {
-  const reservePanelRef = useRef(null);
-
-  const [filters, setFilters] = useState({
-    country: "United Kingdom",
-    city: "London",
-    area: "",
-    checkin: "2026-04-25",
-    checkout: "2026-04-26",
-    rooms: "1",
-    guests: "1",
-  });
-
-  const [selectedHotel, setSelectedHotel] = useState(null);
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [selectedHotel, setSelectedHotel] = useState(HOTELS[0]);
   const [reserveForm, setReserveForm] = useState({
     customer_name: "",
     customer_email: "",
@@ -255,6 +297,7 @@ export default function App() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const [activeInfo, setActiveInfo] = useState("guides");
 
   const filteredHotels = useMemo(() => {
     const cityNeedle = filters.city.trim().toLowerCase();
@@ -272,8 +315,6 @@ export default function App() {
     });
   }, [filters]);
 
-  const totalResultsLabel = `${filteredHotels.length * 400}`;
-
   const handleSearch = () => {
     setStatusMessage("");
     if (filteredHotels.length > 0) {
@@ -281,12 +322,22 @@ export default function App() {
     }
   };
 
+  const handleReset = () => {
+    setFilters(DEFAULT_FILTERS);
+    setSelectedHotel(HOTELS[0]);
+    setReserveForm({
+      customer_name: "",
+      customer_email: "",
+      notes: "",
+    });
+    setStatusMessage("");
+    setActiveInfo("guides");
+  };
+
   const handleReserve = (hotel) => {
     setSelectedHotel(hotel);
     setStatusMessage("");
-    requestAnimationFrame(() => {
-      reservePanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleReservationSubmit = async () => {
@@ -346,6 +397,9 @@ export default function App() {
     }
   };
 
+  const shownCount = filteredHotels.length;
+  const foundCount = filteredHotels.length * 400;
+
   return (
     <div
       style={{
@@ -370,12 +424,7 @@ export default function App() {
             overflow: "hidden",
           }}
         >
-          <div
-            style={{
-              minHeight: 640,
-              paddingRight: 12,
-            }}
-          >
+          <div style={{ minHeight: 640, paddingRight: 12 }}>
             <div
               style={{
                 color: "#dfeaff",
@@ -424,7 +473,6 @@ export default function App() {
                 borderRadius: 30,
                 padding: 24,
                 marginBottom: 24,
-                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
               }}
             >
               <div style={{ color: "#e4eeff", fontSize: 18, marginBottom: 14 }}>
@@ -439,25 +487,53 @@ export default function App() {
                   marginBottom: 8,
                 }}
               >
-                60
+                {shownCount}
               </div>
               <div style={{ color: "#eef5ff", fontSize: 18, lineHeight: 1.45 }}>
                 visible hotels ready for review in your current search
               </div>
             </div>
 
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginBottom: 18 }}>
+              <PillButton
+                label="Travel Guides"
+                active={activeInfo === "guides"}
+                onClick={() => setActiveInfo("guides")}
+              />
+              <PillButton
+                label="FAQs"
+                active={activeInfo === "faqs"}
+                onClick={() => setActiveInfo("faqs")}
+              />
+              <PillButton
+                label="Booking Terms"
+                active={activeInfo === "terms"}
+                onClick={() => setActiveInfo("terms")}
+              />
+              <PillButton
+                label="Customer Support"
+                active={activeInfo === "support"}
+                onClick={() => setActiveInfo("support")}
+              />
+            </div>
+
             <div
               style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 14,
-                marginBottom: 26,
+                background: "rgba(255,255,255,0.10)",
+                borderRadius: 24,
+                border: "1px solid rgba(255,255,255,0.12)",
+                padding: 22,
+                color: "#ffffff",
+                fontSize: 18,
+                lineHeight: 1.6,
+                marginBottom: 20,
+                maxWidth: 900,
               }}
             >
-              <SearchBadge active>Travel Guides</SearchBadge>
-              <SearchBadge>FAQs</SearchBadge>
-              <SearchBadge>Booking Terms</SearchBadge>
-              <SearchBadge>Customer Support</SearchBadge>
+              <div style={{ fontSize: 26, fontWeight: 900, marginBottom: 10 }}>
+                {INFO_PAGES[activeInfo].title}
+              </div>
+              <div>{INFO_PAGES[activeInfo].content}</div>
             </div>
 
             <div
@@ -575,7 +651,7 @@ export default function App() {
                 />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1.4fr 0.6fr", gap: 14 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
                 <input
                   value={filters.guests}
                   onChange={(e) => setFilters((s) => ({ ...s, guests: e.target.value }))}
@@ -583,19 +659,18 @@ export default function App() {
                   placeholder="Guests"
                 />
                 <button
+                  type="button"
                   onClick={handleSearch}
-                  style={{
-                    border: "none",
-                    borderRadius: 22,
-                    background: "#f0c53b",
-                    color: "#08204f",
-                    fontSize: 22,
-                    fontWeight: 900,
-                    cursor: "pointer",
-                    boxShadow: "0 14px 30px rgba(240,197,59,0.32)",
-                  }}
+                  style={yellowButtonStyle}
                 >
                   Search
+                </button>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  style={navyButtonStyle}
+                >
+                  Refresh
                 </button>
               </div>
 
@@ -609,15 +684,14 @@ export default function App() {
                   fontSize: 18,
                 }}
               >
-                Showing page 1. Found {totalResultsLabel} hotel results for {filters.city || "your search"},{" "}
-                {filters.country || "selected country"}.
+                Showing {shownCount} live hotel choices. Found approximately {foundCount} hotel
+                results for {filters.city || "your search"}, {filters.country || "selected country"}.
               </div>
             </div>
           </div>
         </section>
 
         <section
-          ref={reservePanelRef}
           style={{
             marginTop: 26,
             display: "grid",
@@ -798,7 +872,7 @@ export default function App() {
                   marginBottom: 14,
                 }}
               >
-                {selectedHotel ? "Complete your reservation request" : "Select a hotel to continue"}
+                Complete your reservation request
               </div>
 
               <div
@@ -813,42 +887,25 @@ export default function App() {
                 Booking.com or any other affiliate page.
               </div>
 
-              {selectedHotel ? (
-                <div
-                  style={{
-                    background: "#f7faff",
-                    border: "1px solid #dce8f8",
-                    borderRadius: 22,
-                    padding: 18,
-                    marginBottom: 18,
-                  }}
-                >
-                  <div style={{ fontSize: 24, fontWeight: 900, color: "#12367c", marginBottom: 8 }}>
-                    {selectedHotel.name}
-                  </div>
-                  <div style={{ color: "#5f769b", fontSize: 16, marginBottom: 8 }}>
-                    {selectedHotel.area}, {selectedHotel.city}, {selectedHotel.country}
-                  </div>
-                  <div style={{ color: "#12367c", fontSize: 26, fontWeight: 900 }}>
-                    {formatMoney(selectedHotel.price, selectedHotel.currency)}
-                  </div>
+              <div
+                style={{
+                  background: "#f7faff",
+                  border: "1px solid #dce8f8",
+                  borderRadius: 22,
+                  padding: 18,
+                  marginBottom: 18,
+                }}
+              >
+                <div style={{ fontSize: 24, fontWeight: 900, color: "#12367c", marginBottom: 8 }}>
+                  {selectedHotel.name}
                 </div>
-              ) : (
-                <div
-                  style={{
-                    background: "#f7faff",
-                    border: "1px solid #dce8f8",
-                    borderRadius: 22,
-                    padding: 18,
-                    color: "#5f769b",
-                    fontSize: 16,
-                    lineHeight: 1.6,
-                    marginBottom: 18,
-                  }}
-                >
-                  Choose any hotel card and the reservation stays inside this app.
+                <div style={{ color: "#5f769b", fontSize: 16, marginBottom: 8 }}>
+                  {selectedHotel.area}, {selectedHotel.city}, {selectedHotel.country}
                 </div>
-              )}
+                <div style={{ color: "#12367c", fontSize: 26, fontWeight: 900 }}>
+                  {formatMoney(selectedHotel.price, selectedHotel.currency)}
+                </div>
+              </div>
 
               <div style={{ display: "grid", gap: 12 }}>
                 <input
@@ -875,18 +932,13 @@ export default function App() {
                 />
 
                 <button
+                  type="button"
                   onClick={handleReservationSubmit}
-                  disabled={submitting || !selectedHotel}
+                  disabled={submitting}
                   style={{
-                    border: "none",
-                    borderRadius: 22,
-                    background: selectedHotel ? "#f0c53b" : "#d7dfec",
-                    color: selectedHotel ? "#08204f" : "#7b8ba7",
-                    fontSize: 20,
-                    fontWeight: 900,
-                    cursor: selectedHotel ? "pointer" : "not-allowed",
-                    padding: "18px 22px",
-                    boxShadow: selectedHotel ? "0 14px 30px rgba(240,197,59,0.30)" : "none",
+                    ...yellowButtonStyle,
+                    width: "100%",
+                    opacity: submitting ? 0.7 : 1,
                   }}
                 >
                   {submitting ? "Sending request..." : "Reserve in app"}
@@ -895,9 +947,21 @@ export default function App() {
                 {statusMessage ? (
                   <div
                     style={{
-                      background: "#eef8ff",
-                      border: "1px solid #cfe6ff",
-                      color: "#1b4f7d",
+                      background:
+                        statusMessage.toLowerCase().includes("failed") ||
+                        statusMessage.toLowerCase().includes("error")
+                          ? "#fff0f0"
+                          : "#eef8ff",
+                      border:
+                        statusMessage.toLowerCase().includes("failed") ||
+                        statusMessage.toLowerCase().includes("error")
+                          ? "1px solid #f1caca"
+                          : "1px solid #cfe6ff",
+                      color:
+                        statusMessage.toLowerCase().includes("failed") ||
+                        statusMessage.toLowerCase().includes("error")
+                          ? "#9f2d2d"
+                          : "#1b4f7d",
                       borderRadius: 20,
                       padding: "16px 18px",
                       fontSize: 16,
@@ -927,4 +991,28 @@ const fieldStyle = {
   fontSize: 18,
   padding: "20px 20px",
   outline: "none",
+};
+
+const yellowButtonStyle = {
+  border: "none",
+  borderRadius: 22,
+  background: "#f0c53b",
+  color: "#08204f",
+  fontSize: 20,
+  fontWeight: 900,
+  cursor: "pointer",
+  padding: "18px 22px",
+  boxShadow: "0 14px 30px rgba(240,197,59,0.30)",
+};
+
+const navyButtonStyle = {
+  border: "none",
+  borderRadius: 22,
+  background: "#12367c",
+  color: "#ffffff",
+  fontSize: 20,
+  fontWeight: 900,
+  cursor: "pointer",
+  padding: "18px 22px",
+  boxShadow: "0 14px 30px rgba(18,54,124,0.18)",
 };
