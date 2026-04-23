@@ -25,10 +25,6 @@ RAPIDAPI_PROPERTIES_URL = os.getenv(
     f"https://{RAPIDAPI_HOST}/properties/v2/list",
 ).strip()
 
-# Email configuration
-# Priority:
-# 1) SMTP_USERNAME if present
-# 2) EMAIL_USER as fallback
 SMTP_HOST = os.getenv("SMTP_HOST", "").strip()
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587").strip() or "587")
 SMTP_USERNAME = os.getenv("SMTP_USERNAME", "").strip()
@@ -64,7 +60,6 @@ app.add_middleware(
 
 # =========================================================
 # CITY IMPORT CONFIG
-# Add or correct destination references over time.
 # =========================================================
 CITY_IMPORT_CONFIG = {
     "london": {"dest_ids": "-2601889", "search_type": "city", "currency": "GBP"},
@@ -102,6 +97,78 @@ DEFAULT_FACILITIES = [
     "business lounge",
     "breakfast included",
     "city centre access",
+]
+
+SEED_CITY_BASE = {
+    "London": {
+        "country": "United Kingdom",
+        "currency": "GBP",
+        "areas": ["Central London", "Westminster", "Kensington", "Paddington", "Soho", "Mayfair"],
+        "price_start": 165,
+    },
+    "Paris": {
+        "country": "France",
+        "currency": "EUR",
+        "areas": ["Champs-Élysées", "Le Marais", "Saint-Germain", "Montmartre", "Latin Quarter"],
+        "price_start": 175,
+    },
+    "Dubai": {
+        "country": "United Arab Emirates",
+        "currency": "AED",
+        "areas": ["Downtown Dubai", "Dubai Marina", "Palm Jumeirah", "Business Bay", "Jumeirah Beach"],
+        "price_start": 390,
+    },
+    "New York": {
+        "country": "United States",
+        "currency": "USD",
+        "areas": ["Midtown Manhattan", "SoHo", "Chelsea", "Times Square", "Financial District"],
+        "price_start": 210,
+    },
+    "Lagos": {
+        "country": "Nigeria",
+        "currency": "NGN",
+        "areas": ["Victoria Island", "Ikoyi", "Lekki", "Ikeja", "Yaba"],
+        "price_start": 78000,
+    },
+    "Rome": {
+        "country": "Italy",
+        "currency": "EUR",
+        "areas": ["Centro Storico", "Trastevere", "Vatican Area", "Termini", "Monti"],
+        "price_start": 160,
+    },
+    "Barcelona": {
+        "country": "Spain",
+        "currency": "EUR",
+        "areas": ["Gothic Quarter", "Eixample", "Barceloneta", "Gracia", "Sants"],
+        "price_start": 170,
+    },
+    "Istanbul": {
+        "country": "Turkey",
+        "currency": "TRY",
+        "areas": ["Sultanahmet", "Taksim", "Galata", "Besiktas", "Kadikoy"],
+        "price_start": 4200,
+    },
+}
+
+SEED_IMAGE_POOL = [
+    "https://images.unsplash.com/photo-1566073771259-6a8506099945",
+    "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa",
+    "https://images.unsplash.com/photo-1522798514-97ceb8c4f1c8",
+    "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85",
+    "https://images.unsplash.com/photo-1578683010236-d716f9a3f461",
+    "https://images.unsplash.com/photo-1445019980597-93fa8acb246c",
+    "https://images.unsplash.com/photo-1455587734955-081b22074882",
+    "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
+]
+
+SEED_PREFIXES = [
+    "Grand", "Royal", "Central", "Elite", "Skyline", "Harbour",
+    "Imperial", "Premier", "Signature", "Urban", "Landmark", "Prestige",
+]
+
+SEED_SUFFIXES = [
+    "Palace", "Suites", "Hotel", "Residences", "Retreat",
+    "Boutique Rooms", "Plaza", "Gateway Hotel", "Executive Stay", "Corner Hotel",
 ]
 
 # =========================================================
@@ -169,7 +236,73 @@ def init_db() -> None:
     conn.close()
 
 
+def count_hotels() -> int:
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) AS count FROM hotels")
+    total = cur.fetchone()["count"]
+    conn.close()
+    return total
+
+
+def seed_internal_catalogue_if_empty() -> int:
+    existing_total = count_hotels()
+    if existing_total > 0:
+        return existing_total
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+    inserted = 0
+
+    for city, meta in SEED_CITY_BASE.items():
+        for idx in range(1, 121):
+            area = meta["areas"][idx % len(meta["areas"])]
+            prefix = SEED_PREFIXES[idx % len(SEED_PREFIXES)]
+            suffix = SEED_SUFFIXES[idx % len(SEED_SUFFIXES)]
+
+            facilities = []
+            for j, facility in enumerate(DEFAULT_FACILITIES):
+                if facility in ["wifi", "restaurant"] or (idx + j) % 3 == 0 or (idx + j) % 5 == 0:
+                    facilities.append(facility)
+            facilities = list(dict.fromkeys(facilities))
+
+            supplier_hotel_id = f"seed-{city.lower()}-{idx}"
+
+            cur.execute(
+                """
+                INSERT OR IGNORE INTO hotels (
+                    id, supplier, supplier_hotel_id, name, city, area, country,
+                    currency, price, rating, image, summary, facilities, imported_from_city
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    str(uuid.uuid4()),
+                    "internal_seed",
+                    supplier_hotel_id,
+                    f"{prefix} {city} {suffix}",
+                    city,
+                    area,
+                    meta["country"],
+                    meta["currency"],
+                    meta["price_start"] + (idx * 4),
+                    round(8.0 + ((idx % 18) / 10), 1),
+                    SEED_IMAGE_POOL[idx % len(SEED_IMAGE_POOL)],
+                    f"A well-positioned stay in {area}, {city}, designed for travellers who want more confidence before they reserve.",
+                    ",".join(facilities),
+                    city,
+                ),
+            )
+            inserted += 1
+
+    conn.commit()
+    conn.close()
+    return inserted
+
+
 init_db()
+seed_internal_catalogue_if_empty()
 
 # =========================================================
 # EMAIL
@@ -444,16 +577,10 @@ def import_city_from_rapid(city: str, max_pages: int = 1) -> dict:
 # =========================================================
 @app.get("/")
 def root():
-    conn = get_conn()
-    cur = conn.cursor()
-    cur.execute("SELECT COUNT(*) AS count FROM hotels")
-    count = cur.fetchone()["count"]
-    conn.close()
-
     return {
         "status": "running",
         "message": "My Space Hotel Backend Live",
-        "hotels_in_database": count,
+        "hotels_in_database": count_hotels(),
         "endpoints": {
             "search": "/api/hotels",
             "facilities": "/api/facilities",
