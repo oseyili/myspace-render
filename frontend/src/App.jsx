@@ -18,118 +18,133 @@ const DEFAULT_FILTERS = {
 
 const GUIDE_LINKS = [
   {
-    title: "Why location matters more than the lowest rate",
+    title: "Choose the right area before you choose the rate",
     body:
-      "Customers often lose more through poor location than they save on headline price. The right district can reduce transport stress, improve safety, and make the whole trip feel more successful.",
+      "A lower headline rate can still become the wrong choice if the area adds long journeys, inconvenience, noise, or distance from what matters most on the trip. A stronger hotel decision starts with a stronger location decision.",
   },
   {
-    title: "Business travel needs a different hotel decision",
+    title: "Business travel needs calm, timing, and credibility",
     body:
-      "A serious business stay should support timing, access, quiet working conditions, internet quality, and confidence on arrival. My Space Hotel helps customers look for those signals instead of only chasing a cheap room.",
+      "The right business stay should support meetings, transport timing, reliable internet, and a polished arrival experience. Search more carefully and compare more confidently before you reserve.",
   },
   {
-    title: "Family travel requires smarter filtering",
+    title: "Family travel works best when comfort is practical",
     body:
-      "Family bookings need space, convenience, calm, and practical facilities. A cleaner guided search reduces wasted time and makes the shortlist easier to trust.",
+      "Family bookings need more than a room. They need space, convenience, good area positioning, and useful facilities. Filter clearly so the shortlist feels right from the start.",
   },
   {
-    title: "Short city breaks need stronger area guidance",
+    title: "Short city breaks depend on strong positioning",
     body:
-      "When the trip is short, the customer cannot afford a weak location decision. Better area guidance helps travellers stay closer to the experience they actually came for.",
+      "When the trip is short, location matters even more. The right area can turn a rushed break into a smooth one by reducing wasted time and increasing what you can actually enjoy.",
+  },
+  {
+    title: "Luxury should feel considered, not rushed",
+    body:
+      "A premium stay should deliver atmosphere, comfort, ease, and confidence. Compare carefully so the hotel feels right for the purpose of the trip, not just impressive on first glance.",
+  },
+  {
+    title: "Return to search with a clearer decision",
+    body:
+      "Travel guidance should help you make a better hotel choice, then bring you straight back to search and reserve with more confidence.",
   },
 ];
 
 const INFO_PAGES = {
   guides: {
-    title: "Travel Guides",
-    hero: "Travel intelligence that helps customers choose better stays",
+    title: "Smart Travel Guides",
+    hero: "Travel guidance that helps you choose the right stay with more confidence",
     intro:
-      "Travel Guides are not filler content. They are one of the strongest selling points of My Space Hotel because they help customers make better location and hotel decisions before they reserve. That improves confidence, supports trust, and gives the platform a more serious competitive position.",
+      "My Space Hotel is built for travellers who want more than a list of rooms. Smart Travel Guides help you compare areas, understand what kind of stay suits the trip, and return to search with a clearer, stronger decision.",
     sections: [
       {
-        heading: "Why this matters for a global audience",
+        heading: "A better hotel choice starts before you reserve",
         body:
-          "Travellers booking across cities and countries want more than a price tag. They want guidance on which areas work best, what kind of stay fits the trip, and how to shortlist options without wasting time. Strong travel guidance makes the whole app feel more premium and more useful.",
+          "The best stay is not always the one with the lowest headline rate. It is the one that supports the purpose of your trip, saves time, improves comfort, and helps you feel better about where you are staying.",
       },
       {
-        heading: "A better guide creates a better booking decision",
+        heading: "Designed for serious travellers",
         body:
-          "My Space Hotel should help customers understand the difference between central convenience, luxury positioning, family practicality, nightlife access, beach access, airport convenience, and business suitability. When that guidance is clear, the customer is more likely to continue inside the app instead of leaving to search elsewhere.",
+          "Whether you are planning a business trip, a city break, a family stay, or a higher-end experience, strong guidance helps you search more intelligently and compare more effectively.",
       },
       {
-        heading: "Return directly to the app and complete the search",
+        heading: "Built to return you directly to search",
         body:
-          "Each guide is designed to support the search journey, not distract from it. Customers should be able to learn something important, return immediately to the portal, and continue their hotel comparison with more confidence.",
+          "Every guide is part of the reservation journey. Learn what matters, return directly to the app, and continue your hotel search with more confidence.",
       },
     ],
     links: GUIDE_LINKS,
   },
   faqs: {
     title: "FAQs",
-    hero: "Clear answers that reduce hesitation",
+    hero: "Clear answers that help you move forward with confidence",
     intro:
-      "Customers should never feel uncertain about how the platform works. Strong FAQs help serious travellers move forward faster and trust the reservation flow more easily.",
+      "Booking a hotel should not feel confusing. These answers help you understand how My Space Hotel works and why the reservation journey is designed to stay clear and customer-focused.",
     sections: [
       {
-        heading: "Does My Space Hotel keep customers inside the app?",
+        heading: "Do I stay inside My Space Hotel while searching?",
         body:
-          "Yes. The aim is to make the search and reservation request journey feel direct, controlled, and branded inside My Space Hotel.",
+          "Yes. The aim is to help you search, compare, choose, and submit your reservation request directly inside My Space Hotel.",
       },
       {
-        heading: "Can customers compare multiple hotels before requesting availability?",
+        heading: "Can I compare several hotels before I decide?",
         body:
-          "Yes. The platform is designed to let customers review a broader hotel list, refine results, and then select the stay that best fits the trip.",
+          "Yes. You can search by city, refine with facilities, browse through multiple pages of results, and then choose the stay that feels right for your trip.",
       },
       {
-        heading: "Is this designed only for one city?",
+        heading: "What happens after I send a reservation request?",
         body:
-          "No. The app is built to scale into a wider international hotel platform with clearer guidance, stronger filtering, and a more serious customer journey.",
+          "Your request is received by the platform and prepared for follow-up using the details you provide. The goal is to keep the process clear, direct, and customer-friendly.",
+      },
+      {
+        heading: "Is this built only for one city?",
+        body:
+          "No. My Space Hotel is designed as a global hotel platform with a growing catalogue and a clearer search experience.",
       },
     ],
   },
   terms: {
     title: "Booking Terms",
-    hero: "A cleaner reservation-first approach",
+    hero: "A reservation journey designed to feel clearer and more trustworthy",
     intro:
-      "My Space Hotel uses a request-first reservation flow that gives customers more clarity before the next step. This helps the platform feel less rushed and more trustworthy.",
+      "My Space Hotel uses a reservation-request approach that helps you compare first, choose carefully, and continue with more confidence.",
     sections: [
       {
-        heading: "Reservation requests come first",
+        heading: "Search first, choose carefully",
         body:
-          "The customer first chooses a hotel and sends a request. That keeps the platform in control of the experience and avoids pushing the traveller too quickly into the wrong commitment.",
+          "Your journey begins with hotel comparison and selection. This gives you more control before moving into the next step.",
+      },
+      {
+        heading: "Reservation requests help keep the journey focused",
+        body:
+          "A reservation request allows the platform to continue with you more clearly around the stay you selected.",
       },
       {
         heading: "Displayed rates support comparison",
         body:
-          "Displayed rates are used to help customers compare, shortlist, and move toward the best-fit stay. They support the decision process inside the app.",
-      },
-      {
-        heading: "The customer journey stays focused",
-        body:
-          "The platform is designed to keep the customer on a clear path from search to hotel selection to reservation request.",
+          "Displayed rates are there to help you compare and shortlist the right stay for your trip before you continue.",
       },
     ],
   },
   support: {
     title: "Customer Support",
-    hero: "Support that helps the customer continue with confidence",
+    hero: "Support that helps you continue with more confidence",
     intro:
-      "Support is not just for solving problems. It is part of the trust structure of the app. Clear support helps customers continue the reservation journey with less uncertainty and more confidence.",
+      "Strong support is part of a strong booking experience. My Space Hotel customer support is there to help you search, compare, and continue your reservation journey with less uncertainty.",
     sections: [
       {
         heading: "Search support",
         body:
-          "Customers may need help understanding areas, hotel differences, or which stay is the stronger fit for the trip.",
+          "If you need help understanding locations, hotel differences, or which stay may fit your trip more strongly, support helps make the choice clearer.",
       },
       {
         heading: "Reservation support",
         body:
-          "Once a request is submitted, support helps maintain confidence and gives the traveller a stronger feeling of being looked after by the platform.",
+          "After you send a reservation request, support helps keep the experience more secure, more responsive, and easier to trust.",
       },
       {
-        heading: "Built for repeat use",
+        heading: "Built to earn repeat use",
         body:
-          "A serious support layer increases trust, improves return usage, and helps the platform compete more strongly.",
+          "A platform becomes stronger when travellers feel understood, informed, and supported from search to reservation.",
       },
     ],
   },
@@ -209,7 +224,7 @@ function InfoPage({ page }) {
             marginBottom: 24,
           }}
         >
-          Return to app
+          Return to search
         </button>
 
         <section
@@ -314,7 +329,7 @@ function InfoPage({ page }) {
                 marginBottom: 16,
               }}
             >
-              Important travel guide themes
+              Travel guide highlights
             </div>
 
             <div style={{ display: "grid", gap: 16 }}>
@@ -367,10 +382,27 @@ function InfoPage({ page }) {
                 cursor: "pointer",
               }}
             >
-              Return to app and continue search
+              Return to search and compare hotels
             </button>
           </section>
-        ) : null}
+        ) : (
+          <button
+            type="button"
+            onClick={() => setHash("home")}
+            style={{
+              border: "none",
+              borderRadius: 18,
+              background: "#f0c53b",
+              color: "#08204f",
+              fontWeight: 900,
+              fontSize: 18,
+              padding: "16px 20px",
+              cursor: "pointer",
+            }}
+          >
+            Return to search
+          </button>
+        )}
       </div>
     </div>
   );
@@ -479,6 +511,17 @@ function HotelCard({ hotel, onReserve }) {
 
         <div
           style={{
+            color: "#5d7090",
+            fontSize: 16,
+            lineHeight: 1.6,
+            marginBottom: 14,
+          }}
+        >
+          {hotel.summary}
+        </div>
+
+        <div
+          style={{
             fontSize: 26,
             fontWeight: 900,
             color: "#0d2a66",
@@ -504,7 +547,7 @@ function HotelCard({ hotel, onReserve }) {
             boxShadow: "0 14px 28px rgba(240,197,59,0.34)",
           }}
         >
-          Reserve in app
+          Choose this stay
         </button>
       </div>
     </div>
@@ -550,6 +593,8 @@ export default function App() {
           "family rooms",
           "beach access",
           "business lounge",
+          "breakfast included",
+          "city centre access",
         ]);
       }
     }
@@ -662,17 +707,17 @@ export default function App() {
     }
 
     if (!reserveForm.name.trim()) {
-      setStatusMessage("Please enter the customer name.");
+      setStatusMessage("Please enter your name.");
       return;
     }
 
     if (!reserveForm.email.trim()) {
-      setStatusMessage("Please enter the customer email.");
+      setStatusMessage("Please enter your email address.");
       return;
     }
 
     setSubmitting(true);
-    setStatusMessage("Sending request...");
+    setStatusMessage("Sending your reservation request...");
 
     try {
       const controller = new AbortController();
@@ -698,14 +743,23 @@ export default function App() {
         throw new Error(data?.message || "Request could not be submitted.");
       }
 
-      setStatusMessage(
-        data?.message || "Your request has been submitted. We will contact you shortly."
-      );
+      const supportSent = Boolean(data?.email_delivery?.support_sent);
+      const customerSent = Boolean(data?.email_delivery?.customer_sent);
+
+      if (supportSent && customerSent) {
+        setStatusMessage(
+          "Your reservation request has been received and confirmation emails have been sent."
+        );
+      } else {
+        setStatusMessage(
+          "Your reservation request has been received. We will continue with you shortly."
+        );
+      }
     } catch (error) {
       setStatusMessage(
         error.name === "AbortError"
           ? "The request took too long to complete. Please try again."
-          : "Reservation request failed."
+          : "Your reservation request could not be completed right now."
       );
     } finally {
       setSubmitting(false);
@@ -776,7 +830,7 @@ export default function App() {
                 marginBottom: 26,
               }}
             >
-              Search a stronger hotel database, compare more seriously, and move customers into a direct reservation request inside your own platform.
+              Search more hotels worldwide, compare with clarity, and reserve with confidence inside one customer-focused platform.
             </div>
 
             <div
@@ -791,7 +845,7 @@ export default function App() {
               }}
             >
               <div style={{ color: "#e4eeff", fontSize: 18, marginBottom: 14 }}>
-                Live choices shown
+                Hotels in your current search
               </div>
               <div
                 style={{
@@ -806,13 +860,13 @@ export default function App() {
               </div>
               <div style={{ color: "#eef5ff", fontSize: 18, lineHeight: 1.45 }}>
                 {hasSearched
-                  ? "visible hotels ready for review in your current search"
-                  : "search by city, refine with facilities, and browse through multiple pages of results"}
+                  ? "Search results ready for review, comparison, and reservation request"
+                  : "Search by city, refine with facilities, and browse through multiple pages of stays"}
               </div>
             </div>
 
             <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginBottom: 18 }}>
-              <NavPill label="Travel Guides" page="guides" />
+              <NavPill label="Smart Travel Guides" page="guides" />
               <NavPill label="FAQs" page="faqs" />
               <NavPill label="Booking Terms" page="terms" />
               <NavPill label="Customer Support" page="support" />
@@ -829,10 +883,10 @@ export default function App() {
                 maxWidth: 860,
               }}
             >
-              <div>Search larger internal hotel inventory</div>
-              <div>Refine results clearly with tick boxes</div>
-              <div>Keep customers inside your platform</div>
-              <div>Browse multiple result pages smoothly</div>
+              <div>Search a wider hotel catalogue</div>
+              <div>Refine clearly with facility tick boxes</div>
+              <div>Compare more confidently</div>
+              <div>Send your reservation request directly</div>
             </div>
           </div>
 
@@ -867,7 +921,7 @@ export default function App() {
                 marginBottom: 12,
               }}
             >
-              Search hotels with speed and clarity
+              Find the stay that feels right for your trip
             </div>
 
             <div
@@ -878,7 +932,7 @@ export default function App() {
                 marginBottom: 18,
               }}
             >
-              Search by city, refine with facility tick boxes, and move directly toward a reservation request without unnecessary friction.
+              Search by city, refine by what matters most, compare more clearly, and continue to reservation with greater confidence.
             </div>
 
             <div style={{ display: "grid", gap: 14 }}>
@@ -886,7 +940,7 @@ export default function App() {
                 value={filters.city}
                 onChange={(e) => setFilters((s) => ({ ...s, city: e.target.value }))}
                 style={fieldStyle}
-                placeholder="City"
+                placeholder="Where are you travelling?"
               />
 
               <div
@@ -905,7 +959,7 @@ export default function App() {
                     marginBottom: 12,
                   }}
                 >
-                  Facilities
+                  Choose the facilities that matter most
                 </div>
 
                 <div
@@ -949,10 +1003,10 @@ export default function App() {
                 }}
               >
                 {searchLoading
-                  ? "Loading matching hotel options..."
+                  ? "Searching for matching stays..."
                   : hasSearched
-                  ? `Showing ${shownCount} of ${totalCount} hotel options for the current search.`
-                  : "Start with a city search to load matching hotels into the portal."}
+                  ? `Showing ${shownCount} of ${totalCount} hotel options for this search.`
+                  : "Start with a city search to load hotel options into the portal."}
               </div>
             </div>
           </div>
@@ -985,7 +1039,7 @@ export default function App() {
                 marginBottom: 10,
               }}
             >
-              Precision filters
+              Find the right match faster
             </div>
 
             <div
@@ -997,7 +1051,7 @@ export default function App() {
                 marginBottom: 14,
               }}
             >
-              Refine your search with precision filters
+              Narrow your search with more confidence
             </div>
 
             <div
@@ -1007,7 +1061,7 @@ export default function App() {
                 lineHeight: 1.65,
               }}
             >
-              Customers should be able to narrow choices quickly with clear facility tick boxes and then move through a broader list without losing confidence.
+              Filter by the facilities you care about, compare the strongest options, and focus on stays that genuinely suit your trip.
             </div>
           </div>
 
@@ -1030,7 +1084,7 @@ export default function App() {
                 marginBottom: 10,
               }}
             >
-              Professional portal
+              Why travellers choose My Space Hotel
             </div>
 
             <div
@@ -1041,7 +1095,7 @@ export default function App() {
                 marginBottom: 14,
               }}
             >
-              Build trust before the customer reserves
+              Search, compare, and reserve with more clarity
             </div>
 
             <div
@@ -1051,7 +1105,7 @@ export default function App() {
                 lineHeight: 1.65,
               }}
             >
-              The portal should feel direct, useful, competitive, and informative enough to keep customers inside your own experience.
+              My Space Hotel is designed to help you make a stronger hotel decision before you reserve, with clearer guidance, cleaner filtering, and a more focused reservation journey.
             </div>
           </div>
         </section>
@@ -1081,7 +1135,7 @@ export default function App() {
                   marginBottom: 18,
                 }}
               >
-                Choose the hotel that fits the trip
+                Compare hotels and choose the stay that fits your trip
               </div>
 
               {!hasSearched ? (
@@ -1097,7 +1151,7 @@ export default function App() {
                     lineHeight: 1.7,
                   }}
                 >
-                  Begin with a city search. Once results load, customers can compare a broader list of hotels, move through pages of results, and select the stay that best fits the trip.
+                  Begin with a city search. Once results load, you can compare a broader hotel list, move through multiple pages of results, and select the stay that feels right.
                 </div>
               ) : hotels.length > 0 ? (
                 <>
@@ -1198,7 +1252,7 @@ export default function App() {
                   marginBottom: 10,
                 }}
               >
-                Request availability
+                Send your reservation request
               </div>
 
               <div
@@ -1221,7 +1275,7 @@ export default function App() {
                   marginBottom: 18,
                 }}
               >
-                Customers stay inside My Space Hotel. Search, compare, select, and request the stay directly from your own platform.
+                Choose your stay, share your details, and continue your reservation journey directly inside My Space Hotel.
               </div>
 
               {selectedHotel ? (
@@ -1257,7 +1311,7 @@ export default function App() {
                     lineHeight: 1.6,
                   }}
                 >
-                  Select a hotel card first so the chosen stay appears here.
+                  Select a hotel first so your chosen stay appears here.
                 </div>
               )}
 
@@ -1266,19 +1320,19 @@ export default function App() {
                   value={reserveForm.name}
                   onChange={(e) => setReserveForm((s) => ({ ...s, name: e.target.value }))}
                   style={fieldStyle}
-                  placeholder="Customer name"
+                  placeholder="Your name"
                 />
                 <input
                   value={reserveForm.email}
                   onChange={(e) => setReserveForm((s) => ({ ...s, email: e.target.value }))}
                   style={fieldStyle}
-                  placeholder="Customer email"
+                  placeholder="Your email address"
                 />
                 <textarea
                   value={reserveForm.message}
                   onChange={(e) => setReserveForm((s) => ({ ...s, message: e.target.value }))}
                   style={{ ...fieldStyle, minHeight: 120, resize: "vertical" }}
-                  placeholder="Special requests"
+                  placeholder="Special requests or important details"
                 />
 
                 <button
@@ -1291,28 +1345,28 @@ export default function App() {
                     opacity: submitting ? 0.7 : 1,
                   }}
                 >
-                  {submitting ? "Sending request..." : "Request availability"}
+                  {submitting ? "Sending request..." : "Send reservation request"}
                 </button>
 
                 {statusMessage ? (
                   <div
                     style={{
                       background:
-                        statusMessage.toLowerCase().includes("failed") ||
-                        statusMessage.toLowerCase().includes("unavailable") ||
-                        statusMessage.toLowerCase().includes("please")
+                        statusMessage.toLowerCase().includes("could not") ||
+                        statusMessage.toLowerCase().includes("please") ||
+                        statusMessage.toLowerCase().includes("unavailable")
                           ? "#fff0f0"
                           : "#eef8ff",
                       border:
-                        statusMessage.toLowerCase().includes("failed") ||
-                        statusMessage.toLowerCase().includes("unavailable") ||
-                        statusMessage.toLowerCase().includes("please")
+                        statusMessage.toLowerCase().includes("could not") ||
+                        statusMessage.toLowerCase().includes("please") ||
+                        statusMessage.toLowerCase().includes("unavailable")
                           ? "1px solid #f1caca"
                           : "1px solid #cfe6ff",
                       color:
-                        statusMessage.toLowerCase().includes("failed") ||
-                        statusMessage.toLowerCase().includes("unavailable") ||
-                        statusMessage.toLowerCase().includes("please")
+                        statusMessage.toLowerCase().includes("could not") ||
+                        statusMessage.toLowerCase().includes("please") ||
+                        statusMessage.toLowerCase().includes("unavailable")
                           ? "#9f2d2d"
                           : "#1b4f7d",
                       borderRadius: 20,
