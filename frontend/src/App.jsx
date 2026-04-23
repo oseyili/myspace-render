@@ -5,112 +5,131 @@ const API_BASE =
   import.meta.env.NEXT_PUBLIC_API_BASE ||
   "";
 
-const DEFAULT_FILTERS = {
-  city: "",
-  facility: "",
-};
-
 const DEFAULT_FORM = {
   name: "",
   email: "",
   message: "",
 };
 
+const DEFAULT_FILTERS = {
+  city: "",
+  page: 1,
+};
+
+const GUIDE_LINKS = [
+  {
+    title: "Why location matters more than the lowest rate",
+    body:
+      "Customers often lose more through poor location than they save on headline price. The right district can reduce transport stress, improve safety, and make the whole trip feel more successful.",
+  },
+  {
+    title: "Business travel needs a different hotel decision",
+    body:
+      "A serious business stay should support timing, access, quiet working conditions, internet quality, and confidence on arrival. My Space Hotel helps customers look for those signals instead of only chasing a cheap room.",
+  },
+  {
+    title: "Family travel requires smarter filtering",
+    body:
+      "Family bookings need space, convenience, calm, and practical facilities. A cleaner guided search reduces wasted time and makes the shortlist easier to trust.",
+  },
+  {
+    title: "Short city breaks need stronger area guidance",
+    body:
+      "When the trip is short, the customer cannot afford a weak location decision. Better area guidance helps travellers stay closer to the experience they actually came for.",
+  },
+];
+
 const INFO_PAGES = {
   guides: {
     title: "Travel Guides",
-    hero: "Travel smarter before you reserve",
+    hero: "Travel intelligence that helps customers choose better stays",
     intro:
-      "A better hotel decision starts with a better destination decision. My Space Hotel helps customers think beyond price alone and focus on location, convenience, atmosphere, transport access, and the purpose of the trip.",
+      "Travel Guides are not filler content. They are one of the strongest selling points of My Space Hotel because they help customers make better location and hotel decisions before they reserve. That improves confidence, supports trust, and gives the platform a more serious competitive position.",
     sections: [
       {
-        heading: "Choose the right area, not just the cheapest room",
+        heading: "Why this matters for a global audience",
         body:
-          "A lower price in the wrong location can cost more in time, transport, inconvenience, and missed plans. Customers need a clearer picture of where they are staying, not just a rate.",
+          "Travellers booking across cities and countries want more than a price tag. They want guidance on which areas work best, what kind of stay fits the trip, and how to shortlist options without wasting time. Strong travel guidance makes the whole app feel more premium and more useful.",
       },
       {
-        heading: "Compare with confidence",
+        heading: "A better guide creates a better booking decision",
         body:
-          "Strong travel guidance gives customers more confidence before they reserve. That confidence increases trust, reduces hesitation, and helps travellers move faster toward the right stay.",
+          "My Space Hotel should help customers understand the difference between central convenience, luxury positioning, family practicality, nightlife access, beach access, airport convenience, and business suitability. When that guidance is clear, the customer is more likely to continue inside the app instead of leaving to search elsewhere.",
       },
       {
-        heading: "Built for a global audience",
+        heading: "Return directly to the app and complete the search",
         body:
-          "My Space Hotel is being shaped as a serious worldwide hotel platform. Travel guidance is part of that experience because customers need more than a list of rooms. They need useful decision support.",
+          "Each guide is designed to support the search journey, not distract from it. Customers should be able to learn something important, return immediately to the portal, and continue their hotel comparison with more confidence.",
       },
     ],
+    links: GUIDE_LINKS,
   },
   faqs: {
     title: "FAQs",
-    hero: "Clear answers for serious travellers",
+    hero: "Clear answers that reduce hesitation",
     intro:
-      "Customers booking across different cities and countries need direct answers. These FAQs explain how My Space Hotel works and why the reservation experience is designed to stay simple and controlled.",
+      "Customers should never feel uncertain about how the platform works. Strong FAQs help serious travellers move forward faster and trust the reservation flow more easily.",
     sections: [
       {
-        heading: "Do customers pay immediately?",
+        heading: "Does My Space Hotel keep customers inside the app?",
         body:
-          "No. The customer first sends a reservation request. That gives the platform a chance to review the selected stay and continue the process properly without rushing the customer into the wrong decision.",
+          "Yes. The aim is to make the search and reservation request journey feel direct, controlled, and branded inside My Space Hotel.",
       },
       {
-        heading: "Are customers redirected to outside booking websites?",
+        heading: "Can customers compare multiple hotels before requesting availability?",
         body:
-          "No. The aim is to keep customers inside My Space Hotel so the journey feels direct, branded, and easier to trust.",
+          "Yes. The platform is designed to let customers review a broader hotel list, refine results, and then select the stay that best fits the trip.",
       },
       {
-        heading: "Is this only for one city?",
+        heading: "Is this designed only for one city?",
         body:
-          "No. The platform is built to grow into a wider global hotel database. Search, comparison, and reservation flow are all being shaped for international use.",
-      },
-      {
-        heading: "What happens after a reservation request is sent?",
-        body:
-          "The request is recorded, a response message is returned, and the selected stay can then move into the next communication step from inside your own platform.",
+          "No. The app is built to scale into a wider international hotel platform with clearer guidance, stronger filtering, and a more serious customer journey.",
       },
     ],
   },
   terms: {
     title: "Booking Terms",
-    hero: "A reservation-first model that protects the customer",
+    hero: "A cleaner reservation-first approach",
     intro:
-      "My Space Hotel uses a request-first reservation approach. This allows customers to select a stay with more control and helps the platform build a cleaner confirmation path.",
+      "My Space Hotel uses a request-first reservation flow that gives customers more clarity before the next step. This helps the platform feel less rushed and more trustworthy.",
     sections: [
       {
-        heading: "Reservation request first",
+        heading: "Reservation requests come first",
         body:
-          "Submitting a request tells the platform which stay the customer wants to move forward with. It does not need to behave like a rushed, instant outside checkout.",
+          "The customer first chooses a hotel and sends a request. That keeps the platform in control of the experience and avoids pushing the traveller too quickly into the wrong commitment.",
       },
       {
-        heading: "Confirmation before pressure",
+        heading: "Displayed rates support comparison",
         body:
-          "Customers should not feel pushed toward commitment before the selected stay has been properly reviewed. A calmer reservation path creates stronger confidence and fewer mistakes.",
+          "Displayed rates are used to help customers compare, shortlist, and move toward the best-fit stay. They support the decision process inside the app.",
       },
       {
-        heading: "Displayed rates guide selection",
+        heading: "The customer journey stays focused",
         body:
-          "Displayed prices are part of the customer’s comparison journey. The platform uses them to help customers shortlist the right stay before moving forward.",
+          "The platform is designed to keep the customer on a clear path from search to hotel selection to reservation request.",
       },
     ],
   },
   support: {
     title: "Customer Support",
-    hero: "Support that helps customers move forward with confidence",
+    hero: "Support that helps the customer continue with confidence",
     intro:
-      "A serious hotel platform needs strong support. My Space Hotel customer support is part of the trust layer that helps customers feel more secure from first search to reservation request.",
+      "Support is not just for solving problems. It is part of the trust structure of the app. Clear support helps customers continue the reservation journey with less uncertainty and more confidence.",
     sections: [
       {
-        heading: "Reservation assistance",
+        heading: "Search support",
         body:
-          "Customers can get support with selected hotels, search questions, and the next steps after they submit a request.",
+          "Customers may need help understanding areas, hotel differences, or which stay is the stronger fit for the trip.",
       },
       {
-        heading: "Clarity without confusion",
+        heading: "Reservation support",
         body:
-          "Support should reduce uncertainty, not add to it. Clear answers help customers continue with more confidence and less hesitation.",
+          "Once a request is submitted, support helps maintain confidence and gives the traveller a stronger feeling of being looked after by the platform.",
       },
       {
-        heading: "Built for long-term trust",
+        heading: "Built for repeat use",
         body:
-          "As your platform grows, support becomes one of the biggest reasons customers return and recommend the service to others.",
+          "A serious support layer increases trust, improves return usage, and helps the platform compete more strongly.",
       },
     ],
   },
@@ -141,7 +160,7 @@ function setHash(page) {
   window.location.hash = page === "home" ? "#/" : `#/${page}`;
 }
 
-function TopPill({ label, page, active }) {
+function NavPill({ label, page }) {
   return (
     <button
       type="button"
@@ -149,13 +168,12 @@ function TopPill({ label, page, active }) {
       style={{
         padding: "16px 24px",
         borderRadius: 999,
-        border: "1px solid rgba(255,255,255,0.16)",
-        background: active ? "#f0c53b" : "rgba(255,255,255,0.10)",
-        color: active ? "#08204f" : "#ffffff",
+        border: "1px solid rgba(255,255,255,0.14)",
+        background: "rgba(255,255,255,0.10)",
+        color: "#ffffff",
         fontWeight: 900,
         fontSize: 17,
         cursor: "pointer",
-        boxShadow: active ? "0 12px 24px rgba(240,197,59,0.22)" : "none",
       }}
     >
       {label}
@@ -173,10 +191,9 @@ function InfoPage({ page }) {
         background: "#f2f5fb",
         fontFamily:
           'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        color: "#12367c",
       }}
     >
-      <div style={{ maxWidth: 1320, margin: "0 auto", padding: 28 }}>
+      <div style={{ maxWidth: 1440, margin: "0 auto", padding: 28 }}>
         <button
           type="button"
           onClick={() => setHash("home")}
@@ -185,14 +202,14 @@ function InfoPage({ page }) {
             borderRadius: 16,
             background: "#12367c",
             color: "#ffffff",
-            fontWeight: 800,
+            fontWeight: 900,
             fontSize: 16,
             padding: "14px 18px",
             cursor: "pointer",
             marginBottom: 24,
           }}
         >
-          Back to portal
+          Return to app
         </button>
 
         <section
@@ -232,16 +249,16 @@ function InfoPage({ page }) {
           <div
             style={{
               fontSize: 20,
-              lineHeight: 1.7,
+              lineHeight: 1.75,
               color: "#eef5ff",
-              maxWidth: 980,
+              maxWidth: 1100,
             }}
           >
             {content.intro}
           </div>
         </section>
 
-        <section style={{ display: "grid", gap: 20 }}>
+        <section style={{ display: "grid", gap: 20, marginBottom: 24 }}>
           {content.sections.map((section, index) => (
             <div
               key={`${page}-${index}`}
@@ -255,7 +272,7 @@ function InfoPage({ page }) {
             >
               <div
                 style={{
-                  fontSize: 28,
+                  fontSize: 30,
                   lineHeight: 1.15,
                   fontWeight: 900,
                   color: "#12367c",
@@ -277,8 +294,112 @@ function InfoPage({ page }) {
             </div>
           ))}
         </section>
+
+        {page === "guides" ? (
+          <section
+            style={{
+              background: "#ffffff",
+              borderRadius: 28,
+              padding: 28,
+              border: "1px solid #dce6f5",
+              boxShadow: "0 14px 30px rgba(12,38,96,0.08)",
+            }}
+          >
+            <div
+              style={{
+                fontSize: 34,
+                lineHeight: 1.1,
+                fontWeight: 900,
+                color: "#12367c",
+                marginBottom: 16,
+              }}
+            >
+              Important travel guide themes
+            </div>
+
+            <div style={{ display: "grid", gap: 16 }}>
+              {content.links.map((item, index) => (
+                <div
+                  key={`guide-link-${index}`}
+                  style={{
+                    border: "1px solid #dce6f5",
+                    background: "#f7faff",
+                    borderRadius: 22,
+                    padding: 20,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 23,
+                      lineHeight: 1.2,
+                      fontWeight: 900,
+                      color: "#12367c",
+                      marginBottom: 8,
+                    }}
+                  >
+                    {item.title}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 17,
+                      lineHeight: 1.7,
+                      color: "#5d7090",
+                    }}
+                  >
+                    {item.body}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setHash("home")}
+              style={{
+                marginTop: 22,
+                border: "none",
+                borderRadius: 18,
+                background: "#f0c53b",
+                color: "#08204f",
+                fontWeight: 900,
+                fontSize: 18,
+                padding: "16px 20px",
+                cursor: "pointer",
+              }}
+            >
+              Return to app and continue search
+            </button>
+          </section>
+        ) : null}
       </div>
     </div>
+  );
+}
+
+function FacilityCheckbox({ label, checked, onChange }) {
+  return (
+    <label
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "12px 14px",
+        borderRadius: 16,
+        background: checked ? "#eef5ff" : "#ffffff",
+        border: checked ? "1px solid #bcd6ff" : "1px solid #dce6f5",
+        cursor: "pointer",
+        fontWeight: 700,
+        color: "#12367c",
+      }}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={onChange}
+        style={{ width: 18, height: 18 }}
+      />
+      {label}
+    </label>
   );
 }
 
@@ -393,6 +514,8 @@ function HotelCard({ hotel, onReserve }) {
 export default function App() {
   const [page, setPage] = useState(getPageFromHash());
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [facilityOptions, setFacilityOptions] = useState([]);
+  const [selectedFacilities, setSelectedFacilities] = useState([]);
   const [reserveForm, setReserveForm] = useState(DEFAULT_FORM);
   const [hotels, setHotels] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -400,6 +523,8 @@ export default function App() {
   const [submitting, setSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const onHash = () => setPage(getPageFromHash());
@@ -407,9 +532,34 @@ export default function App() {
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
+  useEffect(() => {
+    async function loadFacilities() {
+      try {
+        const response = await fetch(`${API_BASE}/api/facilities`);
+        const data = await response.json();
+        setFacilityOptions(Array.isArray(data.facilities) ? data.facilities : []);
+      } catch {
+        setFacilityOptions([
+          "wifi",
+          "spa",
+          "gym",
+          "restaurant",
+          "pool",
+          "parking",
+          "airport shuttle",
+          "family rooms",
+          "beach access",
+          "business lounge",
+        ]);
+      }
+    }
+
+    loadFacilities();
+  }, []);
+
   const shownCount = useMemo(() => hotels.length, [hotels]);
 
-  async function handleSearch() {
+  async function runSearch(pageNumber = 1) {
     if (!filters.city.trim()) {
       setStatusMessage("Please enter a city before searching.");
       return;
@@ -424,9 +574,11 @@ export default function App() {
     try {
       const params = new URLSearchParams();
       params.set("city", filters.city.trim());
+      params.set("page", String(pageNumber));
+      params.set("page_size", "12");
 
-      if (filters.facility.trim()) {
-        params.set("facility", filters.facility.trim());
+      if (selectedFacilities.length > 0) {
+        params.set("facilities", selectedFacilities.join(","));
       }
 
       const controller = new AbortController();
@@ -447,6 +599,9 @@ export default function App() {
       const list = Array.isArray(data.hotels) ? data.hotels : [];
 
       setHotels(list);
+      setTotalCount(Number(data.count || 0));
+      setTotalPages(Number(data.total_pages || 1));
+      setFilters((s) => ({ ...s, page: Number(data.page || pageNumber) }));
 
       if (list.length > 0) {
         setSelectedHotel(list[0]);
@@ -464,14 +619,34 @@ export default function App() {
     }
   }
 
+  function handleSearch() {
+    runSearch(1);
+  }
+
+  function handlePageChange(nextPage) {
+    runSearch(nextPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   function handleRefresh() {
     setFilters(DEFAULT_FILTERS);
+    setSelectedFacilities([]);
     setReserveForm(DEFAULT_FORM);
     setHotels([]);
     setSelectedHotel(null);
     setStatusMessage("");
     setHasSearched(false);
+    setTotalCount(0);
+    setTotalPages(1);
     setHash("home");
+  }
+
+  function toggleFacility(facility) {
+    setSelectedFacilities((prev) =>
+      prev.includes(facility)
+        ? prev.filter((item) => item !== facility)
+        : [...prev, facility]
+    );
   }
 
   function handleReserveSelect(hotel) {
@@ -601,7 +776,7 @@ export default function App() {
                 marginBottom: 26,
               }}
             >
-              Search a stronger hotel database, compare the right options faster, and move to a direct reservation request inside your own platform.
+              Search a stronger hotel database, compare more seriously, and move customers into a direct reservation request inside your own platform.
             </div>
 
             <div
@@ -627,20 +802,20 @@ export default function App() {
                   marginBottom: 8,
                 }}
               >
-                {shownCount}
+                {totalCount}
               </div>
               <div style={{ color: "#eef5ff", fontSize: 18, lineHeight: 1.45 }}>
                 {hasSearched
                   ? "visible hotels ready for review in your current search"
-                  : "search by city and refine with facilities to bring the right stays into view"}
+                  : "search by city, refine with facilities, and browse through multiple pages of results"}
               </div>
             </div>
 
             <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginBottom: 18 }}>
-              <TopPill label="Travel Guides" page="guides" active={page === "guides"} />
-              <TopPill label="FAQs" page="faqs" active={page === "faqs"} />
-              <TopPill label="Booking Terms" page="terms" active={page === "terms"} />
-              <TopPill label="Customer Support" page="support" active={page === "support"} />
+              <NavPill label="Travel Guides" page="guides" />
+              <NavPill label="FAQs" page="faqs" />
+              <NavPill label="Booking Terms" page="terms" />
+              <NavPill label="Customer Support" page="support" />
             </div>
 
             <div
@@ -651,13 +826,13 @@ export default function App() {
                 color: "#ffffff",
                 fontSize: 19,
                 fontWeight: 800,
-                maxWidth: 800,
+                maxWidth: 860,
               }}
             >
               <div>Search larger internal hotel inventory</div>
-              <div>Refine results clearly</div>
+              <div>Refine results clearly with tick boxes</div>
               <div>Keep customers inside your platform</div>
-              <div>Request availability with confidence</div>
+              <div>Browse multiple result pages smoothly</div>
             </div>
           </div>
 
@@ -703,7 +878,7 @@ export default function App() {
                 marginBottom: 18,
               }}
             >
-              Search by city, refine by facility, and move directly toward a reservation request without unnecessary friction.
+              Search by city, refine with facility tick boxes, and move directly toward a reservation request without unnecessary friction.
             </div>
 
             <div style={{ display: "grid", gap: 14 }}>
@@ -714,12 +889,45 @@ export default function App() {
                 placeholder="City"
               />
 
-              <input
-                value={filters.facility}
-                onChange={(e) => setFilters((s) => ({ ...s, facility: e.target.value }))}
-                style={fieldStyle}
-                placeholder="Facility, for example wifi or spa"
-              />
+              <div
+                style={{
+                  background: "#ffffff",
+                  border: "1px solid #d8e3f1",
+                  borderRadius: 24,
+                  padding: 16,
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: 900,
+                    color: "#12367c",
+                    fontSize: 16,
+                    marginBottom: 12,
+                  }}
+                >
+                  Facilities
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                    gap: 10,
+                    maxHeight: 220,
+                    overflowY: "auto",
+                    paddingRight: 4,
+                  }}
+                >
+                  {facilityOptions.map((facility) => (
+                    <FacilityCheckbox
+                      key={facility}
+                      label={facility}
+                      checked={selectedFacilities.includes(facility)}
+                      onChange={() => toggleFacility(facility)}
+                    />
+                  ))}
+                </div>
+              </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                 <button type="button" onClick={handleSearch} style={yellowButtonStyle}>
@@ -743,7 +951,7 @@ export default function App() {
                 {searchLoading
                   ? "Loading matching hotel options..."
                   : hasSearched
-                  ? `Showing ${shownCount} hotel option${shownCount === 1 ? "" : "s"} for the current search.`
+                  ? `Showing ${shownCount} of ${totalCount} hotel options for the current search.`
                   : "Start with a city search to load matching hotels into the portal."}
               </div>
             </div>
@@ -799,7 +1007,7 @@ export default function App() {
                 lineHeight: 1.65,
               }}
             >
-              Customers should be able to narrow choices faster and focus on stays that actually match the trip. This portal is designed to feel cleaner, stronger, and more professional from the first click.
+              Customers should be able to narrow choices quickly with clear facility tick boxes and then move through a broader list without losing confidence.
             </div>
           </div>
 
@@ -843,7 +1051,7 @@ export default function App() {
                 lineHeight: 1.65,
               }}
             >
-              The platform should feel direct, useful, and competitive. Customers should understand what the app offers and why it is worth using without being pushed out into unrelated pages.
+              The portal should feel direct, useful, competitive, and informative enough to keep customers inside your own experience.
             </div>
           </div>
         </section>
@@ -889,14 +1097,68 @@ export default function App() {
                     lineHeight: 1.7,
                   }}
                 >
-                  Begin with a city search. Once results load, customers can compare hotels, shortlist the strongest fit, and move directly into the reservation request panel.
+                  Begin with a city search. Once results load, customers can compare a broader list of hotels, move through pages of results, and select the stay that best fits the trip.
                 </div>
               ) : hotels.length > 0 ? (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 20 }}>
-                  {hotels.map((hotel) => (
-                    <HotelCard key={hotel.id} hotel={hotel} onReserve={handleReserveSelect} />
-                  ))}
-                </div>
+                <>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 20 }}>
+                    {hotels.map((hotel) => (
+                      <HotelCard key={hotel.id} hotel={hotel} onReserve={handleReserveSelect} />
+                    ))}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 22,
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 12,
+                      alignItems: "center",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      disabled={filters.page <= 1 || searchLoading}
+                      onClick={() => handlePageChange(filters.page - 1)}
+                      style={{
+                        ...navyButtonStyle,
+                        padding: "14px 18px",
+                        fontSize: 16,
+                        opacity: filters.page <= 1 ? 0.5 : 1,
+                      }}
+                    >
+                      Previous
+                    </button>
+
+                    <div
+                      style={{
+                        background: "#ffffff",
+                        border: "1px solid #dce6f5",
+                        borderRadius: 16,
+                        padding: "14px 18px",
+                        color: "#12367c",
+                        fontWeight: 800,
+                        fontSize: 16,
+                      }}
+                    >
+                      Page {filters.page} of {totalPages}
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={filters.page >= totalPages || searchLoading}
+                      onClick={() => handlePageChange(filters.page + 1)}
+                      style={{
+                        ...yellowButtonStyle,
+                        padding: "14px 18px",
+                        fontSize: 16,
+                        opacity: filters.page >= totalPages ? 0.5 : 1,
+                      }}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </>
               ) : (
                 <div
                   style={{
