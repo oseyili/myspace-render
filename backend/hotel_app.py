@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
-from typing import List, Optional
+from typing import List
 from dotenv import load_dotenv
 import os
 import math
@@ -25,13 +25,19 @@ RAPIDAPI_PROPERTIES_URL = os.getenv(
     f"https://{RAPIDAPI_HOST}/properties/v2/list",
 ).strip()
 
+# Email configuration
+# Priority:
+# 1) SMTP_USERNAME if present
+# 2) EMAIL_USER as fallback
 SMTP_HOST = os.getenv("SMTP_HOST", "").strip()
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = os.getenv("SMTP_USER", "").strip()
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587").strip() or "587")
+SMTP_USERNAME = os.getenv("SMTP_USERNAME", "").strip()
+EMAIL_USER = os.getenv("EMAIL_USER", "").strip()
+SMTP_USER = SMTP_USERNAME or EMAIL_USER
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "").strip()
 SMTP_FROM = os.getenv("SMTP_FROM", "").strip()
 SMTP_USE_TLS = os.getenv("SMTP_USE_TLS", "true").strip().lower() == "true"
-SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "").strip()
+SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "reservations@myspace-hotel.com").strip()
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "hotel_catalog.db"
@@ -58,8 +64,7 @@ app.add_middleware(
 
 # =========================================================
 # CITY IMPORT CONFIG
-# These are starter city destination references for Rapid imports.
-# Add more cities over time as you expand the catalogue.
+# Add or correct destination references over time.
 # =========================================================
 CITY_IMPORT_CONFIG = {
     "london": {"dest_ids": "-2601889", "search_type": "city", "currency": "GBP"},
@@ -154,7 +159,8 @@ def init_db() -> None:
             customer_email TEXT NOT NULL,
             customer_message TEXT,
             support_sent INTEGER DEFAULT 0,
-            customer_sent INTEGER DEFAULT 0
+            customer_sent INTEGER DEFAULT 0,
+            email_note TEXT DEFAULT ''
         )
         """
     )
@@ -169,7 +175,14 @@ init_db()
 # EMAIL
 # =========================================================
 def email_ready() -> bool:
-    return all([SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM, SUPPORT_EMAIL])
+    return all([
+        SMTP_HOST,
+        SMTP_PORT,
+        SMTP_USER,
+        SMTP_PASSWORD,
+        SMTP_FROM,
+        SUPPORT_EMAIL,
+    ])
 
 
 def send_html_email(to_address: str, subject: str, html_body: str) -> None:
@@ -283,6 +296,12 @@ def parse_rapid_hotels(payload: dict, imported_city: str, currency_code: str) ->
             or f"A globally sourced stay in {area} for travellers who want more clarity before they reserve."
         )
 
+        def safe_float(value) -> float:
+            try:
+                return float(value)
+            except Exception:
+                return 0.0
+
         parsed.append(
             {
                 "id": str(uuid.uuid4()),
@@ -293,8 +312,8 @@ def parse_rapid_hotels(payload: dict, imported_city: str, currency_code: str) ->
                 "area": area,
                 "country": country,
                 "currency": currency_code,
-                "price": float(price) if str(price).replace(".", "", 1).isdigit() else 0,
-                "rating": float(rating) if str(rating).replace(".", "", 1).isdigit() else 0,
+                "price": safe_float(price),
+                "rating": safe_float(rating),
                 "image": image,
                 "summary": summary,
                 "facilities": ",".join(facilities),
@@ -439,7 +458,7 @@ def root():
             "search": "/api/hotels",
             "facilities": "/api/facilities",
             "reservation": "/api/request",
-            "rapid_import": "/api/admin/import-city?city=London&max_pages=3",
+            "rapid_import": "/api/admin/import-city?city=London&max_pages=1",
         },
     }
 
@@ -572,15 +591,18 @@ def request_booking(request: BookingRequest):
         except Exception as exc:
             email_note = str(exc)
     else:
-        email_note = "SMTP is not fully configured."
+        email_note = (
+            "SMTP is not fully configured. Required keys: SMTP_HOST, SMTP_PORT, "
+            "SMTP_USERNAME or EMAIL_USER, SMTP_PASSWORD, SMTP_FROM, SUPPORT_EMAIL."
+        )
 
     cur.execute(
         """
         INSERT INTO reservation_requests (
             request_id, hotel_id, hotel_name, customer_name, customer_email,
-            customer_message, support_sent, customer_sent
+            customer_message, support_sent, customer_sent, email_note
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             request_id,
@@ -591,6 +613,7 @@ def request_booking(request: BookingRequest):
             request.message.strip(),
             support_sent,
             customer_sent,
+            email_note,
         ),
     )
     conn.commit()
@@ -612,8 +635,8 @@ def request_booking(request: BookingRequest):
         "message": "Your reservation request has been received. We will continue with you shortly.",
         "request_id": request_id,
         "email_delivery": {
-            "support_sent": False if support_sent == 0 else True,
-            "customer_sent": False if customer_sent == 0 else True,
+            "support_sent": bool(support_sent),
+            "customer_sent": bool(customer_sent),
             "note": email_note,
         },
     }
@@ -653,4 +676,14 @@ def catalogue_status():
         "cities_loaded": by_city,
         "rapid_ready": bool(RAPIDAPI_KEY),
         "email_ready": email_ready(),
+        "email_config_debug": {
+            "smtp_host_present": bool(SMTP_HOST),
+            "smtp_port_present": bool(SMTP_PORT),
+            "smtp_username_present": bool(SMTP_USERNAME),
+            "email_user_present": bool(EMAIL_USER),
+            "smtp_user_effective_present": bool(SMTP_USER),
+            "smtp_password_present": bool(SMTP_PASSWORD),
+            "smtp_from_present": bool(SMTP_FROM),
+            "support_email_present": bool(SUPPORT_EMAIL),
+        },
     }
