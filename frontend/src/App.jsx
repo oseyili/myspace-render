@@ -1,42 +1,36 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "";
-
-const PAGES = {
-  home: "home",
-  guides: "guides",
-  faqs: "faqs",
-  terms: "terms",
-  support: "support",
-};
+const API_BASE = import.meta.env.VITE_API_BASE;
 
 export default function App() {
-  const [page, setPage] = useState(PAGES.home);
+  const [hotels, setHotels] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [selectedHotel, setSelectedHotel] = useState(null);
+  const [status, setStatus] = useState("");
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    notes: "",
-  });
-
-  const hotels = [
-    {
-      name: "Mayfair Executive Stay",
-      location: "London",
-      price: "£310",
-    },
-    {
-      name: "Soho Corner Hotel",
-      location: "London",
-      price: "£205",
-    },
-  ];
-
-  const handleReserve = async (hotel) => {
+  // 🔥 LOAD HOTELS FROM BACKEND
+  const fetchHotels = async () => {
     setLoading(true);
-    setMessage("");
+    try {
+      const res = await fetch(`${API_BASE}/api/hotels`);
+      const data = await res.json();
+      setHotels(data.hotels || []);
+    } catch (err) {
+      console.error(err);
+      setStatus("Failed to fetch hotels");
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchHotels();
+  }, []);
+
+  // 🔥 RESERVE FUNCTION
+  const reserveHotel = async () => {
+    if (!selectedHotel) return;
+
+    setStatus("Sending request...");
 
     try {
       const res = await fetch(`${API_BASE}/reserve`, {
@@ -45,178 +39,77 @@ export default function App() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...form,
-          hotel: hotel.name,
+          hotel: selectedHotel.name,
+          email: "test@email.com",
         }),
       });
 
       const data = await res.json();
 
       if (data.success) {
-        setMessage("Reservation request sent successfully.");
+        setStatus("Reservation sent successfully ✅");
       } else {
-        setMessage("Reservation failed.");
+        setStatus("Reservation failed ❌");
       }
     } catch (err) {
-      setMessage("Server not reachable.");
+      console.error(err);
+      setStatus("Error sending request ❌");
     }
-
-    setLoading(false);
   };
 
-  // ================= PAGES =================
-
-  if (page === PAGES.guides) {
-    return (
-      <div style={styles.page}>
-        <h1>Travel Guides</h1>
-        <p>
-          Discover cities worldwide with confidence. Our platform connects you
-          to a growing global database of hotels so you can explore options
-          without limits.
-        </p>
-        <button onClick={() => setPage(PAGES.home)}>Back</button>
-      </div>
-    );
-  }
-
-  if (page === PAGES.faqs) {
-    return (
-      <div style={styles.page}>
-        <h1>FAQs</h1>
-        <p>
-          Search, compare, and reserve directly inside the platform. No redirects.
-          No confusion. Everything stays in one place.
-        </p>
-        <button onClick={() => setPage(PAGES.home)}>Back</button>
-      </div>
-    );
-  }
-
-  if (page === PAGES.terms) {
-    return (
-      <div style={styles.page}>
-        <h1>Booking Terms</h1>
-        <p>
-          Reservations are handled directly inside My Space Hotel. Details are
-          confirmed after request submission.
-        </p>
-        <button onClick={() => setPage(PAGES.home)}>Back</button>
-      </div>
-    );
-  }
-
-  if (page === PAGES.support) {
-    return (
-      <div style={styles.page}>
-        <h1>Customer Support</h1>
-        <p>
-          Need help? Contact support anytime. We ensure every booking request is
-          handled securely and efficiently.
-        </p>
-        <button onClick={() => setPage(PAGES.home)}>Back</button>
-      </div>
-    );
-  }
-
-  // ================= HOME =================
+  // 🔥 NAVIGATION PAGES
+  const openPage = (page) => {
+    window.location.href = `/${page}`;
+  };
 
   return (
-    <div style={styles.container}>
+    <div style={{ padding: 30, fontFamily: "Arial" }}>
       <h1>My Space Hotel</h1>
+      <p>Search global hotels and reserve directly.</p>
 
-      <p>
-        Find better hotels worldwide. Book with confidence. Reserve without
-        pressure.
-      </p>
-
-      <div style={styles.nav}>
-        <button onClick={() => setPage(PAGES.guides)}>Travel Guides</button>
-        <button onClick={() => setPage(PAGES.faqs)}>FAQs</button>
-        <button onClick={() => setPage(PAGES.terms)}>Booking Terms</button>
-        <button onClick={() => setPage(PAGES.support)}>
-          Customer Support
-        </button>
+      {/* NAV BUTTONS */}
+      <div style={{ marginBottom: 20 }}>
+        <button onClick={() => openPage("guides")}>Travel Guides</button>
+        <button onClick={() => openPage("faqs")}>FAQs</button>
+        <button onClick={() => openPage("terms")}>Booking Terms</button>
+        <button onClick={() => openPage("support")}>Customer Support</button>
       </div>
 
-      <div style={styles.grid}>
-        {hotels.map((hotel, i) => (
-          <div key={i} style={styles.card}>
-            <h3>{hotel.name}</h3>
-            <p>{hotel.location}</p>
-            <p>{hotel.price}</p>
+      {/* HOTEL LIST */}
+      {loading ? (
+        <p>Loading hotels...</p>
+      ) : (
+        <div>
+          {hotels.map((hotel, i) => (
+            <div
+              key={i}
+              style={{
+                border: "1px solid #ccc",
+                padding: 15,
+                marginBottom: 10,
+              }}
+            >
+              <h3>{hotel.name}</h3>
+              <p>{hotel.city}</p>
+              <p>{hotel.price}</p>
 
-            <button onClick={() => handleReserve(hotel)}>
-              Reserve in app
-            </button>
-          </div>
-        ))}
-      </div>
+              <button onClick={() => setSelectedHotel(hotel)}>
+                Select
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <div style={styles.form}>
-        <h2>Complete your reservation request</h2>
+      {/* RESERVE */}
+      {selectedHotel && (
+        <div style={{ marginTop: 20 }}>
+          <h2>{selectedHotel.name}</h2>
+          <button onClick={reserveHotel}>Reserve</button>
+        </div>
+      )}
 
-        <input
-          placeholder="Your name"
-          value={form.name}
-          onChange={(e) =>
-            setForm({ ...form, name: e.target.value })
-          }
-        />
-
-        <input
-          placeholder="Your email"
-          value={form.email}
-          onChange={(e) =>
-            setForm({ ...form, email: e.target.value })
-          }
-        />
-
-        <textarea
-          placeholder="Special requests"
-          value={form.notes}
-          onChange={(e) =>
-            setForm({ ...form, notes: e.target.value })
-          }
-        />
-
-        <button disabled={loading}>
-          {loading ? "Sending request..." : "Submit request"}
-        </button>
-
-        <p>{message}</p>
-      </div>
+      <p>{status}</p>
     </div>
   );
 }
-
-// ================= STYLES =================
-
-const styles = {
-  container: {
-    padding: "20px",
-    fontFamily: "Arial",
-  },
-  nav: {
-    marginBottom: "20px",
-  },
-  grid: {
-    display: "flex",
-    gap: "20px",
-  },
-  card: {
-    border: "1px solid #ccc",
-    padding: "10px",
-    width: "200px",
-  },
-  form: {
-    marginTop: "30px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-    maxWidth: "400px",
-  },
-  page: {
-    padding: "20px",
-  },
-};
