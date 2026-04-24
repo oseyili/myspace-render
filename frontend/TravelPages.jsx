@@ -1,137 +1,83 @@
 import React from "react";
 
-export const pages = [
-{
-title: "Best Hotels in London",
-slug: "london-hotels",
-content: `London offers one of the widest selections of accommodation in the world. Whether you are travelling for business, leisure, or a short city break, there are options for every budget.
+export default function TravelPages({ city = "London" }) {
+  return (
+    <div style={{ background: "#0b1f4b", color: "white", padding: "30px" }}>
 
-Popular areas include Central London, Westminster, Kensington, Canary Wharf, and Paddington.
+      {/* HERO */}
+      <h1 style={{ fontSize: "48px", fontWeight: "bold" }}>
+        Discover {city} before you book
+      </h1>
 
-When booking, consider transport access, breakfast options, cancellation flexibility, and guest reviews.
+      <p style={{ fontSize: "18px", maxWidth: "800px" }}>
+        Your hotel choice defines your entire experience.
+        Explore the city, understand the areas, and choose the stay that fits your trip.
+      </p>
 
-My Space Hotel helps you compare London hotel options and book securely through trusted partners.`
-},
+      {/* IMAGE GRID */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: "15px",
+        marginTop: "30px"
+      }}>
+        <img src="https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba" style={{ width: "100%", borderRadius: "12px" }} />
+        <img src="https://images.unsplash.com/photo-1473959383413-3d6f0f69d8b9" style={{ width: "100%", borderRadius: "12px" }} />
+        <img src="https://images.unsplash.com/photo-1505761671935-60b3a7427bad" style={{ width: "100%", borderRadius: "12px" }} />
+      </div>
 
-{
-title: "Where to Stay in Paris",
-slug: "paris-hotels",
-content: `Paris offers a wide range of hotels from boutique stays to luxury accommodation.
+      {/* WHY VISIT */}
+      <h2 style={{ marginTop: "40px", color: "#FFD700" }}>
+        Why {city} is worth visiting
+      </h2>
 
-Popular areas include Central Paris, Eiffel Tower district, Latin Quarter, and Montmartre.
+      <p>
+        {city} combines culture, lifestyle, food, and unique experiences.
+        Choosing the right location will determine how easy, enjoyable,
+        and efficient your stay will be.
+      </p>
 
-Check metro access, room size, cancellation policies, and location before booking.
+      {/* AREAS */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: "20px",
+        marginTop: "30px"
+      }}>
+        <div style={card}>Central — close to everything</div>
+        <div style={card}>Business areas — quiet and efficient</div>
+        <div style={card}>Tourist zones — lively and vibrant</div>
+      </div>
 
-Use My Space Hotel to compare and book through trusted providers.`
-},
+      {/* MAP */}
+      <h2 style={{ marginTop: "40px", color: "#FFD700" }}>
+        Explore the city
+      </h2>
 
-{
-title: "Hotels in Dubai",
-slug: "dubai-hotels",
-content: `Dubai is known for luxury hotels, business accommodation, and family-friendly resorts.
+      <iframe
+        src={`https://www.google.com/maps?q=${city}&output=embed`}
+        width="100%"
+        height="350"
+        style={{ border: 0, borderRadius: "12px" }}
+      />
 
-Popular areas include Downtown Dubai, Dubai Marina, Palm Jumeirah, and Business Bay.
+      {/* CTA */}
+      <div style={{
+        marginTop: "40px",
+        background: "#FFD700",
+        padding: "20px",
+        borderRadius: "12px",
+        textAlign: "center"
+      }}>
+        <h2 style={{ color: "#000" }}>Continue your hotel search</h2>
+      </div>
 
-Look for pool access, airport transfers, and flexible booking options.
-
-My Space Hotel helps you find and compare Dubai stays easily.`
-},
-
-{
-title: "Family-Friendly Hotels",
-slug: "family-hotels",
-content: `Family travel requires comfort and convenience.
-
-Look for family rooms, breakfast included, swimming pool, and safe locations.
-
-Also consider nearby transport and flexible cancellation.
-
-My Space Hotel helps families find suitable accommodation quickly.`
-},
-
-{
-title: "Business Travel Hotels",
-slug: "business-hotels",
-content: `Business travellers need reliable WiFi, convenient location, and fast check-in.
-
-Look for hotels near airports, city centres, or business districts.
-
-Flexible booking is important for changing schedules.
-
-Use My Space Hotel to compare business-friendly stays.`
-},
-
-{
-title: "Budget Hotels Guide",
-slug: "budget-hotels",
-content: `Budget hotels can still offer comfort and value.
-
-Check guest ratings, location, WiFi, and cancellation policies.
-
-Avoid choosing based only on price—focus on value.
-
-My Space Hotel helps you compare affordable stays easily.`
-},
-
-{
-title: "Luxury Hotels Guide",
-slug: "luxury-hotels",
-content: `Luxury hotels offer premium comfort, location, and service.
-
-Look for high ratings, spacious rooms, and premium facilities.
-
-Popular luxury destinations include London, Paris, and Dubai.
-
-Compare luxury stays easily with My Space Hotel.`
-},
-
-{
-title: "Last-Minute Hotel Booking",
-slug: "last-minute-hotels",
-content: `Last-minute travel requires quick decisions.
-
-Focus on location, availability, and flexible booking.
-
-Compare central vs airport locations for convenience.
-
-My Space Hotel helps you find last-minute stays fast.`
-},
-
-{
-title: "Hotel Booking Tips",
-slug: "booking-tips",
-content: `Always review booking details before confirming.
-
-Check dates, guest count, cancellation policy, and total price.
-
-Also review guest ratings and location.
-
-My Space Hotel helps you make informed decisions before booking.`
-},
-
-{
-title: "City Break Hotels",
-slug: "city-break-hotels",
-content: `City breaks require convenient locations.
-
-Look for walkable areas, transport access, and nearby attractions.
-
-Short stays benefit from central locations.
-
-Use My Space Hotel to find the perfect city break stay.`
+    </div>
+  );
 }
-];
 
-export default function TravelPages() {
-return (
-<div style={{padding:"40px", maxWidth:"900px", margin:"auto"}}>
-<h1>Travel Guides</h1>
-{pages.map((p) => (
-<div key={p.slug} style={{marginBottom:"30px"}}>
-<h2>{p.title}</h2>
-<p>{p.content}</p>
-</div>
-))}
-</div>
-);
-}
+const card = {
+  background: "#1e3a8a",
+  padding: "20px",
+  borderRadius: "12px"
+};
