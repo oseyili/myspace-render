@@ -2,18 +2,15 @@ import React, { useEffect, useMemo, useState } from "react";
 
 const API_BASE = "https://hotel-backend-1-ee5z.onrender.com";
 
-const FACILITIES = [
-  "wifi",
-  "spa",
-  "gym",
-  "restaurant",
-  "pool",
-  "parking",
-  "airport shuttle",
-  "family rooms",
-  "beach access",
-  "business lounge",
-];
+const FACILITIES = ["wifi", "spa", "gym", "restaurant", "pool", "parking", "airport shuttle", "family rooms", "beach access", "business lounge"];
+
+function normaliseCountry(value) {
+  const v = value.trim().toLowerCase();
+  if (["uk", "u.k", "england", "britain", "great britain"].includes(v)) return "United Kingdom";
+  if (["usa", "us", "u.s", "america"].includes(v)) return "United States";
+  if (["uae", "u.a.e"].includes(v)) return "United Arab Emirates";
+  return value.trim();
+}
 
 export default function App() {
   const [pageView, setPageView] = useState("home");
@@ -38,7 +35,9 @@ export default function App() {
     setMessage("");
 
     const params = new URLSearchParams();
-    if (country.trim()) params.set("country", country.trim());
+    const cleanCountry = normaliseCountry(country);
+
+    if (cleanCountry) params.set("country", cleanCountry);
     if (city.trim()) params.set("city", city.trim());
     if (area.trim()) params.set("area", area.trim());
     if (facilityQuery) params.set("facilities", facilityQuery);
@@ -49,8 +48,8 @@ export default function App() {
     try {
       const res = await fetch(`${API_BASE}/api/hotels?${params.toString()}`);
       const data = await res.json();
-
       const nextHotels = data.hotels || [];
+
       setHotels(nextHotels);
       setSelectedHotel(nextHotels[0] || null);
       setPage(data.page || nextPage);
@@ -58,7 +57,7 @@ export default function App() {
       setTotalHotels(data.count || 0);
 
       if (nextHotels.length === 0) {
-        setMessage("No hotels matched this search. Try fewer filters or a broader location.");
+        setMessage("No hotels matched this search. Try United Kingdom instead of UK, remove facility filters, or search city only.");
       }
     } catch {
       setMessage("Search could not load hotels. Please try again.");
@@ -75,35 +74,20 @@ export default function App() {
 
   function toggleFacility(facility) {
     setSelectedFacilities((prev) =>
-      prev.includes(facility)
-        ? prev.filter((item) => item !== facility)
-        : [...prev, facility]
+      prev.includes(facility) ? prev.filter((item) => item !== facility) : [...prev, facility]
     );
   }
 
   async function submitRequest() {
-    if (!selectedHotel) {
-      setMessage("Please select a hotel first.");
-      return;
-    }
-
-    if (!form.name.trim() || !form.email.trim()) {
-      setMessage("Please enter your name and email.");
-      return;
-    }
+    if (!selectedHotel) return setMessage("Please select a hotel first.");
+    if (!form.name.trim() || !form.email.trim()) return setMessage("Please enter your name and email.");
 
     try {
       const res = await fetch(`${API_BASE}/api/request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          hotel_id: selectedHotel.id,
-          name: form.name.trim(),
-          email: form.email.trim(),
-          message: form.requests.trim(),
-        }),
+        body: JSON.stringify({ hotel_id: selectedHotel.id, name: form.name.trim(), email: form.email.trim(), message: form.requests.trim() }),
       });
-
       const data = await res.json();
       setMessage(data.message || "Your reservation request has been received.");
     } catch {
@@ -122,9 +106,7 @@ export default function App() {
           <div style={styles.hero}>
             <div style={styles.kicker}>Worldwide hotel search</div>
             <h1 style={styles.title}>My Space Hotel</h1>
-            <p style={styles.heroText}>
-              Search globally, compare clearly, and request your stay with confidence.
-            </p>
+            <p style={styles.heroText}>Search a growing global hotel catalogue, compare stronger stay options, and request your hotel with confidence.</p>
 
             <div style={styles.statBox}>
               <div style={styles.statLabel}>Hotels in this search</div>
@@ -144,16 +126,14 @@ export default function App() {
             <div style={styles.kickerDark}>Search</div>
             <h2 style={styles.searchTitle}>Find the stay that fits your trip</h2>
 
-            <input style={styles.input} placeholder="Country" value={country} onChange={(e) => setCountry(e.target.value)} />
-            <input style={styles.input} placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
-            <input style={styles.input} placeholder="Area" value={area} onChange={(e) => setArea(e.target.value)} />
+            <input style={styles.input} placeholder="Country e.g. United Kingdom, Nigeria, France" value={country} onChange={(e) => setCountry(e.target.value)} />
+            <input style={styles.input} placeholder="City e.g. London, Lagos, Paris, Dubai" value={city} onChange={(e) => setCity(e.target.value)} />
+            <input style={styles.input} placeholder="Area e.g. Mayfair, Lekki, Marina" value={area} onChange={(e) => setArea(e.target.value)} />
 
             <div style={styles.guestRow}>
               <b>Guests</b>
               {[1, 2, 3, 4, 5, 6].map((n) => (
-                <button key={n} onClick={() => setGuests(n)} style={guests === n ? styles.guestActive : styles.guestBtn}>
-                  {n}
-                </button>
+                <button key={n} onClick={() => setGuests(n)} style={guests === n ? styles.guestActive : styles.guestBtn}>{n}</button>
               ))}
             </div>
 
@@ -162,50 +142,30 @@ export default function App() {
               <div style={styles.filterGrid}>
                 {FACILITIES.map((facility) => (
                   <label key={facility} style={styles.checkLabel}>
-                    <input
-                      type="checkbox"
-                      checked={selectedFacilities.includes(facility)}
-                      onChange={() => toggleFacility(facility)}
-                    />
-                    {facility}
+                    <input type="checkbox" checked={selectedFacilities.includes(facility)} onChange={() => toggleFacility(facility)} /> {facility}
                   </label>
                 ))}
               </div>
             </div>
 
-            <button style={styles.yellowBtn} onClick={() => searchHotels(1)}>
-              {loading ? "Loading hotels..." : "Search hotels"}
-            </button>
+            <button style={styles.yellowBtn} onClick={() => searchHotels(1)}>{loading ? "Loading hotels..." : "Search hotels"}</button>
           </div>
         </section>
 
         <section style={styles.mainGrid}>
           <div style={styles.resultsPanel}>
             <div style={styles.kickerDark}>Available hotels</div>
-            <h2 style={styles.resultsTitle}>
-              {loading ? "Loading hotel options..." : `${hotels.length} shown from ${totalHotels} matching hotels`}
-            </h2>
+            <h2 style={styles.resultsTitle}>{loading ? "Loading hotel options..." : `${hotels.length} shown from ${totalHotels} matching hotels`}</h2>
 
             <div style={styles.pageBar}>
-              <button style={styles.pageBtn} disabled={page <= 1} onClick={() => searchHotels(page - 1)}>
-                Previous
-              </button>
+              <button style={styles.pageBtn} disabled={page <= 1} onClick={() => searchHotels(page - 1)}>Previous</button>
               <b>Page {page} of {totalPages}</b>
-              <button style={styles.pageBtn} disabled={page >= totalPages} onClick={() => searchHotels(page + 1)}>
-                Next
-              </button>
+              <button style={styles.pageBtn} disabled={page >= totalPages} onClick={() => searchHotels(page + 1)}>Next</button>
             </div>
 
             <div style={styles.resultsScroll}>
               {hotels.map((hotel) => (
-                <div
-                  key={hotel.id}
-                  style={{
-                    ...styles.hotelCard,
-                    border: selectedHotel?.id === hotel.id ? "3px solid #f1c644" : "1px solid #d7e3f4",
-                  }}
-                  onClick={() => setSelectedHotel(hotel)}
-                >
+                <div key={hotel.id} style={{ ...styles.hotelCard, border: selectedHotel?.id === hotel.id ? "3px solid #f1c644" : "1px solid #d7e3f4" }} onClick={() => setSelectedHotel(hotel)}>
                   {hotel.image && <img src={hotel.image} alt={hotel.name} style={styles.hotelImg} />}
                   <div style={styles.hotelBody}>
                     <h3 style={styles.hotelName}>{hotel.name}</h3>
@@ -214,20 +174,11 @@ export default function App() {
                     <p style={styles.facilities}>Facilities: {(hotel.facilities || []).join(", ")}</p>
                     <div style={styles.priceRow}>
                       <b style={styles.price}>{hotel.currency} {hotel.price}</b>
-                      <button
-                        style={styles.reserveBtn}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedHotel(hotel);
-                        }}
-                      >
-                        Reserve in app
-                      </button>
+                      <button style={styles.reserveBtn} onClick={(e) => { e.stopPropagation(); setSelectedHotel(hotel); }}>Reserve in app</button>
                     </div>
                   </div>
                 </div>
               ))}
-
               {!loading && hotels.length === 0 && <div style={styles.emptyBox}>{message}</div>}
             </div>
           </div>
@@ -243,9 +194,7 @@ export default function App() {
                   <p>{selectedHotel.area}, {selectedHotel.city}, {selectedHotel.country}</p>
                   <b style={styles.price}>{selectedHotel.currency} {selectedHotel.price}</b>
                 </>
-              ) : (
-                <p>Select a hotel to continue.</p>
-              )}
+              ) : <p>Select a hotel to continue.</p>}
             </div>
 
             <input style={styles.formInput} placeholder="Your name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
@@ -253,7 +202,6 @@ export default function App() {
             <textarea style={styles.textarea} placeholder="Special requests" value={form.requests} onChange={(e) => setForm({ ...form, requests: e.target.value })} />
 
             <button style={styles.yellowBtn} onClick={submitRequest}>Request availability</button>
-
             {message && <div style={styles.message}>{message}</div>}
           </aside>
         </section>
@@ -265,20 +213,20 @@ export default function App() {
 function InfoPage({ pageView, setPageView, city }) {
   const pages = {
     guide: {
-      title: `${city} travel guide`,
-      text: "Choose the right area before you reserve. Compare location, access, facilities, and trip purpose so your hotel decision feels clearer.",
+      title: `${city} smart travel guide`,
+      text: "Choose the right area before you reserve. Compare location, access, facilities, travel purpose, and comfort so your hotel decision feels clear. Use the guide to shortlist stronger options, then return to search and reserve with confidence.",
     },
     faq: {
       title: "Frequently asked questions",
-      text: "Search globally, compare hotels, select the stay you prefer, and send a reservation request. My Space Hotel helps you move from choice to request with less confusion.",
+      text: "My Space Hotel helps you search globally, compare hotels clearly, and send a reservation request directly. You can search by country, city, or area. Use filters to narrow the stay that fits your trip.",
     },
     terms: {
       title: "Booking terms",
-      text: "A reservation request is not a final confirmed booking until availability and next steps are confirmed. Prices and availability may change depending on property rules and dates.",
+      text: "A reservation request is not a final confirmed booking until availability and next steps are confirmed. Prices and availability may change depending on property rules, dates, and provider conditions.",
     },
     support: {
       title: "Customer support",
-      text: "For help with a reservation request, contact reservations@myspace-hotel.com and include your name, destination, selected hotel, and travel details.",
+      text: "Need help with a reservation request? Contact reservations@myspace-hotel.com with your name, destination, selected hotel, travel dates, and request details so support can assist faster.",
     },
   };
 
