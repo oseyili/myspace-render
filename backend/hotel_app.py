@@ -1,30 +1,22 @@
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
-from typing import List
 from dotenv import load_dotenv
+from typing import Optional, List
+from pathlib import Path
 import os
 import math
-import sqlite3
-import requests
 import uuid
+import sqlite3
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from pathlib import Path
 
 load_dotenv()
 
 # =========================================================
 # ENV
 # =========================================================
-RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY", "").strip()
-RAPIDAPI_HOST = os.getenv("RAPIDAPI_HOST", "booking-com.p.rapidapi.com").strip()
-RAPIDAPI_PROPERTIES_URL = os.getenv(
-    "RAPIDAPI_PROPERTIES_URL",
-    f"https://{RAPIDAPI_HOST}/properties/v2/list",
-).strip()
-
 SMTP_HOST = os.getenv("SMTP_HOST", "").strip()
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587").strip() or "587")
 SMTP_USERNAME = os.getenv("SMTP_USERNAME", "").strip()
@@ -34,6 +26,9 @@ SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "").strip()
 SMTP_FROM = os.getenv("SMTP_FROM", "").strip()
 SMTP_USE_TLS = os.getenv("SMTP_USE_TLS", "true").strip().lower() == "true"
 SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "reservations@myspace-hotel.com").strip()
+
+RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY", "").strip()
+RAPIDAPI_HOST = os.getenv("RAPIDAPI_HOST", "").strip()
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "hotel_catalog.db"
@@ -59,32 +54,12 @@ app.add_middleware(
 )
 
 # =========================================================
-# CITY IMPORT CONFIG
+# GLOBAL CATALOGUE SEEDING
+# This creates a large searchable internal database safely.
+# It does NOT claim to be live supplier inventory.
+# Rapid can replace/add real supplier records later.
 # =========================================================
-CITY_IMPORT_CONFIG = {
-    "london": {"dest_ids": "-2601889", "search_type": "city", "currency": "GBP"},
-    "paris": {"dest_ids": "-1456928", "search_type": "city", "currency": "EUR"},
-    "rome": {"dest_ids": "-126693", "search_type": "city", "currency": "EUR"},
-    "barcelona": {"dest_ids": "-372490", "search_type": "city", "currency": "EUR"},
-    "madrid": {"dest_ids": "-390625", "search_type": "city", "currency": "EUR"},
-    "berlin": {"dest_ids": "-1746443", "search_type": "city", "currency": "EUR"},
-    "amsterdam": {"dest_ids": "-2140479", "search_type": "city", "currency": "EUR"},
-    "dubai": {"dest_ids": "-782831", "search_type": "city", "currency": "AED"},
-    "istanbul": {"dest_ids": "-755070", "search_type": "city", "currency": "TRY"},
-    "new york": {"dest_ids": "20088325", "search_type": "city", "currency": "USD"},
-    "los angeles": {"dest_ids": "20014181", "search_type": "city", "currency": "USD"},
-    "miami": {"dest_ids": "20023181", "search_type": "city", "currency": "USD"},
-    "lagos": {"dest_ids": "-2014871", "search_type": "city", "currency": "NGN"},
-    "cape town": {"dest_ids": "-1217214", "search_type": "city", "currency": "ZAR"},
-    "singapore": {"dest_ids": "-73635", "search_type": "city", "currency": "SGD"},
-    "bangkok": {"dest_ids": "-3414440", "search_type": "city", "currency": "THB"},
-    "tokyo": {"dest_ids": "-246227", "search_type": "city", "currency": "JPY"},
-    "sydney": {"dest_ids": "-1603135", "search_type": "city", "currency": "AUD"},
-    "toronto": {"dest_ids": "-574890", "search_type": "city", "currency": "CAD"},
-    "lisbon": {"dest_ids": "-2167973", "search_type": "city", "currency": "EUR"},
-}
-
-DEFAULT_FACILITIES = [
+FACILITIES = [
     "wifi",
     "spa",
     "gym",
@@ -99,58 +74,144 @@ DEFAULT_FACILITIES = [
     "city centre access",
 ]
 
-SEED_CITY_BASE = {
-    "London": {
-        "country": "United Kingdom",
+COUNTRY_CITY_AREA_MAP = {
+    "United Kingdom": {
         "currency": "GBP",
-        "areas": ["Central London", "Westminster", "Kensington", "Paddington", "Soho", "Mayfair"],
-        "price_start": 165,
+        "cities": {
+            "London": ["Mayfair", "Westminster", "Soho", "Kensington", "Paddington", "Canary Wharf", "Chelsea", "Shoreditch"],
+            "Manchester": ["City Centre", "Salford Quays", "Northern Quarter", "Deansgate"],
+            "Birmingham": ["City Centre", "Jewellery Quarter", "Edgbaston", "Mailbox"],
+            "Edinburgh": ["Old Town", "New Town", "Leith", "Haymarket"],
+        },
     },
-    "Paris": {
-        "country": "France",
+    "France": {
         "currency": "EUR",
-        "areas": ["Champs-Élysées", "Le Marais", "Saint-Germain", "Montmartre", "Latin Quarter"],
-        "price_start": 175,
+        "cities": {
+            "Paris": ["Champs-Elysees", "Le Marais", "Saint-Germain", "Montmartre", "Latin Quarter", "Opera"],
+            "Nice": ["Promenade des Anglais", "Old Town", "Port Area", "City Centre"],
+            "Lyon": ["Presquile", "Old Lyon", "Part-Dieu", "Confluence"],
+        },
     },
-    "Dubai": {
-        "country": "United Arab Emirates",
-        "currency": "AED",
-        "areas": ["Downtown Dubai", "Dubai Marina", "Palm Jumeirah", "Business Bay", "Jumeirah Beach"],
-        "price_start": 390,
-    },
-    "New York": {
-        "country": "United States",
+    "United States": {
         "currency": "USD",
-        "areas": ["Midtown Manhattan", "SoHo", "Chelsea", "Times Square", "Financial District"],
-        "price_start": 210,
+        "cities": {
+            "New York": ["Midtown Manhattan", "SoHo", "Chelsea", "Times Square", "Financial District", "Upper West Side"],
+            "Los Angeles": ["Hollywood", "Santa Monica", "Downtown LA", "Beverly Hills", "Venice"],
+            "Miami": ["South Beach", "Downtown Miami", "Brickell", "Wynwood"],
+            "Chicago": ["The Loop", "River North", "Magnificent Mile", "West Loop"],
+        },
     },
-    "Lagos": {
-        "country": "Nigeria",
+    "United Arab Emirates": {
+        "currency": "AED",
+        "cities": {
+            "Dubai": ["Downtown Dubai", "Dubai Marina", "Palm Jumeirah", "Business Bay", "Jumeirah Beach"],
+            "Abu Dhabi": ["Corniche", "Yas Island", "Saadiyat Island", "City Centre"],
+        },
+    },
+    "Nigeria": {
         "currency": "NGN",
-        "areas": ["Victoria Island", "Ikoyi", "Lekki", "Ikeja", "Yaba"],
-        "price_start": 78000,
+        "cities": {
+            "Lagos": ["Victoria Island", "Ikoyi", "Lekki", "Ikeja", "Yaba", "Surulere"],
+            "Abuja": ["Maitama", "Wuse", "Garki", "Asokoro"],
+            "Port Harcourt": ["GRA", "Old GRA", "Trans Amadi", "City Centre"],
+        },
     },
-    "Rome": {
-        "country": "Italy",
+    "Spain": {
         "currency": "EUR",
-        "areas": ["Centro Storico", "Trastevere", "Vatican Area", "Termini", "Monti"],
-        "price_start": 160,
+        "cities": {
+            "Barcelona": ["Gothic Quarter", "Eixample", "Barceloneta", "Gracia", "Sants"],
+            "Madrid": ["Gran Via", "Salamanca", "Sol", "Chueca", "Retiro"],
+            "Valencia": ["Ciutat Vella", "Ruzafa", "Beach Area", "City Centre"],
+        },
     },
-    "Barcelona": {
-        "country": "Spain",
+    "Italy": {
         "currency": "EUR",
-        "areas": ["Gothic Quarter", "Eixample", "Barceloneta", "Gracia", "Sants"],
-        "price_start": 170,
+        "cities": {
+            "Rome": ["Centro Storico", "Trastevere", "Vatican Area", "Termini", "Monti"],
+            "Milan": ["Duomo", "Brera", "Navigli", "Porta Nuova"],
+            "Venice": ["San Marco", "Cannaregio", "Dorsoduro", "Castello"],
+        },
     },
-    "Istanbul": {
-        "country": "Turkey",
+    "Turkey": {
         "currency": "TRY",
-        "areas": ["Sultanahmet", "Taksim", "Galata", "Besiktas", "Kadikoy"],
-        "price_start": 4200,
+        "cities": {
+            "Istanbul": ["Sultanahmet", "Taksim", "Galata", "Besiktas", "Kadikoy"],
+            "Antalya": ["Lara", "Kaleici", "Konyaalti", "City Centre"],
+        },
+    },
+    "Japan": {
+        "currency": "JPY",
+        "cities": {
+            "Tokyo": ["Shinjuku", "Shibuya", "Ginza", "Tokyo Station", "Ueno"],
+            "Osaka": ["Namba", "Umeda", "Shinsaibashi", "Tennoji"],
+            "Kyoto": ["Gion", "Kyoto Station", "Arashiyama", "Higashiyama"],
+        },
+    },
+    "Singapore": {
+        "currency": "SGD",
+        "cities": {
+            "Singapore": ["Marina Bay", "Orchard", "Sentosa", "Chinatown", "Bugis"],
+        },
+    },
+    "Australia": {
+        "currency": "AUD",
+        "cities": {
+            "Sydney": ["CBD", "Darling Harbour", "Bondi", "Circular Quay"],
+            "Melbourne": ["CBD", "Southbank", "Docklands", "St Kilda"],
+            "Brisbane": ["CBD", "South Bank", "Fortitude Valley", "Kangaroo Point"],
+        },
+    },
+    "South Africa": {
+        "currency": "ZAR",
+        "cities": {
+            "Cape Town": ["Waterfront", "Sea Point", "Camps Bay", "City Bowl"],
+            "Johannesburg": ["Sandton", "Rosebank", "Melrose", "Fourways"],
+        },
     },
 }
 
-SEED_IMAGE_POOL = [
+HOTEL_PREFIXES = [
+    "Grand",
+    "Royal",
+    "Central",
+    "Elite",
+    "Skyline",
+    "Harbour",
+    "Imperial",
+    "Premier",
+    "Signature",
+    "Urban",
+    "Landmark",
+    "Prestige",
+    "Golden",
+    "Regency",
+    "Crown",
+    "Continental",
+    "Metropolitan",
+    "Vista",
+    "Garden",
+    "Riverside",
+]
+
+HOTEL_SUFFIXES = [
+    "Palace",
+    "Suites",
+    "Hotel",
+    "Residences",
+    "Retreat",
+    "Boutique Rooms",
+    "Plaza",
+    "Gateway Hotel",
+    "Executive Stay",
+    "Corner Hotel",
+    "Collection",
+    "Lodge",
+    "Resort",
+    "Inn",
+    "House",
+]
+
+IMAGE_POOL = [
     "https://images.unsplash.com/photo-1566073771259-6a8506099945",
     "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa",
     "https://images.unsplash.com/photo-1522798514-97ceb8c4f1c8",
@@ -161,20 +222,15 @@ SEED_IMAGE_POOL = [
     "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
 ]
 
-SEED_PREFIXES = [
-    "Grand", "Royal", "Central", "Elite", "Skyline", "Harbour",
-    "Imperial", "Premier", "Signature", "Urban", "Landmark", "Prestige",
-]
+# Increase this later in stages.
+# 50 per area creates thousands safely.
+HOTELS_PER_AREA = 50
 
-SEED_SUFFIXES = [
-    "Palace", "Suites", "Hotel", "Residences", "Retreat",
-    "Boutique Rooms", "Plaza", "Gateway Hotel", "Executive Stay", "Corner Hotel",
-]
 
 # =========================================================
 # MODELS
 # =========================================================
-class BookingRequest(BaseModel):
+class ReservationRequest(BaseModel):
     hotel_id: str
     name: str
     email: EmailStr
@@ -182,15 +238,15 @@ class BookingRequest(BaseModel):
 
 
 # =========================================================
-# DB
+# DATABASE
 # =========================================================
-def get_conn() -> sqlite3.Connection:
+def get_conn():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
 
-def init_db() -> None:
+def init_db():
     conn = get_conn()
     cur = conn.cursor()
 
@@ -201,16 +257,16 @@ def init_db() -> None:
             supplier TEXT NOT NULL,
             supplier_hotel_id TEXT NOT NULL,
             name TEXT NOT NULL,
+            country TEXT NOT NULL,
             city TEXT NOT NULL,
-            area TEXT,
-            country TEXT,
-            currency TEXT,
-            price REAL DEFAULT 0,
-            rating REAL DEFAULT 0,
+            area TEXT NOT NULL,
+            currency TEXT NOT NULL,
+            price REAL NOT NULL,
+            rating REAL NOT NULL,
             image TEXT,
             summary TEXT,
             facilities TEXT,
-            imported_from_city TEXT,
+            source_note TEXT,
             UNIQUE(supplier, supplier_hotel_id)
         )
         """
@@ -220,10 +276,10 @@ def init_db() -> None:
         """
         CREATE TABLE IF NOT EXISTS reservation_requests (
             request_id TEXT PRIMARY KEY,
-            hotel_id TEXT NOT NULL,
-            hotel_name TEXT NOT NULL,
-            customer_name TEXT NOT NULL,
-            customer_email TEXT NOT NULL,
+            hotel_id TEXT,
+            hotel_name TEXT,
+            customer_name TEXT,
+            customer_email TEXT,
             customer_message TEXT,
             support_sent INTEGER DEFAULT 0,
             customer_sent INTEGER DEFAULT 0,
@@ -236,89 +292,102 @@ def init_db() -> None:
     conn.close()
 
 
-def count_hotels() -> int:
+def count_hotels():
     conn = get_conn()
     cur = conn.cursor()
-    cur.execute("SELECT COUNT(*) AS count FROM hotels")
-    total = cur.fetchone()["count"]
+    cur.execute("SELECT COUNT(*) AS total FROM hotels")
+    total = cur.fetchone()["total"]
     conn.close()
-    return total
+    return int(total)
 
 
-def seed_internal_catalogue_if_empty() -> int:
-    existing_total = count_hotels()
-    if existing_total > 0:
-        return existing_total
+def build_facilities(index: int) -> List[str]:
+    chosen = ["wifi", "restaurant"]
+    for position, facility in enumerate(FACILITIES):
+        if (index + position) % 3 == 0 or (index + position) % 5 == 0:
+            chosen.append(facility)
+    return list(dict.fromkeys(chosen))
+
+
+def seed_database_if_small():
+    current = count_hotels()
+
+    # Do not rebuild every deploy if already seeded.
+    expected_minimum = 5000
+    if current >= expected_minimum:
+        return current
 
     conn = get_conn()
     cur = conn.cursor()
 
     inserted = 0
+    global_index = 0
 
-    for city, meta in SEED_CITY_BASE.items():
-        for idx in range(1, 121):
-            area = meta["areas"][idx % len(meta["areas"])]
-            prefix = SEED_PREFIXES[idx % len(SEED_PREFIXES)]
-            suffix = SEED_SUFFIXES[idx % len(SEED_SUFFIXES)]
+    for country, country_data in COUNTRY_CITY_AREA_MAP.items():
+        currency = country_data["currency"]
 
-            facilities = []
-            for j, facility in enumerate(DEFAULT_FACILITIES):
-                if facility in ["wifi", "restaurant"] or (idx + j) % 3 == 0 or (idx + j) % 5 == 0:
-                    facilities.append(facility)
-            facilities = list(dict.fromkeys(facilities))
+        for city, areas in country_data["cities"].items():
+            for area in areas:
+                for local_index in range(1, HOTELS_PER_AREA + 1):
+                    global_index += 1
+                    prefix = HOTEL_PREFIXES[global_index % len(HOTEL_PREFIXES)]
+                    suffix = HOTEL_SUFFIXES[global_index % len(HOTEL_SUFFIXES)]
+                    supplier_hotel_id = f"internal-{country}-{city}-{area}-{local_index}".lower().replace(" ", "-")
+                    price_base = 70 + ((global_index * 7) % 340)
+                    rating = round(7.8 + ((global_index % 22) / 10), 1)
+                    facilities = build_facilities(global_index)
 
-            supplier_hotel_id = f"seed-{city.lower()}-{idx}"
+                    name = f"{prefix} {area} {suffix}"
+                    summary = (
+                        f"A searchable stay option in {area}, {city}, designed to help travellers "
+                        f"compare location, facilities, and reservation choices with more confidence."
+                    )
 
-            cur.execute(
-                """
-                INSERT OR IGNORE INTO hotels (
-                    id, supplier, supplier_hotel_id, name, city, area, country,
-                    currency, price, rating, image, summary, facilities, imported_from_city
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    str(uuid.uuid4()),
-                    "internal_seed",
-                    supplier_hotel_id,
-                    f"{prefix} {city} {suffix}",
-                    city,
-                    area,
-                    meta["country"],
-                    meta["currency"],
-                    meta["price_start"] + (idx * 4),
-                    round(8.0 + ((idx % 18) / 10), 1),
-                    SEED_IMAGE_POOL[idx % len(SEED_IMAGE_POOL)],
-                    f"A well-positioned stay in {area}, {city}, designed for travellers who want more confidence before they reserve.",
-                    ",".join(facilities),
-                    city,
-                ),
-            )
-            inserted += 1
+                    cur.execute(
+                        """
+                        INSERT OR IGNORE INTO hotels (
+                            id, supplier, supplier_hotel_id, name, country, city, area,
+                            currency, price, rating, image, summary, facilities, source_note
+                        )
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            str(uuid.uuid4()),
+                            "internal_catalogue",
+                            supplier_hotel_id,
+                            name,
+                            country,
+                            city,
+                            area,
+                            currency,
+                            float(price_base),
+                            float(rating),
+                            IMAGE_POOL[global_index % len(IMAGE_POOL)],
+                            summary,
+                            ",".join(facilities),
+                            "Internal searchable catalogue. Supplier import can enrich this record later.",
+                        ),
+                    )
+                    inserted += 1
 
     conn.commit()
     conn.close()
-    return inserted
+
+    return current + inserted
 
 
 init_db()
-seed_internal_catalogue_if_empty()
+seed_database_if_small()
+
 
 # =========================================================
 # EMAIL
 # =========================================================
-def email_ready() -> bool:
-    return all([
-        SMTP_HOST,
-        SMTP_PORT,
-        SMTP_USER,
-        SMTP_PASSWORD,
-        SMTP_FROM,
-        SUPPORT_EMAIL,
-    ])
+def email_ready():
+    return all([SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM, SUPPORT_EMAIL])
 
 
-def send_html_email(to_address: str, subject: str, html_body: str) -> None:
+def send_html_email(to_address: str, subject: str, html_body: str):
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = SMTP_FROM
@@ -333,246 +402,6 @@ def send_html_email(to_address: str, subject: str, html_body: str) -> None:
 
 
 # =========================================================
-# RAPID IMPORT
-# =========================================================
-def rapid_headers() -> dict:
-    return {
-        "X-RapidAPI-Key": RAPIDAPI_KEY,
-        "X-RapidAPI-Host": RAPIDAPI_HOST,
-    }
-
-
-def parse_rapid_hotels(payload: dict, imported_city: str, currency_code: str) -> List[dict]:
-    raw_results: List[dict] = []
-
-    if isinstance(payload, dict):
-        if isinstance(payload.get("data"), list):
-            raw_results = payload["data"]
-        elif isinstance(payload.get("properties"), list):
-            raw_results = payload["properties"]
-        elif isinstance(payload.get("results"), list):
-            raw_results = payload["results"]
-        elif isinstance(payload.get("data"), dict):
-            nested = payload["data"]
-            if isinstance(nested.get("hotels"), list):
-                raw_results = nested["hotels"]
-            elif isinstance(nested.get("properties"), list):
-                raw_results = nested["properties"]
-            elif isinstance(nested.get("result"), list):
-                raw_results = nested["result"]
-
-    parsed: List[dict] = []
-
-    for item in raw_results:
-        if not isinstance(item, dict):
-            continue
-
-        supplier_hotel_id = str(
-            item.get("hotel_id")
-            or item.get("id")
-            or item.get("property_id")
-            or item.get("ufi")
-            or uuid.uuid4()
-        )
-
-        name = (
-            item.get("name")
-            or item.get("hotel_name")
-            or item.get("property_name")
-            or "Hotel"
-        )
-
-        image = (
-            item.get("photoMainUrl")
-            or item.get("main_photo_url")
-            or item.get("image")
-            or item.get("max_1440_photo_url")
-            or ""
-        )
-
-        area = (
-            item.get("district")
-            or item.get("address")
-            or item.get("city")
-            or imported_city.title()
-        )
-
-        country = (
-            item.get("country")
-            or item.get("country_trans")
-            or ""
-        )
-
-        price = (
-            item.get("price")
-            or item.get("min_total_price")
-            or item.get("gross_price")
-            or item.get("price_breakdown", {}).get("gross_price")
-            or 0
-        )
-
-        rating = (
-            item.get("reviewScore")
-            or item.get("review_score")
-            or item.get("review_nr")
-            or 0
-        )
-
-        facilities = DEFAULT_FACILITIES[:]
-        if isinstance(item.get("hotel_facilities"), list) and item["hotel_facilities"]:
-            facilities = [str(x).strip().lower() for x in item["hotel_facilities"] if str(x).strip()]
-
-        summary = (
-            item.get("wishlistName")
-            or item.get("reviewScoreWord")
-            or item.get("accessibilityLabel")
-            or f"A globally sourced stay in {area} for travellers who want more clarity before they reserve."
-        )
-
-        def safe_float(value) -> float:
-            try:
-                return float(value)
-            except Exception:
-                return 0.0
-
-        parsed.append(
-            {
-                "id": str(uuid.uuid4()),
-                "supplier": "rapid_booking",
-                "supplier_hotel_id": supplier_hotel_id,
-                "name": name,
-                "city": imported_city.title(),
-                "area": area,
-                "country": country,
-                "currency": currency_code,
-                "price": safe_float(price),
-                "rating": safe_float(rating),
-                "image": image,
-                "summary": summary,
-                "facilities": ",".join(facilities),
-                "imported_from_city": imported_city.title(),
-            }
-        )
-
-    return parsed
-
-
-def upsert_hotels(hotels: List[dict]) -> int:
-    conn = get_conn()
-    cur = conn.cursor()
-    inserted_or_updated = 0
-
-    for hotel in hotels:
-        cur.execute(
-            """
-            INSERT INTO hotels (
-                id, supplier, supplier_hotel_id, name, city, area, country,
-                currency, price, rating, image, summary, facilities, imported_from_city
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(supplier, supplier_hotel_id) DO UPDATE SET
-                name=excluded.name,
-                city=excluded.city,
-                area=excluded.area,
-                country=excluded.country,
-                currency=excluded.currency,
-                price=excluded.price,
-                rating=excluded.rating,
-                image=excluded.image,
-                summary=excluded.summary,
-                facilities=excluded.facilities,
-                imported_from_city=excluded.imported_from_city
-            """,
-            (
-                hotel["id"],
-                hotel["supplier"],
-                hotel["supplier_hotel_id"],
-                hotel["name"],
-                hotel["city"],
-                hotel["area"],
-                hotel["country"],
-                hotel["currency"],
-                hotel["price"],
-                hotel["rating"],
-                hotel["image"],
-                hotel["summary"],
-                hotel["facilities"],
-                hotel["imported_from_city"],
-            ),
-        )
-        inserted_or_updated += 1
-
-    conn.commit()
-    conn.close()
-    return inserted_or_updated
-
-
-def import_city_from_rapid(city: str, max_pages: int = 1) -> dict:
-    key = city.strip().lower()
-    config = CITY_IMPORT_CONFIG.get(key)
-
-    if not config:
-        return {
-            "status": "error",
-            "message": f"No Rapid import config exists yet for '{city}'.",
-        }
-
-    if not RAPIDAPI_KEY:
-        return {
-            "status": "error",
-            "message": "RAPIDAPI_KEY is missing.",
-        }
-
-    total_processed = 0
-    errors = []
-
-    for page_number in range(1, max_pages + 1):
-        offset = (page_number - 1) * 20
-
-        params = {
-            "offset": str(offset),
-            "arrival_date": "2026-05-01",
-            "departure_date": "2026-05-05",
-            "room_qty": "1",
-            "guest_qty": "1",
-            "children_qty": "0",
-            "dest_ids": config["dest_ids"],
-            "search_type": config["search_type"],
-            "price_filter_currencycode": config["currency"],
-            "order_by": "popularity",
-            "languagecode": "en-gb",
-            "units": "metric",
-        }
-
-        response = requests.get(
-            RAPIDAPI_PROPERTIES_URL,
-            headers=rapid_headers(),
-            params=params,
-            timeout=45,
-        )
-
-        if response.status_code != 200:
-            errors.append(
-                {
-                    "page": page_number,
-                    "status_code": response.status_code,
-                    "details": response.text[:300],
-                }
-            )
-            continue
-
-        parsed_hotels = parse_rapid_hotels(response.json(), key, config["currency"])
-        total_processed += upsert_hotels(parsed_hotels)
-
-    return {
-        "status": "ok" if not errors else "partial",
-        "city": city.title(),
-        "processed": total_processed,
-        "errors": errors,
-    }
-
-
-# =========================================================
 # ROUTES
 # =========================================================
 @app.get("/")
@@ -581,55 +410,115 @@ def root():
         "status": "running",
         "message": "My Space Hotel Backend Live",
         "hotels_in_database": count_hotels(),
-        "endpoints": {
-            "search": "/api/hotels",
-            "facilities": "/api/facilities",
-            "reservation": "/api/request",
-            "rapid_import": "/api/admin/import-city?city=London&max_pages=1",
-        },
+        "search_example": "/api/hotels?country=United Kingdom&page=1&page_size=12",
+    }
+
+
+@app.get("/api/admin/catalogue-status")
+def catalogue_status():
+    conn = get_conn()
+    cur = conn.cursor()
+
+    cur.execute("SELECT COUNT(*) AS total FROM hotels")
+    total = cur.fetchone()["total"]
+
+    cur.execute(
+        """
+        SELECT country, COUNT(*) AS count
+        FROM hotels
+        GROUP BY country
+        ORDER BY count DESC
+        """
+    )
+    countries = [{"country": row["country"], "count": row["count"]} for row in cur.fetchall()]
+
+    cur.execute(
+        """
+        SELECT city, country, COUNT(*) AS count
+        FROM hotels
+        GROUP BY city, country
+        ORDER BY count DESC
+        LIMIT 100
+        """
+    )
+    cities = [{"city": row["city"], "country": row["country"], "count": row["count"]} for row in cur.fetchall()]
+
+    conn.close()
+
+    return {
+        "total_hotels": total,
+        "countries_loaded": countries,
+        "cities_loaded": cities,
+        "rapid_ready": bool(RAPIDAPI_KEY),
+        "email_ready": email_ready(),
+        "pagination_ready": True,
     }
 
 
 @app.get("/api/facilities")
 def get_facilities():
-    return {"facilities": DEFAULT_FACILITIES}
+    return {"facilities": FACILITIES}
 
 
 @app.get("/api/hotels")
 def search_hotels(
-    city: str = Query(...),
-    facilities: str = Query(""),
+    country: Optional[str] = Query(None),
+    city: Optional[str] = Query(None),
+    area: Optional[str] = Query(None),
+    facilities: Optional[str] = Query(None),
+    adults: int = Query(2),
     page: int = Query(1),
     page_size: int = Query(12),
 ):
-    selected = [f.strip().lower() for f in facilities.split(",") if f.strip()]
-    search_city = f"%{city.strip().lower()}%"
+    safe_page = max(1, page)
+    safe_page_size = min(max(1, page_size), 24)
+    offset = (safe_page - 1) * safe_page_size
+
+    where = []
+    params = []
+
+    if country and country.strip():
+        where.append("LOWER(country) LIKE ?")
+        params.append(f"%{country.strip().lower()}%")
+
+    if city and city.strip():
+        where.append("LOWER(city) LIKE ?")
+        params.append(f"%{city.strip().lower()}%")
+
+    if area and area.strip():
+        where.append("LOWER(area) LIKE ?")
+        params.append(f"%{area.strip().lower()}%")
+
+    selected_facilities = []
+    if facilities and facilities.strip():
+        selected_facilities = [x.strip().lower() for x in facilities.split(",") if x.strip()]
+        for facility in selected_facilities:
+            where.append("LOWER(facilities) LIKE ?")
+            params.append(f"%{facility}%")
+
+    where_sql = ""
+    if where:
+        where_sql = "WHERE " + " AND ".join(where)
 
     conn = get_conn()
     cur = conn.cursor()
 
-    base_sql = """
-        SELECT * FROM hotels
-        WHERE lower(city) LIKE ?
-    """
-    params: List[object] = [search_city]
+    cur.execute(f"SELECT COUNT(*) AS total FROM hotels {where_sql}", params)
+    total = int(cur.fetchone()["total"])
 
-    if selected:
-        for item in selected:
-            base_sql += " AND lower(facilities) LIKE ?"
-            params.append(f"%{item}%")
+    total_pages = max(1, math.ceil(total / safe_page_size))
 
-    count_sql = f"SELECT COUNT(*) AS count FROM ({base_sql})"
-    cur.execute(count_sql, params)
-    total = cur.fetchone()["count"]
+    cur.execute(
+        f"""
+        SELECT *
+        FROM hotels
+        {where_sql}
+        ORDER BY rating DESC, price ASC, name ASC
+        LIMIT ? OFFSET ?
+        """,
+        params + [safe_page_size, offset],
+    )
 
-    total_pages = max(1, math.ceil(total / page_size))
-    safe_page = max(1, min(page, total_pages))
-    offset = (safe_page - 1) * page_size
-
-    final_sql = base_sql + " ORDER BY rating DESC, price ASC LIMIT ? OFFSET ?"
-    final_params = params + [page_size, offset]
-    cur.execute(final_sql, final_params)
     rows = cur.fetchall()
     conn.close()
 
@@ -639,29 +528,38 @@ def search_hotels(
             {
                 "id": row["id"],
                 "name": row["name"],
+                "country": row["country"],
                 "city": row["city"],
                 "area": row["area"],
-                "country": row["country"],
-                "price": row["price"],
                 "currency": row["currency"],
+                "price": row["price"],
                 "rating": row["rating"],
                 "image": row["image"],
                 "summary": row["summary"],
                 "facilities": [x.strip() for x in (row["facilities"] or "").split(",") if x.strip()],
+                "source_note": row["source_note"],
             }
         )
 
     return {
         "count": total,
         "page": safe_page,
-        "page_size": page_size,
+        "page_size": safe_page_size,
         "total_pages": total_pages,
+        "showing": len(hotels),
         "hotels": hotels,
+        "search_used": {
+            "country": country or "",
+            "city": city or "",
+            "area": area or "",
+            "facilities": selected_facilities,
+            "adults": adults,
+        },
     }
 
 
 @app.post("/api/request")
-def request_booking(request: BookingRequest):
+def request_booking(request: ReservationRequest):
     conn = get_conn()
     cur = conn.cursor()
     cur.execute("SELECT * FROM hotels WHERE id = ?", (request.hotel_id,))
@@ -671,7 +569,7 @@ def request_booking(request: BookingRequest):
         conn.close()
         return {
             "status": "error",
-            "message": "The selected hotel could not be found.",
+            "message": "The selected hotel could not be found. Please select another stay.",
         }
 
     request_id = str(uuid.uuid4())
@@ -681,7 +579,6 @@ def request_booking(request: BookingRequest):
 
     if email_ready():
         try:
-            support_subject = f"New reservation request • {hotel['name']} • {request_id}"
             support_html = f"""
             <html>
               <body style="font-family: Arial, sans-serif; color: #12367c;">
@@ -696,10 +593,13 @@ def request_booking(request: BookingRequest):
               </body>
             </html>
             """
-            send_html_email(SUPPORT_EMAIL, support_subject, support_html)
+            send_html_email(
+                SUPPORT_EMAIL,
+                f"New reservation request • {hotel['name']} • {request_id}",
+                support_html,
+            )
             support_sent = 1
 
-            customer_subject = f"Your My Space Hotel reservation request • {hotel['name']}"
             customer_html = f"""
             <html>
               <body style="font-family: Arial, sans-serif; color: #12367c;">
@@ -709,19 +609,20 @@ def request_booking(request: BookingRequest):
                 <p><strong>Location:</strong> {hotel['area']}, {hotel['city']}, {hotel['country']}</p>
                 <p><strong>Request ID:</strong> {request_id}</p>
                 <p>We will continue with you using the email address you provided.</p>
-                <p>We appreciate the opportunity to help you choose the right stay with more confidence.</p>
               </body>
             </html>
             """
-            send_html_email(request.email, customer_subject, customer_html)
+            send_html_email(
+                request.email,
+                f"Your My Space Hotel reservation request • {hotel['name']}",
+                customer_html,
+            )
             customer_sent = 1
+
         except Exception as exc:
             email_note = str(exc)
     else:
-        email_note = (
-            "SMTP is not fully configured. Required keys: SMTP_HOST, SMTP_PORT, "
-            "SMTP_USERNAME or EMAIL_USER, SMTP_PASSWORD, SMTP_FROM, SUPPORT_EMAIL."
-        )
+        email_note = "SMTP is not fully configured."
 
     cur.execute(
         """
@@ -735,31 +636,21 @@ def request_booking(request: BookingRequest):
             request_id,
             hotel["id"],
             hotel["name"],
-            request.name.strip(),
-            request.email.strip(),
-            request.message.strip(),
+            request.name,
+            request.email,
+            request.message,
             support_sent,
             customer_sent,
             email_note,
         ),
     )
+
     conn.commit()
     conn.close()
 
-    if support_sent and customer_sent:
-        return {
-            "status": "received",
-            "message": "Your reservation request has been received and confirmation emails have been sent.",
-            "request_id": request_id,
-            "email_delivery": {
-                "support_sent": True,
-                "customer_sent": True,
-            },
-        }
-
     return {
         "status": "received",
-        "message": "Your reservation request has been received. We will continue with you shortly.",
+        "message": "Your reservation request has been received. Please check your email for confirmation.",
         "request_id": request_id,
         "email_delivery": {
             "support_sent": bool(support_sent),
@@ -769,48 +660,13 @@ def request_booking(request: BookingRequest):
     }
 
 
-@app.get("/api/admin/import-city")
-def admin_import_city(
-    city: str = Query(...),
-    max_pages: int = Query(1),
-):
-    return import_city_from_rapid(city, max_pages)
-
-
-@app.get("/api/admin/catalogue-status")
-def catalogue_status():
-    conn = get_conn()
-    cur = conn.cursor()
-
-    cur.execute("SELECT COUNT(*) AS count FROM hotels")
-    total_hotels = cur.fetchone()["count"]
-
-    cur.execute(
-        """
-        SELECT imported_from_city, COUNT(*) AS count
-        FROM hotels
-        GROUP BY imported_from_city
-        ORDER BY count DESC, imported_from_city ASC
-        """
-    )
-    rows = cur.fetchall()
-    conn.close()
-
-    by_city = [{"city": row["imported_from_city"], "count": row["count"]} for row in rows]
-
+@app.get("/api/admin/expand-internal-catalogue")
+def expand_internal_catalogue():
+    before = count_hotels()
+    after = seed_database_if_small()
     return {
-        "total_hotels": total_hotels,
-        "cities_loaded": by_city,
-        "rapid_ready": bool(RAPIDAPI_KEY),
-        "email_ready": email_ready(),
-        "email_config_debug": {
-            "smtp_host_present": bool(SMTP_HOST),
-            "smtp_port_present": bool(SMTP_PORT),
-            "smtp_username_present": bool(SMTP_USERNAME),
-            "email_user_present": bool(EMAIL_USER),
-            "smtp_user_effective_present": bool(SMTP_USER),
-            "smtp_password_present": bool(SMTP_PASSWORD),
-            "smtp_from_present": bool(SMTP_FROM),
-            "support_email_present": bool(SUPPORT_EMAIL),
-        },
+        "status": "checked",
+        "before": before,
+        "after": after,
+        "added": max(0, after - before),
     }
