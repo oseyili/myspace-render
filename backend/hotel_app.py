@@ -1,17 +1,4 @@
-# =========================================================
-# BACKEND WINDOW — RESTORE HOTEL SEARCH API
-# CONTEXT: Windows PowerShell
-# =========================================================
-
-# Press Ctrl+C first if backend is running.
-# If asked "Terminate batch job (Y/N)?", type Y and press Enter.
-
-$ErrorActionPreference = "Stop"
-
-cd C:\frontend\hotel-booking-app\backend
-
-@'
-from fastapi import FastAPI, Query
+﻿from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from math import ceil
 import hashlib
@@ -38,6 +25,8 @@ COUNTRY_ALIASES = {
     "england": "United Kingdom",
     "united kingdom": "United Kingdom",
     "uae": "United Arab Emirates",
+    "dubai": "United Arab Emirates",
+    "nigeria": "Nigeria",
 }
 
 COUNTRIES = {
@@ -73,7 +62,7 @@ COUNTRIES = {
         "total": 16400,
         "currency": "AED",
         "locations": {
-            "Dubai": ["Downtown Dubai", "Marina", "Palm Jumeirah", "Deira"],
+            "Dubai": ["Downtown Dubai", "Dubai Marina", "Palm Jumeirah", "Deira"],
             "Abu Dhabi": ["Corniche", "Yas Island", "Saadiyat Island"],
         },
     },
@@ -92,12 +81,12 @@ FACILITIES = [
     "business lounge",
 ]
 
-def normalize_country(value: str):
+def normalize_country(value: str) -> str:
     raw = (value or "").strip()
     lower = raw.lower()
     return COUNTRY_ALIASES.get(lower, raw.title())
 
-def score(seed: str, low: int, high: int):
+def stable_number(seed: str, low: int, high: int) -> int:
     digest = hashlib.sha256(seed.encode("utf-8")).hexdigest()
     return low + (int(digest[:8], 16) % (high - low + 1))
 
@@ -108,43 +97,76 @@ def all_locations(country_data):
             rows.append({"region": region, "city": city})
     return rows
 
-def make_hotel(country, region, city, index):
+def make_hotel(country: str, region: str, city: str, index: int):
     seed = f"{country}-{region}-{city}-{index}"
     prefixes = ["Grand", "Royal", "Central", "Premier", "Harbour", "Garden", "Skyline", "Palm", "Metro", "Riverside"]
     types = ["Hotel", "Suites", "Residence", "Inn", "Resort", "Lodge"]
-    name = f"{prefixes[score(seed + 'a', 0, len(prefixes)-1)]} {city} {types[score(seed + 'b', 0, len(types)-1)]}"
 
-    facilities = []
+    prefix = prefixes[stable_number(seed + "prefix", 0, len(prefixes) - 1)]
+    stay_type = types[stable_number(seed + "type", 0, len(types) - 1)]
+
+    hotel_facilities = []
     for item in FACILITIES:
-        if score(seed + item, 0, 100) > 42:
-            facilities.append(item)
-    if "wifi" not in facilities:
-        facilities.insert(0, "wifi")
-    if "restaurant" not in facilities:
-        facilities.append("restaurant")
+        if stable_number(seed + item, 0, 100) > 40:
+            hotel_facilities.append(item)
+
+    if "wifi" not in hotel_facilities:
+        hotel_facilities.insert(0, "wifi")
+    if "restaurant" not in hotel_facilities:
+        hotel_facilities.append("restaurant")
+    if "parking" not in hotel_facilities:
+        hotel_facilities.append("parking")
 
     return {
         "id": hashlib.md5(seed.encode("utf-8")).hexdigest()[:12],
-        "name": name,
+        "name": f"{prefix} {city} {stay_type}",
         "country": country,
         "region": region,
         "city": city,
         "area": city,
-        "address": f"{score(seed, 1, 299)} {city} Hospitality Avenue, {region}, {country}",
+        "address": f"{stable_number(seed, 1, 299)} {city} Hospitality Avenue, {region}, {country}",
         "map_query": f"{city}, {region}, {country}",
-        "rating": round(score(seed + 'rating', 38, 49) / 10, 1),
+        "rating": round(stable_number(seed + "rating", 38, 49) / 10, 1),
         "currency": COUNTRIES[country]["currency"],
-        "facilities": facilities[:7],
+        "facilities": hotel_facilities[:7],
         "reservation_status": "Request availability",
     }
 
 @app.get("/")
 def root():
-    return {"status": "online", "app": "My Space Hotel"}
+    return {
+        "status": "online",
+        "app": "My Space Hotel",
+        "message": "Backend is running",
+    }
 
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
+
+@app.get("/api/locations")
+def locations(country: str = Query("")):
+    clean_country = normalize_country(country)
+
+    if clean_country not in COUNTRIES:
+        return {
+            "country": clean_country,
+            "total_hotels": 0,
+            "currency": "",
+            "locations": [],
+        }
+
+    data = COUNTRIES[clean_country]
+
+    return {
+        "country": clean_country,
+        "total_hotels": data["total"],
+        "currency": data["currency"],
+        "locations": [
+            {"region": region, "cities": cities}
+            for region, cities in data["locations"].items()
+        ],
+    }
 
 @app.get("/api/search")
 def search(
@@ -171,33 +193,34 @@ def search(
         }
 
     data = COUNTRIES[clean_country]
-    locations = all_locations(data)
+    location_rows = all_locations(data)
 
     wanted_city = (city or "").strip().lower()
     wanted_area = (area or "").strip().lower()
     wanted_facilities = [x.strip().lower() for x in facilities.split(",") if x.strip()]
 
     matched_locations = []
-    for loc in locations:
-        region_l = loc["region"].lower()
-        city_l = loc["city"].lower()
+
+    for loc in location_rows:
+        region_lower = loc["region"].lower()
+        city_lower = loc["city"].lower()
 
         city_ok = True
         area_ok = True
 
         if wanted_city:
-            city_ok = wanted_city in city_l or wanted_city in region_l
+            city_ok = wanted_city in city_lower or wanted_city in region_lower
 
         if wanted_area:
-            area_ok = wanted_area in city_l or wanted_area in region_l
+            area_ok = wanted_area in city_lower or wanted_area in region_lower
 
         if city_ok and area_ok:
             matched_locations.append(loc)
 
     if not matched_locations:
-        matched_locations = locations
+        matched_locations = location_rows
 
-    total = max(1, int(data["total"] * (len(matched_locations) / max(1, len(locations)))))
+    total = max(1, int(data["total"] * (len(matched_locations) / max(1, len(location_rows)))))
     page = max(1, page)
     page_size = max(6, min(page_size, 48))
     pages = ceil(total / page_size)
@@ -226,11 +249,9 @@ def search(
         "pages": pages,
         "currency": data["currency"],
         "country": clean_country,
-        "locations": [{"region": region, "cities": cities} for region, cities in data["locations"].items()],
+        "locations": [
+            {"region": region, "cities": cities}
+            for region, cities in data["locations"].items()
+        ],
         "hotels": hotels,
     }
-'@ | Set-Content -Path ".\hotel_app.py" -Encoding UTF8
-
-python -m py_compile .\hotel_app.py
-
-python -m uvicorn hotel_app:app --host 127.0.0.1 --port 5050
