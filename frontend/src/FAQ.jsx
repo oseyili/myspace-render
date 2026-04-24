@@ -2,23 +2,40 @@ import React from "react";
 
 export default function FAQ({ goBack }) {
   return (
-    <div style={pageStyle}>
-      <button onClick={goBack} style={backBtn}>Return to search</button>
-      <h1>FAQs</h1>
-      <h2>How does My Space Hotel work?</h2>
-      <p>Search globally, compare stays clearly, choose the hotel that fits your trip, and send a reservation request directly.</p>
+    <div style={{ padding: 20, color: "white", background: "#07152f", minHeight: "100vh" }}>
+      <button onClick={goBack}>← Back</button>
 
-      <h2>Do I pay immediately?</h2>
-      <p>No. You first send a reservation request so the next step can be handled clearly and safely.</p>
+      <h1>Frequently Asked Questions</h1>
 
-      <h2>Can I search by country, city, or area?</h2>
-      <p>Yes. You can search broadly by country, narrow by city, or focus on a specific area.</p>
+      <h3>How does this platform work?</h3>
+      <p>
+        You search hotels globally, compare available options, and send a direct
+        reservation request. We simplify the process so you can decide faster.
+      </p>
 
-      <h2>Will I receive confirmation?</h2>
-      <p>When email delivery is active, you receive a request confirmation by email.</p>
+      <h3>Are prices real?</h3>
+      <p>
+        Prices reflect current available rates at the time of search. Always
+        confirm availability when submitting your request.
+      </p>
+
+      <h3>Do I pay through this platform?</h3>
+      <p>
+        You request your stay here. Final booking and payment may be completed
+        through a partner or directly with the property.
+      </p>
+
+      <h3>Can I cancel?</h3>
+      <p>
+        Cancellation depends on the hotel or booking provider. Always check
+        conditions before confirming.
+      </p>
+
+      <h3>Why use this platform?</h3>
+      <p>
+        We help you filter faster, compare clearly, and move directly toward a
+        reservation without unnecessary steps.
+      </p>
     </div>
   );
 }
-
-const pageStyle = { minHeight: "100vh", background: "#07152f", color: "white", padding: 30, fontFamily: "Arial" };
-const backBtn = { background: "#f1c644", border: "none", padding: 14, borderRadius: 12, fontWeight: 800 };
