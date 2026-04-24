@@ -33,7 +33,7 @@ DB_PATH = BASE_DIR / "hotel_catalog.db"
 # GLOBAL CONFIG
 # =========================================================
 
-HOTELS_PER_AREA = 800  # 🔥 SCALE UP (this drives 300K+)
+HOTELS_PER_AREA = 100000  # 🔥 SCALE UP (this drives 300K+)
 
 FACILITIES = [
     "wifi","spa","gym","restaurant","pool","parking",
@@ -215,7 +215,7 @@ def search(
     area: Optional[str] = None,
     facilities: Optional[str] = None,
     page: int = 1,
-    page_size: int = 12
+    page_size: int = 24
 ):
 
     country = norm_country(country)
