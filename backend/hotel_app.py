@@ -1,9 +1,12 @@
 ﻿from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
-from math import ceil
+import os
+import json
 import hashlib
+import urllib.parse
+import urllib.request
 
-app = FastAPI(title="My Space Hotel Backend")
+app = FastAPI(title="My Space Hotel Global Backend")
 
 app.add_middleware(
     CORSMiddleware,
@@ -13,160 +16,150 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-COUNTRIES = {
-    "usa": {
-        "name": "United States",
-        "currency": "USD",
-        "total": 128760,
-        "regions": {
-            "Florida": ["Miami", "Orlando", "Tampa", "Fort Lauderdale", "Key West", "Naples", "Jacksonville", "Palm Beach", "Sarasota", "Clearwater"],
-            "New York": ["New York City", "Brooklyn", "Queens", "Buffalo", "Albany"],
-            "California": ["Los Angeles", "San Francisco", "San Diego", "Anaheim", "Sacramento"],
-            "Texas": ["Houston", "Dallas", "Austin", "San Antonio"],
-            "Nevada": ["Las Vegas", "Reno"],
-        },
-    },
-    "uk": {
-        "name": "United Kingdom",
-        "currency": "GBP",
-        "total": 42600,
-        "regions": {
-            "England": ["London", "Manchester", "Birmingham", "Liverpool", "Leeds"],
-            "Scotland": ["Edinburgh", "Glasgow", "Aberdeen"],
-            "Wales": ["Cardiff", "Swansea"],
-        },
-    },
-    "nigeria": {
-        "name": "Nigeria",
-        "currency": "NGN",
-        "total": 18800,
-        "regions": {
-            "Lagos": ["Lekki", "Victoria Island", "Ikeja", "Ikoyi", "Marina"],
-            "Abuja": ["Wuse", "Maitama", "Garki", "Asokoro"],
-        },
-    },
-    "uae": {
-        "name": "United Arab Emirates",
-        "currency": "AED",
-        "total": 16400,
-        "regions": {
-            "Dubai": ["Downtown Dubai", "Dubai Marina", "Palm Jumeirah", "Deira"],
-            "Abu Dhabi": ["Corniche", "Yas Island", "Saadiyat Island"],
-        },
-    },
+RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY", "").strip()
+RAPIDAPI_HOST = os.getenv("RAPIDAPI_HOST", "booking-com.p.rapidapi.com").strip()
+
+COUNTRY_ALIASES = {
+    "usa": "United States", "us": "United States", "america": "United States", "united states": "United States",
+    "uk": "United Kingdom", "england": "United Kingdom", "united kingdom": "United Kingdom",
+    "uae": "United Arab Emirates", "dubai": "United Arab Emirates",
 }
 
-ALIASES = {
-    "usa": "usa", "us": "usa", "u.s.a": "usa", "america": "usa", "united states": "usa", "florida": "usa",
-    "uk": "uk", "u.k.": "uk", "england": "uk", "united kingdom": "uk",
-    "nigeria": "nigeria",
-    "uae": "uae", "dubai": "uae", "united arab emirates": "uae",
+GLOBAL_DATABASE = {
+    "United States": {"currency": "USD", "total": 128760, "places": ["New York", "Florida", "Miami", "Orlando", "Los Angeles", "Las Vegas", "Chicago", "Houston", "Dallas", "San Francisco"]},
+    "United Kingdom": {"currency": "GBP", "total": 52600, "places": ["London", "Manchester", "Birmingham", "Liverpool", "Edinburgh", "Glasgow", "Cardiff"]},
+    "France": {"currency": "EUR", "total": 61200, "places": ["Paris", "Nice", "Lyon", "Marseille", "Cannes", "Bordeaux"]},
+    "Spain": {"currency": "EUR", "total": 73500, "places": ["Madrid", "Barcelona", "Malaga", "Ibiza", "Valencia", "Seville"]},
+    "Italy": {"currency": "EUR", "total": 68400, "places": ["Rome", "Milan", "Venice", "Florence", "Naples", "Sorrento"]},
+    "Nigeria": {"currency": "NGN", "total": 24800, "places": ["Lagos", "Abuja", "Lekki", "Victoria Island", "Ikeja", "Kano", "Port Harcourt"]},
+    "United Arab Emirates": {"currency": "AED", "total": 22400, "places": ["Dubai", "Abu Dhabi", "Dubai Marina", "Palm Jumeirah", "Deira"]},
+    "Thailand": {"currency": "THB", "total": 48200, "places": ["Bangkok", "Phuket", "Pattaya", "Chiang Mai", "Krabi"]},
+    "Turkey": {"currency": "TRY", "total": 44600, "places": ["Istanbul", "Antalya", "Bodrum", "Izmir", "Ankara"]},
+    "Greece": {"currency": "EUR", "total": 31200, "places": ["Athens", "Santorini", "Mykonos", "Crete", "Rhodes"]},
 }
 
 FACILITIES = ["wifi", "spa", "gym", "restaurant", "pool", "parking", "airport shuttle", "family rooms", "beach access", "business lounge"]
 
-def norm(v):
-    return ALIASES.get((v or "").strip().lower(), (v or "").strip().lower())
+def clean_country(value):
+    raw = (value or "").strip()
+    return COUNTRY_ALIASES.get(raw.lower(), raw.title())
 
-def num(seed, low, high):
-    h = hashlib.sha256(seed.encode()).hexdigest()
+def n(seed, low, high):
+    h = hashlib.sha256(seed.encode("utf-8")).hexdigest()
     return low + int(h[:8], 16) % (high - low + 1)
 
-def rows(data):
-    out = []
-    for region, cities in data["regions"].items():
-        for city in cities:
-            out.append({"region": region, "city": city})
-    return out
+def fallback_hotels(country, city, area, facilities, page, page_size):
+    country = clean_country(country) or "United States"
+    if country not in GLOBAL_DATABASE:
+        country = "United States"
 
-def hotel(data, country_key, region, city, i):
-    seed = f"{country_key}-{region}-{city}-{i}"
-    prefixes = ["Grand", "Royal", "Central", "Premier", "Harbour", "Garden", "Skyline", "Palm", "Metro", "Riverside"]
-    types = ["Hotel", "Suites", "Residence", "Inn", "Resort", "Lodge"]
-    fs = [f for f in FACILITIES if num(seed + f, 0, 100) > 38]
-    for must in ["wifi", "restaurant", "parking"]:
-        if must not in fs:
-            fs.append(must)
-    return {
-        "id": hashlib.md5(seed.encode()).hexdigest()[:12],
-        "name": f"{prefixes[num(seed+'p',0,9)]} {city} {types[num(seed+'t',0,5)]}",
-        "country": data["name"],
-        "region": region,
-        "city": city,
-        "area": city,
-        "address": f"{num(seed,1,399)} {city} Hospitality Avenue, {region}, {data['name']}",
-        "map_query": f"{city}, {region}, {data['name']}",
-        "rating": round(num(seed+"r", 38, 49) / 10, 1),
-        "currency": data["currency"],
-        "facilities": fs[:7],
-        "reservation_status": "Request availability",
-    }
+    data = GLOBAL_DATABASE[country]
+    q = (city or area or "").strip().lower()
+    places = [p for p in data["places"] if not q or q in p.lower()]
+    if not places:
+        places = data["places"]
 
-@app.get("/")
-def root():
-    return {"status": "online", "app": "My Space Hotel", "total_usa_hotels": 128760}
-
-@app.get("/api/search")
-def search(country: str = "", city: str = "", area: str = "", facilities: str = "", page: int = 1, page_size: int = 24, guests: int = 2):
-    key = norm(country) or "usa"
-    if key not in COUNTRIES:
-        key = "usa"
-
-    data = COUNTRIES[key]
-    all_rows = rows(data)
-    q_city = (city or "").strip().lower()
-    q_area = (area or "").strip().lower()
+    total = max(100000 if country == "United States" else data["total"], int(data["total"] * len(places) / len(data["places"])))
     wanted = [x.strip().lower() for x in facilities.split(",") if x.strip()]
-
-    matched = []
-    for r in all_rows:
-        region = r["region"].lower()
-        c = r["city"].lower()
-        ok_city = not q_city or q_city in region or q_city in c
-        ok_area = not q_area or q_area in region or q_area in c
-        if ok_city and ok_area:
-            matched.append(r)
-
-    if not matched:
-        matched = all_rows
-
-    total = max(100000 if key == "usa" else 1, int(data["total"] * len(matched) / len(all_rows)))
-    page = max(1, page)
-    page_size = max(12, min(page_size, 48))
-    pages = ceil(total / page_size)
-    start = (page - 1) * page_size
+    start = (max(1, page) - 1) * page_size
 
     hotels = []
     i = start
     while len(hotels) < page_size and i < total:
-        r = matched[i % len(matched)]
-        h = hotel(data, key, r["region"], r["city"], i + 1)
-        if wanted and not all(x in [f.lower() for f in h["facilities"]] for x in wanted):
+        place = places[i % len(places)]
+        seed = f"{country}-{place}-{i}"
+        fs = [f for f in FACILITIES if n(seed + f, 0, 100) > 35]
+        for must in ["wifi", "restaurant", "parking"]:
+            if must not in fs:
+                fs.append(must)
+
+        if wanted and not all(w in [x.lower() for x in fs] for w in wanted):
             i += 1
             continue
-        hotels.append(h)
+
+        hotels.append({
+            "id": hashlib.md5(seed.encode("utf-8")).hexdigest()[:12],
+            "name": f"{['Grand','Royal','Central','Premier','Harbour','Garden','Skyline','Palm'][n(seed,0,7)]} {place} {['Hotel','Suites','Residence','Resort','Inn'][n(seed+'x',0,4)]}",
+            "country": country,
+            "region": place,
+            "city": place,
+            "area": place,
+            "address": f"{n(seed,1,499)} {place} Hospitality Avenue, {country}",
+            "map_query": f"{place}, {country}",
+            "rating": round(n(seed+"r", 38, 49) / 10, 1),
+            "currency": data["currency"],
+            "facilities": fs[:7],
+            "reservation_status": "Request availability",
+        })
         i += 1
 
     return {
+        "source": "internal-global-database",
         "total": total,
         "page": page,
         "page_size": page_size,
-        "pages": pages,
         "currency": data["currency"],
-        "country": data["name"],
-        "locations": [{"region": k, "cities": v} for k, v in data["regions"].items()],
+        "country": country,
+        "locations": [{"region": country, "cities": data["places"]}],
         "hotels": hotels,
     }
 
+def rapid_search(country, city):
+    if not RAPIDAPI_KEY:
+        return None
+
+    destination = city.strip() or country.strip() or "London"
+    url = "https://booking-com.p.rapidapi.com/v1/hotels/locations?" + urllib.parse.urlencode({
+        "name": destination,
+        "locale": "en-gb",
+    })
+
+    req = urllib.request.Request(url, headers={
+        "X-RapidAPI-Key": RAPIDAPI_KEY,
+        "X-RapidAPI-Host": RAPIDAPI_HOST,
+    })
+
+    try:
+        with urllib.request.urlopen(req, timeout=12) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except Exception:
+        return None
+
+@app.get("/")
+def root():
+    return {"status": "online", "app": "My Space Hotel", "database": "global", "rapidapi_enabled": bool(RAPIDAPI_KEY)}
+
+@app.get("/api/search")
+def search(
+    country: str = Query(""),
+    city: str = Query(""),
+    area: str = Query(""),
+    facilities: str = Query(""),
+    guests: int = Query(2),
+    page: int = Query(1),
+    page_size: int = Query(24),
+):
+    page = max(1, page)
+    page_size = max(12, min(page_size, 48))
+
+    rapid = rapid_search(country, city or area)
+    fallback = fallback_hotels(country, city, area, facilities, page, page_size)
+
+    if rapid:
+        fallback["source"] = "rapidapi-plus-internal-global-database"
+        fallback["rapidapi_locations_found"] = len(rapid) if isinstance(rapid, list) else 1
+
+    return fallback
+
 @app.get("/api/locations")
-def locations(country: str = "usa"):
-    key = norm(country) or "usa"
-    if key not in COUNTRIES:
-        key = "usa"
-    data = COUNTRIES[key]
+def locations(country: str = Query("")):
+    country = clean_country(country) or "United States"
+    if country not in GLOBAL_DATABASE:
+        country = "United States"
+    data = GLOBAL_DATABASE[country]
     return {
-        "country": data["name"],
+        "country": country,
         "total_hotels": data["total"],
         "currency": data["currency"],
-        "locations": [{"region": k, "cities": v} for k, v in data["regions"].items()],
+        "locations": [{"region": country, "cities": data["places"]}],
     }
