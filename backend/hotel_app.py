@@ -2,17 +2,17 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 from dotenv import load_dotenv
-from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
-import os, sqlite3, uuid, smtplib, requests, stripe
+import os
+import uuid
+import smtplib
+import requests
+import stripe
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 load_dotenv()
-
-BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "hotel_catalog.db"
 
 RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY", "").strip()
 RAPIDAPI_HOST = "apidojo-booking-v1.p.rapidapi.com"
@@ -44,12 +44,6 @@ class ReservationRequest(BaseModel):
     email: EmailStr
     message: str = ""
 
-def rapid_headers():
-    return {
-        "X-RapidAPI-Key": RAPIDAPI_KEY,
-        "X-RapidAPI-Host": RAPIDAPI_HOST,
-    }
-
 def email_ready():
     return all([SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM])
 
@@ -73,6 +67,153 @@ def send_email(to_email, subject, html):
     except Exception as exc:
         return False, str(exc)
 
+def rapid_headers():
+    return {
+        "X-RapidAPI-Key": RAPIDAPI_KEY,
+        "X-RapidAPI-Host": RAPIDAPI_HOST,
+    }
+
+def travel_dates():
+    arrival = datetime.utcnow().date() + timedelta(days=30)
+    departure = arrival + timedelta(days=4)
+    return arrival.isoformat(), departure.isoformat()
+
+def get_dest(city):
+    url = f"https://{RAPIDAPI_HOST}/locations/auto-complete"
+    params = {"text": city, "languagecode": "en-us"}
+
+    r = requests.get(url, headers=rapid_headers(), params=params, timeout=35)
+    if r.status_code != 200:
+        return None, f"Location error {r.status_code}: {r.text[:500]}"
+
+    data = r.json()
+    if isinstance(data, dict):
+        data = data.get("data") or data.get("result") or data.get("results") or []
+
+    if not data:
+        return None, "No destination found."
+
+    best = None
+
+    for item in data:
+        if item.get("dest_type") in ["city", "district", "region"] and (item.get("dest_id") or item.get("id") or item.get("ufi")):
+            best = item
+            break
+
+    if not best:
+        best = data[0]
+
+    return {
+        "dest_id": best.get("dest_id") or best.get("id") or best.get("ufi"),
+        "dest_type": best.get("dest_type") or best.get("type") or "city",
+        "label": best.get("label") or best.get("name") or city,
+    }, ""
+
+def find_hotel_list(data):
+    if isinstance(data, list):
+        return data
+
+    if not isinstance(data, dict):
+        return []
+
+    direct_paths = [
+        ["result"],
+        ["results"],
+        ["hotels"],
+        ["data"],
+        ["data", "result"],
+        ["data", "results"],
+        ["data", "hotels"],
+        ["searchResults", "results"],
+        ["propertySearchListings"],
+    ]
+
+    for path in direct_paths:
+        cur = data
+        ok = True
+        for key in path:
+            if isinstance(cur, dict) and key in cur:
+                cur = cur[key]
+            else:
+                ok = False
+                break
+        if ok and isinstance(cur, list):
+            return cur
+
+    for value in data.values():
+        if isinstance(value, list) and value and isinstance(value[0], dict):
+            return value
+        if isinstance(value, dict):
+            nested = find_hotel_list(value)
+            if nested:
+                return nested
+
+    return []
+
+def nested(obj, path, default=None):
+    cur = obj
+    for part in path.split("."):
+        if isinstance(cur, dict) and part in cur:
+            cur = cur[part]
+        elif isinstance(cur, list) and part.isdigit() and int(part) < len(cur):
+            cur = cur[int(part)]
+        else:
+            return default
+    return cur if cur not in [None, ""] else default
+
+def clean_hotel(item):
+    basic = item.get("basicPropertyData") or {}
+    location = item.get("location") or basic.get("location") or {}
+    price_breakdown = item.get("priceBreakdown") or {}
+    gross_price = price_breakdown.get("grossPrice") or {}
+
+    hotel_id = (
+        item.get("hotel_id")
+        or item.get("id")
+        or item.get("propertyId")
+        or basic.get("id")
+    )
+
+    name = (
+        item.get("hotel_name")
+        or item.get("name")
+        or item.get("propertyName")
+        or basic.get("name")
+        or nested(item, "displayName.text")
+    )
+
+    if not hotel_id or not name:
+        return None
+
+    lat = item.get("latitude") or item.get("lat") or location.get("latitude")
+    lng = item.get("longitude") or item.get("lng") or location.get("longitude")
+
+    image = (
+        item.get("max_1440_photo_url")
+        or item.get("main_photo_url")
+        or item.get("photo_url")
+        or nested(item, "photoUrls.0")
+        or nested(item, "basicPropertyData.photos.main.highResUrl")
+        or nested(item, "basicPropertyData.photos.main.lowResUrl")
+        or ""
+    )
+
+    return {
+        "id": f"rapid-{hotel_id}",
+        "name": name,
+        "city": item.get("city") or item.get("city_name") or location.get("city") or "",
+        "country": item.get("country_trans") or item.get("country") or location.get("country") or "",
+        "price": item.get("min_total_price") or gross_price.get("value"),
+        "currency": item.get("currencycode") or gross_price.get("currency") or "LOCAL",
+        "rating": item.get("review_score") or item.get("reviewScore") or nested(item, "basicPropertyData.reviewScore.score"),
+        "review_count": item.get("review_nr") or item.get("review_count") or nested(item, "basicPropertyData.reviewScore.reviewCount"),
+        "image": image,
+        "latitude": lat,
+        "longitude": lng,
+        "map_url": f"https://www.google.com/maps?q={lat},{lng}" if lat and lng else f"https://www.google.com/maps?q={name}",
+        "fake_data": False,
+    }
+
 @app.get("/")
 def root():
     return {
@@ -85,125 +226,18 @@ def root():
         "stripe_ready": bool(STRIPE_SECRET_KEY),
     }
 
-def get_dest(city):
-    url = f"https://{RAPIDAPI_HOST}/locations/auto-complete"
-    params = {"text": city, "languagecode": "en-us"}
-
-    r = requests.get(url, headers=rapid_headers(), params=params, timeout=35)
-    if r.status_code != 200:
-        return None, f"Location error {r.status_code}: {r.text[:300]}"
-
-    data = r.json()
-    if isinstance(data, dict):
-        data = data.get("data") or data.get("result") or data.get("results") or []
-
-    if not data:
-        return None, "No destination found."
-
-    first = data[0]
-    return {
-        "dest_id": first.get("dest_id") or first.get("id") or first.get("ufi"),
-        "dest_type": first.get("dest_type") or first.get("type") or "city",
-        "raw": first,
-    }, ""
-
-def find_hotel_list(data):
-    paths = [
-        ["result"],
-        ["results"],
-        ["hotels"],
-        ["data"],
-        ["data", "result"],
-        ["data", "results"],
-        ["data", "hotels"],
-        ["searchResults", "results"],
-        ["search_results"],
-        ["propertySearchListings"],
-    ]
-
-    for path in paths:
-        cur = data
-        ok = True
-        for key in path:
-            if isinstance(cur, dict) and key in cur:
-                cur = cur[key]
-            else:
-                ok = False
-                break
-        if ok and isinstance(cur, list):
-            return cur
-
-    if isinstance(data, dict):
-        for value in data.values():
-            if isinstance(value, list) and value and isinstance(value[0], dict):
-                return value
-            if isinstance(value, dict):
-                nested = find_hotel_list(value)
-                if nested:
-                    return nested
-
-    return []
-
-def clean_hotel(item):
-    hotel_id = item.get("hotel_id") or item.get("id") or item.get("propertyId")
-    name = item.get("hotel_name") or item.get("name") or item.get("propertyName")
-
-    if not hotel_id or not name:
-        basic = item.get("basicPropertyData") or {}
-        hotel_id = hotel_id or basic.get("id")
-        name = name or basic.get("name")
-
-    if not hotel_id or not name:
-        return None
-
-    lat = item.get("latitude") or item.get("lat")
-    lng = item.get("longitude") or item.get("lng")
-
-    location = item.get("location") or {}
-    if not lat:
-        lat = location.get("latitude")
-    if not lng:
-        lng = location.get("longitude")
-
-    image = (
-        item.get("max_1440_photo_url")
-        or item.get("main_photo_url")
-        or item.get("photo_url")
-        or ""
-    )
-
-    if not image:
-        photos = item.get("photoUrls") or []
-        if photos:
-            image = photos[0]
-
-    price_breakdown = item.get("priceBreakdown") or {}
-    gross_price = price_breakdown.get("grossPrice") or {}
-
-    return {
-        "id": f"rapid-{hotel_id}",
-        "name": name,
-        "city": item.get("city") or item.get("city_name") or location.get("city") or "",
-        "country": item.get("country_trans") or item.get("country") or location.get("country") or "",
-        "price": item.get("min_total_price") or gross_price.get("value"),
-        "currency": item.get("currencycode") or gross_price.get("currency") or "LOCAL",
-        "rating": item.get("review_score") or item.get("reviewScore"),
-        "image": image,
-        "latitude": lat,
-        "longitude": lng,
-        "map_url": f"https://www.google.com/maps?q={lat},{lng}" if lat and lng else f"https://www.google.com/maps?q={name}",
-        "fake_data": False,
-    }
-
 @app.get("/api/debug/rapid")
 def debug_rapid(city: str = Query("London")):
     dest, err = get_dest(city)
     if err:
         return {"stage": "location", "error": err}
 
-    url = f"https://{RAPIDAPI_HOST}/properties/list"
+    arrival, departure = travel_dates()
+
     params = {
         "offset": 0,
+        "arrival_date": arrival,
+        "departure_date": departure,
         "guest_qty": 2,
         "children_qty": 0,
         "room_qty": 1,
@@ -216,19 +250,28 @@ def debug_rapid(city: str = Query("London")):
         "timezone": "UTC",
     }
 
-    r = requests.get(url, headers=rapid_headers(), params=params, timeout=40)
+    r = requests.get(
+        f"https://{RAPIDAPI_HOST}/properties/list",
+        headers=rapid_headers(),
+        params=params,
+        timeout=40,
+    )
 
     try:
         body = r.json()
     except Exception:
         body = r.text[:1000]
 
-    keys = list(body.keys()) if isinstance(body, dict) else []
+    hotel_list = find_hotel_list(body)
 
     return {
         "status_code": r.status_code,
         "destination": dest,
-        "top_level_keys": keys,
+        "arrival_date": arrival,
+        "departure_date": departure,
+        "top_level_keys": list(body.keys()) if isinstance(body, dict) else [],
+        "hotel_list_found": len(hotel_list),
+        "sample_hotel_keys": list(hotel_list[0].keys()) if hotel_list and isinstance(hotel_list[0], dict) else [],
         "sample": body if isinstance(body, dict) else str(body)[:1000],
     }
 
@@ -242,28 +285,47 @@ def search_hotels(
     page_size: int = Query(24),
 ):
     if not RAPIDAPI_KEY:
-        return {"count": 0, "hotels": [], "message": "RapidAPI key is not configured."}
+        return {
+            "count": 0,
+            "hotels": [],
+            "message": "RapidAPI key is not configured.",
+            "fake_data": False,
+        }
 
     dest, err = get_dest(city)
     if err or not dest or not dest.get("dest_id"):
-        return {"count": 0, "hotels": [], "message": err or "Destination not found."}
+        return {
+            "count": 0,
+            "hotels": [],
+            "message": err or "Destination not found.",
+            "fake_data": False,
+        }
 
-    url = f"https://{RAPIDAPI_HOST}/properties/list"
+    arrival, departure = travel_dates()
+    safe_page_size = min(max(1, page_size), 24)
+
     params = {
-        "offset": max(0, (page - 1) * page_size),
+        "offset": max(0, (page - 1) * safe_page_size),
+        "arrival_date": arrival,
+        "departure_date": departure,
         "guest_qty": adults,
         "children_qty": 0,
         "room_qty": 1,
         "search_type": dest["dest_type"],
         "dest_ids": dest["dest_id"],
-        "price_filter_currencycode": "GBP" if (country or "").lower() in ["uk", "united kingdom"] else "USD",
+        "price_filter_currencycode": "GBP" if (country or "").lower() in ["uk", "united kingdom", "gb", "england"] else "USD",
         "order_by": "popularity",
         "languagecode": "en-us",
         "units": "imperial",
         "timezone": "UTC",
     }
 
-    r = requests.get(url, headers=rapid_headers(), params=params, timeout=40)
+    r = requests.get(
+        f"https://{RAPIDAPI_HOST}/properties/list",
+        headers=rapid_headers(),
+        params=params,
+        timeout=40,
+    )
 
     if r.status_code != 200:
         return {
@@ -271,27 +333,38 @@ def search_hotels(
             "hotels": [],
             "message": "Live hotel provider error.",
             "provider_error": r.text[:500],
+            "fake_data": False,
         }
 
     data = r.json()
     results = find_hotel_list(data)
 
     hotels = []
-    for item in results[:page_size]:
+    for item in results[:safe_page_size]:
         if isinstance(item, dict):
-            h = clean_hotel(item)
-            if h:
-                hotels.append(h)
+            hotel = clean_hotel(item)
+            if hotel:
+                hotels.append(hotel)
+
+    if area:
+        area_lower = area.lower()
+        hotels = [
+            h for h in hotels
+            if area_lower in (h.get("name") or "").lower()
+            or area_lower in (h.get("city") or "").lower()
+            or area_lower in (h.get("country") or "").lower()
+        ]
 
     return {
         "count": len(hotels),
         "page": page,
-        "page_size": page_size,
+        "page_size": safe_page_size,
         "total_pages": 1,
         "showing": len(hotels),
         "hotels": hotels,
         "fake_data": False,
-        "debug_keys": list(data.keys()) if isinstance(data, dict) else [],
+        "arrival_date": arrival,
+        "departure_date": departure,
     }
 
 def create_stripe_checkout(booking_id, hotel_name, email):
@@ -314,6 +387,7 @@ def create_stripe_checkout(booking_id, hotel_name, email):
         success_url=f"{PUBLIC_FRONTEND_URL}/?payment=success&booking_id={booking_id}",
         cancel_url=f"{PUBLIC_FRONTEND_URL}/?payment=cancelled&booking_id={booking_id}",
     )
+
     return session.url
 
 @app.post("/api/request")
@@ -341,8 +415,17 @@ def request_booking(req: ReservationRequest):
     <p><a href="{stripe_url}">Continue to secure payment</a></p>
     """
 
-    support_sent, support_error = send_email(SUPPORT_EMAIL, f"New reservation request - {booking_id}", support_html)
-    customer_sent, customer_error = send_email(req.email, "Your My Space Hotel reservation and payment link", customer_html)
+    support_sent, support_error = send_email(
+        SUPPORT_EMAIL,
+        f"New reservation request - {booking_id}",
+        support_html,
+    )
+
+    customer_sent, customer_error = send_email(
+        req.email,
+        "Your My Space Hotel reservation and payment link",
+        customer_html,
+    )
 
     return {
         "status": "received",
@@ -359,4 +442,8 @@ def request_booking(req: ReservationRequest):
 
 @app.get("/api/booking/confirm")
 def confirm_booking(booking_id: str):
-    return {"status": "paid", "message": "Booking confirmed."}
+    return {
+        "status": "paid",
+        "message": "Booking confirmed.",
+        "booking_id": booking_id,
+    }
