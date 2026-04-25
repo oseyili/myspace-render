@@ -3,8 +3,7 @@ import TravelPages from "./TravelPages";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
-  import.meta.env.VITE_BACKEND_URL ||
-  "https://hotel-backend-1.onrender.com";
+  "https://hotel-backend-1-ee5z.onrender.com";
 
 const SUPPORT_EMAIL = "reservations@myspace-hotel.com";
 
