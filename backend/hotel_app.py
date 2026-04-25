@@ -1,42 +1,31 @@
+# =========================
+# FULL HOTEL BOOKING SYSTEM
+# =========================
+
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 from dotenv import load_dotenv
-from typing import Optional, List
-from pathlib import Path
 from datetime import datetime, timedelta
-import os
-import math
-import uuid
-import sqlite3
-import smtplib
-import random
-import stripe
+import os, uuid, sqlite3, smtplib, random, stripe
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 load_dotenv()
 
 # =========================
-# STRIPE
+# CONFIG
 # =========================
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
-# =========================
-# EMAIL CONFIG
-# =========================
-SMTP_HOST = os.getenv("SMTP_HOST", "").strip()
+SMTP_HOST = os.getenv("SMTP_HOST")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = os.getenv("SMTP_USERNAME", "").strip()
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "").strip()
-SMTP_FROM = os.getenv("SMTP_FROM", "").strip()
-SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "reservations@myspace-hotel.com")
+SMTP_USER = os.getenv("SMTP_USERNAME")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+SMTP_FROM = os.getenv("SMTP_FROM")
+SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL")
 
-# =========================
-# APP
-# =========================
-BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "hotel_catalog.db"
+DB_PATH = "hotel.db"
 
 app = FastAPI()
 
@@ -51,147 +40,159 @@ app.add_middleware(
 # =========================
 # MODELS
 # =========================
-class PaymentCodeSend(BaseModel):
-    hotel_id: str
+class CodeSend(BaseModel):
     email: EmailStr
+    hotel_id: str
 
-class PaymentCodeVerify(BaseModel):
-    hotel_id: str
+class CodeVerify(BaseModel):
     email: EmailStr
+    hotel_id: str
     code: str
 
-class CheckoutRequest(BaseModel):
-    hotel_id: str
+class Checkout(BaseModel):
     email: EmailStr
-    amount: int  # cents
+    hotel_id: str
+    hotel_name: str
+    amount: int
 
 # =========================
 # DATABASE
 # =========================
-def get_conn():
+def db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
-def init_db():
-    conn = get_conn()
-    cur = conn.cursor()
+def init():
+    c = db().cursor()
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS payment_codes (
-        code_id TEXT PRIMARY KEY,
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS codes (
+        id TEXT PRIMARY KEY,
         email TEXT,
         hotel_id TEXT,
         code TEXT,
-        expires_at TEXT,
-        verified INTEGER DEFAULT 0,
-        attempts INTEGER DEFAULT 0
+        expires TEXT,
+        verified INTEGER DEFAULT 0
     )
     """)
 
-    conn.commit()
-    conn.close()
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS bookings (
+        booking_id TEXT PRIMARY KEY,
+        email TEXT,
+        hotel_id TEXT,
+        hotel_name TEXT,
+        amount INTEGER,
+        status TEXT,
+        created TEXT
+    )
+    """)
 
-init_db()
+    db().commit()
+
+init()
 
 # =========================
 # EMAIL
 # =========================
 def send_email(to, subject, html):
-    msg = MIMEMultipart("alternative")
+    msg = MIMEMultipart()
     msg["Subject"] = subject
     msg["From"] = SMTP_FROM
     msg["To"] = to
     msg.attach(MIMEText(html, "html"))
 
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PASSWORD)
-        server.sendmail(SMTP_FROM, [to], msg.as_string())
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as s:
+        s.starttls()
+        s.login(SMTP_USER, SMTP_PASSWORD)
+        s.sendmail(SMTP_FROM, to, msg.as_string())
 
 # =========================
 # PAYMENT CODE
 # =========================
-def generate_code():
+def gen_code():
     return str(random.randint(100000, 999999))
 
-@app.post("/api/payment-code/send")
-def send_code(data: PaymentCodeSend):
-    conn = get_conn()
-    cur = conn.cursor()
+@app.post("/api/code/send")
+def send_code(data: CodeSend):
+    conn = db()
+    c = conn.cursor()
 
-    code = generate_code()
-    expiry = datetime.utcnow() + timedelta(minutes=10)
+    code = gen_code()
+    expiry = (datetime.utcnow() + timedelta(minutes=10)).isoformat()
 
-    cur.execute("DELETE FROM payment_codes WHERE email=? AND hotel_id=?",
-                (data.email, data.hotel_id))
+    c.execute("DELETE FROM codes WHERE email=? AND hotel_id=?", (data.email, data.hotel_id))
 
-    cur.execute("""
-    INSERT INTO payment_codes (code_id,email,hotel_id,code,expires_at)
-    VALUES (?,?,?,?,?)
-    """, (
+    c.execute("INSERT INTO codes VALUES (?,?,?,?,?,0)", (
         str(uuid.uuid4()),
         data.email,
         data.hotel_id,
         code,
-        expiry.isoformat()
+        expiry
     ))
 
     conn.commit()
     conn.close()
 
-    send_email(
-        data.email,
-        "Your Payment Code",
-        f"<h1>{code}</h1><p>Expires in 10 minutes</p>"
-    )
+    send_email(data.email, "Your Code", f"<h1>{code}</h1>")
 
     return {"status": "sent"}
 
-@app.post("/api/payment-code/verify")
-def verify_code(data: PaymentCodeVerify):
-    conn = get_conn()
-    cur = conn.cursor()
+@app.post("/api/code/verify")
+def verify_code(data: CodeVerify):
+    conn = db()
+    c = conn.cursor()
 
-    row = cur.execute("""
-    SELECT * FROM payment_codes
-    WHERE email=? AND hotel_id=? AND verified=0
-    """, (data.email, data.hotel_id)).fetchone()
+    row = c.execute("SELECT * FROM codes WHERE email=? AND hotel_id=?", (data.email, data.hotel_id)).fetchone()
 
     if not row:
         return {"verified": False}
 
-    if datetime.utcnow() > datetime.fromisoformat(row["expires_at"]):
-        return {"verified": False, "status": "expired"}
-
-    if data.code != row["code"]:
-        cur.execute("UPDATE payment_codes SET attempts = attempts + 1 WHERE code_id=?",
-                    (row["code_id"],))
-        conn.commit()
+    if datetime.utcnow() > datetime.fromisoformat(row["expires"]):
         return {"verified": False}
 
-    cur.execute("UPDATE payment_codes SET verified=1 WHERE code_id=?",
-                (row["code_id"],))
+    if data.code != row["code"]:
+        return {"verified": False}
+
+    c.execute("UPDATE codes SET verified=1 WHERE id=?", (row["id"],))
     conn.commit()
     conn.close()
 
     return {"verified": True}
 
 # =========================
-# STRIPE CHECKOUT
+# CHECKOUT + BOOKING
 # =========================
 @app.post("/api/payment/checkout")
-def create_checkout(data: CheckoutRequest):
-    conn = get_conn()
-    cur = conn.cursor()
+def checkout(data: Checkout):
+    conn = db()
+    c = conn.cursor()
 
-    verified = cur.execute("""
-    SELECT * FROM payment_codes
-    WHERE email=? AND hotel_id=? AND verified=1
-    """, (data.email, data.hotel_id)).fetchone()
+    verified = c.execute(
+        "SELECT * FROM codes WHERE email=? AND hotel_id=? AND verified=1",
+        (data.email, data.hotel_id)
+    ).fetchone()
 
     if not verified:
-        return {"error": "Email not verified"}
+        return {"error": "Not verified"}
+
+    booking_id = str(uuid.uuid4())
+
+    c.execute("""
+    INSERT INTO bookings VALUES (?,?,?,?,?,?,?)
+    """, (
+        booking_id,
+        data.email,
+        data.hotel_id,
+        data.hotel_name,
+        data.amount,
+        "pending",
+        datetime.utcnow().isoformat()
+    ))
+
+    conn.commit()
+    conn.close()
 
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],
@@ -199,18 +200,60 @@ def create_checkout(data: CheckoutRequest):
             "price_data": {
                 "currency": "usd",
                 "product_data": {
-                    "name": "Hotel Reservation"
+                    "name": data.hotel_name,
                 },
                 "unit_amount": data.amount,
             },
             "quantity": 1,
         }],
         mode="payment",
-        success_url="https://www.myspace-hotel.com/success",
+        success_url=f"https://www.myspace-hotel.com/success?booking_id={booking_id}",
         cancel_url="https://www.myspace-hotel.com/cancel",
     )
 
     return {"url": session.url}
+
+# =========================
+# CONFIRM PAYMENT
+# =========================
+@app.get("/api/payment/success")
+def payment_success(booking_id: str):
+    conn = db()
+    c = conn.cursor()
+
+    booking = c.execute("SELECT * FROM bookings WHERE booking_id=?", (booking_id,)).fetchone()
+
+    if not booking:
+        return {"error": "Booking not found"}
+
+    c.execute("UPDATE bookings SET status='paid' WHERE booking_id=?", (booking_id,))
+    conn.commit()
+
+    # EMAIL RECEIPT
+    send_email(
+        booking["email"],
+        "Booking Confirmed",
+        f"""
+        <h2>Booking Confirmed</h2>
+        <p>Hotel: {booking["hotel_name"]}</p>
+        <p>Amount Paid: ${booking["amount"]/100}</p>
+        <p>Booking ID: {booking_id}</p>
+        """
+    )
+
+    return {"status": "paid"}
+
+# =========================
+# ADMIN VIEW BOOKINGS
+# =========================
+@app.get("/api/admin/bookings")
+def get_bookings():
+    conn = db()
+    c = conn.cursor()
+
+    rows = c.execute("SELECT * FROM bookings ORDER BY created DESC").fetchall()
+
+    return [dict(r) for r in rows]
 
 # =========================
 # ROOT
@@ -219,6 +262,7 @@ def create_checkout(data: CheckoutRequest):
 def root():
     return {
         "status": "live",
-        "payment": "enabled",
-        "email_code": "enabled"
+        "booking_system": "enabled",
+        "payments": "stripe",
+        "email_verification": True
     }
