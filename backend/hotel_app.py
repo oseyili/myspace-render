@@ -29,7 +29,7 @@ SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "").strip()
 SMTP_FROM = os.getenv("SMTP_FROM", "").strip()
 SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "reservations@myspace-hotel.com").strip()
 
-app = FastAPI(title="My Space Hotel Backend - Real Hotel Database")
+app = FastAPI(title="My Space Hotel Backend - Optimized Real Search")
 
 app.add_middleware(
     CORSMiddleware,
@@ -44,11 +44,30 @@ FACILITIES = [
     "airport shuttle", "family rooms", "beach access", "business lounge",
 ]
 
+COUNTRY_ALIASES = {
+    "uk": "United Kingdom",
+    "gb": "United Kingdom",
+    "england": "United Kingdom",
+    "usa": "United States",
+    "us": "United States",
+    "america": "United States",
+    "uae": "United Arab Emirates",
+    "ng": "Nigeria",
+}
+
+
 class ReservationRequest(BaseModel):
     hotel_id: str
     name: str
     email: EmailStr
     message: str = ""
+
+
+def normalise_country(value: Optional[str]) -> str:
+    if not value:
+        return ""
+    key = value.strip().lower().replace(".", "")
+    return COUNTRY_ALIASES.get(key, value.strip().title())
 
 
 def get_conn():
@@ -104,6 +123,7 @@ def init_db():
     cur.execute("CREATE INDEX IF NOT EXISTS idx_hotels_city ON hotels(city)")
     cur.execute("CREATE INDEX IF NOT EXISTS idx_hotels_area ON hotels(area)")
     cur.execute("CREATE INDEX IF NOT EXISTS idx_hotels_name ON hotels(name)")
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_hotels_address ON hotels(address)")
     cur.execute("CREATE INDEX IF NOT EXISTS idx_hotels_supplier_id ON hotels(supplier_hotel_id)")
 
     conn.commit()
@@ -151,17 +171,70 @@ def travel_dates():
     return arrival.isoformat(), departure.isoformat()
 
 
-def get_destination(city: str):
-    url = f"https://{RAPIDAPI_HOST}/locations/auto-complete"
-    params = {"text": city, "languagecode": "en-us"}
+def nested(obj, path, default=None):
+    current = obj
+    for part in path.split("."):
+        if isinstance(current, dict) and part in current:
+            current = current[part]
+        elif isinstance(current, list) and part.isdigit() and int(part) < len(current):
+            current = current[int(part)]
+        else:
+            return default
+    return current if current not in [None, ""] else default
 
-    response = requests.get(url, headers=rapid_headers(), params=params, timeout=35)
+
+def find_hotel_list(data):
+    if isinstance(data, list):
+        return data
+    if not isinstance(data, dict):
+        return []
+
+    paths = [
+        ["result"], ["results"], ["hotels"], ["data"],
+        ["data", "result"], ["data", "results"], ["data", "hotels"],
+        ["searchResults", "results"], ["propertySearchListings"],
+    ]
+
+    for path in paths:
+        current = data
+        ok = True
+        for key in path:
+            if isinstance(current, dict) and key in current:
+                current = current[key]
+            else:
+                ok = False
+                break
+        if ok and isinstance(current, list):
+            return current
+
+    for value in data.values():
+        if isinstance(value, list) and value and isinstance(value[0], dict):
+            return value
+        if isinstance(value, dict):
+            found = find_hotel_list(value)
+            if found:
+                return found
+
+    return []
+
+
+def get_destination(city: str, country: str = ""):
+    if not RAPIDAPI_KEY:
+        return None, "RAPIDAPI_KEY is not configured."
+
+    search_text = f"{city}, {country}".strip(", ")
+    url = f"https://{RAPIDAPI_HOST}/locations/auto-complete"
+    response = requests.get(
+        url,
+        headers=rapid_headers(),
+        params={"text": search_text, "languagecode": "en-us"},
+        timeout=35,
+    )
 
     if response.status_code != 200:
         return None, f"Location API error {response.status_code}: {response.text[:300]}"
 
     data = response.json()
-
     if isinstance(data, dict):
         data = data.get("data") or data.get("result") or data.get("results") or []
 
@@ -181,67 +254,9 @@ def get_destination(city: str):
         "dest_id": best.get("dest_id") or best.get("id") or best.get("ufi"),
         "dest_type": best.get("dest_type") or best.get("type") or "city",
         "label": best.get("label") or best.get("name") or city,
-        "country": best.get("country") or "",
+        "country": best.get("country") or country,
         "city_name": best.get("city_name") or city,
     }, ""
-
-
-def find_hotel_list(data):
-    if isinstance(data, list):
-        return data
-
-    if not isinstance(data, dict):
-        return []
-
-    paths = [
-        ["result"],
-        ["results"],
-        ["hotels"],
-        ["data"],
-        ["data", "result"],
-        ["data", "results"],
-        ["data", "hotels"],
-        ["searchResults", "results"],
-        ["propertySearchListings"],
-    ]
-
-    for path in paths:
-        current = data
-        ok = True
-
-        for key in path:
-            if isinstance(current, dict) and key in current:
-                current = current[key]
-            else:
-                ok = False
-                break
-
-        if ok and isinstance(current, list):
-            return current
-
-    for value in data.values():
-        if isinstance(value, list) and value and isinstance(value[0], dict):
-            return value
-        if isinstance(value, dict):
-            nested = find_hotel_list(value)
-            if nested:
-                return nested
-
-    return []
-
-
-def nested(obj, path, default=None):
-    current = obj
-
-    for part in path.split("."):
-        if isinstance(current, dict) and part in current:
-            current = current[part]
-        elif isinstance(current, list) and part.isdigit() and int(part) < len(current):
-            current = current[int(part)]
-        else:
-            return default
-
-    return current if current not in [None, ""] else default
 
 
 def clean_hotel(item, city_hint="", country_hint=""):
@@ -250,13 +265,7 @@ def clean_hotel(item, city_hint="", country_hint=""):
     price_breakdown = item.get("priceBreakdown") or {}
     gross_price = price_breakdown.get("grossPrice") or {}
 
-    hotel_id = (
-        item.get("hotel_id")
-        or item.get("id")
-        or item.get("propertyId")
-        or basic.get("id")
-    )
-
+    hotel_id = item.get("hotel_id") or item.get("id") or item.get("propertyId") or basic.get("id")
     name = (
         item.get("hotel_name")
         or item.get("name")
@@ -331,7 +340,6 @@ def save_hotels(hotels):
             hotel["image"], hotel["latitude"], hotel["longitude"], hotel["map_url"],
             hotel["source_note"], hotel["imported_at"],
         ))
-
         saved += 1
 
     conn.commit()
@@ -340,16 +348,11 @@ def save_hotels(hotels):
 
 
 def import_from_rapid(city: str, country: str = "", page: int = 1, page_size: int = 24):
-    if not RAPIDAPI_KEY:
-        return [], "RAPIDAPI_KEY is not configured."
-
-    destination, error = get_destination(city)
-
+    destination, error = get_destination(city, country)
     if error or not destination:
         return [], error or "Destination not found."
 
     arrival, departure = travel_dates()
-
     params = {
         "offset": max(0, (page - 1) * page_size),
         "arrival_date": arrival,
@@ -359,7 +362,7 @@ def import_from_rapid(city: str, country: str = "", page: int = 1, page_size: in
         "room_qty": 1,
         "search_type": destination["dest_type"],
         "dest_ids": destination["dest_id"],
-        "price_filter_currencycode": "GBP" if (country or "").lower() in ["uk", "united kingdom", "gb", "england"] else "USD",
+        "price_filter_currencycode": "GBP" if country.lower() in ["uk", "united kingdom", "gb", "england"] else "USD",
         "order_by": "popularity",
         "languagecode": "en-us",
         "units": "imperial",
@@ -376,10 +379,9 @@ def import_from_rapid(city: str, country: str = "", page: int = 1, page_size: in
     if response.status_code != 200:
         return [], f"RapidAPI property error {response.status_code}: {response.text[:500]}"
 
-    data = response.json()
-    raw_hotels = find_hotel_list(data)
-
+    raw_hotels = find_hotel_list(response.json())
     cleaned = []
+
     for item in raw_hotels[:page_size]:
         if isinstance(item, dict):
             hotel = clean_hotel(
@@ -425,6 +427,7 @@ def root():
     return {
         "status": "live",
         "database": "enabled",
+        "optimized_search": True,
         "hotel_source": "RapidAPI real hotels only",
         "fake_data": False,
         "rapidapi_key_loaded": bool(RAPIDAPI_KEY),
@@ -445,25 +448,23 @@ def catalogue_status():
 
     total = cur.execute("SELECT COUNT(*) AS total FROM hotels").fetchone()["total"]
 
-    countries = [
-        dict(row) for row in cur.execute("""
-            SELECT country, COUNT(*) AS count
-            FROM hotels
-            GROUP BY country
-            ORDER BY count DESC
-            LIMIT 100
-        """).fetchall()
-    ]
+    countries = [dict(row) for row in cur.execute("""
+        SELECT country, COUNT(*) AS count
+        FROM hotels
+        WHERE country IS NOT NULL AND country != ''
+        GROUP BY country
+        ORDER BY count DESC
+        LIMIT 100
+    """).fetchall()]
 
-    cities = [
-        dict(row) for row in cur.execute("""
-            SELECT city, country, COUNT(*) AS count
-            FROM hotels
-            GROUP BY city, country
-            ORDER BY count DESC
-            LIMIT 200
-        """).fetchall()
-    ]
+    cities = [dict(row) for row in cur.execute("""
+        SELECT city, country, COUNT(*) AS count
+        FROM hotels
+        WHERE city IS NOT NULL AND city != ''
+        GROUP BY city, country
+        ORDER BY count DESC
+        LIMIT 200
+    """).fetchall()]
 
     conn.close()
 
@@ -477,7 +478,7 @@ def catalogue_status():
     }
 
 
-@app.post("/api/admin/import-rapid")
+@app.api_route("/api/admin/import-rapid", methods=["GET", "POST"])
 def admin_import_rapid(
     city: str = Query(...),
     country: str = Query(""),
@@ -492,11 +493,9 @@ def admin_import_rapid(
 
     for page_number in range(1, safe_pages + 1):
         hotels, error = import_from_rapid(city, country, page_number, safe_page_size)
-
         if error:
             last_error = error
             break
-
         total_saved += len(hotels)
 
     return {
@@ -510,11 +509,45 @@ def admin_import_rapid(
     }
 
 
+@app.get("/api/search/suggestions")
+def search_suggestions(q: str = Query("")):
+    query = q.strip().lower()
+    if not query:
+        return {"suggestions": []}
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+    rows = cur.execute("""
+        SELECT DISTINCT country, city, area, name
+        FROM hotels
+        WHERE LOWER(country) LIKE ?
+           OR LOWER(city) LIKE ?
+           OR LOWER(area) LIKE ?
+           OR LOWER(name) LIKE ?
+        LIMIT 25
+    """, (f"%{query}%", f"%{query}%", f"%{query}%", f"%{query}%")).fetchall()
+
+    conn.close()
+
+    suggestions = []
+    seen = set()
+
+    for row in rows:
+        for value in [row["city"], row["area"], row["country"], row["name"]]:
+            if value and value.lower() not in seen:
+                seen.add(value.lower())
+                suggestions.append(value)
+
+    return {"suggestions": suggestions[:20]}
+
+
 @app.get("/api/hotels")
 def search_hotels(
     country: Optional[str] = Query(None),
     city: Optional[str] = Query(None),
     area: Optional[str] = Query(None),
+    q: Optional[str] = Query(None),
     facilities: Optional[str] = Query(None),
     adults: int = Query(2),
     page: int = Query(1),
@@ -524,34 +557,39 @@ def search_hotels(
     safe_page_size = min(max(1, page_size), 24)
     offset = (safe_page - 1) * safe_page_size
 
+    norm_country = normalise_country(country) if country else ""
+    city_value = city.strip() if city else ""
+    area_value = area.strip() if area else ""
+    q_value = q.strip() if q else ""
+
     where = []
     params = []
 
-    if country and country.strip():
+    if norm_country:
         where.append("LOWER(country) LIKE ?")
-        params.append(f"%{country.strip().lower()}%")
+        params.append(f"%{norm_country.lower()}%")
 
-    if city and city.strip():
-        where.append("LOWER(city) LIKE ?")
-        params.append(f"%{city.strip().lower()}%")
+    if city_value:
+        where.append("(LOWER(city) LIKE ? OR LOWER(area) LIKE ? OR LOWER(address) LIKE ?)")
+        params.extend([f"%{city_value.lower()}%", f"%{city_value.lower()}%", f"%{city_value.lower()}%"])
 
-    if area and area.strip():
+    if area_value:
         where.append("(LOWER(area) LIKE ? OR LOWER(address) LIKE ? OR LOWER(name) LIKE ?)")
-        params.append(f"%{area.strip().lower()}%")
-        params.append(f"%{area.strip().lower()}%")
-        params.append(f"%{area.strip().lower()}%")
+        params.extend([f"%{area_value.lower()}%", f"%{area_value.lower()}%", f"%{area_value.lower()}%"])
+
+    if q_value:
+        where.append("(LOWER(name) LIKE ? OR LOWER(city) LIKE ? OR LOWER(country) LIKE ? OR LOWER(area) LIKE ? OR LOWER(address) LIKE ?)")
+        params.extend([f"%{q_value.lower()}%"] * 5)
 
     where_sql = "WHERE " + " AND ".join(where) if where else ""
 
     conn = get_conn()
     cur = conn.cursor()
-
     total = int(cur.execute(f"SELECT COUNT(*) AS total FROM hotels {where_sql}", params).fetchone()["total"])
 
-    if total == 0 and city and city.strip():
+    if total == 0 and city_value:
         conn.close()
-
-        imported, error = import_from_rapid(city.strip(), country or "", safe_page, safe_page_size)
+        imported, error = import_from_rapid(city_value, norm_country, safe_page, safe_page_size)
 
         if not imported:
             return {
@@ -575,6 +613,7 @@ def search_hotels(
             "hotels": imported,
             "message": "Real hotels imported into the app database from RapidAPI.",
             "fake_data": False,
+            "source": "rapidapi_import",
         }
 
     rows = cur.execute(
@@ -582,7 +621,12 @@ def search_hotels(
         SELECT *
         FROM hotels
         {where_sql}
-        ORDER BY rating DESC, price ASC, name ASC
+        ORDER BY 
+            CASE WHEN price IS NULL THEN 1 ELSE 0 END,
+            rating DESC,
+            review_count DESC,
+            price ASC,
+            name ASC
         LIMIT ? OFFSET ?
         """,
         params + [safe_page_size, offset],
@@ -600,6 +644,14 @@ def search_hotels(
         "showing": len(hotels),
         "hotels": hotels,
         "fake_data": False,
+        "source": "database",
+        "search_used": {
+            "country": norm_country,
+            "city": city_value,
+            "area": area_value,
+            "q": q_value,
+            "adults": adults,
+        },
     }
 
 
@@ -638,17 +690,8 @@ def request_booking(request: ReservationRequest):
     <p>We will continue with you using this email address.</p>
     """
 
-    support_sent, support_note = send_email(
-        SUPPORT_EMAIL,
-        f"New reservation request - {hotel['name']}",
-        support_html,
-    )
-
-    customer_sent, customer_note = send_email(
-        request.email,
-        f"Your My Space Hotel reservation request - {hotel['name']}",
-        customer_html,
-    )
+    support_sent, support_note = send_email(SUPPORT_EMAIL, f"New reservation request - {hotel['name']}", support_html)
+    customer_sent, customer_note = send_email(request.email, f"Your My Space Hotel reservation request - {hotel['name']}", customer_html)
 
     email_note = "; ".join([x for x in [support_note, customer_note] if x])
 
