@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "hotel_catalog.db"
 
 RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY", "").strip()
-RAPIDAPI_HOST = os.getenv("RAPIDAPI_HOST", "booking-com.p.rapidapi.com").strip()
+RAPIDAPI_HOST = os.getenv("RAPIDAPI_HOST", "apidojo-booking-v1.p.rapidapi.com").strip()
 
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "").strip()
 stripe.api_key = STRIPE_SECRET_KEY or None
@@ -42,14 +42,7 @@ app = FastAPI(title="My Space Hotel Backend")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "https://myspace-hotel.com",
-        "https://www.myspace-hotel.com",
-        "https://myspace-hotel.vercel.app",
-        "https://hotel-frontend-vlwa.onrender.com",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -69,26 +62,6 @@ COUNTRY_ALIASES = {
     "america": "United States",
     "uae": "United Arab Emirates",
     "ng": "Nigeria",
-}
-
-CURRENCY_BY_COUNTRY = {
-    "United Kingdom": "GBP",
-    "United States": "USD",
-    "Nigeria": "NGN",
-    "France": "EUR",
-    "Spain": "EUR",
-    "Italy": "EUR",
-    "Germany": "EUR",
-    "United Arab Emirates": "AED",
-    "Japan": "JPY",
-    "Australia": "AUD",
-    "South Africa": "ZAR",
-    "Turkey": "TRY",
-    "Singapore": "SGD",
-    "Canada": "CAD",
-    "Ghana": "GHS",
-    "Kenya": "KES",
-    "India": "INR",
 }
 
 
@@ -112,7 +85,7 @@ class PaymentCodeVerifyRequest(BaseModel):
 
 class CheckoutRequest(BaseModel):
     hotel_id: str
-    hotel_name: str = "Selected hotel stay"
+    hotel_name: str
     email: EmailStr
     amount: int = 15000
 
@@ -123,12 +96,6 @@ def normalise_country(value: Optional[str]) -> str:
     cleaned = value.strip()
     key = cleaned.lower().replace(".", "")
     return COUNTRY_ALIASES.get(key, cleaned.title())
-
-
-def currency_for_country(country: Optional[str]) -> str:
-    if not country:
-        return "USD"
-    return CURRENCY_BY_COUNTRY.get(normalise_country(country), "USD")
 
 
 def get_conn():
@@ -159,7 +126,6 @@ def init_db():
             latitude REAL,
             longitude REAL,
             map_url TEXT,
-            booking_url TEXT,
             source_note TEXT,
             imported_at TEXT,
             UNIQUE(supplier, supplier_hotel_id)
@@ -212,6 +178,7 @@ def init_db():
     cur.execute("CREATE INDEX IF NOT EXISTS idx_hotels_city ON hotels(city)")
     cur.execute("CREATE INDEX IF NOT EXISTS idx_hotels_area ON hotels(area)")
     cur.execute("CREATE INDEX IF NOT EXISTS idx_hotels_supplier_id ON hotels(supplier_hotel_id)")
+
     conn.commit()
     conn.close()
 
@@ -225,7 +192,7 @@ def email_ready():
 
 def send_html_email(to_address: str, subject: str, html_body: str):
     if not email_ready():
-        return False, "SMTP is not fully configured on the server."
+        return False, "SMTP is not fully configured on Render."
 
     try:
         msg = MIMEMultipart("alternative")
@@ -248,7 +215,8 @@ def send_html_email(to_address: str, subject: str, html_body: str):
 def rapid_headers():
     return {
         "X-RapidAPI-Key": RAPIDAPI_KEY,
-        "X-RapidAPI-Host": RAPIDAPI_HOST,
+        "X-RapidAPI-Host": "apidojo-booking-v1.p.rapidapi.com",
+        "Content-Type": "application/json",
     }
 
 
@@ -256,62 +224,214 @@ def rapid_get(path: str, params: dict):
     if not RAPIDAPI_KEY:
         return None, "RAPIDAPI_KEY is not configured."
 
-    url = f"https://{RAPIDAPI_HOST}{path}"
+    url = f"https://apidojo-booking-v1.p.rapidapi.com{path}"
+
     try:
-        res = requests.get(url, headers=rapid_headers(), params=params, timeout=35)
+        res = requests.get(url, headers=rapid_headers(), params=params, timeout=40)
         if res.status_code != 200:
-            return None, f"RapidAPI returned {res.status_code}: {res.text[:300]}"
+            return None, f"RapidAPI returned {res.status_code}: {res.text[:500]}"
         return res.json(), ""
     except Exception as exc:
         return None, str(exc)
 
 
-def find_destination(city: str):
-    data, error = rapid_get(
-        "/v1/hotels/locations",
-        {"name": city, "locale": "en-gb"},
+def get_nested(obj, path, default=None):
+    cur = obj
+    for part in path.split("."):
+        if isinstance(cur, dict) and part in cur:
+            cur = cur[part]
+        elif isinstance(cur, list) and part.isdigit() and int(part) < len(cur):
+            cur = cur[int(part)]
+        else:
+            return default
+    return cur if cur not in [None, ""] else default
+
+
+def extract_first_list(data):
+    if isinstance(data, list):
+        return data
+
+    if not isinstance(data, dict):
+        return []
+
+    possible = [
+        data.get("data"),
+        data.get("result"),
+        data.get("results"),
+        data.get("items"),
+        data.get("properties"),
+        get_nested(data, "data.results"),
+        get_nested(data, "data.result"),
+        get_nested(data, "data.properties"),
+        get_nested(data, "searchResults.results"),
+    ]
+
+    for item in possible:
+        if isinstance(item, list):
+            return item
+
+    for value in data.values():
+        if isinstance(value, list):
+            return value
+        if isinstance(value, dict):
+            nested = extract_first_list(value)
+            if nested:
+                return nested
+
+    return []
+
+
+def find_destination(city: str, country: str = ""):
+    text = f"{city}, {country}".strip(", ")
+
+    attempts = [
+        {"text": text, "languagecode": "en-us"},
+        {"query": text, "languagecode": "en-us"},
+        {"name": text, "languagecode": "en-us"},
+    ]
+
+    last_error = ""
+
+    for params in attempts:
+        data, error = rapid_get("/locations/auto-complete", params)
+
+        if error:
+            last_error = error
+            continue
+
+        items = extract_first_list(data)
+
+        for item in items:
+            dest_id = (
+                item.get("dest_id")
+                or item.get("id")
+                or item.get("city_ufi")
+                or item.get("ufi")
+            )
+
+            dest_type = (
+                item.get("dest_type")
+                or item.get("type")
+                or item.get("search_type")
+                or "city"
+            )
+
+            if dest_id:
+                return {
+                    "dest_id": str(dest_id),
+                    "dest_type": str(dest_type),
+                    "name": item.get("name") or item.get("label") or city,
+                    "country": item.get("country") or item.get("countryName") or country,
+                }, ""
+
+    return None, last_error or "No destination found from RapidAPI auto-complete."
+
+
+def clean_property(raw: dict, city_hint: str, country_hint: str):
+    hotel_id = (
+        raw.get("id")
+        or raw.get("hotel_id")
+        or get_nested(raw, "property.id")
+        or get_nested(raw, "basicPropertyData.id")
     )
 
-    if error or not data:
-        return None, error or "No destination found."
+    name = (
+        raw.get("name")
+        or raw.get("hotel_name")
+        or get_nested(raw, "property.name")
+        or get_nested(raw, "basicPropertyData.name")
+        or get_nested(raw, "displayName.text")
+    )
 
-    for item in data:
-        if item.get("dest_id") and item.get("dest_type"):
-            return {
-                "dest_id": item.get("dest_id"),
-                "dest_type": item.get("dest_type"),
-                "name": item.get("name") or city,
-                "country": item.get("country") or item.get("country_trans") or "",
-            }, ""
-
-    return None, "No usable destination returned by RapidAPI."
-
-
-def clean_hotel(raw: dict, city_hint: str, country_hint: str):
-    hotel_id = raw.get("hotel_id") or raw.get("id")
-    name = raw.get("hotel_name") or raw.get("name")
     if not hotel_id or not name:
         return None
 
-    latitude = raw.get("latitude")
-    longitude = raw.get("longitude")
+    country = (
+        raw.get("country")
+        or raw.get("country_trans")
+        or get_nested(raw, "location.country")
+        or get_nested(raw, "address.countryName")
+        or country_hint
+        or ""
+    )
 
-    city = raw.get("city") or raw.get("city_name") or city_hint or ""
-    country = raw.get("country_trans") or raw.get("country") or country_hint or ""
-    area = raw.get("district") or raw.get("district_name") or raw.get("address") or city
-    currency = raw.get("currencycode") or raw.get("currency_code") or currency_for_country(country)
-    price = raw.get("min_total_price") or raw.get("price_breakdown", {}).get("gross_price")
-    rating = raw.get("review_score")
-    review_count = raw.get("review_nr") or raw.get("review_count")
+    city = (
+        raw.get("city")
+        or raw.get("city_name")
+        or get_nested(raw, "location.city")
+        or get_nested(raw, "address.city")
+        or city_hint
+        or ""
+    )
+
+    area = (
+        raw.get("district")
+        or raw.get("district_name")
+        or get_nested(raw, "location.district")
+        or get_nested(raw, "address.district")
+        or raw.get("wishlistName")
+        or city
+        or ""
+    )
+
+    address = (
+        raw.get("address")
+        or get_nested(raw, "address.street")
+        or get_nested(raw, "basicPropertyData.location.address")
+        or ""
+    )
+
+    latitude = (
+        raw.get("latitude")
+        or get_nested(raw, "location.latitude")
+        or get_nested(raw, "basicPropertyData.location.latitude")
+    )
+
+    longitude = (
+        raw.get("longitude")
+        or get_nested(raw, "location.longitude")
+        or get_nested(raw, "basicPropertyData.location.longitude")
+    )
+
+    currency = (
+        raw.get("currencycode")
+        or raw.get("currency")
+        or get_nested(raw, "priceBreakdown.currency")
+        or get_nested(raw, "priceBreakdown.grossPrice.currency")
+        or "USD"
+    )
+
+    price = (
+        raw.get("min_total_price")
+        or get_nested(raw, "priceBreakdown.grossPrice.value")
+        or get_nested(raw, "priceBreakdown.strikethroughPrice.value")
+        or get_nested(raw, "price.value")
+    )
+
+    rating = (
+        raw.get("review_score")
+        or raw.get("reviewScore")
+        or get_nested(raw, "reviews.score")
+        or get_nested(raw, "basicPropertyData.reviewScore.score")
+    )
+
+    review_count = (
+        raw.get("review_nr")
+        or raw.get("review_count")
+        or get_nested(raw, "reviews.count")
+        or get_nested(raw, "basicPropertyData.reviewScore.reviewCount")
+    )
+
     image = (
         raw.get("max_1440_photo_url")
         or raw.get("main_photo_url")
         or raw.get("photo_url")
+        or get_nested(raw, "photoUrls.0")
+        or get_nested(raw, "basicPropertyData.photos.main.highResUrl")
+        or get_nested(raw, "basicPropertyData.photos.main.lowResUrl")
         or ""
     )
 
-    booking_url = raw.get("url") or raw.get("hotel_url") or ""
-    map_url = ""
     if latitude and longitude:
         map_url = f"https://www.google.com/maps?q={latitude},{longitude}"
     else:
@@ -319,14 +439,14 @@ def clean_hotel(raw: dict, city_hint: str, country_hint: str):
 
     return {
         "id": f"rapid-{hotel_id}",
-        "supplier": "rapidapi_booking",
+        "supplier": "rapidapi_booking_v2",
         "supplier_hotel_id": str(hotel_id),
-        "name": name,
-        "country": country,
-        "city": city,
-        "area": area,
-        "address": raw.get("address") or "",
-        "currency": currency,
+        "name": str(name),
+        "country": str(country or ""),
+        "city": str(city or ""),
+        "area": str(area or ""),
+        "address": str(address or ""),
+        "currency": str(currency or "USD").upper(),
         "price": price,
         "rating": rating,
         "review_count": review_count,
@@ -334,8 +454,7 @@ def clean_hotel(raw: dict, city_hint: str, country_hint: str):
         "latitude": latitude,
         "longitude": longitude,
         "map_url": map_url,
-        "booking_url": booking_url,
-        "source_note": "Real hotel imported from RapidAPI Booking provider.",
+        "source_note": "Real hotel imported from RapidAPI Booking v2.",
         "imported_at": datetime.utcnow().isoformat(),
     }
 
@@ -353,15 +472,15 @@ def save_hotels(hotels):
             INSERT OR REPLACE INTO hotels (
                 id, supplier, supplier_hotel_id, name, country, city, area, address,
                 currency, price, rating, review_count, image, latitude, longitude,
-                map_url, booking_url, source_note, imported_at
+                map_url, source_note, imported_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             h["id"], h["supplier"], h["supplier_hotel_id"], h["name"],
             h["country"], h["city"], h["area"], h["address"],
             h["currency"], h["price"], h["rating"], h["review_count"],
             h["image"], h["latitude"], h["longitude"], h["map_url"],
-            h["booking_url"], h["source_note"], h["imported_at"],
+            h["source_note"], h["imported_at"],
         ))
         saved += 1
 
@@ -371,41 +490,41 @@ def save_hotels(hotels):
 
 
 def import_from_rapid(city: str, country: str = "", page: int = 1, page_size: int = 24):
-    destination, error = find_destination(city)
+    destination, error = find_destination(city, country)
+
     if error or not destination:
         return [], error
 
-    checkin = (datetime.utcnow() + timedelta(days=30)).date().isoformat()
-    checkout = (datetime.utcnow() + timedelta(days=34)).date().isoformat()
+    offset = max(0, (page - 1) * page_size)
 
-    data, error = rapid_get(
-        "/v1/hotels/search",
-        {
-            "dest_id": destination["dest_id"],
-            "dest_type": destination["dest_type"],
-            "checkin_date": checkin,
-            "checkout_date": checkout,
-            "adults_number": "2",
-            "room_number": "1",
-            "units": "metric",
-            "order_by": "popularity",
-            "locale": "en-gb",
-            "page_number": str(max(0, page - 1)),
-            "include_adjacency": "true",
-            "filter_by_currency": currency_for_country(country or destination.get("country")),
-        },
-    )
+    params = {
+        "offset": str(offset),
+        "guest_qty": "2",
+        "children_qty": "0",
+        "children_age": "5,7",
+        "room_qty": "1",
+        "dest_ids": destination["dest_id"],
+        "search_type": destination.get("dest_type") or "city",
+        "price_filter_currencycode": "USD",
+        "order_by": "popularity",
+        "languagecode": "en-us",
+        "units": "imperial",
+        "timezone": "UTC",
+    }
+
+    data, error = rapid_get("/properties/v2/list", params)
 
     if error or not data:
-        return [], error or "No RapidAPI search data returned."
+        return [], error or "No RapidAPI property data returned."
 
-    raw_results = data.get("result") or data.get("hotels") or []
+    raw_results = extract_first_list(data)
     cleaned = []
 
     for raw in raw_results[:page_size]:
-        hotel = clean_hotel(raw, city, country or destination.get("country", ""))
-        if hotel:
-            cleaned.append(hotel)
+        if isinstance(raw, dict):
+            hotel = clean_property(raw, city, country or destination.get("country", ""))
+            if hotel:
+                cleaned.append(hotel)
 
     save_hotels(cleaned)
     return cleaned, ""
@@ -427,7 +546,6 @@ def row_to_hotel(row):
         "latitude": row["latitude"],
         "longitude": row["longitude"],
         "map_url": row["map_url"],
-        "booking_url": row["booking_url"],
         "source_note": row["source_note"],
         "facilities": [],
     }
@@ -441,9 +559,10 @@ def root():
 
     return {
         "status": "live",
-        "hotel_source": "RapidAPI imported real hotels only",
-        "fake_data": False,
+        "hotel_source": "RapidAPI Booking v2 real hotels only",
+        "rapidapi_host": "apidojo-booking-v1.p.rapidapi.com",
         "rapidapi_configured": bool(RAPIDAPI_KEY),
+        "fake_data": False,
         "hotels_in_database": total,
         "email_ready": email_ready(),
         "payment_ready": bool(STRIPE_SECRET_KEY),
@@ -453,60 +572,6 @@ def root():
 @app.get("/api/facilities")
 def get_facilities():
     return {"facilities": FACILITIES}
-
-
-@app.get("/api/admin/catalogue-status")
-def catalogue_status():
-    conn = get_conn()
-    cur = conn.cursor()
-    total = cur.execute("SELECT COUNT(*) AS total FROM hotels").fetchone()["total"]
-    countries = [dict(r) for r in cur.execute("""
-        SELECT country, COUNT(*) AS count
-        FROM hotels
-        GROUP BY country
-        ORDER BY count DESC
-        LIMIT 100
-    """).fetchall()]
-    conn.close()
-
-    return {
-        "total_hotels": total,
-        "countries_loaded": countries,
-        "rapidapi_configured": bool(RAPIDAPI_KEY),
-        "email_ready": email_ready(),
-        "payment_ready": bool(STRIPE_SECRET_KEY),
-        "fake_data": False,
-    }
-
-
-@app.post("/api/admin/import-rapid")
-def admin_import_rapid(
-    city: str = Query(...),
-    country: str = Query(""),
-    pages: int = Query(1),
-    page_size: int = Query(24),
-):
-    safe_pages = min(max(1, pages), 10)
-    safe_page_size = min(max(1, page_size), 24)
-
-    total_saved = 0
-    last_error = ""
-
-    for p in range(1, safe_pages + 1):
-        hotels, error = import_from_rapid(city, country, p, safe_page_size)
-        if error:
-            last_error = error
-            break
-        total_saved += save_hotels(hotels)
-
-    return {
-        "status": "completed" if not last_error else "partial_or_failed",
-        "city": city,
-        "country": normalise_country(country) if country else "",
-        "pages_requested": safe_pages,
-        "saved": total_saved,
-        "error": last_error,
-    }
 
 
 @app.get("/api/hotels")
@@ -819,6 +884,7 @@ def request_booking(request: ReservationRequest):
         email_note,
         datetime.utcnow().isoformat(),
     ))
+
     conn.commit()
     conn.close()
 
