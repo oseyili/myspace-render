@@ -223,7 +223,13 @@ export default function App() {
       });
 
       const data = await res.json();
-      alert(data.message || "Reservation request received.");
+     if (data.email_delivery?.customer_sent) {
+  alert("Reservation received. Confirmation email sent to the customer.");
+} else {
+  alert(
+    "Reservation received, but confirmation email was not sent. Please check backend SMTP settings on Render."
+  );
+}
     } catch {
       alert("Reservation request failed.");
     } finally {
