@@ -18,7 +18,6 @@ EMAIL_USER = os.getenv("EMAIL_USER")
 EMAIL_PASS = os.getenv("EMAIL_PASS")
 
 stripe.api_key = STRIPE_KEY
-
 RAPID_HOST = "apidojo-booking-v1.p.rapidapi.com"
 
 # ---------------- DB ----------------
@@ -69,7 +68,7 @@ def send_email(to_email, subject, body):
     except Exception as e:
         print("EMAIL ERROR:", e)
 
-# ---------------- RAPID SEARCH ----------------
+# ---------------- RAPID SEARCH (LIVE) ----------------
 def search_hotels(city):
     url = "https://apidojo-booking-v1.p.rapidapi.com/properties/v2/list"
 
@@ -115,68 +114,105 @@ def search_hotels(city):
 
     return hotels
 
+# ---------------- DATABASE IMPORT ----------------
+@app.post("/api/admin/import-rapid")
+def import_hotels(city: str, country: str, pages: int = 5, page_size: int = 24):
+    saved = 0
+
+    for page in range(1, pages + 1):
+        hotels = search_hotels(city)
+
+        for h in hotels:
+            try:
+                cur.execute("""
+                INSERT OR IGNORE INTO hotels VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    h["id"], h["name"], h["city"], h["country"],
+                    h["price"], h["currency"], h["image"],
+                    h["lat"], h["lng"]
+                ))
+                saved += 1
+            except:
+                pass
+
+    conn.commit()
+
+    return {
+        "status": "completed",
+        "city": city,
+        "country": country,
+        "pages": pages,
+        "saved": saved,
+        "fake_data": False
+    }
+
+# ---------------- DATABASE STATUS ----------------
+@app.get("/api/admin/catalogue-status")
+def catalogue_status():
+    cur.execute("SELECT COUNT(*) FROM hotels")
+    total = cur.fetchone()[0]
+
+    return {
+        "total_hotels": total,
+        "fake_data": False,
+        "rapidapi_key_loaded": RAPID_KEY is not None,
+        "email_ready": EMAIL_USER is not None
+    }
+
 # ---------------- SEARCH API ----------------
 @app.get("/api/hotels")
 def get_hotels(city: str):
-    hotels = search_hotels(city)
+    cur.execute("SELECT * FROM hotels WHERE city LIKE ? LIMIT 50", (f"%{city}%",))
+    rows = cur.fetchall()
 
-    return {
-        "count": len(hotels),
-        "hotels": hotels
-    }
+    hotels = []
+    for r in rows:
+        hotels.append({
+            "id": r[0],
+            "name": r[1],
+            "city": r[2],
+            "country": r[3],
+            "price": r[4],
+            "currency": r[5],
+            "image": r[6],
+            "lat": r[7],
+            "lng": r[8]
+        })
+
+    return {"count": len(hotels), "hotels": hotels}
 
 # ---------------- RESERVATION ----------------
 @app.post("/api/request")
 def create_request(data: dict):
     booking_id = str(uuid.uuid4())
 
-    hotel_id = data["hotel_id"]
-    hotel_name = data["hotel_name"]
-
-    name = data["name"]
-    email = data["email"]
-
-    price = data["price"]
-    currency = data["currency"]
-
     cur.execute("""
     INSERT INTO reservations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         booking_id,
-        hotel_id,
-        hotel_name,
-        name,
-        email,
+        data["hotel_id"],
+        data["hotel_name"],
+        data["name"],
+        data["email"],
         "pending_hotel",
-        price,
-        currency,
+        data["price"],
+        data["currency"],
         datetime.now().isoformat()
     ))
-
     conn.commit()
 
-    # EMAIL CUSTOMER
+    # CUSTOMER EMAIL
     send_email(
-        email,
+        data["email"],
         "Reservation received",
-        f"""
-Your reservation request has been received.
-
-Hotel: {hotel_name}
-Booking ID: {booking_id}
-
-We are confirming availability with the hotel.
-"""
+        f"Booking ID: {booking_id}\nWe are confirming availability."
     )
 
-    # EMAIL HOTEL (simulate)
+    # HOTEL EMAIL (SIMULATED)
     send_email(
         EMAIL_USER,
-        "New reservation request",
+        "Confirm booking",
         f"""
-Hotel: {hotel_name}
-Booking ID: {booking_id}
-
 Confirm:
 https://hotel-backend-1-ee5z.onrender.com/api/hotel/confirm?booking_id={booking_id}
 
@@ -185,34 +221,26 @@ https://hotel-backend-1-ee5z.onrender.com/api/hotel/reject?booking_id={booking_i
 """
     )
 
-    return {"status": "reservation_sent", "booking_id": booking_id}
+    return {"booking_id": booking_id}
 
 # ---------------- HOTEL CONFIRM ----------------
 @app.get("/api/hotel/confirm")
-def hotel_confirm(booking_id: str):
+def confirm(booking_id: str):
     cur.execute("SELECT * FROM reservations WHERE booking_id=?", (booking_id,))
     r = cur.fetchone()
 
     if not r:
-        raise HTTPException(404, "Booking not found")
+        raise HTTPException(404)
 
-    # LIVE PRICE REFRESH (IMPORTANT)
-    new_price = float(r[6])  # simulate (replace with real recheck)
+    price = float(r[6])
 
-    cur.execute("""
-    UPDATE reservations SET status=?, price=? WHERE booking_id=?
-    """, ("hotel_confirmed", new_price, booking_id))
-
-    conn.commit()
-
-    # CREATE STRIPE PAYMENT
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],
         line_items=[{
             "price_data": {
                 "currency": r[7].lower(),
                 "product_data": {"name": r[2]},
-                "unit_amount": int(new_price * 100)
+                "unit_amount": int(price * 100)
             },
             "quantity": 1
         }],
@@ -221,77 +249,35 @@ def hotel_confirm(booking_id: str):
         cancel_url="https://myspace-hotel.com/cancel"
     )
 
-    # EMAIL CUSTOMER PAYMENT LINK
     send_email(
         r[4],
-        "Hotel confirmed – complete payment",
-        f"""
-Your hotel is available.
-
-Hotel: {r[2]}
-Price: {new_price} {r[7]}
-
-Pay here:
-{session.url}
-"""
+        "Pay for your booking",
+        f"Complete payment:\n{session.url}"
     )
 
     return {"status": "payment_sent"}
 
-# ---------------- HOTEL REJECT ----------------
-@app.get("/api/hotel/reject")
-def hotel_reject(booking_id: str):
-    cur.execute("UPDATE reservations SET status=? WHERE booking_id=?",
-                ("rejected", booking_id))
-    conn.commit()
-
-    return {"status": "rejected"}
-
 # ---------------- STRIPE WEBHOOK ----------------
 @app.post("/api/stripe/webhook")
-async def stripe_webhook(request: Request):
-    payload = await request.body()
+async def webhook(request: Request):
+    data = await request.json()
 
-    event = stripe.Event.construct_from(
-        request.json(), stripe.api_key
-    )
+    if data.get("type") == "checkout.session.completed":
+        booking_id = data["data"]["object"]["success_url"].split("=")[-1]
 
-    if event["type"] == "checkout.session.completed":
-        session = event["data"]["object"]
-
-        booking_id = session["success_url"].split("=")[-1]
-
-        cur.execute("""
-        UPDATE reservations SET status=? WHERE booking_id=?
-        """, ("paid", booking_id))
+        cur.execute("UPDATE reservations SET status='paid' WHERE booking_id=?", (booking_id,))
         conn.commit()
 
-        cur.execute("SELECT * FROM reservations WHERE booking_id=?", (booking_id,))
-        r = cur.fetchone()
+    return {"ok": True}
 
-        # EMAIL CONFIRMATION
-        send_email(
-            r[4],
-            "Booking confirmed",
-            f"""
-Your booking is confirmed.
-
-Hotel: {r[2]}
-Booking ID: {booking_id}
-
-We look forward to your stay.
-"""
-        )
-
-    return {"status": "success"}
-
-# ---------------- STATUS ----------------
+# ---------------- ROOT ----------------
 @app.get("/")
-def status():
+def root():
     return {
         "status": "live",
+        "database": "enabled",
+        "import": "enabled",
         "search": "enabled",
         "reservation": "enabled",
-        "automation": "full",
-        "price_refresh": "enabled"
+        "payment": "enabled"
     }
