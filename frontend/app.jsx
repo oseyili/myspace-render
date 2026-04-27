@@ -1,27 +1,29 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import TravelPages from "./TravelPages";
 
 const API_BASE =
-  import.meta.env.VITE_API_BASE ||
-  "https://hotel-backend-1-ee5z.onrender.com";
+  import.meta.env.VITE_API_BASE || "https://hotel-backend-1-ee5z.onrender.com";
 
 const SUPPORT_EMAIL = "reservations@myspace-hotel.com";
+const PAGE_SIZE = 48;
 
-const facilitiesList = [
-  "wifi",
-  "gym",
-  "pool",
-  "airport shuttle",
-  "beach access",
-  "spa",
-  "restaurant",
-  "parking",
-  "family rooms",
-  "business lounge",
-];
+function cleanFacilities(facilities) {
+  if (!facilities) return [];
+  if (Array.isArray(facilities)) return facilities.filter(Boolean);
+  if (typeof facilities === "string") {
+    return facilities.split(",").map((x) => x.trim()).filter(Boolean);
+  }
+  return [];
+}
 
-function moneyLabel(hotel) {
-  if (!hotel?.price) return `Request availability`;
+function hotelImage(hotel) {
+  return hotel.high_res_image || hotel.image || "";
+}
+
+function priceLabel(hotel) {
+  if (!hotel.price || Number(hotel.price) <= 0) {
+    return "Latest price confirmed before booking";
+  }
   return `${hotel.currency || "LOCAL"} ${Number(hotel.price).toLocaleString()}`;
 }
 
@@ -30,74 +32,34 @@ export default function App() {
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
   const [area, setArea] = useState("");
-  const [guests, setGuests] = useState(2);
-  const [selectedFacilities, setSelectedFacilities] = useState([]);
+  const [q, setQ] = useState("");
+  const [hotelPage, setHotelPage] = useState(1);
   const [hotels, setHotels] = useState([]);
   const [count, setCount] = useState(0);
-  const [hotelPage, setHotelPage] = useState(1);
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const [customerEmail, setCustomerEmail] = useState("");
   const [customerName, setCustomerName] = useState("");
-  const [paymentCode, setPaymentCode] = useState("");
-  const [codeSent, setCodeSent] = useState(false);
-  const [verified, setVerified] = useState(false);
-  const [bookingMessage, setBookingMessage] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
 
-  const pageSize = 24;
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const payment = params.get("payment");
-    const bookingId = params.get("booking_id");
-
-    if (payment === "success" && bookingId) {
-      setPage("success");
-      confirmBooking(bookingId);
-    }
-
-    if (payment === "cancelled") {
-      setPage("cancel");
-    }
-  }, []);
-
-  async function confirmBooking(bookingId) {
-    try {
-      const res = await fetch(
-        `${API_BASE}/api/booking/confirm?booking_id=${encodeURIComponent(
-          bookingId
-        )}`
-      );
-      const data = await res.json();
-      setBookingMessage(
-        data?.message || "Booking confirmation has been received."
-      );
-    } catch {
-      setBookingMessage(
-        "Payment succeeded. Booking confirmation is being processed."
-      );
-    }
-  }
+  const totalPages = useMemo(() => {
+    return Math.max(1, Math.ceil((count || 0) / PAGE_SIZE));
+  }, [count]);
 
   async function searchHotels(nextPage = 1) {
     setLoading(true);
     setHotelPage(nextPage);
     setSelectedHotel(null);
-    setCodeSent(false);
-    setVerified(false);
-    setPaymentCode("");
-    setBookingMessage("");
 
     const params = new URLSearchParams({
-      country,
-      city,
-      area,
-      adults: String(guests),
       page: String(nextPage),
-      page_size: String(pageSize),
-      facilities: selectedFacilities.join(","),
+      page_size: String(PAGE_SIZE),
     });
+
+    if (country.trim()) params.set("country", country.trim());
+    if (city.trim()) params.set("city", city.trim());
+    if (area.trim()) params.set("area", area.trim());
+    if (q.trim()) params.set("q", q.trim());
 
     try {
       const res = await fetch(`${API_BASE}/api/hotels?${params.toString()}`);
@@ -105,111 +67,25 @@ export default function App() {
 
       setHotels(data.hotels || []);
       setCount(data.count || 0);
-      setPage("home");
+
+      if (!data.hotels || data.hotels.length === 0) {
+        alert(data.message || "No hotels found for this search yet.");
+      }
     } catch {
-      alert("Search failed. Please check backend deployment and try again.");
+      alert("Search failed. Please check the backend connection.");
     } finally {
       setLoading(false);
     }
   }
 
-  async function sendPaymentCode() {
+  async function reserveHotel() {
     if (!selectedHotel) return alert("Please select a hotel first.");
-    if (!customerEmail) return alert("Please enter your email.");
-
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE}/api/payment-code/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          hotel_id: selectedHotel.id,
-          email: customerEmail,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.status === "sent" || data.status === "email_not_configured") {
-        setCodeSent(true);
-        alert(data.message || "Payment access code sent.");
-      } else {
-        alert(data.message || "Could not send code.");
-      }
-    } catch {
-      alert("Could not send payment code.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function verifyPaymentCode() {
-    if (!paymentCode) return alert("Enter the code from your email.");
-
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE}/api/payment-code/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          hotel_id: selectedHotel.id,
-          email: customerEmail,
-          code: paymentCode,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.verified) {
-        setVerified(true);
-        alert("Email verified. You can now continue to payment.");
-      } else {
-        alert(data.message || "Code incorrect or expired.");
-      }
-    } catch {
-      alert("Could not verify payment code.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function payNow() {
-    if (!verified) return alert("Please verify your email code first.");
-    if (!selectedHotel) return alert("Please select a hotel.");
-
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE}/api/payment/checkout`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          hotel_id: selectedHotel.id,
-          hotel_name: selectedHotel.name,
-          email: customerEmail,
-          amount: 15000,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert(data.error || "Payment could not be started.");
-      }
-    } catch {
-      alert("Payment could not be started.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function reserveOnly() {
-    if (!selectedHotel) return alert("Please select a hotel.");
-    if (!customerEmail || !customerName)
+    if (!customerName.trim() || !customerEmail.trim()) {
       return alert("Please enter your name and email.");
+    }
 
     setLoading(true);
+
     try {
       const res = await fetch(`${API_BASE}/api/request`, {
         method: "POST",
@@ -223,95 +99,46 @@ export default function App() {
       });
 
       const data = await res.json();
-     if (data.email_delivery?.customer_sent) {
-  alert("Reservation received. Confirmation email sent to the customer.");
-} else {
-  alert(
-    "Reservation received, but confirmation email was not sent. Please check backend SMTP settings on Render."
-  );
-}
+
+      if (data.status === "received") {
+        alert("Reservation received. Please check your email.");
+      } else {
+        alert(data.message || "Reservation could not be completed.");
+      }
     } catch {
-      alert("Reservation request failed.");
+      alert("Reservation failed. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
-  const headlineCount = useMemo(() => {
-    return count ? count.toLocaleString() : "2,100,000";
-  }, [count]);
-
-  if (page === "travel") return <TravelPages city={city || "London"} />;
-
-  if (page === "success") {
-    return (
-      <main style={styles.shell}>
-        <section style={styles.successBox}>
-          <h1>Booking payment received</h1>
-          <p>{bookingMessage || "Confirming your booking..."}</p>
-          <button style={styles.primaryBtn} onClick={() => setPage("home")}>
-            Return to hotel search
-          </button>
-        </section>
-      </main>
-    );
-  }
-
-  if (page === "cancel") {
-    return (
-      <main style={styles.shell}>
-        <section style={styles.successBox}>
-          <h1>Payment was not completed</h1>
-          <p>Your booking has not been paid. You can return and try again.</p>
-          <button style={styles.primaryBtn} onClick={() => setPage("home")}>
-            Return to hotel search
-          </button>
-        </section>
-      </main>
-    );
+  if (page === "travel") {
+    return <TravelPages city={city || "London"} />;
   }
 
   return (
     <main style={styles.shell}>
       <section style={styles.hero}>
-        <div style={styles.leftPanel}>
-          <div style={styles.kicker}>WORLDWIDE HOTEL SEARCH</div>
-          <h1 style={styles.logoTitle}>My Space Hotel</h1>
-          <p style={styles.heroText}>
-            Find hotels around the world, compare stays clearly, and send your
-            reservation request with confidence.
+        <div style={styles.heroLeft}>
+          <div style={styles.kicker}>MY SPACE HOTEL</div>
+          <h1 style={styles.title}>Find the right stay with real hotel data.</h1>
+          <p style={styles.subtitle}>
+            Search 50,000+ real hotel records, compare location, facilities,
+            images, ratings, and reserve with confidence.
           </p>
 
-          <div style={styles.counterBox}>
-            <p>Matching stays found</p>
-            <strong>{headlineCount}</strong>
-            <span>hotel options available for your current search</span>
+          <div style={styles.stats}>
+            <strong>{count ? count.toLocaleString() : "50,015+"}</strong>
+            <span>real hotel records available</span>
           </div>
 
-          <div style={styles.navRow}>
-            <button style={styles.navPill} onClick={() => setPage("travel")}>
-              Travel Guides
-            </button>
-            <button style={styles.navPill}>FAQs</button>
-            <button style={styles.navPill}>Booking Terms</button>
-            <button style={styles.navPill}>Customer Support</button>
-          </div>
-
-          <div style={styles.featureGrid}>
-            <b>Search by country, city, or area</b>
-            <b>Filter by facilities that matter</b>
-            <b>Compare stays before you decide</b>
-            <b>Reserve or pay securely</b>
-          </div>
+          <button style={styles.travelBtn} onClick={() => setPage("travel")}>
+            Explore Travel Guides
+          </button>
         </div>
 
-        <div style={styles.searchPanel}>
-          <div style={styles.kickerDark}>SEARCH</div>
-          <h2 style={styles.searchTitle}>Choose the stay that fits your trip</h2>
-          <p style={styles.searchText}>
-            Search broadly or narrow your stay by destination, neighbourhood,
-            and facilities.
-          </p>
+        <div style={styles.searchBox}>
+          <h2>Search hotels</h2>
 
           <input
             style={styles.input}
@@ -319,80 +146,56 @@ export default function App() {
             value={country}
             onChange={(e) => setCountry(e.target.value)}
           />
+
           <input
             style={styles.input}
-            placeholder="City, e.g. London, New York, Lagos, Dubai"
+            placeholder="City, e.g. Benin City, London, Paris, Dubai"
             value={city}
             onChange={(e) => setCity(e.target.value)}
           />
+
           <input
             style={styles.input}
-            placeholder="Area, e.g. Mayfair, Times Square, Lekki, Marina"
+            placeholder="Area or district, e.g. City Centre, Lekki, Mayfair"
             value={area}
             onChange={(e) => setArea(e.target.value)}
           />
 
-          <div style={styles.guestRow}>
-            <b>Guests</b>
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <button
-                key={n}
-                style={guests === n ? styles.guestActive : styles.guestBtn}
-                onClick={() => setGuests(n)}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-
-          <div style={styles.facilityBox}>
-            <b>Choose preferred facilities</b>
-            <div style={styles.facilityGrid}>
-              {facilitiesList.map((f) => (
-                <label key={f}>
-                  <input
-                    type="checkbox"
-                    checked={selectedFacilities.includes(f)}
-                    onChange={() =>
-                      setSelectedFacilities((old) =>
-                        old.includes(f)
-                          ? old.filter((x) => x !== f)
-                          : [...old, f]
-                      )
-                    }
-                  />{" "}
-                  {f}
-                </label>
-              ))}
-            </div>
-          </div>
+          <input
+            style={styles.input}
+            placeholder="Hotel name or keyword"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
 
           <button style={styles.searchBtn} onClick={() => searchHotels(1)}>
-            {loading ? "Searching..." : "Search hotels"}
+            {loading ? "Searching..." : "Search real hotels"}
           </button>
         </div>
       </section>
 
       {hotels.length > 0 && (
-        <section style={styles.resultsWrap}>
-          <div style={styles.resultsHeader}>
+        <section style={styles.results}>
+          <div style={styles.resultsTop}>
             <div>
-              <h2>Available stays</h2>
+              <h2>Available hotel matches</h2>
               <p>
-                Showing {hotels.length} of {headlineCount} matching options.
+                Showing {hotels.length} of {count.toLocaleString()} results —
+                page {hotelPage} of {totalPages}.
               </p>
             </div>
-            <div style={styles.pageControls}>
+
+            <div style={styles.pageButtons}>
               <button
                 style={styles.smallBtn}
-                disabled={hotelPage <= 1}
+                disabled={hotelPage <= 1 || loading}
                 onClick={() => searchHotels(hotelPage - 1)}
               >
                 Previous
               </button>
-              <span>Page {hotelPage}</span>
               <button
                 style={styles.smallBtn}
+                disabled={loading}
                 onClick={() => searchHotels(hotelPage + 1)}
               >
                 Next
@@ -400,81 +203,119 @@ export default function App() {
             </div>
           </div>
 
-          <div style={styles.resultsGrid}>
-            {hotels.map((hotel) => (
-              <article
-                key={hotel.id}
-                style={{
-                  ...styles.card,
-                  border:
-                    selectedHotel?.id === hotel.id
-                      ? "4px solid #f7c948"
-                      : "1px solid #d8e1f0",
-                }}
-              >
-                <img src={hotel.image} alt={hotel.name} style={styles.hotelImg} />
-                <div style={styles.cardBody}>
-                  <h3>{hotel.name}</h3>
-                  <p>
-                    {hotel.area}, {hotel.city}, {hotel.country}
-                  </p>
-                  <p>{hotel.summary}</p>
-                  <b>{moneyLabel(hotel)}</b>
-                  <p>Rating: {hotel.rating}</p>
+          <div style={styles.grid}>
+            {hotels.map((hotel) => {
+              const facilities = cleanFacilities(hotel.facilities);
+              const image = hotelImage(hotel);
 
-                  <div style={styles.tags}>
-                    {(hotel.facilities || []).slice(0, 5).map((f) => (
-                      <span key={f}>{f}</span>
-                    ))}
+              return (
+                <article
+                  key={hotel.id}
+                  style={{
+                    ...styles.card,
+                    border:
+                      selectedHotel?.id === hotel.id
+                        ? "4px solid #f5c542"
+                        : "1px solid #d8e3f3",
+                  }}
+                >
+                  {image ? (
+                    <img
+                      src={image}
+                      alt={hotel.name}
+                      style={styles.image}
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div style={styles.noImage}>Image pending</div>
+                  )}
+
+                  <div style={styles.cardBody}>
+                    <h3>{hotel.name}</h3>
+
+                    <p style={styles.location}>
+                      {[hotel.area, hotel.city, hotel.country]
+                        .filter(Boolean)
+                        .join(", ")}
+                    </p>
+
+                    <p style={styles.summary}>
+                      {hotel.summary ||
+                        hotel.description ||
+                        "Real hotel option from the supplier database."}
+                    </p>
+
+                    <div style={styles.price}>{priceLabel(hotel)}</div>
+
+                    <div style={styles.rating}>
+                      Rating: {hotel.rating || "Customer rating pending"}
+                    </div>
+
+                    {facilities.length > 0 ? (
+                      <div style={styles.facilities}>
+                        {facilities.slice(0, 8).map((f) => (
+                          <span key={f} style={styles.facility}>
+                            ✓ {f}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p style={styles.pendingFacilities}>
+                        Facilities are being verified.
+                      </p>
+                    )}
+
+                    {hotel.map_url && (
+                      <iframe
+                        title={`Map ${hotel.id}`}
+                        src={`${hotel.map_url}&output=embed`}
+                        width="100%"
+                        height="180"
+                        style={styles.map}
+                        loading="lazy"
+                      />
+                    )}
+
+                    <button
+                      style={styles.selectBtn}
+                      onClick={() => {
+                        setSelectedHotel(hotel);
+                        setTimeout(() => {
+                          document
+                            .getElementById("reserve-panel")
+                            ?.scrollIntoView({ behavior: "smooth" });
+                        }, 100);
+                      }}
+                    >
+                      Select this hotel
+                    </button>
                   </div>
-
-                  <iframe
-                    title={`Map ${hotel.id}`}
-                    src={`${hotel.map_url}&output=embed`}
-                    width="100%"
-                    height="180"
-                    style={styles.map}
-                    loading="lazy"
-                  />
-
-                  <button
-                    style={styles.primaryBtn}
-                    onClick={() => {
-                      setSelectedHotel(hotel);
-                      setCodeSent(false);
-                      setVerified(false);
-                      setPaymentCode("");
-                      setTimeout(() => {
-                        document
-                          .getElementById("booking-panel")
-                          ?.scrollIntoView({ behavior: "smooth" });
-                      }, 100);
-                    }}
-                  >
-                    Select this stay
-                  </button>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         </section>
       )}
 
       {selectedHotel && (
-        <section id="booking-panel" style={styles.bookingPanel}>
-          <h2>Complete your booking</h2>
+        <section id="reserve-panel" style={styles.reservePanel}>
+          <h2>Reserve selected hotel</h2>
           <p>
-            Selected: <b>{selectedHotel.name}</b> — {selectedHotel.area},{" "}
-            {selectedHotel.city}, {selectedHotel.country}
+            <strong>{selectedHotel.name}</strong> —{" "}
+            {[selectedHotel.area, selectedHotel.city, selectedHotel.country]
+              .filter(Boolean)
+              .join(", ")}
           </p>
 
-          <div style={styles.formGrid}>
+          <div style={styles.reserveGrid}>
             <input
               style={styles.input}
               placeholder="Your full name"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
             />
+
             <input
               style={styles.input}
               placeholder="Your email address"
@@ -483,48 +324,14 @@ export default function App() {
             />
           </div>
 
-          <div style={styles.paymentBox}>
-            <h3>Secure payment access</h3>
-            <p>
-              To reduce fraud, payment is only unlocked after the email address
-              receives and verifies a payment access code.
-            </p>
-
-            {!codeSent && (
-              <button style={styles.primaryBtn} onClick={sendPaymentCode}>
-                Send payment code
-              </button>
-            )}
-
-            {codeSent && !verified && (
-              <div style={styles.formGrid}>
-                <input
-                  style={styles.input}
-                  placeholder="Enter 6-digit payment code"
-                  value={paymentCode}
-                  onChange={(e) => setPaymentCode(e.target.value)}
-                />
-                <button style={styles.primaryBtn} onClick={verifyPaymentCode}>
-                  Verify code
-                </button>
-              </div>
-            )}
-
-            {verified && (
-              <button style={styles.payBtn} onClick={payNow}>
-                Pay securely now
-              </button>
-            )}
-
-            <button style={styles.reserveBtn} onClick={reserveOnly}>
-              Reserve only — email request
-            </button>
-          </div>
+          <button style={styles.reserveBtn} onClick={reserveHotel}>
+            {loading ? "Sending..." : "Send reservation request"}
+          </button>
         </section>
       )}
 
       <footer style={styles.footer}>
-        <b>Need help?</b> Contact {SUPPORT_EMAIL}
+        Customer support: {SUPPORT_EMAIL}
       </footer>
     </main>
   );
@@ -534,256 +341,213 @@ const styles = {
   shell: {
     minHeight: "100vh",
     background: "#07152f",
-    color: "#07152f",
+    color: "#10213f",
     fontFamily: "Arial, Helvetica, sans-serif",
-    padding: 24,
+    padding: 22,
   },
   hero: {
     display: "grid",
-    gridTemplateColumns: "1.25fr 1fr",
-    gap: 24,
-    alignItems: "stretch",
+    gridTemplateColumns: "1.15fr 0.85fr",
+    gap: 22,
   },
-  leftPanel: {
-    background: "linear-gradient(160deg,#1e4598,#2e62cf)",
+  heroLeft: {
+    borderRadius: 28,
+    padding: 38,
+    background: "linear-gradient(140deg,#153b8a,#295ed6)",
     color: "white",
-    borderRadius: 30,
-    padding: 42,
   },
   kicker: {
-    letterSpacing: 8,
+    letterSpacing: 6,
     fontWeight: 900,
-    fontSize: 18,
+    opacity: 0.9,
   },
-  kickerDark: {
-    letterSpacing: 8,
-    fontWeight: 900,
-    color: "#5f78a7",
-  },
-  logoTitle: {
-    fontSize: 72,
+  title: {
+    fontSize: 58,
+    lineHeight: 1,
     margin: "26px 0",
-    lineHeight: 0.95,
   },
-  heroText: {
-    fontSize: 27,
-    lineHeight: 1.35,
-    fontWeight: 800,
+  subtitle: {
+    fontSize: 22,
+    lineHeight: 1.45,
+    maxWidth: 760,
+    fontWeight: 700,
   },
-  counterBox: {
-    marginTop: 34,
-    background: "rgba(255,255,255,0.13)",
-    borderRadius: 22,
-    padding: 24,
-    maxWidth: 560,
-  },
-  counterBoxStrong: {},
-  navRow: {
+  stats: {
+    marginTop: 28,
+    padding: 22,
+    borderRadius: 20,
+    background: "rgba(255,255,255,0.14)",
     display: "flex",
-    gap: 12,
-    flexWrap: "wrap",
-    marginTop: 24,
+    flexDirection: "column",
+    maxWidth: 360,
   },
-  navPill: {
-    background: "rgba(255,255,255,0.13)",
-    color: "white",
-    border: "1px solid rgba(255,255,255,0.28)",
-    borderRadius: 999,
-    padding: "14px 20px",
+  travelBtn: {
+    marginTop: 22,
+    background: "#f5c542",
+    color: "#07152f",
+    border: "none",
+    borderRadius: 16,
+    padding: "16px 22px",
     fontWeight: 900,
     cursor: "pointer",
   },
-  featureGrid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: 18,
-    marginTop: 28,
-    fontSize: 20,
-  },
-  searchPanel: {
-    background: "#eaf2fd",
-    borderRadius: 30,
-    padding: 32,
-  },
-  searchTitle: {
-    fontSize: 48,
-    lineHeight: 1.05,
-    margin: "12px 0",
-    color: "#0b1b3d",
-  },
-  searchText: {
-    color: "#48648d",
-    fontSize: 19,
+  searchBox: {
+    borderRadius: 28,
+    padding: 28,
+    background: "#edf5ff",
   },
   input: {
     width: "100%",
-    padding: "17px 18px",
-    borderRadius: 18,
-    border: "1px solid #d5dfed",
-    fontSize: 16,
+    padding: "16px 18px",
+    borderRadius: 16,
+    border: "1px solid #c9d7eb",
     marginTop: 12,
+    fontSize: 16,
     boxSizing: "border-box",
-  },
-  guestRow: {
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-    marginTop: 20,
-  },
-  guestBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    border: "1px solid #d5dfed",
-    background: "white",
-    cursor: "pointer",
-  },
-  guestActive: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    border: "1px solid #f7c948",
-    background: "#f7c948",
-    fontWeight: 900,
-    cursor: "pointer",
-  },
-  facilityBox: {
-    background: "white",
-    borderRadius: 18,
-    padding: 18,
-    marginTop: 18,
-  },
-  facilityGrid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: 12,
-    marginTop: 14,
   },
   searchBtn: {
     width: "100%",
-    marginTop: 16,
-    background: "#f7c948",
+    marginTop: 14,
+    background: "#f5c542",
     color: "#07152f",
     border: "2px solid #07152f",
-    borderRadius: 18,
+    borderRadius: 16,
     padding: 18,
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 900,
     cursor: "pointer",
   },
-  resultsWrap: {
-    background: "#f4f8ff",
+  results: {
+    marginTop: 22,
+    background: "#f6f9ff",
     borderRadius: 26,
-    marginTop: 24,
     padding: 24,
   },
-  resultsHeader: {
+  resultsTop: {
     display: "flex",
     justifyContent: "space-between",
-    gap: 16,
+    gap: 18,
     alignItems: "center",
   },
-  pageControls: {
+  pageButtons: {
     display: "flex",
-    alignItems: "center",
-    gap: 12,
+    gap: 10,
   },
   smallBtn: {
-    padding: "10px 14px",
+    padding: "12px 16px",
     borderRadius: 12,
     border: "1px solid #b6c5db",
     background: "white",
     cursor: "pointer",
+    fontWeight: 800,
   },
-  resultsGrid: {
+  grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit,minmax(290px,1fr))",
+    gridTemplateColumns: "repeat(auto-fit,minmax(310px,1fr))",
     gap: 20,
+    marginTop: 20,
   },
   card: {
     background: "white",
     borderRadius: 22,
     overflow: "hidden",
+    boxShadow: "0 12px 28px rgba(10,25,50,0.08)",
   },
-  hotelImg: {
+  image: {
     width: "100%",
-    height: 190,
+    height: 240,
     objectFit: "cover",
+    imageRendering: "auto",
+    background: "#dfe8f7",
+  },
+  noImage: {
+    height: 240,
+    display: "grid",
+    placeItems: "center",
+    background: "#dfe8f7",
+    fontWeight: 900,
+    color: "#52657e",
   },
   cardBody: {
     padding: 18,
   },
-  tags: {
+  location: {
+    color: "#4f668a",
+    fontWeight: 800,
+  },
+  summary: {
+    color: "#405473",
+    lineHeight: 1.45,
+  },
+  price: {
+    marginTop: 12,
+    fontSize: 18,
+    fontWeight: 900,
+    color: "#0b3277",
+  },
+  rating: {
+    marginTop: 8,
+    fontWeight: 800,
+  },
+  facilities: {
     display: "flex",
     flexWrap: "wrap",
     gap: 8,
-    margin: "12px 0",
+    marginTop: 14,
+  },
+  facility: {
+    background: "#e8f1ff",
+    color: "#123b7a",
+    borderRadius: 999,
+    padding: "8px 10px",
+    fontSize: 13,
+    fontWeight: 800,
+  },
+  pendingFacilities: {
+    marginTop: 12,
+    color: "#7a8798",
+    fontWeight: 700,
   },
   map: {
+    marginTop: 14,
     border: 0,
     borderRadius: 14,
-    marginTop: 10,
   },
-  primaryBtn: {
+  selectBtn: {
+    width: "100%",
+    marginTop: 14,
     background: "#153b8a",
     color: "white",
     border: "none",
     borderRadius: 14,
-    padding: "14px 18px",
+    padding: 14,
     fontWeight: 900,
     cursor: "pointer",
-    marginTop: 12,
   },
-  reserveBtn: {
+  reservePanel: {
+    marginTop: 22,
     background: "white",
-    color: "#153b8a",
-    border: "2px solid #153b8a",
-    borderRadius: 14,
-    padding: "14px 18px",
-    fontWeight: 900,
-    cursor: "pointer",
-    marginTop: 12,
-    marginLeft: 12,
-  },
-  payBtn: {
-    background: "#f7c948",
-    color: "#07152f",
-    border: "2px solid #07152f",
-    borderRadius: 14,
-    padding: "15px 22px",
-    fontWeight: 900,
-    cursor: "pointer",
-    marginTop: 12,
-  },
-  bookingPanel: {
-    background: "#ffffff",
     borderRadius: 26,
-    marginTop: 24,
-    padding: 28,
+    padding: 26,
   },
-  formGrid: {
+  reserveGrid: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     gap: 16,
-    alignItems: "end",
   },
-  paymentBox: {
-    marginTop: 22,
-    background: "#eef5ff",
-    borderRadius: 20,
-    padding: 20,
-  },
-  successBox: {
-    maxWidth: 760,
-    margin: "80px auto",
-    background: "white",
-    borderRadius: 28,
-    padding: 40,
-    textAlign: "center",
+  reserveBtn: {
+    marginTop: 16,
+    background: "#153b8a",
+    color: "white",
+    border: "none",
+    borderRadius: 14,
+    padding: "15px 20px",
+    fontWeight: 900,
+    cursor: "pointer",
   },
   footer: {
     color: "white",
     textAlign: "center",
-    padding: 28,
+    padding: 26,
   },
 };
