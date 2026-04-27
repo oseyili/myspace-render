@@ -987,3 +987,170 @@ def enrich_hotels_safe(limit: int = Query(250)):
     conn.close()
 
     return enrich_hotels(limit)
+
+# =========================================================
+# SAFE IMAGE + LOCAL CURRENCY PATCH
+# UPDATE ONLY - NO DELETE - NO RESET - SAME DB ONLY
+# =========================================================
+
+COUNTRY_CURRENCY = {
+    "United Kingdom": "GBP", "UK": "GBP", "England": "GBP", "Scotland": "GBP", "Wales": "GBP",
+    "United States": "USD", "USA": "USD", "US": "USD",
+    "Nigeria": "NGN", "Ghana": "GHS", "South Africa": "ZAR", "Kenya": "KES", "Egypt": "EGP", "Morocco": "MAD",
+    "France": "EUR", "Italy": "EUR", "Spain": "EUR", "Portugal": "EUR", "Germany": "EUR", "Netherlands": "EUR",
+    "Belgium": "EUR", "Austria": "EUR", "Greece": "EUR", "Ireland": "EUR", "Finland": "EUR",
+    "Switzerland": "CHF", "Sweden": "SEK", "Norway": "NOK", "Denmark": "DKK", "Poland": "PLN",
+    "Czech Republic": "CZK", "Hungary": "HUF",
+    "United Arab Emirates": "AED", "UAE": "AED", "Saudi Arabia": "SAR", "Qatar": "QAR", "Bahrain": "BHD",
+    "Oman": "OMR", "Kuwait": "KWD",
+    "Japan": "JPY", "South Korea": "KRW", "China": "CNY", "Hong Kong": "HKD", "Singapore": "SGD",
+    "Thailand": "THB", "Malaysia": "MYR", "India": "INR",
+    "Australia": "AUD", "New Zealand": "NZD",
+    "Canada": "CAD", "Mexico": "MXN", "Brazil": "BRL", "Argentina": "ARS", "Chile": "CLP", "Colombia": "COP",
+    "Croatia": "EUR"
+}
+
+def local_currency_for_country(country):
+    if not country:
+        return "LOCAL"
+    clean = str(country).strip()
+    return COUNTRY_CURRENCY.get(clean, COUNTRY_CURRENCY.get(clean.title(), "LOCAL"))
+
+def upgrade_booking_image_url(url):
+    if not url:
+        return ""
+    upgraded = str(url)
+    replacements = [
+        ("/square60/", "/max1024x768/"),
+        ("/square200/", "/max1024x768/"),
+        ("/square300/", "/max1024x768/"),
+        ("/150x150/", "/max1024x768/"),
+        ("square60", "max1024x768"),
+        ("square200", "max1024x768"),
+        ("square300", "max1024x768"),
+    ]
+    for old, new in replacements:
+        upgraded = upgraded.replace(old, new)
+    return upgraded
+
+old_clean_hotel_for_currency_patch = clean_hotel
+
+def clean_hotel(item, city_hint="", country_hint=""):
+    hotel = old_clean_hotel_for_currency_patch(item, city_hint, country_hint)
+    if not hotel:
+        return None
+
+    country_value = hotel.get("country") or country_hint or ""
+    local_currency = local_currency_for_country(country_value)
+
+    if local_currency != "LOCAL":
+        hotel["currency"] = local_currency
+
+    hotel["image"] = upgrade_booking_image_url(hotel.get("image") or "")
+    return hotel
+
+def safe_row_image_value(data):
+    return (
+        upgrade_booking_image_url(data.get("high_res_image") or "")
+        or upgrade_booking_image_url(data.get("image") or "")
+        or ""
+    )
+
+def safe_facility_list(value):
+    if not value:
+        return []
+    if isinstance(value, list):
+        return [str(x).strip() for x in value if str(x).strip()]
+    return [x.strip() for x in str(value).split(",") if x.strip()]
+
+def row_to_hotel(row):
+    data = dict(row)
+    return {
+        "id": data.get("id"),
+        "name": data.get("name"),
+        "country": data.get("country"),
+        "city": data.get("city"),
+        "area": data.get("area"),
+        "address": data.get("address"),
+        "currency": local_currency_for_country(data.get("country")) if data.get("country") else data.get("currency"),
+        "price": data.get("price"),
+        "rating": data.get("rating"),
+        "review_count": data.get("review_count"),
+        "image": safe_row_image_value(data),
+        "high_res_image": safe_row_image_value(data),
+        "latitude": data.get("latitude"),
+        "longitude": data.get("longitude"),
+        "map_url": data.get("map_url"),
+        "summary": data.get("description") or f"Real hotel option in {data.get('city') or 'this destination'} from the live supplier database.",
+        "description": data.get("description") or "",
+        "facilities": safe_facility_list(data.get("facilities")),
+        "fake_data": False,
+    }
+
+@app.post("/api/admin/fix-images-currency-safe")
+def fix_images_currency_safe(limit: int = Query(2000)):
+    ensure_enrichment_columns()
+
+    conn = get_conn()
+    cur = conn.cursor()
+    total = int(cur.execute("SELECT COUNT(*) FROM hotels").fetchone()[0])
+
+    if total == 0:
+        conn.close()
+        return {
+            "status": "blocked",
+            "message": "Database is empty. Restore FINAL_50000 before running this.",
+            "database_file": DB_PATH.name,
+            "safe_update_only": True,
+            "no_delete": True,
+        }
+
+    backup_database("before_image_currency_fix")
+
+    safe_limit = min(max(1, limit), 5000)
+
+    rows = cur.execute("""
+        SELECT id, image, high_res_image, country, currency
+        FROM hotels
+        LIMIT ?
+    """, (safe_limit,)).fetchall()
+
+    updated = 0
+    now = datetime.utcnow().isoformat()
+
+    for row in rows:
+        data = dict(row)
+        image = upgrade_booking_image_url(data.get("high_res_image") or data.get("image") or "")
+        currency = local_currency_for_country(data.get("country") or "")
+        if currency == "LOCAL":
+            currency = data.get("currency") or "LOCAL"
+
+        cur.execute("""
+            UPDATE hotels
+            SET high_res_image = ?,
+                image = ?,
+                currency = ?,
+                last_enriched_at = COALESCE(last_enriched_at, ?)
+            WHERE id = ?
+        """, (
+            image,
+            image,
+            currency,
+            now,
+            data.get("id"),
+        ))
+        updated += 1
+
+    conn.commit()
+    conn.close()
+
+    return {
+        "status": "completed",
+        "updated": updated,
+        "limit": safe_limit,
+        "total_hotels": total,
+        "database_file": DB_PATH.name,
+        "backup_created_before_update": True,
+        "safe_update_only": True,
+        "no_delete": True,
+    }
