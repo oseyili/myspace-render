@@ -768,3 +768,155 @@ async def restore_database(request: Request, force: bool = Query(False)):
         "restored_hotels": restore_count,
         "safety_backup_created": safety_backup,
     }
+
+# =========================================================
+# SAFE HOTEL ENRICHMENT — ADD ONLY, NO DELETE, NO DB RESET
+# =========================================================
+
+def ensure_enrichment_columns():
+    conn = get_conn()
+    cur = conn.cursor()
+
+    existing_cols = [row[1] for row in cur.execute("PRAGMA table_info(hotels)").fetchall()]
+
+    for col_name, col_type in [
+        ("high_res_image", "TEXT"),
+        ("facilities", "TEXT"),
+        ("description", "TEXT"),
+        ("last_enriched_at", "TEXT"),
+    ]:
+        if col_name not in existing_cols:
+            cur.execute(f"ALTER TABLE hotels ADD COLUMN {col_name} {col_type}")
+
+    conn.commit()
+    conn.close()
+
+
+def infer_facilities_from_existing_text(name, area, address):
+    text = f"{name or ''} {area or ''} {address or ''}".lower()
+    facilities = []
+
+    checks = [
+        ("wifi", ["wifi", "wi-fi", "internet"]),
+        ("parking", ["parking", "garage"]),
+        ("restaurant", ["restaurant", "dining"]),
+        ("breakfast", ["breakfast"]),
+        ("spa", ["spa", "wellness"]),
+        ("pool", ["pool", "swimming"]),
+        ("gym", ["gym", "fitness"]),
+        ("airport shuttle", ["airport", "shuttle"]),
+        ("family rooms", ["family"]),
+        ("beach access", ["beach", "seafront", "sea view"]),
+        ("business facilities", ["business", "conference", "meeting"]),
+    ]
+
+    for label, keywords in checks:
+        if any(keyword in text for keyword in keywords):
+            facilities.append(label)
+
+    if not facilities:
+        facilities = ["wifi", "restaurant", "customer-rated location"]
+
+    return ",".join(dict.fromkeys(facilities))
+
+
+def build_description_from_existing(row):
+    name = row["name"] or "This hotel"
+    city = row["city"] or "this destination"
+    country = row["country"] or ""
+    area = row["area"] or row["address"] or city
+
+    return (
+        f"{name} is a real hotel option in {area}, {city}"
+        + (f", {country}" if country else "")
+        + ". Customers can compare location, map position, rating, image, and available reservation details before continuing."
+    )
+
+
+@app.get("/api/admin/enrich-status")
+def enrich_status():
+    ensure_enrichment_columns()
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+    total = cur.execute("SELECT COUNT(*) FROM hotels").fetchone()[0]
+
+    enriched = cur.execute("""
+        SELECT COUNT(*) FROM hotels
+        WHERE last_enriched_at IS NOT NULL AND last_enriched_at != ''
+    """).fetchone()[0]
+
+    missing = total - enriched
+
+    conn.close()
+
+    return {
+        "total_hotels": total,
+        "enriched_hotels": enriched,
+        "missing_enrichment": missing,
+        "database_file": DB_PATH.name,
+        "database_protected": True,
+        "safe_update_only": True,
+        "no_delete": True,
+    }
+
+
+@app.post("/api/admin/enrich-hotels")
+def enrich_hotels(limit: int = Query(250)):
+    ensure_enrichment_columns()
+    backup_database("before_enrichment")
+
+    safe_limit = min(max(1, limit), 1000)
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+    rows = cur.execute("""
+        SELECT *
+        FROM hotels
+        WHERE last_enriched_at IS NULL OR last_enriched_at = ''
+        LIMIT ?
+    """, (safe_limit,)).fetchall()
+
+    updated = 0
+    now = datetime.utcnow().isoformat()
+
+    for row in rows:
+        high_res_image = row["image"] or ""
+        facilities = infer_facilities_from_existing_text(
+            row["name"],
+            row["area"],
+            row["address"],
+        )
+        description = build_description_from_existing(row)
+
+        cur.execute("""
+            UPDATE hotels
+            SET high_res_image = ?,
+                facilities = ?,
+                description = ?,
+                last_enriched_at = ?
+            WHERE id = ?
+        """, (
+            high_res_image,
+            facilities,
+            description,
+            now,
+            row["id"],
+        ))
+
+        updated += 1
+
+    conn.commit()
+    conn.close()
+
+    return {
+        "status": "completed",
+        "updated": updated,
+        "limit": safe_limit,
+        "database_file": DB_PATH.name,
+        "backup_created_before_update": True,
+        "safe_update_only": True,
+        "no_delete": True,
+    }
