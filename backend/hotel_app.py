@@ -921,3 +921,69 @@ def enrich_hotels(limit: int = Query(250)):
         "no_delete": True,
     }
 
+
+# =========================
+# SAFE SEARCH FIX (NO RESET)
+# =========================
+
+def format_facilities(facilities_text):
+    if not facilities_text:
+        return []
+    return [f.strip() for f in facilities_text.split(",") if f.strip()]
+
+
+def safe_image(row):
+    return row.get("high_res_image") or row.get("image") or ""
+
+
+# Patch search response formatting
+old_row_to_hotel = row_to_hotel
+
+def row_to_hotel(row):
+    data = dict(row)
+
+    return {
+        "id": data.get("id"),
+        "name": data.get("name"),
+        "country": data.get("country"),
+        "city": data.get("city"),
+        "area": data.get("area"),
+        "address": data.get("address"),
+        "currency": data.get("currency"),
+        "price": data.get("price"),
+        "rating": data.get("rating"),
+        "review_count": data.get("review_count"),
+        "image": safe_image(data),
+        "latitude": data.get("latitude"),
+        "longitude": data.get("longitude"),
+        "map_url": data.get("map_url"),
+        "summary": data.get("description") or f"Hotel in {data.get('city')}",
+        "facilities": format_facilities(data.get("facilities")),
+        "fake_data": False
+    }
+
+
+# =========================
+# ENRICHMENT SAFETY LOCK
+# =========================
+
+@app.post("/api/admin/enrich-hotels-safe")
+def enrich_hotels_safe(limit: int = Query(250)):
+    ensure_enrichment_columns()
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+    total = cur.execute("SELECT COUNT(*) FROM hotels").fetchone()[0]
+
+    if total == 0:
+        conn.close()
+        return {
+            "status": "blocked",
+            "message": "Enrichment blocked: database is empty",
+            "safe": True
+        }
+
+    conn.close()
+
+    return enrich_hotels(limit)
