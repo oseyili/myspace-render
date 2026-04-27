@@ -727,3 +727,44 @@ def request_booking(request: ReservationRequest):
             "note": email_note,
         },
     }
+@app.post("/api/admin/restore-database")
+async def restore_database(request: Request, force: bool = Query(False)):
+    uploaded_bytes = await request.body()
+
+    if not uploaded_bytes or len(uploaded_bytes) < 1024:
+        return {"status": "error", "message": "Uploaded database file is empty or invalid."}
+
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    uploaded_path = BACKUP_DIR / f"uploaded_restore_{timestamp}.db"
+
+    with open(uploaded_path, "wb") as f:
+        f.write(uploaded_bytes)
+
+    try:
+        test_conn = sqlite3.connect(uploaded_path)
+        test_cur = test_conn.cursor()
+        restore_count = int(test_cur.execute("SELECT COUNT(*) FROM hotels").fetchone()[0])
+        test_conn.close()
+    except Exception as exc:
+        return {"status": "error", "message": "Uploaded file is not a valid hotel database.", "error": str(exc)}
+
+    current_count = count_hotels_in_db(DB_PATH)
+
+    if restore_count < current_count and not force:
+        return {
+            "status": "blocked",
+            "message": "Restore blocked because uploaded DB has fewer hotels than current DB. Use force=true only if you are certain.",
+            "current_hotels": current_count,
+            "uploaded_hotels": restore_count,
+        }
+
+    safety_backup = backup_database("before_restore")
+    shutil.copy2(uploaded_path, DB_PATH)
+
+    return {
+        "status": "restored",
+        "database_file": DB_PATH.name,
+        "previous_hotels": current_count,
+        "restored_hotels": restore_count,
+        "safety_backup_created": safety_backup,
+    }
