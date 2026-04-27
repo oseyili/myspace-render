@@ -104,16 +104,8 @@ export default function App() {
   );
 
   const filteredHotels = useMemo(() => {
-    if (!selectedFacilities.length) return hotels;
-    return hotels.filter((hotel) => {
-      const facilities = cleanFacilities(hotel.facilities).map((x) =>
-        x.toLowerCase()
-      );
-      return selectedFacilities.every((f) =>
-        facilities.some((item) => item.includes(f.toLowerCase()))
-      );
-    });
-  }, [hotels, selectedFacilities]);
+  return hotels;
+}, [hotels]);
 
   function toggleFacility(name) {
     setSelectedFacilities((current) =>
