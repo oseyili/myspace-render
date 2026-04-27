@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query, Request
+ï»¿from fastapi import FastAPI, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, EmailStr
@@ -770,7 +770,7 @@ async def restore_database(request: Request, force: bool = Query(False)):
     }
 
 # =========================================================
-# SAFE HOTEL ENRICHMENT — ADD ONLY, NO DELETE, NO DB RESET
+# SAFE HOTEL ENRICHMENT - ADD ONLY, NO DELETE, NO DB RESET
 # =========================================================
 
 def ensure_enrichment_columns():
@@ -920,3 +920,4 @@ def enrich_hotels(limit: int = Query(250)):
         "safe_update_only": True,
         "no_delete": True,
     }
+
