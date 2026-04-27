@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import TravelPages from "./TravelPages";
 
 const API_BASE =
@@ -180,7 +180,7 @@ export default function App() {
             <div>
               <h2>Available hotel matches</h2>
               <p>
-                Showing {hotels.length} of {count.toLocaleString()} results â€”
+                Showing {hotels.length} of {count.toLocaleString()} results —
                 page {hotelPage} of {totalPages}.
               </p>
             </div>
@@ -256,7 +256,7 @@ export default function App() {
                       <div style={styles.facilities}>
                         {facilities.slice(0, 8).map((f) => (
                           <span key={f} style={styles.facility}>
-                            âœ“ {f}
+                            ✓ {f}
                           </span>
                         ))}
                       </div>
@@ -302,7 +302,7 @@ export default function App() {
         <section id="reserve-panel" style={styles.reservePanel}>
           <h2>Reserve selected hotel</h2>
           <p>
-            <strong>{selectedHotel.name}</strong> â€”{" "}
+            <strong>{selectedHotel.name}</strong> —{" "}
             {[selectedHotel.area, selectedHotel.city, selectedHotel.country]
               .filter(Boolean)
               .join(", ")}
