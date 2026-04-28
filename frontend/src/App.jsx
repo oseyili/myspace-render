@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 const API_BASE = "https://hotel-backend-1-ee5z.onrender.com";
 const SUPPORT_EMAIL = "reservations@myspace-hotel.com";
@@ -78,23 +78,7 @@ function infoPageContent(page) {
   return pages[page] || pages.guides;
 }
 
-export default function normalizeCountry(input) {
-  if (!input) return "";
-
-  const map = {
-    uk: "United Kingdom",
-    usa: "United States",
-    us: "United States",
-    uae: "United Arab Emirates",
-    ksa: "Saudi Arabia",
-    nigeria: "Nigeria"
-  };
-
-  const lower = input.toLowerCase();
-  return map[lower] || input;
-}
-
-function App() {
+export default function App() {
   const [activePage, setActivePage] = useState("home");
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
@@ -120,8 +104,16 @@ function App() {
   );
 
   const filteredHotels = useMemo(() => {
-  return hotels;
-}, [hotels]);
+    if (!selectedFacilities.length) return hotels;
+    return hotels.filter((hotel) => {
+      const facilities = cleanFacilities(hotel.facilities).map((x) =>
+        x.toLowerCase()
+      );
+      return selectedFacilities.every((f) =>
+        facilities.some((item) => item.includes(f.toLowerCase()))
+      );
+    });
+  }, [hotels, selectedFacilities]);
 
   function toggleFacility(name) {
     setSelectedFacilities((current) =>
@@ -354,7 +346,7 @@ function App() {
                   {image ? (
                     <img src={image} alt={hotel.name} style={styles.hotelImg} loading="lazy" referrerPolicy="no-referrer" />
                   ) : (
-                    <div style={styles.noImage}>Hotel image</div>
+                    <div style={styles.noImage}>Image being verified</div>
                   )}
 
                   <div style={styles.hotelBody}>
@@ -363,7 +355,7 @@ function App() {
                       {[hotel.area, hotel.city, hotel.country].filter(Boolean).join(", ")}
                     </p>
                     <p style={styles.summary}>
-                      {hotel.summary || hotel.description || "Compare this stay by location, price, map position, and available facilities before requesting availability."}
+                      {hotel.summary || hotel.description || "Real hotel option from the live supplier database."}
                     </p>
 
                     <div style={styles.price}>{priceLabel(hotel)}</div>
@@ -371,10 +363,10 @@ function App() {
                     <div style={styles.facilityTags}>
                       {facilities.length ? (
                         facilities.slice(0, 8).map((f) => (
-                          <span key={f}>âœ“ {f}</span>
+                          <span key={f}>✓ {f}</span>
                         ))
                       ) : (
-                        <span>Popular facilities for this stay</span>
+                        <span>Facilities being verified</span>
                       )}
                     </div>
 
@@ -716,4 +708,3 @@ const styles = {
     marginTop: 28,
   },
 };
-
