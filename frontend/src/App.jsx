@@ -79,7 +79,7 @@ function infoPageContent(page) {
 }
 
 export default function normalizeCountry(input) {
-  if (!input) return "";
+  if (!input || typeof input !== 'string') return "";
 
   const map = {
     uk: "United Kingdom",
@@ -87,8 +87,12 @@ export default function normalizeCountry(input) {
     us: "United States",
     uae: "United Arab Emirates",
     ksa: "Saudi Arabia",
-    nigeria: "Nigeria"
+    ng: "Nigeria"
   };
+
+  const lower = input.trim().toLowerCase();
+  return map[lower] || input;
+};
 
   const lower = input.toLowerCase();
   return map[lower] || input;
@@ -716,4 +720,5 @@ const styles = {
     marginTop: 28,
   },
 };
+
 
