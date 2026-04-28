@@ -434,3 +434,24 @@ def render_diagnostic_20260428_212643():
     except Exception as e:
         data["error"] = str(e)
     return data
+
+@app.get("/api/admin/render-diagnostic-20260428_213939")
+def render_diagnostic_20260428_213939():
+    import os, sqlite3
+    db_path = DB_FILE
+    data = {
+        "stamp": "20260428_213939",
+        "db_file": db_path,
+        "db_abs": os.path.abspath(db_path),
+        "exists": os.path.exists(db_path),
+        "size": os.path.getsize(db_path) if os.path.exists(db_path) else 0,
+        "cwd": os.getcwd(),
+        "backend_dir": os.path.dirname(__file__),
+    }
+    try:
+        con = sqlite3.connect(db_path)
+        data["hotels"] = con.execute("SELECT COUNT(*) FROM hotels").fetchone()[0]
+        con.close()
+    except Exception as e:
+        data["error"] = str(e)
+    return data
