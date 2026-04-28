@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 APP_NAME = "My Space Hotel Backend"
-DB_FILE = "hotel_catalog.db"
+DB_FILE = os.path.join(os.path.dirname(__file__), "hotel_catalog.db")
 
 RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY", "").strip()
 RAPIDAPI_HOST = os.getenv("RAPIDAPI_HOST", "booking-com.p.rapidapi.com").strip()
