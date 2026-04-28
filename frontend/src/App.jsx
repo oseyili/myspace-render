@@ -92,6 +92,53 @@ export default function App() {
     }
   }
 
+  async function submitAvailability() {
+    setRequestNotice("");
+
+    if (!selectedHotel) {
+      setRequestNotice("Please select a hotel first.");
+      return;
+    }
+
+    if (!customerName.trim() || !customerEmail.trim()) {
+      setRequestNotice("Please enter your name and email address.");
+      return;
+    }
+
+    setRequesting(true);
+
+    try {
+      const response = await fetch(`${API_BASE}/api/request-availability`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          hotel_id: selectedHotel.id || "",
+          hotel_name: selectedHotel.name || "",
+          name: customerName.trim(),
+          email: customerEmail.trim(),
+          message: customerMessage.trim()
+        })
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok || !payload.ok) {
+        throw new Error("Request failed");
+      }
+
+      setRequestNotice("Your availability request has been received. Support will continue by email.");
+      setCustomerName("");
+      setCustomerEmail("");
+      setCustomerMessage("");
+    } catch {
+      setRequestNotice("The request could not be sent. Please try again shortly.");
+    } finally {
+      setRequesting(false);
+    }
+  }
+
   if (activePage === "guide") {
     const mapQuery = encodeURIComponent([area, city, country].filter(Boolean).join(" ") || "London");
     return (
@@ -211,3 +258,4 @@ export default function App() {
     </main>
   );
 }
+
