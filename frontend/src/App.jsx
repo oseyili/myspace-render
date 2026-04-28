@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+﻿import React, { useMemo, useState } from "react";
 
 const API_BASE = "https://hotel-backend-1-ee5z.onrender.com";
 const SUPPORT_EMAIL = "reservations@myspace-hotel.com";
@@ -141,7 +141,7 @@ export default function App() {
     if (keyword.trim()) params.set("q", keyword.trim());
 
     try {
-      const res = await fetch(`${API_BASE}/api/hotels?${params.toString()}`);
+      const res = await fetch(`${API_BASE}/api/hotels-safe?${params.toString()}`);
       const data = await res.json();
 
       setHotels(data.hotels || []);
@@ -363,7 +363,7 @@ export default function App() {
                     <div style={styles.facilityTags}>
                       {facilities.length ? (
                         facilities.slice(0, 8).map((f) => (
-                          <span key={f}>✓ {f}</span>
+                          <span key={f}>âœ“ {f}</span>
                         ))
                       ) : (
                         <span>Facilities being verified</span>

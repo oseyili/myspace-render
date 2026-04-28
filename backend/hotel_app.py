@@ -1431,3 +1431,110 @@ def fix_images_currency_safe_v2(limit: int = Query(5000)):
         "safe_update_only": True,
         "no_delete": True,
     }
+
+# =========================================================
+# SAFE SEARCH ENDPOINT V2 - DOES NOT DELETE OR RESET DB
+# =========================================================
+
+def normalize_search_country_safe(value):
+    if not value:
+        return ""
+    v = str(value).strip().lower()
+    if v in ["uk", "u.k.", "gb", "great britain", "england"]:
+        return "United Kingdom"
+    if v in ["usa", "us", "u.s.", "america"]:
+        return "United States"
+    if v in ["uae", "u.a.e."]:
+        return "United Arab Emirates"
+    if v in ["ng"]:
+        return "Nigeria"
+    return str(value).strip()
+
+def split_facilities_safe(value):
+    if not value:
+        return []
+    return [x.strip() for x in str(value).split(",") if x.strip()]
+
+@app.get("/api/hotels-safe")
+def hotels_safe(
+    country: str = "",
+    city: str = "",
+    area: str = "",
+    q: str = "",
+    page: int = 1,
+    page_size: int = 48,
+):
+    conn = get_conn()
+    cur = conn.cursor()
+
+    safe_page = max(1, int(page or 1))
+    safe_page_size = min(max(1, int(page_size or 48)), 100)
+    offset = (safe_page - 1) * safe_page_size
+
+    where = []
+    params = []
+
+    clean_country = normalize_search_country_safe(country)
+
+    if clean_country:
+        where.append("LOWER(country) LIKE ?")
+        params.append("%" + clean_country.lower() + "%")
+
+    if city:
+        where.append("LOWER(city) LIKE ?")
+        params.append("%" + str(city).strip().lower() + "%")
+
+    if area:
+        where.append("(LOWER(area) LIKE ? OR LOWER(address) LIKE ?)")
+        params.append("%" + str(area).strip().lower() + "%")
+        params.append("%" + str(area).strip().lower() + "%")
+
+    if q:
+        where.append("(LOWER(name) LIKE ? OR LOWER(address) LIKE ?)")
+        params.append("%" + str(q).strip().lower() + "%")
+        params.append("%" + str(q).strip().lower() + "%")
+
+    where_sql = " WHERE " + " AND ".join(where) if where else ""
+
+    total = cur.execute("SELECT COUNT(*) FROM hotels" + where_sql, params).fetchone()[0]
+
+    rows = cur.execute(
+        "SELECT * FROM hotels" + where_sql + " ORDER BY rating DESC LIMIT ? OFFSET ?",
+        params + [safe_page_size, offset],
+    ).fetchall()
+
+    hotels = []
+    for row in rows:
+        d = dict(row)
+        image = d.get("high_res_image") or d.get("image") or ""
+        hotels.append({
+            "id": d.get("id"),
+            "name": d.get("name"),
+            "country": d.get("country"),
+            "city": d.get("city"),
+            "area": d.get("area"),
+            "address": d.get("address"),
+            "currency": d.get("currency"),
+            "price": d.get("price"),
+            "rating": d.get("rating"),
+            "review_count": d.get("review_count"),
+            "image": image,
+            "high_res_image": image,
+            "latitude": d.get("latitude"),
+            "longitude": d.get("longitude"),
+            "map_url": d.get("map_url"),
+            "summary": d.get("description") or "Compare this stay by location, price, map position, and available facilities before requesting availability.",
+            "description": d.get("description") or "",
+            "facilities": split_facilities_safe(d.get("facilities")),
+            "fake_data": False,
+        })
+
+    conn.close()
+
+    return {
+        "count": total,
+        "page": safe_page,
+        "page_size": safe_page_size,
+        "hotels": hotels,
+        "safe_search": True,
+    }
