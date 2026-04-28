@@ -4,41 +4,30 @@ import "./App.css";
 const API_BASE = "https://hotel-backend-1-ee5z.onrender.com";
 const SUPPORT_EMAIL = "reservations@myspace-hotel.com";
 
-const FACILITIES = [
-  "wifi",
-  "gym",
-  "pool",
-  "airport shuttle",
-  "beach access",
-  "spa",
-  "restaurant",
-  "parking",
-  "family rooms",
-  "business lounge",
-];
+const FACILITIES = ["wifi","gym","pool","airport shuttle","beach access","spa","restaurant","parking","family rooms","business lounge"];
 
 const INFO = {
   faq: {
     title: "FAQs",
-    intro: "Clear answers before you search, compare, or request availability.",
+    intro: "Clear answers before customers search, compare, or request hotel availability.",
     rows: [
       ["How do I search?", "Enter country and city first. Add area, hotel name, or facilities only when you want to narrow results."],
-      ["Why did my search return nothing?", "The database may not contain that exact city spelling or your filters may be too narrow. Start with country and city only."],
+      ["Why did my search return nothing?", "Start with country and city only. Filters can be added after results appear."],
       ["Do I pay immediately?", "No. Payment should only happen after availability and final price are confirmed."],
-      ["Are prices final?", "No. Final prices depend on dates, room type, guest count, taxes, and hotel availability."],
-      ["Can I use UK, USA, or NG?", "Yes. Common country abbreviations are accepted where supported by the search database."],
-    ],
+      ["Are prices final?", "Final prices depend on dates, room type, guest count, taxes, and hotel availability."],
+      ["Can I use UK, USA, or NG?", "Yes. Common country abbreviations are supported where recognised by the database."]
+    ]
   },
   terms: {
     title: "Booking Terms",
     intro: "Important information before continuing with a reservation request.",
     rows: [
-      ["Availability", "A request is not a confirmed booking until the hotel or booking source confirms availability."],
-      ["Price confirmation", "The final price must be confirmed for your selected dates, guests, room type, taxes, and local charges."],
+      ["Availability", "A request is not a confirmed booking until availability is confirmed."],
+      ["Price confirmation", "Final price must be confirmed for the selected dates, guests, room type, taxes, and local charges."],
       ["Customer details", "Customers must provide accurate names, email addresses, dates, destination, and room requirements."],
       ["Cancellation rules", "Cancellation rules depend on the selected hotel, room type, dates, and booking provider."],
-      ["Payment", "Only continue to payment when the stay details and price have been confirmed."],
-    ],
+      ["Payment", "Only continue to payment when the stay details and price have been confirmed."]
+    ]
   },
   support: {
     title: "Customer Support",
@@ -47,9 +36,9 @@ const INFO = {
       ["Email", SUPPORT_EMAIL],
       ["What to include", "Send the country, city, dates, number of guests, selected hotel, and special room needs."],
       ["Search help", "Start with country and city only. Add area or facilities after results appear."],
-      ["Availability help", "If one hotel is unavailable, support can help continue with another suitable stay."],
-    ],
-  },
+      ["Availability help", "If one hotel is unavailable, support can help continue with another suitable stay."]
+    ]
+  }
 };
 
 function getHotels(payload) {
@@ -58,20 +47,9 @@ function getHotels(payload) {
 }
 
 function cleanImage(hotel) {
-  const url =
-    hotel?.image ||
-    hotel?.max_photo_url ||
-    hotel?.main_photo_url ||
-    hotel?.photo_url ||
-    hotel?.image_url ||
-    "";
-
+  const url = hotel?.image || hotel?.max_photo_url || hotel?.main_photo_url || hotel?.photo_url || hotel?.image_url || "";
   if (!url || typeof url !== "string") return "";
-
-  return url
-    .replace("square60", "max1280x900")
-    .replace("square200", "max1280x900")
-    .replace("max300", "max1280x900");
+  return url.replace("square60", "max1280x900").replace("square200", "max1280x900").replace("max300", "max1280x900");
 }
 
 export default function App() {
@@ -88,9 +66,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
 
   function toggleFacility(name) {
-    setSelectedFacilities((old) =>
-      old.includes(name) ? old.filter((x) => x !== name) : [...old, name]
-    );
+    setSelectedFacilities((old) => old.includes(name) ? old.filter((x) => x !== name) : [...old, name]);
   }
 
   async function searchHotels() {
@@ -100,31 +76,15 @@ export default function App() {
     setSelectedHotel(null);
 
     try {
-      const params = new URLSearchParams({
-        country,
-        city,
-        area,
-        keyword,
-        guests: String(guests),
-        limit: "60",
-      });
+      const params = new URLSearchParams({ country, city, area, keyword, guests: String(guests), limit: "60" });
+      if (selectedFacilities.length) params.set("facilities", selectedFacilities.join(","));
 
-      if (selectedFacilities.length) {
-        params.set("facilities", selectedFacilities.join(","));
-      }
-
-      const res = await fetch(`${API_BASE}/api/hotels/search?${params.toString()}`, {
-        cache: "no-store",
-      });
-
+      const res = await fetch(`${API_BASE}/api/hotels/search?${params.toString()}`, { cache: "no-store" });
       const payload = await res.json();
       const list = getHotels(payload);
-
       setHotels(list);
 
-      if (!list.length) {
-        setNotice("No hotel matched this search. Try country and city only first, then add area, hotel name, or facilities.");
-      }
+      if (!list.length) setNotice("No hotel matched this search. Try country and city only first, then add area, hotel name, or facilities.");
     } catch {
       setNotice("Search is not connecting to the hotel server. Please try again shortly.");
     } finally {
@@ -134,26 +94,13 @@ export default function App() {
 
   if (activePage === "guide") {
     const mapQuery = encodeURIComponent([area, city, country].filter(Boolean).join(" ") || "London");
-
     return (
       <main className="app-shell">
         <section className="page-card">
           <button className="yellow-small" onClick={() => setActivePage("home")}>Back to hotel search</button>
           <h1>Travel Guides</h1>
-          <p className="page-intro">
-            Use the map to understand the destination area before choosing a stay. Compare location, access, and nearby districts before requesting availability.
-          </p>
-          <iframe
-            title="Travel guide map"
-            src={`https://www.google.com/maps?q=${mapQuery}&output=embed`}
-            className="guide-map"
-            loading="lazy"
-          />
-          <div className="info-grid">
-            <div><b>Location matters</b><span>Choose a hotel near the places you will visit most.</span></div>
-            <div><b>Access matters</b><span>Check airport, transport, and neighbourhood convenience.</span></div>
-            <div><b>Confirmation matters</b><span>Confirm availability and final price before payment.</span></div>
-          </div>
+          <p className="page-intro">Use the map to understand the destination area before choosing a stay.</p>
+          <iframe title="Travel guide map" src={`https://www.google.com/maps?q=${mapQuery}&output=embed`} className="guide-map" loading="lazy" />
         </section>
       </main>
     );
@@ -161,7 +108,6 @@ export default function App() {
 
   if (activePage !== "home") {
     const content = INFO[activePage];
-
     return (
       <main className="app-shell">
         <section className="page-card">
@@ -216,27 +162,15 @@ export default function App() {
 
           <div className="guest-row">
             <b>Guests</b>
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <button key={n} className={guests === n ? "active" : ""} onClick={() => setGuests(n)}>{n}</button>
-            ))}
+            {[1,2,3,4,5,6].map((n) => <button key={n} className={guests === n ? "active" : ""} onClick={() => setGuests(n)}>{n}</button>)}
           </div>
 
           <div className="facility-box">
             <h3>Choose preferred facilities</h3>
-            <div>
-              {FACILITIES.map((f) => (
-                <label key={f}>
-                  <input type="checkbox" checked={selectedFacilities.includes(f)} onChange={() => toggleFacility(f)} />
-                  {f}
-                </label>
-              ))}
-            </div>
+            <div>{FACILITIES.map((f) => <label key={f}><input type="checkbox" checked={selectedFacilities.includes(f)} onChange={() => toggleFacility(f)} />{f}</label>)}</div>
           </div>
 
-          <button className="search-button" onClick={searchHotels} disabled={loading}>
-            {loading ? "Searching..." : "Search hotels"}
-          </button>
-
+          <button className="search-button" onClick={searchHotels} disabled={loading}>{loading ? "Searching..." : "Search hotels"}</button>
           {notice && <div className="notice">{notice}</div>}
         </section>
       </section>
