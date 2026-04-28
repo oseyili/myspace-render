@@ -1321,3 +1321,113 @@ def fix_images_currency_safe(limit: int = Query(2000)):
         "safe_update_only": True,
         "no_delete": True,
     }
+
+# =========================================================
+# SAFE IMAGE/CURRENCY FIX V2 - PROGRESS MARKER, NO DELETE
+# =========================================================
+
+def ensure_image_currency_fix_column():
+    conn = get_conn()
+    cur = conn.cursor()
+    existing_cols = [row[1] for row in cur.execute("PRAGMA table_info(hotels)").fetchall()]
+    if "image_currency_fixed_at" not in existing_cols:
+        cur.execute("ALTER TABLE hotels ADD COLUMN image_currency_fixed_at TEXT")
+    conn.commit()
+    conn.close()
+
+
+@app.post("/api/admin/fix-images-currency-safe-v2")
+def fix_images_currency_safe_v2(limit: int = Query(5000)):
+    ensure_enrichment_columns()
+    ensure_image_currency_fix_column()
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+    total = int(cur.execute("SELECT COUNT(*) FROM hotels").fetchone()[0])
+
+    if total == 0:
+        conn.close()
+        return {
+            "status": "blocked",
+            "message": "Database is empty. Restore FINAL_50000 before running this.",
+            "safe_update_only": True,
+            "no_delete": True,
+        }
+
+    fixed = int(cur.execute("""
+        SELECT COUNT(*) FROM hotels
+        WHERE image_currency_fixed_at IS NOT NULL AND image_currency_fixed_at != ''
+    """).fetchone()[0])
+
+    safe_limit = min(max(1, limit), 5000)
+
+    rows = cur.execute("""
+        SELECT id, image, high_res_image, country, currency
+        FROM hotels
+        WHERE image_currency_fixed_at IS NULL OR image_currency_fixed_at = ''
+        LIMIT ?
+    """, (safe_limit,)).fetchall()
+
+    if not rows:
+        conn.close()
+        return {
+            "status": "complete",
+            "updated": 0,
+            "total_hotels": total,
+            "fixed_hotels": fixed,
+            "remaining": 0,
+            "safe_update_only": True,
+            "no_delete": True,
+        }
+
+    backup_database("before_image_currency_fix_v2")
+
+    updated = 0
+    now = datetime.utcnow().isoformat()
+
+    for row in rows:
+        data = dict(row)
+
+        image = upgrade_booking_image_url(data.get("high_res_image") or data.get("image") or "")
+        currency = local_currency_for_country(data.get("country") or "")
+
+        if currency == "LOCAL":
+            currency = data.get("currency") or "LOCAL"
+
+        cur.execute("""
+            UPDATE hotels
+            SET high_res_image = ?,
+                image = ?,
+                currency = ?,
+                image_currency_fixed_at = ?
+            WHERE id = ?
+        """, (
+            image,
+            image,
+            currency,
+            now,
+            data.get("id"),
+        ))
+
+        updated += 1
+
+    conn.commit()
+
+    fixed_after = int(cur.execute("""
+        SELECT COUNT(*) FROM hotels
+        WHERE image_currency_fixed_at IS NOT NULL AND image_currency_fixed_at != ''
+    """).fetchone()[0])
+
+    conn.close()
+
+    return {
+        "status": "completed",
+        "updated": updated,
+        "total_hotels": total,
+        "fixed_hotels": fixed_after,
+        "remaining": total - fixed_after,
+        "database_file": DB_PATH.name,
+        "safe_update_only": True,
+        "no_delete": True,
+    }
