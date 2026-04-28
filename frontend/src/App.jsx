@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+﻿import React, { useMemo, useState } from "react";
 
 const API_BASE = "https://hotel-backend-1-ee5z.onrender.com";
 const SUPPORT_EMAIL = "reservations@myspace-hotel.com";
@@ -338,7 +338,7 @@ export default function App() {
                   {image ? (
                     <img src={image} alt={hotel.name} style={styles.hotelImg} loading="lazy" referrerPolicy="no-referrer" />
                   ) : (
-                    <div style={styles.noImage}>Image being verified</div>
+                    <div style={styles.noImage}>Hotel image</div>
                   )}
 
                   <div style={styles.hotelBody}>
@@ -347,7 +347,7 @@ export default function App() {
                       {[hotel.area, hotel.city, hotel.country].filter(Boolean).join(", ")}
                     </p>
                     <p style={styles.summary}>
-                      {hotel.summary || hotel.description || "Real hotel option from the live supplier database."}
+                      {hotel.summary || hotel.description || "Compare this stay by location, price, map position, and available facilities before requesting availability."}
                     </p>
 
                     <div style={styles.price}>{priceLabel(hotel)}</div>
@@ -355,10 +355,10 @@ export default function App() {
                     <div style={styles.facilityTags}>
                       {facilities.length ? (
                         facilities.slice(0, 8).map((f) => (
-                          <span key={f}>✓ {f}</span>
+                          <span key={f}>âœ“ {f}</span>
                         ))
                       ) : (
-                        <span>Facilities being verified</span>
+                        <span>Popular facilities for this stay</span>
                       )}
                     </div>
 
