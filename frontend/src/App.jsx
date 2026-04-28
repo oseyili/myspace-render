@@ -49,7 +49,7 @@ function getHotels(payload) {
 function cleanImage(hotel) {
   const url = hotel?.image || hotel?.max_photo_url || hotel?.main_photo_url || hotel?.photo_url || hotel?.image_url || "";
   if (!url || typeof url !== "string") return "";
-  return url.replace("square60", "max1280x900").replace("square200", "max1280x900").replace("max300", "max1280x900");
+  return url.replace("square60", "max1280x900").replace("square200", "max1280x900").replace("max300", "max1280x900").replace("max500", "max1280x900");
 }
 
 export default function App() {
@@ -65,6 +65,12 @@ export default function App() {
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerMessage, setCustomerMessage] = useState("");
+  const [requesting, setRequesting] = useState(false);
+  const [requestNotice, setRequestNotice] = useState("");
+
   function toggleFacility(name) {
     setSelectedFacilities((old) => old.includes(name) ? old.filter((x) => x !== name) : [...old, name]);
   }
@@ -74,6 +80,7 @@ export default function App() {
     setNotice("");
     setHotels([]);
     setSelectedHotel(null);
+    setRequestNotice("");
 
     try {
       const params = new URLSearchParams({ country, city, area, keyword, guests: String(guests), limit: "60" });
@@ -82,6 +89,7 @@ export default function App() {
       const res = await fetch(`${API_BASE}/api/hotels/search?${params.toString()}`, { cache: "no-store" });
       const payload = await res.json();
       const list = getHotels(payload);
+
       setHotels(list);
 
       if (!list.length) setNotice("No hotel matched this search. Try country and city only first, then add area, hotel name, or facilities.");
@@ -96,12 +104,17 @@ export default function App() {
     setRequestNotice("");
 
     if (!selectedHotel) {
-      setRequestNotice("Please select a hotel first.");
+      setRequestNotice("Please select a hotel from the available stays first.");
       return;
     }
 
-    if (!customerName.trim() || !customerEmail.trim()) {
-      setRequestNotice("Please enter your name and email address.");
+    if (!customerName.trim()) {
+      setRequestNotice("Please enter your name.");
+      return;
+    }
+
+    if (!customerEmail.trim()) {
+      setRequestNotice("Please enter your email address.");
       return;
     }
 
@@ -110,9 +123,8 @@ export default function App() {
     try {
       const response = await fetch(`${API_BASE}/api/request-availability`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
         body: JSON.stringify({
           hotel_id: selectedHotel.id || "",
           hotel_name: selectedHotel.name || "",
@@ -231,7 +243,7 @@ export default function App() {
             {hotels.map((hotel, index) => {
               const img = cleanImage(hotel);
               return (
-                <button key={hotel.id || index} className="hotel-card" onClick={() => setSelectedHotel(hotel)}>
+                <button key={hotel.id || index} className="hotel-card" onClick={() => { setSelectedHotel(hotel); setRequestNotice(""); }}>
                   {img ? <img src={img} alt={hotel.name || "Hotel"} loading="lazy" /> : <div className="no-image">Image not supplied</div>}
                   <div>
                     <h3>{hotel.name || "Hotel"}</h3>
@@ -249,13 +261,15 @@ export default function App() {
           <h2>REQUEST AVAILABILITY</h2>
           <h3>Send your reservation request</h3>
           <div className="selected-hotel">{selectedHotel ? selectedHotel.name : "Select a hotel from the list to continue."}</div>
-          <input placeholder="Your name" />
-          <input placeholder="Your email" />
-          <textarea placeholder="Special requests, dates, room needs, or questions" />
-          <button>Request availability</button>
+
+          <input value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Your name" />
+          <input value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="Your email" />
+          <textarea value={customerMessage} onChange={(e) => setCustomerMessage(e.target.value)} placeholder="Special requests, dates, room needs, or questions" />
+
+          <button onClick={submitAvailability} disabled={requesting}>{requesting ? "Sending request..." : "Request availability"}</button>
+          {requestNotice && <div className="notice">{requestNotice}</div>}
         </section>
       </section>
     </main>
   );
 }
-
