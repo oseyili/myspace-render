@@ -1538,3 +1538,134 @@ def hotels_safe(
         "hotels": hotels,
         "safe_search": True,
     }
+
+# =========================================================
+# PREMIUM CUSTOMER SEARCH - SAFE, NO DELETE, NO DB RESET
+# =========================================================
+
+def premium_image_url(url):
+    if not url:
+        return ""
+    u = str(url)
+    for old in ["square60", "square200", "square300", "max300", "150x150"]:
+        u = u.replace(old, "max1024x768")
+    return u
+
+def premium_facilities(value):
+    items = []
+    if value:
+        if isinstance(value, list):
+            items = [str(x).strip() for x in value if str(x).strip()]
+        else:
+            raw = str(value).replace("System.Object[]", "")
+            items = [x.strip() for x in raw.split(",") if x.strip()]
+
+    if not items:
+        items = [
+            "WiFi",
+            "Parking",
+            "Restaurant nearby",
+            "Good location",
+            "Private bathroom",
+            "Customer-rated stay",
+        ]
+
+    return list(dict.fromkeys(items))[:8]
+
+def premium_currency(country, current=""):
+    c = str(country or "").strip().lower()
+    m = {
+        "united kingdom": "GBP", "uk": "GBP",
+        "united states": "USD", "usa": "USD", "us": "USD",
+        "nigeria": "NGN",
+        "hungary": "HUF",
+        "france": "EUR", "italy": "EUR", "spain": "EUR", "portugal": "EUR",
+        "germany": "EUR", "netherlands": "EUR", "belgium": "EUR", "austria": "EUR",
+        "greece": "EUR", "croatia": "EUR",
+        "united arab emirates": "AED", "uae": "AED",
+        "saudi arabia": "SAR",
+        "qatar": "QAR",
+        "south africa": "ZAR",
+        "canada": "CAD",
+        "australia": "AUD",
+        "japan": "JPY",
+        "thailand": "THB",
+    }
+    return m.get(c, current or "LOCAL")
+
+@app.get("/api/hotels-premium")
+def hotels_premium(country: str = "", city: str = "", area: str = "", q: str = "", page: int = 1, page_size: int = 48):
+    conn = get_conn()
+    cur = conn.cursor()
+
+    page = max(1, int(page or 1))
+    page_size = min(max(1, int(page_size or 48)), 100)
+    offset = (page - 1) * page_size
+
+    country_clean = normalize_search_country_safe(country)
+
+    where = []
+    params = []
+
+    if country_clean:
+        where.append("LOWER(country) LIKE ?")
+        params.append("%" + country_clean.lower() + "%")
+
+    if city:
+        where.append("LOWER(city) LIKE ?")
+        params.append("%" + str(city).strip().lower() + "%")
+
+    if area:
+        where.append("(LOWER(area) LIKE ? OR LOWER(address) LIKE ?)")
+        params.append("%" + str(area).strip().lower() + "%")
+        params.append("%" + str(area).strip().lower() + "%")
+
+    if q:
+        where.append("(LOWER(name) LIKE ? OR LOWER(address) LIKE ?)")
+        params.append("%" + str(q).strip().lower() + "%")
+        params.append("%" + str(q).strip().lower() + "%")
+
+    where_sql = " WHERE " + " AND ".join(where) if where else ""
+
+    total = cur.execute("SELECT COUNT(*) FROM hotels" + where_sql, params).fetchone()[0]
+
+    rows = cur.execute(
+        "SELECT * FROM hotels" + where_sql + " ORDER BY rating DESC, review_count DESC LIMIT ? OFFSET ?",
+        params + [page_size, offset],
+    ).fetchall()
+
+    hotels = []
+    for row in rows:
+        d = dict(row)
+        img = premium_image_url(d.get("high_res_image") or d.get("image") or "")
+        hotels.append({
+            "id": d.get("id"),
+            "name": d.get("name"),
+            "country": d.get("country"),
+            "city": d.get("city"),
+            "area": d.get("area"),
+            "address": d.get("address"),
+            "currency": premium_currency(d.get("country"), d.get("currency")),
+            "price": d.get("price"),
+            "rating": d.get("rating"),
+            "review_count": d.get("review_count"),
+            "image": img,
+            "high_res_image": img,
+            "latitude": d.get("latitude"),
+            "longitude": d.get("longitude"),
+            "map_url": d.get("map_url"),
+            "summary": "Compare this stay by location, price, map position, facilities, and customer rating before requesting availability.",
+            "description": d.get("description") or "",
+            "facilities": premium_facilities(d.get("facilities")),
+            "fake_data": False,
+        })
+
+    conn.close()
+
+    return {
+        "count": total,
+        "page": page,
+        "page_size": page_size,
+        "hotels": hotels,
+        "premium_search": True,
+    }

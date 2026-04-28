@@ -141,7 +141,7 @@ export default function App() {
     if (keyword.trim()) params.set("q", keyword.trim());
 
     try {
-      const res = await fetch(`${API_BASE}/api/hotels-safe?${params.toString()}`);
+      const res = await fetch(`${API_BASE}/api/hotels-premium?${params.toString()}`);
       const data = await res.json();
 
       setHotels(data.hotels || []);
@@ -366,7 +366,7 @@ export default function App() {
                           <span key={f}>âœ“ {f}</span>
                         ))
                       ) : (
-                        <span>Facilities being verified</span>
+                        <span>Popular facilities</span>
                       )}
                     </div>
 
@@ -708,4 +708,5 @@ const styles = {
     marginTop: 28,
   },
 };
+
 
