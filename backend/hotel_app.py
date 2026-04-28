@@ -1,22 +1,14 @@
 ﻿import os
-import json
 import sqlite3
-import time
-import requests
-from datetime import datetime
-from typing import Optional, List
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import Optional
 
-APP_NAME = "My Space Hotel Backend"
 DB_FILE = os.path.join(os.path.dirname(__file__), "hotel_catalog.db")
+SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "reservations@myspace-hotel.com")
 
-RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY", "").strip()
-RAPIDAPI_HOST = os.getenv("RAPIDAPI_HOST", "booking-com.p.rapidapi.com").strip()
-SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "reservations@myspace-hotel.com").strip()
-
-app = FastAPI(title=APP_NAME)
+app = FastAPI(title="My Space Hotel Backend")
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,282 +19,104 @@ app.add_middleware(
 )
 
 COUNTRY_ALIASES = {
-    "uk": "gb", "united kingdom": "gb", "england": "gb", "britain": "gb", "gb": "gb",
-    "usa": "us", "us": "us", "america": "us", "united states": "us",
-    "nigeria": "ng", "ng": "ng",
-    "uae": "ae", "dubai": "ae", "united arab emirates": "ae",
-    "south africa": "za", "za": "za",
-    "ghana": "gh", "canada": "ca", "france": "fr", "spain": "es",
-    "italy": "it", "germany": "de", "netherlands": "nl",
+    "uk": ["uk", "gb", "united kingdom", "england", "great britain", "britain"],
+    "gb": ["uk", "gb", "united kingdom", "england", "great britain", "britain"],
+    "usa": ["usa", "us", "united states", "america", "united states of america"],
+    "us": ["usa", "us", "united states", "america", "united states of america"],
+    "ng": ["ng", "nigeria"],
+    "nigeria": ["ng", "nigeria"],
 }
 
-SITE_IMAGES = {
-    "abuja": [
-        {"name": "Aso Rock", "image": "https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?auto=format&fit=crop&w=1200&q=80"},
-        {"name": "National Mosque", "image": "https://images.unsplash.com/photo-1580191947416-62d35a55e71d?auto=format&fit=crop&w=1200&q=80"},
-    ],
-    "london": [
-        {"name": "Tower Bridge", "image": "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1200&q=80"},
-        {"name": "Westminster", "image": "https://images.unsplash.com/photo-1520986606214-8b456906c813?auto=format&fit=crop&w=1200&q=80"},
-    ],
-    "paris": [
-        {"name": "Eiffel Tower", "image": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=80"},
-        {"name": "Seine", "image": "https://images.unsplash.com/photo-1431274172761-fca41d930114?auto=format&fit=crop&w=1200&q=80"},
-    ],
-    "new york": [
-        {"name": "Manhattan", "image": "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?auto=format&fit=crop&w=1200&q=80"},
-        {"name": "Times Square", "image": "https://images.unsplash.com/photo-1546436836-07a91091f160?auto=format&fit=crop&w=1200&q=80"},
-    ],
-}
+IMAGE_COLUMNS = [
+    "image", "image_url", "photo_url", "main_photo_url", "max_photo_url",
+    "hotel_photo", "picture", "thumbnail", "url_max", "photo"
+]
 
-def db():
-    con = sqlite3.connect(DB_FILE)
-    con.row_factory = sqlite3.Row
-    return con
+NAME_COLUMNS = ["name", "hotel_name", "title", "property_name"]
+CITY_COLUMNS = ["city", "city_name", "destination", "dest_name"]
+COUNTRY_COLUMNS = ["country", "country_name", "cc1", "countrycode"]
+AREA_COLUMNS = ["area", "district", "district_name", "neighbourhood", "neighborhood"]
+ADDRESS_COLUMNS = ["address", "address_trans", "full_address"]
+RATING_COLUMNS = ["rating", "stars", "class", "hotel_class"]
+REVIEW_COLUMNS = ["review_score", "score", "rating_score"]
+PRICE_COLUMNS = ["price", "min_total_price", "gross_price", "amount"]
+CURRENCY_COLUMNS = ["currency", "currencycode", "currency_code"]
+FACILITY_COLUMNS = ["facilities", "hotel_facilities", "amenities", "description"]
 
-def init_db():
-    con = db()
-    con.execute("""
-        CREATE TABLE IF NOT EXISTS hotels (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            country TEXT,
-            city TEXT,
-            area TEXT,
-            address TEXT,
-            latitude REAL,
-            longitude REAL,
-            rating REAL,
-            review_score REAL,
-            price TEXT,
-            currency TEXT,
-            image TEXT,
-            facilities TEXT,
-            source TEXT NOT NULL,
-            raw TEXT,
-            created_at TEXT
-        )
-    """)
-    con.commit()
-    con.close()
+def con():
+    db = sqlite3.connect(DB_FILE)
+    db.row_factory = sqlite3.Row
+    return db
 
-init_db()
+def first(row, cols):
+    for c in cols:
+        if c in row.keys() and row[c] not in [None, ""]:
+            return str(row[c])
+    return ""
 
-def headers():
-    return {
-        "X-RapidAPI-Key": RAPIDAPI_KEY,
-        "X-RapidAPI-Host": RAPIDAPI_HOST,
-    }
-
-def clean(v):
-    return str(v or "").strip()
-
-def country_code(country):
-    c = clean(country).lower()
-    return COUNTRY_ALIASES.get(c, c[:2] if len(c) == 2 else c)
-
-def rapid_get(path, params):
-    if not RAPIDAPI_KEY:
-        return {"ok": False, "error": "RapidAPI key is not loaded."}
-    url = f"https://{RAPIDAPI_HOST}{path}"
-    try:
-        r = requests.get(url, headers=headers(), params=params, timeout=25)
-        if r.status_code != 200:
-            return {
-                "ok": False,
-                "status_code": r.status_code,
-                "error": "Hotel provider returned a temporary error.",
-                "body": r.text[:300],
-            }
-        return {"ok": True, "data": r.json()}
-    except Exception as e:
-        return {"ok": False, "error": str(e)}
-
-def find_destination(country, city, area=""):
-    query = " ".join([clean(area), clean(city), clean(country)]).strip()
-    if not query:
-        return None
-
-    result = rapid_get("/v1/hotels/locations", {
-        "name": query,
-        "locale": "en-gb",
-    })
-
-    if not result.get("ok"):
-        return None
-
-    data = result.get("data") or []
-    if not isinstance(data, list) or not data:
-        return None
-
-    preferred = None
-    for item in data:
-        if item.get("dest_type") in ["city", "district", "landmark", "region"]:
-            preferred = item
-            break
-
-    return preferred or data[0]
-
-def normalize_hotel(item, country="", city="", area=""):
-    hotel_id = clean(
-        item.get("hotel_id")
-        or item.get("id")
-        or item.get("cc1") + "-" + item.get("hotel_name", "")
-        or item.get("name")
+def high_res(url):
+    if not url:
+        return ""
+    url = str(url)
+    return (
+        url.replace("square60", "max1280x900")
+           .replace("square90", "max1280x900")
+           .replace("square200", "max1280x900")
+           .replace("max300", "max1280x900")
+           .replace("max500", "max1280x900")
     )
 
-    name = clean(item.get("hotel_name") or item.get("name") or item.get("title"))
-    if not hotel_id or not name:
-        return None
+def blob(row):
+    return " ".join([str(row[k] or "") for k in row.keys()]).lower()
 
-    price = ""
-    currency = clean(item.get("currencycode") or item.get("currency") or item.get("price_currency"))
-    if isinstance(item.get("min_total_price"), (int, float)):
-        price = str(item.get("min_total_price"))
-    elif item.get("price_breakdown"):
-        pb = item.get("price_breakdown") or {}
-        price = clean(pb.get("gross_price") or pb.get("all_inclusive_price"))
+def country_terms(value):
+    v = (value or "").strip().lower()
+    return COUNTRY_ALIASES.get(v, [v] if v else [])
 
-    image = clean(
-        item.get("max_photo_url")
-        or item.get("main_photo_url")
-        or item.get("photo_url")
-        or item.get("image_url")
-    )
-
-    facilities = item.get("hotel_facilities") or item.get("facilities") or []
-    if isinstance(facilities, list):
-        facilities_text = ", ".join([clean(x) for x in facilities if clean(x)])
-    else:
-        facilities_text = clean(facilities)
-
+def normalise(row):
+    d = dict(row)
     return {
-        "id": hotel_id,
-        "name": name,
-        "country": clean(country or item.get("country_trans") or item.get("countrycode")),
-        "city": clean(city or item.get("city") or item.get("city_name")),
-        "area": clean(area or item.get("district") or item.get("districts")),
-        "address": clean(item.get("address") or item.get("address_trans")),
-        "latitude": item.get("latitude") or item.get("lat"),
-        "longitude": item.get("longitude") or item.get("lng"),
-        "rating": item.get("class") or item.get("hotel_class") or item.get("stars"),
-        "review_score": item.get("review_score") or item.get("score"),
-        "price": price,
-        "currency": currency,
-        "image": image,
-        "facilities": facilities_text,
-        "source": "rapidapi",
-        "raw": json.dumps(item)[:10000],
-        "created_at": datetime.utcnow().isoformat(),
+        "id": first(row, ["id", "hotel_id", "property_id"]) or str(abs(hash(str(d)))),
+        "name": first(row, NAME_COLUMNS) or "Hotel",
+        "country": first(row, COUNTRY_COLUMNS),
+        "city": first(row, CITY_COLUMNS),
+        "area": first(row, AREA_COLUMNS),
+        "address": first(row, ADDRESS_COLUMNS),
+        "rating": first(row, RATING_COLUMNS),
+        "review_score": first(row, REVIEW_COLUMNS),
+        "price": first(row, PRICE_COLUMNS),
+        "currency": first(row, CURRENCY_COLUMNS),
+        "image": high_res(first(row, IMAGE_COLUMNS)),
+        "facilities": first(row, FACILITY_COLUMNS),
+        "latitude": first(row, ["latitude", "lat"]),
+        "longitude": first(row, ["longitude", "lng", "lon"]),
+        "source": first(row, ["source"]) or "hotel_catalog",
     }
-
-def save_hotels(hotels):
-    con = db()
-    count = 0
-    for h in hotels:
-        con.execute("""
-            INSERT OR REPLACE INTO hotels
-            (id,name,country,city,area,address,latitude,longitude,rating,review_score,price,currency,image,facilities,source,raw,created_at)
-            VALUES
-            (:id,:name,:country,:city,:area,:address,:latitude,:longitude,:rating,:review_score,:price,:currency,:image,:facilities,:source,:raw,:created_at)
-        """, h)
-        count += 1
-    con.commit()
-    con.close()
-    return count
-
-def search_live(country="", city="", area="", keyword="", guests=2, facilities=None, limit=60):
-    dest = find_destination(country, city, area)
-    if not dest:
-        return {"hotels": [], "provider_ok": False, "message": "Destination was not found by the live hotel provider."}
-
-    params = {
-        "dest_id": dest.get("dest_id"),
-        "dest_type": dest.get("dest_type"),
-        "adults_number": max(int(guests or 2), 1),
-        "room_number": 1,
-        "locale": "en-gb",
-        "units": "metric",
-        "filter_by_currency": "LOCAL",
-        "order_by": "popularity",
-        "checkin_date": "2026-06-10",
-        "checkout_date": "2026-06-11",
-        "page_number": 0,
-    }
-
-    result = rapid_get("/v1/hotels/search", params)
-    if not result.get("ok"):
-        return {"hotels": [], "provider_ok": False, "message": result.get("error", "Provider unavailable."), "provider": result}
-
-    data = result.get("data") or {}
-    raw_hotels = data.get("result") or data.get("hotels") or []
-    hotels = []
-
-    wanted = [f.lower().strip() for f in (facilities or []) if f]
-    key = clean(keyword).lower()
-
-    for item in raw_hotels:
-        h = normalize_hotel(item, country=country, city=city, area=area)
-        if not h:
-            continue
-        blob = " ".join([h["name"], h["city"], h["area"], h["address"], h["facilities"]]).lower()
-        if key and key not in blob:
-            continue
-        if wanted and not all(w in blob for w in wanted):
-            continue
-        hotels.append(h)
-        if len(hotels) >= limit:
-            break
-
-    save_hotels(hotels)
-    return {"hotels": hotels, "provider_ok": True, "destination": dest}
-
-def db_search(country="", city="", area="", keyword="", facilities=None, limit=60, offset=0):
-    clauses = []
-    vals = {}
-
-    for field, value in [("country", country), ("city", city), ("area", area)]:
-        if clean(value):
-            clauses.append(f"LOWER({field}) LIKE :{field}")
-            vals[field] = f"%{clean(value).lower()}%"
-
-    if clean(keyword):
-        clauses.append("(LOWER(name) LIKE :kw OR LOWER(address) LIKE :kw OR LOWER(facilities) LIKE :kw)")
-        vals["kw"] = f"%{clean(keyword).lower()}%"
-
-    for i, f in enumerate(facilities or []):
-        if clean(f):
-            clauses.append(f"LOWER(facilities) LIKE :fac{i}")
-            vals[f"fac{i}"] = f"%{clean(f).lower()}%"
-
-    where = "WHERE " + " AND ".join(clauses) if clauses else ""
-    vals["limit"] = int(limit)
-    vals["offset"] = int(offset)
-
-    con = db()
-    rows = con.execute(f"""
-        SELECT * FROM hotels
-        {where}
-        ORDER BY review_score DESC, rating DESC, name ASC
-        LIMIT :limit OFFSET :offset
-    """, vals).fetchall()
-
-    total = con.execute(f"SELECT COUNT(*) AS c FROM hotels {where}", vals).fetchone()["c"]
-    con.close()
-
-    return [dict(r) for r in rows], total
 
 @app.get("/")
 def root():
-    return {"ok": True, "app": APP_NAME, "support": SUPPORT_EMAIL}
+    return {"ok": True, "app": "My Space Hotel Backend", "support": SUPPORT_EMAIL}
 
 @app.get("/api/admin/catalogue-status")
 def catalogue_status():
-    con = db()
-    total = con.execute("SELECT COUNT(*) AS c FROM hotels").fetchone()["c"]
-    countries = [r["country"] for r in con.execute("SELECT country FROM hotels WHERE country IS NOT NULL AND country != '' GROUP BY country ORDER BY country LIMIT 40").fetchall()]
-    cities = [r["city"] for r in con.execute("SELECT city FROM hotels WHERE city IS NOT NULL AND city != '' GROUP BY city ORDER BY city LIMIT 80").fetchall()]
-    con.close()
+    db = con()
+    total = db.execute("SELECT COUNT(*) AS c FROM hotels").fetchone()["c"]
+    sample = db.execute("SELECT * FROM hotels LIMIT 1").fetchone()
+    columns = sample.keys() if sample else []
+    countries = []
+    cities = []
+
+    for c in COUNTRY_COLUMNS:
+        if c in columns:
+            countries = [r[0] for r in db.execute(f"SELECT DISTINCT {c} FROM hotels WHERE {c} IS NOT NULL AND {c} != '' LIMIT 40").fetchall()]
+            break
+
+    for c in CITY_COLUMNS:
+        if c in columns:
+            cities = [r[0] for r in db.execute(f"SELECT DISTINCT {c} FROM hotels WHERE {c} IS NOT NULL AND {c} != '' LIMIT 80").fetchall()]
+            break
+
+    db.close()
     return {
         "total_hotels": total,
         "countries_loaded": countries,
@@ -310,23 +124,9 @@ def catalogue_status():
         "database_file": DB_FILE,
         "database_protected": True,
         "fake_data": False,
-        "rapidapi_key_loaded": bool(RAPIDAPI_KEY),
+        "rapidapi_key_loaded": bool(os.getenv("RAPIDAPI_KEY", "")),
         "email_ready": bool(SUPPORT_EMAIL),
     }
-
-@app.post("/api/admin/catalogue-grow")
-@app.get("/api/admin/catalogue-grow")
-def catalogue_grow(
-    country: str = Query("UK"),
-    city: str = Query("London"),
-    pages: int = Query(1, ge=1, le=10),
-):
-    added = 0
-    for _ in range(pages):
-        result = search_live(country=country, city=city, limit=80)
-        added += len(result.get("hotels", []))
-        time.sleep(0.4)
-    return {"ok": True, "added_or_updated": added, "fake_data": False}
 
 @app.get("/api/hotels/search")
 @app.get("/api/search-hotels")
@@ -339,63 +139,48 @@ def search_hotels(
     keyword: str = "",
     guests: int = 2,
     facilities: Optional[str] = "",
-    limit: int = 60,
-    offset: int = 0,
+    limit: int = Query(60, ge=1, le=100),
+    offset: int = Query(0, ge=0),
 ):
-    if destination and not city:
-        city = destination
+    city = city or destination
+    country_needles = country_terms(country)
+    city_needles = [city.strip().lower()] if city.strip() else []
+    area_needles = [area.strip().lower()] if area.strip() else []
+    keyword_needles = [keyword.strip().lower()] if keyword.strip() else []
+    facility_needles = [x.strip().lower() for x in (facilities or "").split(",") if x.strip()]
 
-    facility_list = [x.strip() for x in clean(facilities).split(",") if x.strip()]
+    db = con()
+    rows = db.execute("SELECT * FROM hotels").fetchall()
+    db.close()
 
-    cached, total = db_search(country, city, area, keyword, facility_list, limit, offset)
-    if cached:
-        return {
-            "ok": True,
-            "source": "database",
-            "fake_data": False,
-            "total": total,
-            "shown": len(cached),
-            "hotels": cached,
-            "results": cached,
-        }
+    matches = []
+    for row in rows:
+        b = blob(row)
 
-    live = search_live(country, city, area, keyword, guests, facility_list, limit)
-    hotels = live.get("hotels", [])
+        if country_needles and not any(x in b for x in country_needles):
+            continue
+        if city_needles and not any(x in b for x in city_needles):
+            continue
+        if area_needles and not any(x in b for x in area_needles):
+            continue
+        if keyword_needles and not any(x in b for x in keyword_needles):
+            continue
+        if facility_needles and not all(x in b for x in facility_needles):
+            continue
+
+        matches.append(normalise(row))
+
+    page = matches[offset:offset + limit]
 
     return {
         "ok": True,
-        "source": "live_provider" if hotels else "no_match",
+        "source": "database",
         "fake_data": False,
-        "total": len(hotels),
-        "shown": len(hotels),
-        "hotels": hotels,
-        "results": hotels,
-        "message": "" if hotels else "No matching hotels found yet. Try country and city, for example UK and London.",
-    }
-
-@app.get("/api/travel-guide")
-def travel_guide(country: str = "", city: str = "", area: str = ""):
-    place = clean(area or city or country or "destination")
-    key = place.lower()
-
-    images = SITE_IMAGES.get(key, SITE_IMAGES.get(clean(city).lower(), []))
-
-    map_query = "+".join([x for x in [area, city, country] if clean(x)])
-    map_embed = f"https://www.google.com/maps?q={map_query}&output=embed" if map_query else ""
-
-    return {
-        "ok": True,
-        "place": place.title(),
-        "headline": f"Explore {place.title()} before choosing your stay",
-        "summary": f"Compare hotel locations around {place.title()}, check nearby areas, and choose a stay that fits the reason for your trip.",
-        "map_embed": map_embed,
-        "images": images,
-        "highlights": [
-            "Check distance from the area you will visit most.",
-            "Compare transport access before requesting availability.",
-            "Use facilities to narrow the list before choosing a hotel.",
-            "Review the map position before continuing."
-        ],
+        "total": len(matches),
+        "shown": len(page),
+        "hotels": page,
+        "results": page,
+        "message": "" if page else "No matching hotels found for this search.",
     }
 
 class AvailabilityRequest(BaseModel):
@@ -407,51 +192,4 @@ class AvailabilityRequest(BaseModel):
 
 @app.post("/api/request-availability")
 def request_availability(req: AvailabilityRequest):
-    return {
-        "ok": True,
-        "message": "Availability request received.",
-        "support_email": SUPPORT_EMAIL,
-        "hotel": req.hotel_name or req.hotel_id,
-    }
-
-@app.get("/api/admin/render-diagnostic-20260428_212643")
-def render_diagnostic_20260428_212643():
-    import os, sqlite3
-    db_path = DB_FILE
-    data = {
-        "stamp": "20260428_212643",
-        "db_file": db_path,
-        "db_abs": os.path.abspath(db_path),
-        "exists": os.path.exists(db_path),
-        "size": os.path.getsize(db_path) if os.path.exists(db_path) else 0,
-        "cwd": os.getcwd(),
-        "backend_dir": os.path.dirname(__file__),
-    }
-    try:
-        con = sqlite3.connect(db_path)
-        data["hotels"] = con.execute("SELECT COUNT(*) FROM hotels").fetchone()[0]
-        con.close()
-    except Exception as e:
-        data["error"] = str(e)
-    return data
-
-@app.get("/api/admin/render-diagnostic-20260428_213939")
-def render_diagnostic_20260428_213939():
-    import os, sqlite3
-    db_path = DB_FILE
-    data = {
-        "stamp": "20260428_213939",
-        "db_file": db_path,
-        "db_abs": os.path.abspath(db_path),
-        "exists": os.path.exists(db_path),
-        "size": os.path.getsize(db_path) if os.path.exists(db_path) else 0,
-        "cwd": os.getcwd(),
-        "backend_dir": os.path.dirname(__file__),
-    }
-    try:
-        con = sqlite3.connect(db_path)
-        data["hotels"] = con.execute("SELECT COUNT(*) FROM hotels").fetchone()[0]
-        con.close()
-    except Exception as e:
-        data["error"] = str(e)
-    return data
+    return {"ok": True, "message": "Availability request received.", "support_email": SUPPORT_EMAIL}
