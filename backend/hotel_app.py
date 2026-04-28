@@ -1800,3 +1800,31 @@ def hotels_premium(country: str = "", city: str = "", area: str = "", q: str = "
         "hotels": hotels,
         "premium_search": True,
     }
+
+# =========================================================
+# AUTO RESTORE SEED DB ON RENDER START - ONLY IF EMPTY
+# =========================================================
+
+def auto_restore_seed_if_empty():
+    try:
+        seed_path = BASE_DIR / "seed" / "hotel_catalog_seed.db"
+        if not seed_path.exists():
+            return
+
+        conn = get_conn()
+        cur = conn.cursor()
+        current = cur.execute("SELECT COUNT(*) FROM hotels").fetchone()[0]
+        conn.close()
+
+        if int(current) > 0:
+            return
+
+        backup_database("before_auto_seed_restore")
+        import shutil
+        shutil.copyfile(seed_path, DB_PATH)
+
+        print("AUTO RESTORE COMPLETE: seed database copied because live DB was empty.")
+    except Exception as e:
+        print("AUTO RESTORE SKIPPED:", e)
+
+auto_restore_seed_if_empty()
