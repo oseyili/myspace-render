@@ -78,7 +78,23 @@ function infoPageContent(page) {
   return pages[page] || pages.guides;
 }
 
-export default function App() {
+export default function normalizeCountry(input) {
+  if (!input) return "";
+
+  const map = {
+    uk: "United Kingdom",
+    usa: "United States",
+    us: "United States",
+    uae: "United Arab Emirates",
+    ksa: "Saudi Arabia",
+    nigeria: "Nigeria"
+  };
+
+  const lower = input.toLowerCase();
+  return map[lower] || input;
+}
+
+function App() {
   const [activePage, setActivePage] = useState("home");
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
@@ -700,3 +716,4 @@ const styles = {
     marginTop: 28,
   },
 };
+
