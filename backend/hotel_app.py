@@ -193,3 +193,5 @@ class AvailabilityRequest(BaseModel):
 @app.post("/api/request-availability")
 def request_availability(req: AvailabilityRequest):
     return {"ok": True, "message": "Availability request received.", "support_email": SUPPORT_EMAIL}
+
+# Render redeploy stamp 20260429_133105
