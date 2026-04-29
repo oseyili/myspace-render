@@ -1,4 +1,6 @@
 ﻿import os
+import smtplib
+from email.message import EmailMessage
 import sqlite3
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -184,14 +186,21 @@ def search_hotels(
     }
 
 class AvailabilityRequest(BaseModel):
-    hotel_id: Optional[str] = ""
-    hotel_name: Optional[str] = ""
-    name: str
-    email: str
-    message: Optional[str] = ""
+    name: str = ""
+    email: str = ""
+    message: str = ""
+    hotel_name: str = ""
+    hotel_id: str = ""
+    property: str = ""
+    selected_hotel: str = ""
 
 @app.post("/api/request-availability")
 def request_availability(req: AvailabilityRequest):
-    return {"ok": True, "message": "Availability request received.", "support_email": SUPPORT_EMAIL}
+    try:
+        send_availability_email(req)
+        return {"ok": True, "email_sent": True, "message": "Availability request received.", "support_email": SUPPORT_EMAIL}
+    except Exception as e:
+        print("AVAILABILITY EMAIL ERROR:", str(e))
+        return {"ok": False, "email_sent": False, "message": "Request received but email could not be sent.", "error": str(e), "support_email": SUPPORT_EMAIL}
 
 # Render redeploy stamp 20260429_133105
