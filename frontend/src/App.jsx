@@ -193,7 +193,7 @@ export default function App() {
           <div className="brand">MY SPACE HOTEL</div>
           <h1>Find hotels around the world, compare stays clearly, and request availability with confidence.</h1>
           <p>Search real hotel records, compare location, facilities, images, and ratings, then continue only when the stay fits your trip.</p>
-          <div className="count-box">50,015+ real hotel records available</div>
+          <div className="count-box">57,871+ real stays and accommodations available</div>
 
           <div className="nav-buttons">
             <button onClick={() => setActivePage("guide")}>Travel Guides</button>
@@ -273,3 +273,4 @@ export default function App() {
     </main>
   );
 }
+

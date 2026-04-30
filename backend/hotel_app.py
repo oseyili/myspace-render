@@ -2,6 +2,68 @@
 import smtplib
 from email.message import EmailMessage
 import sqlite3
+
+# =========================================================
+# RESERVATION EMAIL SUPPORT
+# Uses environment variables only. Do not hard-code secrets.
+# Required env:
+# SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, RESERVATIONS_EMAIL
+# =========================================================
+import smtplib
+from email.message import EmailMessage
+
+def _env(name, default=""):
+    import os
+    return os.getenv(name, default).strip()
+
+def send_reservation_email(payload: dict):
+    smtp_host = _env("SMTP_HOST", "smtp.gmail.com")
+    smtp_port = int(_env("SMTP_PORT", "587"))
+    smtp_user = _env("SMTP_USER")
+    smtp_pass = _env("SMTP_PASS")
+    support_email = _env("RESERVATIONS_EMAIL", "reservations@myspace-hotel.com")
+
+    if not smtp_user or not smtp_pass:
+        raise RuntimeError("SMTP_USER or SMTP_PASS is missing in environment variables.")
+
+    hotel_name = payload.get("hotel_name") or payload.get("property") or payload.get("property_name") or payload.get("selected_hotel") or "Selected stay"
+    customer_name = payload.get("name") or payload.get("customer_name") or ""
+    customer_email = payload.get("email") or payload.get("customer_email") or ""
+    message_text = payload.get("message") or payload.get("special_requests") or payload.get("notes") or payload.get("request") or ""
+
+    msg = EmailMessage()
+    msg["Subject"] = f"New availability request - {hotel_name}"
+    msg["From"] = smtp_user
+    msg["To"] = support_email
+    if customer_email:
+        msg["Reply-To"] = customer_email
+
+    msg.set_content(f"""New reservation availability request
+
+Hotel / stay:
+{hotel_name}
+
+Customer name:
+{customer_name}
+
+Customer email:
+{customer_email}
+
+Request:
+{message_text}
+
+Full submitted payload:
+{payload}
+""")
+
+    with smtplib.SMTP(smtp_host, smtp_port, timeout=30) as server:
+        server.starttls()
+        server.login(smtp_user, smtp_pass)
+        server.send_message(msg)
+
+    return True
+
+
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -9,6 +71,55 @@ from typing import Optional
 
 DB_FILE = os.path.join(os.path.dirname(__file__), "hotel_catalog.db")
 SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "reservations@myspace-hotel.com")
+
+
+def send_availability_email(req):
+    smtp_host = os.getenv("SMTP_HOST", "").strip()
+    smtp_port = int(os.getenv("SMTP_PORT", "587").strip() or "587")
+    smtp_from = os.getenv("SMTP_FROM", "").strip()
+    smtp_user = os.getenv("SMTP_USERNAME", "").strip()
+    smtp_pass = os.getenv("SMTP_PASSWORD", "").strip()
+    smtp_tls = os.getenv("SMTP_USE_TLS", "true").strip().lower() != "false"
+    receiver = os.getenv("ADMIN_NOTIFICATION_EMAIL", "").strip() or SUPPORT_EMAIL
+
+    if not smtp_host or not smtp_from or not smtp_user or not smtp_pass or not receiver:
+        raise RuntimeError("SMTP email settings are incomplete.")
+
+    hotel_name = getattr(req, "hotel_name", "") or getattr(req, "property", "") or getattr(req, "selected_hotel", "") or "Selected stay"
+    customer_name = getattr(req, "name", "") or ""
+    customer_email = getattr(req, "email", "") or ""
+    message_text = getattr(req, "message", "") or ""
+
+    msg = EmailMessage()
+    msg["Subject"] = f"New availability request - {hotel_name}"
+    msg["From"] = smtp_from
+    msg["To"] = receiver
+    if customer_email:
+        msg["Reply-To"] = customer_email
+
+    msg.set_content(f"""New availability request
+
+Hotel / stay:
+{hotel_name}
+
+Customer name:
+{customer_name}
+
+Customer email:
+{customer_email}
+
+Request:
+{message_text}
+""")
+
+    with smtplib.SMTP(smtp_host, smtp_port, timeout=30) as server:
+        if smtp_tls:
+            server.starttls()
+        server.login(smtp_user, smtp_pass)
+        server.send_message(msg)
+
+    return True
+
 
 app = FastAPI(title="My Space Hotel Backend")
 
@@ -194,13 +305,25 @@ class AvailabilityRequest(BaseModel):
     property: str = ""
     selected_hotel: str = ""
 
-@app.post("/api/request-availability")
-def request_availability(req: AvailabilityRequest):
-    try:
-        send_availability_email(req)
-        return {"ok": True, "email_sent": True, "message": "Availability request received.", "support_email": SUPPORT_EMAIL}
-    except Exception as e:
-        print("AVAILABILITY EMAIL ERROR:", str(e))
-        return {"ok": False, "email_sent": False, "message": "Request received but email could not be sent.", "error": str(e), "support_email": SUPPORT_EMAIL}
 
-# Render redeploy stamp 20260429_133105
+# =========================================================
+# RESERVATION REQUEST ENDPOINTS
+# =========================================================
+@app.post("/api/reservation-request")
+async def reservation_request(payload: dict):
+    try:
+        send_reservation_email(payload)
+        return {"ok": True, "email_sent": True, "message": "Availability request sent."}
+    except Exception as e:
+        print("RESERVATION EMAIL ERROR:", str(e))
+        return {"ok": False, "email_sent": False, "message": "Request was received but email could not be sent.", "error": str(e)}
+
+@app.post("/api/request-availability")
+async def request_availability(payload: dict):
+    try:
+        send_reservation_email(payload)
+        return {"ok": True, "email_sent": True, "message": "Availability request sent."}
+    except Exception as e:
+        print("REQUEST AVAILABILITY EMAIL ERROR:", str(e))
+        return {"ok": False, "email_sent": False, "message": "Request was received but email could not be sent.", "error": str(e)}
+
