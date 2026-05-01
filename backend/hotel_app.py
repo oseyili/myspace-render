@@ -264,3 +264,20 @@ async def request_availability(payload: dict):
         print("REQUEST AVAILABILITY EMAIL ERROR:", str(e))
         return {"ok": False, "email_sent": False, "message": "Request was received but email could not be sent.", "error": str(e)}
 
+
+
+# Compatibility wrapper: old routes may still call this name
+def send_reservation_email(payload):
+    class Obj:
+        pass
+
+    obj = Obj()
+
+    if isinstance(payload, dict):
+        for k, v in payload.items():
+            setattr(obj, k, v)
+    else:
+        obj = payload
+
+    return send_availability_email(obj)
+
