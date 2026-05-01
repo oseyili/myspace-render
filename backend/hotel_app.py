@@ -69,7 +69,7 @@ def send_availability_email(req):
 
         customer_response = requests.post("https://api.resend.com/emails", headers=headers, json=customer_payload, timeout=30)
         if customer_response.status_code >= 300:
-            raise RuntimeError(f"Resend customer email failed: {customer_response.status_code} {customer_response.text[:300]}")
+            print(f"Customer confirmation skipped: {customer_response.status_code} {customer_response.text[:300]}")
 
     return True
 
@@ -299,4 +299,5 @@ def send_reservation_email(payload):
         obj = payload
 
     return send_availability_email(obj)
+
 
