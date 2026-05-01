@@ -1,24 +1,33 @@
-﻿import os, time, sqlite3, requests, shutil
+﻿import os
+import time
+import json
+import sqlite3
+import requests
+import shutil
 from datetime import datetime, UTC
 from pathlib import Path
 
 DB = "hotel_catalog.db"
-TARGET = 300000
-
-SLEEP_BETWEEN_REQUESTS = 0.8
-PAUSE_ON_429_SECONDS = 90
-MAX_PAGES_PER_CITY = 80
-ZERO_STREAK_LIMIT = 8
-BACKUP_DIR = Path(r"C:\frontend\hotel-booking-app\database_backups")
+STATE_FILE = Path("fast_deep_city_state.json")
+BACKUP_DIR = Path(r"D:\hotel_backups")
 BACKUP_DIR.mkdir(parents=True, exist_ok=True)
 
+TARGET = 300000
+SLEEP = 0.85
+MAX_PAGES_PER_DESTINATION = 12
+LOW_YIELD_CHECK_PAGE = 4
+LOW_YIELD_MIN_ADDED = 8
+ZERO_STREAK_LIMIT = 3
+BACKUP_EVERY_ADDED = 5000
+
 def load_env():
-    if os.path.exists(".env"):
-        for line in open(".env", encoding="utf-8", errors="ignore"):
+    env_file = Path(".env")
+    if env_file.exists():
+        for line in env_file.read_text(encoding="utf-8", errors="ignore").splitlines():
             line = line.strip()
             if line and not line.startswith("#") and "=" in line:
-                k, v = line.split("=", 1)
-                os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+                key, value = line.split("=", 1)
+                os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
 
 load_env()
 
@@ -28,61 +37,96 @@ KEY = os.getenv("RAPIDAPI_KEY", "")
 if not KEY:
     raise SystemExit("RAPIDAPI_KEY not loaded. No fake hotels created.")
 
-HEADERS = {"X-RapidAPI-Key": KEY, "X-RapidAPI-Host": HOST}
+HEADERS = {
+    "X-RapidAPI-Key": KEY,
+    "X-RapidAPI-Host": HOST,
+}
 
-PRIORITY_CITIES = [
-    # UK
-    "London United Kingdom","Manchester United Kingdom","Birmingham United Kingdom","Liverpool United Kingdom",
-    "Leeds United Kingdom","Bristol United Kingdom","Newcastle United Kingdom","Nottingham United Kingdom",
-    "Sheffield United Kingdom","Leicester United Kingdom","Coventry United Kingdom","Oxford United Kingdom",
-    "Cambridge United Kingdom","York United Kingdom","Bath United Kingdom","Brighton United Kingdom",
-    "Bournemouth United Kingdom","Southampton United Kingdom","Portsmouth United Kingdom","Cardiff United Kingdom",
-    "Swansea United Kingdom","Edinburgh United Kingdom","Glasgow United Kingdom","Aberdeen United Kingdom",
-    "Inverness United Kingdom","Belfast United Kingdom",
+COUNTRY_PRIORITY = [
+    "United Kingdom",
+    "Nigeria",
+    "United States",
+    "Brazil",
+    "Kenya",
+    "South Africa",
+    "France",
+    "Spain",
+    "Italy",
+    "Germany",
+    "Netherlands",
+    "Portugal",
+    "Greece",
+    "Turkey",
+    "United Arab Emirates",
+    "Saudi Arabia",
+    "Qatar",
+    "Egypt",
+    "Morocco",
+    "Ghana",
+    "Tanzania",
+    "Uganda",
+    "Rwanda",
+    "Thailand",
+    "Malaysia",
+    "Indonesia",
+    "Philippines",
+    "Vietnam",
+    "Japan",
+    "South Korea",
+    "India",
+    "Sri Lanka",
+    "Nepal",
+    "Australia",
+    "New Zealand",
+    "Canada",
+    "Mexico",
+    "Argentina",
+    "Chile",
+    "Colombia",
+    "Peru",
+]
 
-    # Nigeria
-    "Lagos Nigeria","Abuja Nigeria","Port Harcourt Nigeria","Ibadan Nigeria","Kano Nigeria","Enugu Nigeria",
-    "Calabar Nigeria","Uyo Nigeria","Benin City Nigeria","Abeokuta Nigeria","Owerri Nigeria","Warri Nigeria",
-    "Asaba Nigeria","Ilorin Nigeria","Jos Nigeria","Kaduna Nigeria","Akure Nigeria",
+BASE_PLACES = [
+    "London","Manchester","Birmingham","Liverpool","Leeds","Bristol","Newcastle","Nottingham","Sheffield","Leicester",
+    "Oxford","Cambridge","York","Bath","Brighton","Bournemouth","Southampton","Portsmouth","Cardiff","Edinburgh","Glasgow","Aberdeen","Belfast",
+    "Lagos","Abuja","Port Harcourt","Ibadan","Kano","Enugu","Calabar","Uyo","Benin City","Abeokuta","Owerri","Warri","Asaba","Ilorin","Jos","Kaduna","Akure",
+    "New York","Los Angeles","Miami","Orlando","Las Vegas","Chicago","San Francisco","Boston","Washington","Seattle","San Diego","Houston","Dallas","Austin","Atlanta","New Orleans","Nashville","Denver","Phoenix","Honolulu",
+    "Rio de Janeiro","Sao Paulo","Salvador","Brasilia","Florianopolis","Recife","Fortaleza","Natal","Curitiba","Manaus",
+    "Nairobi","Mombasa","Malindi","Diani Beach","Naivasha","Kisumu","Nakuru","Eldoret","Lamu",
+    "Cape Town","Johannesburg","Durban","Pretoria","Sandton","Stellenbosch","Port Elizabeth","Knysna","Hermanus","Bloemfontein",
+    "Paris","Nice","Lyon","Marseille","Madrid","Barcelona","Valencia","Seville","Malaga","Rome","Milan","Venice","Florence","Naples",
+    "Berlin","Munich","Hamburg","Frankfurt","Amsterdam","Rotterdam","Brussels","Bruges","Lisbon","Porto","Zurich","Geneva","Vienna","Prague","Budapest","Athens","Santorini","Mykonos","Istanbul","Antalya",
+    "Dubai","Abu Dhabi","Doha","Riyadh","Jeddah","Cairo","Marrakech","Casablanca","Accra","Dar es Salaam","Zanzibar","Kampala","Kigali",
+    "Bangkok","Phuket","Krabi","Singapore","Tokyo","Osaka","Kyoto","Seoul","Busan","Hong Kong","Kuala Lumpur","Penang","Bali","Jakarta","Manila","Cebu","Hanoi","Ho Chi Minh City","Da Nang",
+    "Mumbai","Delhi","Goa","Jaipur","Sydney","Melbourne","Brisbane","Perth","Auckland","Queenstown","Toronto","Vancouver","Montreal","Mexico City","Cancun","Tulum","Buenos Aires","Santiago","Bogota","Cartagena","Lima",
+]
 
-    # USA
-    "New York United States","Los Angeles United States","Miami United States","Orlando United States",
-    "Las Vegas United States","Chicago United States","San Francisco United States","Boston United States",
-    "Washington United States","Seattle United States","San Diego United States","Houston United States",
-    "Dallas United States","Austin United States","Atlanta United States","New Orleans United States",
-    "Nashville United States","Denver United States","Phoenix United States","Honolulu United States",
+DISCOVERY_TERMS = [
+    "",
+    "city",
+    "town",
+    "district",
+    "central",
+    "city centre",
+    "downtown",
+    "airport",
+    "station",
+    "business district",
+    "market",
+    "university",
+    "beach",
+    "coast",
+    "harbour",
+    "island",
+    "resort",
+    "old town",
+    "nearby",
+]
 
-    # Brazil
-    "Rio de Janeiro Brazil","Sao Paulo Brazil","Salvador Brazil","Brasilia Brazil","Florianopolis Brazil",
-    "Recife Brazil","Fortaleza Brazil","Natal Brazil","Curitiba Brazil","Manaus Brazil",
-
-    # Kenya
-    "Nairobi Kenya","Mombasa Kenya","Malindi Kenya","Diani Beach Kenya","Naivasha Kenya","Kisumu Kenya",
-    "Nakuru Kenya","Eldoret Kenya","Lamu Kenya",
-
-    # South Africa
-    "Cape Town South Africa","Johannesburg South Africa","Durban South Africa","Pretoria South Africa",
-    "Sandton South Africa","Stellenbosch South Africa","Port Elizabeth South Africa","Knysna South Africa",
-    "Hermanus South Africa","Bloemfontein South Africa",
-
-    # Major world hubs
-    "Paris France","Nice France","Lyon France","Marseille France","Madrid Spain","Barcelona Spain",
-    "Valencia Spain","Seville Spain","Malaga Spain","Rome Italy","Milan Italy","Venice Italy",
-    "Florence Italy","Naples Italy","Berlin Germany","Munich Germany","Hamburg Germany","Frankfurt Germany",
-    "Amsterdam Netherlands","Rotterdam Netherlands","Brussels Belgium","Bruges Belgium","Lisbon Portugal",
-    "Porto Portugal","Zurich Switzerland","Geneva Switzerland","Vienna Austria","Prague Czech Republic",
-    "Budapest Hungary","Athens Greece","Santorini Greece","Mykonos Greece","Istanbul Turkey","Antalya Turkey",
-    "Dubai United Arab Emirates","Abu Dhabi United Arab Emirates","Doha Qatar","Riyadh Saudi Arabia",
-    "Jeddah Saudi Arabia","Cairo Egypt","Marrakech Morocco","Casablanca Morocco","Accra Ghana",
-    "Dar es Salaam Tanzania","Zanzibar Tanzania","Kampala Uganda","Kigali Rwanda","Bangkok Thailand",
-    "Phuket Thailand","Krabi Thailand","Singapore Singapore","Tokyo Japan","Osaka Japan","Kyoto Japan",
-    "Seoul South Korea","Busan South Korea","Hong Kong","Kuala Lumpur Malaysia","Penang Malaysia",
-    "Bali Indonesia","Jakarta Indonesia","Manila Philippines","Cebu Philippines","Hanoi Vietnam",
-    "Ho Chi Minh City Vietnam","Da Nang Vietnam","Mumbai India","Delhi India","Goa India","Jaipur India",
-    "Sydney Australia","Melbourne Australia","Brisbane Australia","Perth Australia","Auckland New Zealand",
-    "Queenstown New Zealand","Toronto Canada","Vancouver Canada","Montreal Canada","Mexico City Mexico",
-    "Cancun Mexico","Playa del Carmen Mexico","Tulum Mexico","Buenos Aires Argentina","Santiago Chile",
-    "Bogota Colombia","Cartagena Colombia","Lima Peru"
+UK_DEEP_TERMS = [
+    "Greater London","Central London","Westminster London","Kensington London","Chelsea London","Canary Wharf London","Paddington London","Camden London","Greenwich London","Shoreditch London","Heathrow London","Gatwick London",
+    "Essex United Kingdom","Kent United Kingdom","Surrey United Kingdom","Sussex United Kingdom","Cornwall United Kingdom","Devon United Kingdom","Norfolk United Kingdom","Suffolk United Kingdom","Yorkshire United Kingdom",
+    "Lancashire United Kingdom","Cumbria United Kingdom","Derbyshire United Kingdom","Warwickshire United Kingdom","Hampshire United Kingdom","Somerset United Kingdom","Wiltshire United Kingdom","Dorset United Kingdom",
 ]
 
 def db():
@@ -98,14 +142,14 @@ def count_hotels():
 
 def backup(label):
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    safe_label = label.replace(" ", "_").replace("/", "_").replace("-", "m")
-    out = BACKUP_DIR / f"hotel_catalog_{safe_label}_{stamp}.db"
+    safe = label.replace(" ", "_").replace("/", "_").replace("-", "m").replace(",", "")
+    out = BACKUP_DIR / f"hotel_catalog_{safe}_{stamp}.db"
     shutil.copyfile(DB, out)
     print("LOCAL BACKUP SAVED:", out, flush=True)
 
 def known_ids():
     con = db()
-    ids = set(str(r[0]) for r in con.execute(
+    ids = set(str(row[0]) for row in con.execute(
         "SELECT supplier_hotel_id FROM hotels WHERE supplier_hotel_id IS NOT NULL AND supplier_hotel_id != ''"
     ))
     con.close()
@@ -113,49 +157,173 @@ def known_ids():
 
 KNOWN = known_ids()
 
+def load_state():
+    if STATE_FILE.exists():
+        try:
+            return json.loads(STATE_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {
+        "seen_destinations": [],
+        "dead_destinations": [],
+        "queue": [],
+        "country_index": 0,
+        "place_index": 0,
+        "term_index": 0,
+        "deep_uk_index": 0
+    }
+
+STATE = load_state()
+SEEN_DESTINATIONS = set(STATE.get("seen_destinations", []))
+DEAD_DESTINATIONS = set(STATE.get("dead_destinations", []))
+
+def save_state():
+    STATE["seen_destinations"] = list(SEEN_DESTINATIONS)
+    STATE["dead_destinations"] = list(DEAD_DESTINATIONS)
+    STATE_FILE.write_text(json.dumps(STATE, indent=2), encoding="utf-8")
+
 def high_res(url):
     return str(url or "").replace("square60", "max1024x768").replace("square90", "max1024x768").replace("square200", "max1024x768").replace("max300", "max1024x768")
 
 def safe_get(path, params):
-    time.sleep(SLEEP_BETWEEN_REQUESTS)
-    r = requests.get(f"https://{HOST}{path}", headers=HEADERS, params=params, timeout=35)
+    time.sleep(SLEEP)
 
-    if r.status_code == 429:
-        print("RATE LIMIT 429. Pausing safely.", flush=True)
-        time.sleep(PAUSE_ON_429_SECONDS)
+    try:
+        response = requests.get(f"https://{HOST}{path}", headers=HEADERS, params=params, timeout=35)
+    except Exception as exc:
+        print("Request error:", exc, flush=True)
+        time.sleep(10)
         return None
 
-    if r.status_code in [401, 403]:
-        raise SystemExit(f"Provider blocked or unauthorized: {r.status_code} {r.text[:200]}")
+    if response.status_code == 429:
+        print("RATE LIMIT 429. Sleeping safely for 90 seconds.", flush=True)
+        time.sleep(90)
+        return None
 
-    if r.status_code != 200:
-        print("Provider status:", r.status_code, r.text[:120], flush=True)
+    if response.status_code in [401, 403]:
+        raise SystemExit(f"Provider blocked/unauthorized: {response.status_code} {response.text[:200]}")
+
+    if response.status_code != 200:
         return None
 
     try:
-        return r.json()
+        return response.json()
     except Exception:
         return None
 
-def find_destination(search_text):
-    data = safe_get("/locations/auto-complete", {"text": search_text, "languagecode": "en-us"})
+def add_destination(dest_id, label, dest_type, source_text):
+    if not dest_id:
+        return False
+
+    dest_id = str(dest_id)
+    dest_type = str(dest_type or "").lower()
+
+    allowed_types = {"city", "district", "region", "airport", "landmark"}
+    if dest_type not in allowed_types:
+        return False
+
+    if dest_id in SEEN_DESTINATIONS or dest_id in DEAD_DESTINATIONS:
+        return False
+
+    STATE["queue"].append({
+        "dest_id": dest_id,
+        "label": label or source_text,
+        "dest_type": dest_type,
+        "source": source_text
+    })
+    SEEN_DESTINATIONS.add(dest_id)
+    save_state()
+    return True
+
+def discover_text(text):
+    data = safe_get("/locations/auto-complete", {
+        "text": text,
+        "languagecode": "en-us"
+    })
+
     items = data if isinstance(data, list) else (data or {}).get("data") or []
+    added = 0
 
-    best = None
     for item in items:
-        if str(item.get("dest_type", "")).lower() == "city" and item.get("dest_id"):
-            best = item
-            break
+        dest_id = item.get("dest_id")
+        dest_type = item.get("dest_type")
+        label = item.get("label") or item.get("name") or text
+        if add_destination(dest_id, label, dest_type, text):
+            added += 1
 
-    if not best:
-        return None, None
+    print("DISCOVER:", text, "| new destinations:", added, flush=True)
+    return added
 
-    return str(best["dest_id"]), best.get("label") or best.get("name") or search_text
 
-def fetch_page(dest_id, page):
+BAD_FRANCE_PLACE_TERMS = {
+    "owerri", "warri", "lagos", "abuja", "kano", "ibadan", "benin city",
+    "port harcourt", "accra", "kumasi", "nairobi", "mombasa", "kampala",
+    "dar es salaam", "addis ababa", "casablanca", "marrakech", "cairo",
+    "alexandria", "johannesburg", "cape town", "durban"
+}
+
+def is_bad_country_mix(place, country):
+    place_l = str(place or "").strip().lower()
+    country_l = str(country or "").strip().lower()
+
+    if country_l == "france" and place_l in BAD_FRANCE_PLACE_TERMS:
+        return True
+
+    return False
+
+
+def fill_queue():
+    print("Filling destination queue...", flush=True)
+
+    attempts = 0
+
+    while len(STATE["queue"]) < 30 and attempts < 80:
+        attempts += 1
+
+        if STATE["deep_uk_index"] < len(UK_DEEP_TERMS):
+            text = UK_DEEP_TERMS[STATE["deep_uk_index"]]
+            STATE["deep_uk_index"] += 1
+            save_state()
+            discover_text(text)
+            continue
+
+        country = COUNTRY_PRIORITY[STATE["country_index"] % len(COUNTRY_PRIORITY)]
+        place = BASE_PLACES[STATE["place_index"] % len(BASE_PLACES)]
+        term = DISCOVERY_TERMS[STATE["term_index"] % len(DISCOVERY_TERMS)]
+
+        if is_bad_country_mix(place, country):
+            print("SKIP bad country/place mix:", place, country, flush=True)
+            STATE["place_index"] += 1
+            save_state()
+            continue
+
+        if term:
+            text = f"{place} {term} {country}".strip()
+        else:
+            text = f"{place} {country}".strip()
+
+        STATE["term_index"] += 1
+        if STATE["term_index"] >= len(DISCOVERY_TERMS):
+            STATE["term_index"] = 0
+            STATE["place_index"] += 1
+
+        if STATE["place_index"] >= len(BASE_PLACES):
+            STATE["place_index"] = 0
+            STATE["country_index"] += 1
+
+        save_state()
+        discover_text(text)
+
+    print("Queue size:", len(STATE["queue"]), flush=True)
+
+def fetch_properties(dest_id, dest_type, page):
+    search_type = "city"
+    if dest_type in ["district", "region", "airport", "landmark"]:
+        search_type = dest_type
+
     data = safe_get("/properties/list", {
         "dest_ids": dest_id,
-        "search_type": "city",
+        "search_type": search_type,
         "arrival_date": "2026-06-10",
         "departure_date": "2026-06-11",
         "adults": "2",
@@ -169,7 +337,25 @@ def fetch_page(dest_id, page):
     if not isinstance(data, dict):
         return []
 
-    return data.get("result") or []
+    result = data.get("result") or []
+
+    if not result and search_type != "city":
+        data = safe_get("/properties/list", {
+            "dest_ids": dest_id,
+            "search_type": "city",
+            "arrival_date": "2026-06-10",
+            "departure_date": "2026-06-11",
+            "adults": "2",
+            "room_qty": "1",
+            "page_number": str(page),
+            "units": "metric",
+            "languagecode": "en-us",
+            "currency_code": "GBP",
+        })
+        if isinstance(data, dict):
+            result = data.get("result") or []
+
+    return result
 
 def normalize(hotel):
     hid = str(hotel.get("hotel_id") or "").strip()
@@ -183,6 +369,9 @@ def normalize(hotel):
         return None
 
     now = datetime.now(UTC).isoformat()
+    accommodation_type = str(hotel.get("accommodation_type_name") or "")
+    review_word = str(hotel.get("review_score_word") or "")
+    description = (accommodation_type + " " + review_word).strip()
 
     return (
         "rapid-" + hid,
@@ -201,11 +390,11 @@ def normalize(hotel):
         str(hotel.get("latitude") or ""),
         str(hotel.get("longitude") or ""),
         "",
-        "COUNTRY PRIORITY DEEP CITY IMPORT",
+        "FAST DEEP CITY ALL BOOKABLE ACCOMMODATIONS IMPORT",
         now,
         image,
         str(hotel.get("hotel_facilities") or ""),
-        str(hotel.get("accommodation_type_name") or hotel.get("review_score_word") or ""),
+        description,
         now,
         now,
     )
@@ -222,6 +411,7 @@ def insert_rows(rows):
     """
 
     added = 0
+
     for row in rows:
         before = con.total_changes
         con.execute(sql, row)
@@ -233,51 +423,75 @@ def insert_rows(rows):
     con.close()
     return added
 
-print("COUNTRY PRIORITY DEEP IMPORT STARTED", flush=True)
+print("FAST DEEP CITY EXTRACTION — ALL BOOKABLE ACCOMMODATIONS STARTED", flush=True)
 print("Starting count:", count_hotels(), flush=True)
-backup("BEFORE_COUNTRY_PRIORITY_DEEP_IMPORT")
+backup("BEFORE_FAST_DEEP_CITY_ALL_ACCOMMODATIONS")
 
-for search_text in PRIORITY_CITIES:
-    if count_hotels() >= TARGET:
-        break
+added_since_backup = 0
 
-    dest_id, label = find_destination(search_text)
-    print("\nCITY:", search_text, "| DEST:", dest_id, "| LABEL:", label, flush=True)
+while count_hotels() < TARGET:
+    if not STATE["queue"]:
+        fill_queue()
 
-    if not dest_id:
+    if not STATE["queue"]:
+        print("No destinations discovered. Sleeping and retrying.", flush=True)
+        time.sleep(300)
         continue
 
-    city_added = 0
+    item = STATE["queue"].pop(0)
+    save_state()
+
+    dest_id = item["dest_id"]
+    label = item["label"]
+    dest_type = item.get("dest_type", "city")
+
+    print("\nDESTINATION:", label, "|", dest_type, "|", dest_id, flush=True)
+
+    destination_added = 0
     zero_streak = 0
 
-    for page in range(1, MAX_PAGES_PER_CITY + 1):
-        hotels = fetch_page(dest_id, page)
+    for page in range(1, MAX_PAGES_PER_DESTINATION + 1):
+        hotels = fetch_properties(dest_id, dest_type, page)
         rows = [row for row in (normalize(h) for h in hotels) if row]
 
         added = insert_rows(rows)
-        city_added += added
-        current = count_hotels()
+        destination_added += added
+        added_since_backup += added
 
-        print(f"{current:,}/{TARGET:,} | {label} | page {page} | fetched {len(hotels)} | added {added} | city_added {city_added}", flush=True)
+        current = count_hotels()
+        print(f"{current:,}/{TARGET:,} | {label} | page {page} | fetched {len(hotels)} | added {added} | destination_added {destination_added}", flush=True)
 
         if added == 0:
             zero_streak += 1
         else:
             zero_streak = 0
 
-        if page >= 5 and city_added < 10:
-            print("City is saturated. Backing up and moving to next major city.", flush=True)
+        if page >= LOW_YIELD_CHECK_PAGE and destination_added < LOW_YIELD_MIN_ADDED:
+            print("Low-yield destination. Moving on quickly.", flush=True)
+            break
+
+        if zero_streak >= ZERO_STREAK_LIMIT:
+            print("Destination saturated. Moving on.", flush=True)
             break
 
         if not hotels:
-            print("Provider returned no hotels for this page. City done.", flush=True)
+            print("No more results for this destination.", flush=True)
             break
 
-        if current >= TARGET:
-            break
+        if added_since_backup >= BACKUP_EVERY_ADDED:
+            backup("PROGRESS_FAST_DEEP_CITY")
+            added_since_backup = 0
 
-    backup("AFTER_CITY_" + search_text)
+    if destination_added == 0:
+        DEAD_DESTINATIONS.add(dest_id)
+        save_state()
 
-backup("FINAL_COUNTRY_PRIORITY_DEEP_IMPORT")
-print("Finished count:", count_hotels(), flush=True)
+    pass  # storage optimized: no per-destination full DB backup
+
+print("Target reached:", count_hotels(), flush=True)
+backup("FINAL_FAST_DEEP_CITY_ALL_ACCOMMODATIONS")
+
+
+
+
 
