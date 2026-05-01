@@ -42,12 +42,12 @@ const INFO = {
 };
 
 function getHotels(payload) {
-  const list = payload?.hotels || payload?.results || payload?.data || [];
+  const list = payload?.hotels || payload?.results || payload?.items || payload?.data || [];
   return Array.isArray(list) ? list : [];
 }
 
 function cleanImage(hotel) {
-  const url = hotel?.image || hotel?.max_photo_url || hotel?.main_photo_url || hotel?.photo_url || hotel?.image_url || "";
+  const url = hotel?.image || hotel?.high_res_image || hotel?.max_photo_url || hotel?.main_photo_url || hotel?.photo_url || hotel?.image_url || "";
   if (!url || typeof url !== "string") return "";
   return url.replace("square60", "max1280x900").replace("square200", "max1280x900").replace("max300", "max1280x900").replace("max500", "max1280x900");
 }
@@ -64,6 +64,9 @@ export default function App() {
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
 
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
@@ -75,24 +78,44 @@ export default function App() {
     setSelectedFacilities((old) => old.includes(name) ? old.filter((x) => x !== name) : [...old, name]);
   }
 
-  async function searchHotels() {
+  async function searchHotels(nextPage = 1) {
     setLoading(true);
     setNotice("");
-    setHotels([]);
-    setSelectedHotel(null);
     setRequestNotice("");
 
+    if (nextPage === 1) {
+      setHotels([]);
+      setSelectedHotel(null);
+      setTotalResults(0);
+      setHasMore(false);
+    }
+
     try {
-      const params = new URLSearchParams({ country, city, area, keyword, guests: String(guests), limit: "60" });
+      const params = new URLSearchParams({
+        country,
+        city,
+        destination: area,
+        q: keyword,
+        guests: String(guests),
+        page: String(nextPage),
+        page_size: "100",
+        limit: "100"
+      });
+
       if (selectedFacilities.length) params.set("facilities", selectedFacilities.join(","));
 
       const res = await fetch(`${API_BASE}/api/hotels/search?${params.toString()}`, { cache: "no-store" });
       const payload = await res.json();
       const list = getHotels(payload);
 
-      setHotels(list);
+      setHotels((old) => nextPage === 1 ? list : [...old, ...list]);
+      setPage(nextPage);
+      setTotalResults(Number(payload?.total || 0));
+      setHasMore(Boolean(payload?.has_more));
 
-      if (!list.length) setNotice("No hotel matched this search. Try country and city only first, then add area, hotel name, or facilities.");
+      if (!list.length && nextPage === 1) {
+        setNotice("No hotel matched this search. Try country and city only first, then add area, hotel name, or facilities.");
+      }
     } catch {
       setNotice("Search is not connecting to the hotel server. Please try again shortly.");
     } finally {
@@ -140,7 +163,7 @@ export default function App() {
         throw new Error("Request failed");
       }
 
-      setRequestNotice("Your availability request has been received. Support will continue by email.");
+      setRequestNotice("Your availability request has been received. A confirmation has been sent by email.");
       setCustomerName("");
       setCustomerEmail("");
       setCustomerMessage("");
@@ -192,8 +215,7 @@ export default function App() {
         <section className="hero-card">
           <div className="brand">MY SPACE HOTEL</div>
           <h1>Find hotels around the world, compare stays clearly, and request availability with confidence.</h1>
-          <p>Search real hotel records, compare location, facilities, images, and ratings, then continue only when the stay fits your trip.</p>
-          <div className="count-box">84,787+ real stays and accommodations available</div>
+          <p>Search by destination, compare location, facilities, images, and ratings, then continue only when the stay fits your trip.</p>
 
           <div className="nav-buttons">
             <button onClick={() => setActivePage("guide")}>Travel Guides</button>
@@ -211,7 +233,7 @@ export default function App() {
         </section>
 
         <section className="search-card">
-          <h2>Search real hotels</h2>
+          <h2>Search stays</h2>
           <p>Start with country and city. Add filters only when you want a narrower result.</p>
 
           <input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Country, e.g. UK, USA, NG" />
@@ -229,7 +251,7 @@ export default function App() {
             <div>{FACILITIES.map((f) => <label key={f}><input type="checkbox" checked={selectedFacilities.includes(f)} onChange={() => toggleFacility(f)} />{f}</label>)}</div>
           </div>
 
-          <button className="search-button" onClick={searchHotels} disabled={loading}>{loading ? "Searching..." : "Search hotels"}</button>
+          <button className="search-button" onClick={() => searchHotels(1)} disabled={loading}>{loading ? "Searching..." : "Search hotels"}</button>
           {notice && <div className="notice">{notice}</div>}
         </section>
       </section>
@@ -237,24 +259,34 @@ export default function App() {
       <section className="results-grid">
         <section className="results-card">
           <h2>AVAILABLE STAYS</h2>
-          <p>{hotels.length} stays shown</p>
+          <p>
+            {hotels.length
+              ? `Showing ${hotels.length}${totalResults ? ` of ${totalResults}` : ""} matching stays`
+              : "Search to see available matching stays"}
+          </p>
 
           <div className="hotel-list">
             {hotels.map((hotel, index) => {
               const img = cleanImage(hotel);
               return (
-                <button key={hotel.id || index} className="hotel-card" onClick={() => { setSelectedHotel(hotel); setRequestNotice(""); }}>
+                <button key={`${hotel.id || "hotel"}-${index}`} className="hotel-card" onClick={() => { setSelectedHotel(hotel); setRequestNotice(""); }}>
                   {img ? <img src={img} alt={hotel.name || "Hotel"} loading="lazy" /> : <div className="no-image">Image not supplied</div>}
                   <div>
                     <h3>{hotel.name || "Hotel"}</h3>
                     <p>{[hotel.area, hotel.city, hotel.country].filter(Boolean).join(", ")}</p>
-                    <b>{hotel.rating ? `${hotel.rating} star` : "Rating not supplied"}{hotel.review_score ? ` • Review ${hotel.review_score}` : ""}</b>
+                    <b>{hotel.rating ? `${hotel.rating} star` : "Rating not supplied"}{hotel.review_score ? ` â€¢ Review ${hotel.review_score}` : ""}</b>
                     {hotel.address && <p>{hotel.address}</p>}
                   </div>
                 </button>
               );
             })}
           </div>
+
+          {hasMore && (
+            <button className="search-button" onClick={() => searchHotels(page + 1)} disabled={loading}>
+              {loading ? "Loading..." : "Load more matching stays"}
+            </button>
+          )}
         </section>
 
         <section className="request-card">
@@ -273,5 +305,3 @@ export default function App() {
     </main>
   );
 }
-
-
