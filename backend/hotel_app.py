@@ -2,8 +2,8 @@
 import sqlite3
 import requests
 from pathlib import Path
-from typing import Optional, List
-from fastapi import FastAPI, Query
+from typing import Optional
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -46,22 +46,15 @@ def db():
     con.row_factory = sqlite3.Row
     return con
 
-def table_columns():
-    con = db()
-    try:
-        rows = con.execute("PRAGMA table_info(hotels)").fetchall()
-        return [r["name"] for r in rows]
-    finally:
-        con.close()
-
 def first(row, names, default=""):
+    keys = row.keys()
     for name in names:
-        if name in row.keys() and row[name] not in [None, ""]:
+        if name in keys and row[name] not in [None, ""]:
             return row[name]
     return default
 
 def hotel_to_dict(row):
-    d = dict(row)
+    raw = dict(row)
     image = first(row, ["image", "high_res_image", "image_url", "photo_url", "main_photo_url", "max_photo_url"])
     return {
         "id": str(first(row, ["id", "hotel_id", "supplier_hotel_id"])),
@@ -82,7 +75,7 @@ def hotel_to_dict(row):
         "latitude": str(first(row, ["latitude", "lat"], "")),
         "longitude": str(first(row, ["longitude", "lon", "lng"], "")),
         "source": str(first(row, ["source_note", "supplier"], "hotel_catalog")),
-        "raw": d,
+        "raw": raw,
     }
 
 @app.get("/")
@@ -98,8 +91,8 @@ def catalogue_status():
     con = db()
     try:
         total = con.execute("SELECT COUNT(*) FROM hotels").fetchone()[0]
-        countries = [r[0] for r in con.execute("SELECT DISTINCT country FROM hotels WHERE country IS NOT NULL AND country != '' ORDER BY country LIMIT 50").fetchall()]
-        cities = [r[0] for r in con.execute("SELECT DISTINCT city FROM hotels WHERE city IS NOT NULL AND city != '' ORDER BY city LIMIT 50").fetchall()]
+        countries = [r[0] for r in con.execute("SELECT DISTINCT country FROM hotels WHERE country IS NOT NULL AND country != '' ORDER BY country LIMIT 80").fetchall()]
+        cities = [r[0] for r in con.execute("SELECT DISTINCT city FROM hotels WHERE city IS NOT NULL AND city != '' ORDER BY city LIMIT 80").fetchall()]
         return {
             "total_hotels": total,
             "countries_loaded": countries,
@@ -113,53 +106,121 @@ def catalogue_status():
     finally:
         con.close()
 
+def normalize_search_terms(*values):
+    terms = []
+    for value in values:
+        value = str(value or "").strip()
+        if not value:
+            continue
+        value = value.replace(",", " ")
+        for part in value.split():
+            part = part.strip()
+            if len(part) >= 2:
+                terms.append(part)
+    return terms
+
 def search_hotels_core(country="", city="", destination="", q="", facilities="", page=1, page_size=60, limit=None):
     page = max(int(page or 1), 1)
     page_size = int(limit or page_size or 60)
     page_size = max(1, min(page_size, 100))
+    offset = (page - 1) * page_size
 
     where = []
     params = []
 
-    search_text = (q or destination or "").strip()
+    country = str(country or "").strip()
+    city = str(city or "").strip()
+    destination = str(destination or "").strip()
+    q = str(q or "").strip()
+    facilities = str(facilities or "").strip()
+
     if country:
-        where.append("LOWER(COALESCE(country,'')) LIKE LOWER(?)")
-        params.append(f"%{country.strip()}%")
+        country_aliases = {
+            "uk": ["United Kingdom", "UK", "England", "Scotland", "Wales", "Northern Ireland"],
+            "usa": ["United States", "USA", "US", "America"],
+            "us": ["United States", "USA", "US", "America"],
+            "uae": ["United Arab Emirates", "UAE", "Dubai", "Abu Dhabi"],
+        }
+        options = country_aliases.get(country.lower(), [country])
+        where.append("(" + " OR ".join(["LOWER(COALESCE(country,'')) LIKE LOWER(?)" for _ in options]) + ")")
+        params.extend([f"%{x}%" for x in options])
 
-    if city:
-        where.append("(LOWER(COALESCE(city,'')) LIKE LOWER(?) OR LOWER(COALESCE(area,'')) LIKE LOWER(?) OR LOWER(COALESCE(address,'')) LIKE LOWER(?))")
-        params.extend([f"%{city.strip()}%", f"%{city.strip()}%", f"%{city.strip()}%"])
+    text_terms = normalize_search_terms(city, destination, q)
 
-    if search_text:
-        where.append("(LOWER(COALESCE(name,'')) LIKE LOWER(?) OR LOWER(COALESCE(city,'')) LIKE LOWER(?) OR LOWER(COALESCE(country,'')) LIKE LOWER(?) OR LOWER(COALESCE(area,'')) LIKE LOWER(?) OR LOWER(COALESCE(address,'')) LIKE LOWER(?))")
-        params.extend([f"%{search_text}%"] * 5)
+    for term in text_terms:
+        where.append("""
+        (
+            LOWER(COALESCE(name,'')) LIKE LOWER(?) OR
+            LOWER(COALESCE(city,'')) LIKE LOWER(?) OR
+            LOWER(COALESCE(country,'')) LIKE LOWER(?) OR
+            LOWER(COALESCE(area,'')) LIKE LOWER(?) OR
+            LOWER(COALESCE(address,'')) LIKE LOWER(?) OR
+            LOWER(COALESCE(description,'')) LIKE LOWER(?)
+        )
+        """)
+        params.extend([f"%{term}%"] * 6)
 
     if facilities:
         wanted = [x.strip().lower() for x in facilities.split(",") if x.strip()]
-        for item in wanted:
-            where.append("LOWER(COALESCE(facilities,'')) LIKE LOWER(?)")
-            params.append(f"%{item}%")
+        if wanted:
+            facility_clauses = []
+            for item in wanted:
+                facility_clauses.append("LOWER(COALESCE(facilities,'')) LIKE LOWER(?)")
+                params.append(f"%{item}%")
+            where.append("(" + " OR ".join(facility_clauses) + ")")
 
     sql_where = "WHERE " + " AND ".join(where) if where else ""
-    offset = (page - 1) * page_size
 
     con = db()
     try:
         total = con.execute(f"SELECT COUNT(*) FROM hotels {sql_where}", params).fetchone()[0]
-        rows = con.execute(
-            f"""
-            SELECT * FROM hotels
-            {sql_where}
-            ORDER BY
-              CASE WHEN image IS NOT NULL AND image != '' THEN 0 ELSE 1 END,
-              CASE WHEN rating IS NOT NULL AND rating != '' THEN 0 ELSE 1 END,
-              name
-            LIMIT ? OFFSET ?
-            """,
-            params + [page_size, offset],
-        ).fetchall()
+
+        if total == 0 and (country or city or destination or q):
+            fallback_terms = normalize_search_terms(country, city, destination, q)
+            fallback_where = []
+            fallback_params = []
+            for term in fallback_terms[:3]:
+                fallback_where.append("""
+                (
+                    LOWER(COALESCE(name,'')) LIKE LOWER(?) OR
+                    LOWER(COALESCE(city,'')) LIKE LOWER(?) OR
+                    LOWER(COALESCE(country,'')) LIKE LOWER(?) OR
+                    LOWER(COALESCE(area,'')) LIKE LOWER(?) OR
+                    LOWER(COALESCE(address,'')) LIKE LOWER(?)
+                )
+                """)
+                fallback_params.extend([f"%{term}%"] * 5)
+
+            fallback_sql = "WHERE " + " OR ".join(fallback_where) if fallback_where else ""
+            total = con.execute(f"SELECT COUNT(*) FROM hotels {fallback_sql}", fallback_params).fetchone()[0]
+            rows = con.execute(
+                f"""
+                SELECT * FROM hotels
+                {fallback_sql}
+                ORDER BY
+                  CASE WHEN image IS NOT NULL AND image != '' THEN 0 ELSE 1 END,
+                  CASE WHEN rating IS NOT NULL AND rating != '' THEN 0 ELSE 1 END,
+                  name
+                LIMIT ? OFFSET ?
+                """,
+                fallback_params + [page_size, offset],
+            ).fetchall()
+        else:
+            rows = con.execute(
+                f"""
+                SELECT * FROM hotels
+                {sql_where}
+                ORDER BY
+                  CASE WHEN image IS NOT NULL AND image != '' THEN 0 ELSE 1 END,
+                  CASE WHEN rating IS NOT NULL AND rating != '' THEN 0 ELSE 1 END,
+                  name
+                LIMIT ? OFFSET ?
+                """,
+                params + [page_size, offset],
+            ).fetchall()
 
         items = [hotel_to_dict(r) for r in rows]
+
         return {
             "ok": True,
             "source": "database",
