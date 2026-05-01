@@ -1,0 +1,3518 @@
+﻿country,city,total_rows,unique_hotels
+United Kingdom,Greater London,795,795
+Italy,Milano,712,712
+France,Paris,692,692
+Italy,Napoli,650,650
+Thailand,Bangkok,639,639
+Italy,Roma,613,613
+South Africa,Cape Town,597,597
+Poland,Warszawa,588,588
+Austria,Wien,587,587
+United Arab Emirates,Dubai,575,575
+Spain,Sevilla,568,568
+Spain,Barcelona,548,548
+United States,Miami,532,532
+Poland,Kraków,531,531
+Spain,Málaga,531,531
+Italy,Bologna,509,509
+Portugal,Porto,508,508
+Portugal,Lisboa,494,494
+Spain,Madrid,494,494
+Italy,Firenze,492,492
+Italy,Torino,482,482
+Nigeria,Lagos,462,462
+Malaysia,Kuala Lumpur,460,460
+Nigeria,Abuja,424,424
+Germany,Berlin,400,400
+South Korea,Seoul,396,396
+Brazil,Rio de Janeiro,386,386
+Singapore,Singapore,381,381
+Argentina,Buenos Aires,370,370
+Czech Republic,Hlavní město Praha,351,351
+Mexico,Cancún,345,345
+Hungary,Budapest,343,343
+Brazil,São Paulo,332,332
+United Kingdom,London,331,331
+United States,Los Angeles,316,316
+South Africa,Johannesburg,288,288
+Canada,Toronto,286,286
+South Africa,Sandton,272,272
+Finland,Helsinki,271,271
+Mexico,Ciudad de México,256,256
+Japan,Osaka,255,255
+Germany,Hamburg,242,242
+Italy,Venezia,238,238
+Japan,Kyoto,237,237
+United States,Chicago,228,228
+Thailand,Phuket,221,221
+Australia,Melbourne,210,210
+Italy,Palermo,205,205
+Mexico,Mexico City,202,202
+France,Nice,200,200
+Rwanda,Kigali,200,200
+Italy,Verona,198,198
+Kenya,Nairobi,196,196
+France,Toulouse,195,195
+Senegal,Dakar,194,194
+United Arab Emirates,Abu Dhabi,193,193
+Italy,Pisa,192,192
+France,Cannes,191,191
+Japan,大阪市,191,191
+Spain,Granada,190,190
+Germany,München,188,188
+Morocco,Marrakech,188,188
+United States,Houston,188,188
+France,Rouen,186,186
+Ghana,Accra,184,184
+Italy,Genova,184,184
+Germany,Dresden,180,180
+Kenya,Mombasa,178,178
+Portugal,Faro,178,178
+Spain,València,178,178
+Spain,Córdoba,177,177
+France,Avignon,176,176
+United States,Atlanta,176,176
+France,Strasbourg,174,174
+Germany,Köln,174,174
+United Kingdom,Cardiff,174,174
+France,Lyon,173,173
+South Africa,Pretoria,173,173
+France,Montpellier,172,172
+Morocco,Casablanca,172,172
+Uganda,Kampala,172,172
+France,Dijon,169,169
+United States,Boston,169,169
+United States,Charlotte,169,169
+United States,Nashville,167,167
+France,Lille,166,166
+France,Nantes,166,166
+France,Bordeaux,165,165
+United States,Tampa,165,165
+United States,Austin,164,164
+Saudi Arabia,Riyadh,163,163
+United States,Dallas,163,163
+Morocco,Rabat,160,160
+United Kingdom,Leicester,156,156
+United States,Phoenix,156,156
+Saudi Arabia,Jeddah,155,155
+United Kingdom,York,154,154
+United Kingdom,Nottingham,153,153
+Canada,Calgary,149,149
+Canada,Montréal,147,147
+United States,Seattle,147,147
+Canada,Edmonton,144,144
+Ethiopia,Addis Ababa,144,144
+United States,New York,144,144
+France,Rennes,141,141
+United Kingdom,Belfast,140,140
+United States,San Diego,140,140
+United States,Washington,140,140
+United Arab Emirates,Sharjah,139,139
+United Kingdom,Edinburgh,137,137
+United States,Honolulu,137,137
+United States,Las Vegas,137,137
+United States,New Orleans,136,136
+New Zealand,Queenstown,133,133
+United Kingdom,Greater Manchester,130,130
+United Kingdom,West Midlands,130,130
+Colombia,Medellín,128,128
+India,New Delhi,128,128
+Mexico,Playa del Carmen,128,128
+Hong Kong,Hong Kong,127,127
+Canada,Vancouver,126,126
+India,Mumbai,126,126
+Thailand,Phuket Town,126,126
+Belgium,Antwerpen,124,124
+India,Pune,124,124
+New Zealand,Auckland,124,124
+New Zealand,Christchurch,123,123
+Switzerland,Zürich,123,123
+Tunisia,Tunis,122,122
+Australia,Brisbane City,121,121
+Brazil,Rio de Janeiro (Rio de Janeiro),119,119
+China,Shanghai,119,119
+India,Jaipur,119,119
+Netherlands,Amsterdam,119,119
+Poland,Gdańsk,119,119
+China,Beijing,118,118
+India,Agra,118,118
+India,Chennai,118,118
+South Korea,Busan,117,117
+India,Kolkata,116,116
+United Kingdom,Brighton and Hove,115,115
+Austria,Graz,114,114
+China,Shenzhen,114,114
+Malaysia,Johor Bahru,114,114
+China,Guangzhou,113,113
+Germany,Nürnberg,113,113
+India,Hyderabad,113,113
+South Korea,Incheon,112,112
+Greece,Athina,111,111
+United Kingdom,Merseyside,111,111
+Czech Republic,Prague,109,109
+United States,Philadelphia,107,107
+China,Hangzhou,105,105
+China,Chengdu,104,104
+Nigeria,Ibadan,104,104
+United Kingdom,Glasgow City,103,103
+Poland,Wrocław,102,102
+Saudi Arabia,Al Madinah,100,100
+Italy,Siena,99,99
+Peru,Lima,99,99
+Mexico,Guadalajara,98,98
+Colombia,Cartagena de Indias,97,97
+United Kingdom,Bristol City,96,96
+Japan,Tokyo,95,95
+Saudi Arabia,المدينة المنورة,94,94
+Thailand,Chiang Mai,92,92
+United States,Portland,89,89
+Malaysia,George Town,87,87
+Chile,Santiago,85,85
+Oman,Muscat,85,85
+South Africa,Durban,85,85
+China,Xi'an,84,84
+South Korea,Jeju,84,84
+Australia,Southbank,83,83
+Mexico,Cancun,83,83
+Australia,Sydney,82,82
+Japan,札幌市,82,82
+Portugal,Coimbra,81,81
+Colombia,Bogotá,80,80
+Germany,Stuttgart,80,80
+United States,Orlando,80,80
+India,Bangalore,79,79
+Nigeria,Port Harcourt,79,79
+Spain,Alicante (Alacant),79,79
+Brazil,Salvador,78,78
+Japan,福岡市,78,78
+Saudi Arabia,الرياض,78,78
+Australia,Adelaide,77,77
+Greece,Αθήνα,77,77
+United Kingdom,Liverpool,76,76
+Egypt,Al Haram,75,75
+Brazil,Florianópolis,74,74
+France,Marseille,74,74
+Japan,京都市,72,72
+Belgium,Brugge,71,71
+Brazil,Brasília,71,71
+Denmark,København,71,71
+Ghana,Kumasi,70,70
+United Kingdom,South Yorkshire,70,70
+Belgium,Bruxelles,69,69
+Switzerland,Basel,67,67
+United Kingdom,Oxfordshire,66,66
+United Kingdom,Sheffield,66,66
+Germany,Frankfurt am Main,65,65
+Brazil,Sao Paulo (Sao Paulo),63,63
+United States,Kissimmee,63,63
+Canada,Winnipeg,62,62
+Austria,Innsbruck,60,60
+South Africa,Randburg,60,60
+United States,New York (New York),60,60
+Germany,Düsseldorf,59,59
+Japan,東京都,59,59
+Japan,名古屋市,58,58
+United Kingdom,Southampton,58,58
+Norway,Oslo,57,57
+United Kingdom,West Yorkshire,56,56
+Nigeria,Enugu,55,55
+Australia,South Brisbane,54,54
+Croatia,Split,54,54
+Spain,Bilbao,54,54
+United Kingdom,Birmingham,54,54
+Portugal,Funchal,53,53
+South Africa,Port Elizabeth,53,53
+South Korea,Seogwipo,53,53
+United Kingdom,Bristol,52,52
+United Kingdom,Cambridge,52,52
+Belgium,Gent,51,51
+India,Bengaluru,51,51
+Australia,Surfers Paradise,50,50
+Iceland,Reykjavík,50,50
+Italy,Rome,50,50
+New Zealand,Wellington,50,50
+Australia,Fortitude Valley,49,49
+Spain,Valencia,49,49
+Malaysia,Langkawi,48,48
+Japan,Sapporo,47,47
+Spain,Alicante,47,47
+Taiwan,Kaohsiung City,47,47
+United Kingdom,Leeds,47,47
+United Kingdom,Oxford,47,47
+Austria,Salzburg,46,46
+India,Udaipur,46,46
+Thailand,Pattaya Central,46,46
+Italy,Florence,45,45
+Norway,Bergen,45,45
+Taiwan,Taipei City,45,45
+Colombia,Bogota,44,44
+Germany,Leipzig,44,44
+Japan,Nagoya,44,44
+Macau,Macau,44,44
+Taiwan,Taipei,44,44
+United States,Santa Monica,44,44
+Canada,Québec,43,43
+Egypt,Alexandria,43,43
+Taiwan,Kaohsiung,43,43
+United Kingdom,Manchester,43,43
+Georgia,Batumi,42,42
+Italy,Venice,42,42
+Sri Lanka,Kandy,42,42
+Tanzania,Arusha,42,42
+Japan,Fukuoka,41,41
+Saudi Arabia,Al Khobar,41,41
+Spain,Bilbo,41,41
+Japan,Shinjuku City,40,40
+Namibia,Windhoek,39,39
+United Kingdom,Bath,39,39
+Vietnam,Nha Trang,39,39
+Brazil,Florianopolis (Santa Catarina),38,38
+Nigeria,Asaba,38,38
+Norway,Oslo kommune,38,38
+United Kingdom,Bath and North East Somerset,38,38
+United Kingdom,Glasgow,38,38
+United States,"Honolulu (Oahu, Hawaii)",38,38
+United States,New Orleans (Louisiana),38,38
+Australia,Docklands,37,37
+Australia,Perth,37,37
+Brazil,Salvador (Bahia),37,37
+Ivory Coast,Abidjan,37,37
+Philippines,Boracay,37,37
+Saudi Arabia,Makkah,37,37
+South Africa,Umhlanga,37,37
+United States,Marina del Rey,37,37
+Belgium,Brussels,36,36
+Cameroon,Douala,36,36
+Croatia,Zagreb,36,36
+Greece,Athens,36,36
+Nigeria,Uyo,36,36
+Sweden,Göteborg,36,36
+United Kingdom,Brighton,36,36
+United States,San Francisco,36,36
+Azerbaijan,Bakı,35,35
+Indonesia,Surabaya,35,35
+Morocco,Marrakesh,35,35
+Austria,Vienna,34,34
+Bahrain,Manama,34,34
+Colombia,Cartagena,34,34
+Japan,大阪府大阪市,34,34
+Morocco,Agadir,34,34
+Nigeria,Owerri,34,34
+Saudi Arabia,جدة,34,34
+Switzerland,Genève,34,34
+Thailand,Ao Nang Beach,34,34
+United Arab Emirates,Fujairah,34,34
+United States,Denver,34,34
+Australia,Brisbane,33,33
+Croatia,Dubrovnik,33,33
+Qatar,Doha,33,33
+South Korea,서울시,33,33
+United States,Las Vegas (Nevada),33,33
+Brazil,São Paulo (São Paulo),32,32
+Cameroon,Yaoundé,32,32
+Nepal,Pokhara,32,32
+Netherlands,Den Haag,32,32
+Sri Lanka,Galle,32,32
+Vietnam,Hoi An,32,32
+Egypt,الهرم,31,31
+Indonesia,Bandung,31,31
+South Korea,서울,31,31
+South Korea,서울특별시,31,31
+Spain,Alacant,31,31
+Sweden,Stockholm,31,31
+Uganda,Entebbe,31,31
+Armenia,Yerevan,30,30
+Kazakhstan,Алматы,30,30
+Mozambique,Maputo,30,30
+South Korea,Gyeongju,30,30
+Japan,Hiroshima,29,29
+Morocco,Tanger,29,29
+Peru,Arequipa,29,29
+Philippines,Cebu City,29,29
+United Arab Emirates,Ajman,29,29
+Benin,Cotonou,28,28
+Czech Republic,Praha,28,28
+Japan,Taito City,28,28
+Japan,Toshima City,28,28
+Japan,広島市,28,28
+Malaysia,Melaka,28,28
+New Zealand,Rotorua,28,28
+Portugal,Lagos,28,28
+Saudi Arabia,Dammam,28,28
+South Africa,uMhlanga,28,28
+Tunisia,La Marsa,28,28
+United Kingdom,Newcastle upon Tyne,28,28
+Cambodia,Phnom Penh,27,27
+Egypt,Cairo,27,27
+India,Varanasi,27,27
+Indonesia,Yogyakarta,27,27
+Netherlands,Eindhoven,27,27
+Thailand,Patong Beach,27,27
+Australia,Hobart,26,26
+Australia,Manly,26,26
+Oman,Salalah,26,26
+Peru,Cusco,26,26
+South Africa,Johannesburg South,26,26
+Thailand,Chiang Rai,26,26
+Zimbabwe,Victoria Falls,26,26
+Australia,Haymarket,25,25
+Egypt,Giza,25,25
+India,Cochin,25,25
+Japan,台東区,25,25
+Mexico,Puerto Vallarta,25,25
+India,Jodhpur,24,24
+Jamaica,Montego Bay,24,24
+Malaysia,Pantai Cenang,24,24
+Mexico,Cabo San Lucas,24,24
+Morocco,Fès,24,24
+Spain,Palma de Mallorca,24,24
+Switzerland,St. Gallen,24,24
+United Kingdom,Cambridgeshire,24,24
+United Kingdom,England,24,24
+United States,Beverly Hills,24,24
+Vietnam,Hue,24,24
+Belgium,Bruges,23,23
+Japan,Yokohama,23,23
+Japan,新宿区,23,23
+Kyrgyzstan,Bishkek,23,23
+Morocco,Fes,23,23
+Netherlands,Rotterdam,23,23
+Nigeria,Ikeja,23,23
+Saudi Arabia,Madinah,23,23
+United States,Chicago (Illinois),23,23
+Vietnam,Da Nang,23,23
+Australia,Gold Coast,22,22
+Denmark,Copenhagen,22,22
+Georgia,Bakuriani,22,22
+India,Navi Mumbai,22,22
+Indonesia,Kuta Lombok,22,22
+Nigeria,Abeokuta,22,22
+Nigeria,Benin City,22,22
+Poland,Warsaw,22,22
+Poland,Wroclaw,22,22
+Spain,Huelva,22,22
+United Arab Emirates,sharjah,22,22
+United Kingdom,Tyne and Wear,22,22
+Belgium,Ixelles,21,21
+Canada,Montreal,21,21
+India,Kochi,21,21
+India,Rishikesh,21,21
+Japan,豊島区,21,21
+Lebanon,Beirut,21,21
+Saudi Arabia,مكة,21,21
+United Kingdom,Newcastle Upon Tyne,21,21
+United States,Birmingham,21,21
+United States,Seattle (Washington),21,21
+Argentina,Mendoza,20,20
+Australia,Bondi Beach,20,20
+Canada,Vancouver (British Columbia),20,20
+Egypt,قسم ثان المنتزة,20,20
+Kazakhstan,Уральск,20,20
+Tanzania,Zanzibar,20,20
+United States,Athens,20,20
+United States,San Francisco (California),20,20
+Australia,Canberra,19,19
+Australia,Surry Hills,19,19
+Azerbaijan,Baku,19,19
+Belgium,Anderlecht,19,19
+Belgium,Brussel,19,19
+Indonesia,Jakarta,19,19
+Japan,大田区,19,19
+Japan,大阪府,19,19
+Jordan,Aqaba,19,19
+Malaysia,Malacca,19,19
+Nepal,Kathmandu,19,19
+Nigeria,Warri,19,19
+Thailand,Amphoe Mueang Phuket,19,19
+United States,Clermont,19,19
+Argentina,CABA,18,18
+Australia,Millers Point,18,18
+Australia,St Kilda,18,18
+Canada,Ottawa,18,18
+Canada,Québec City,18,18
+Colombia,Medellin,18,18
+India,Candolim,18,18
+India,Delhi,18,18
+Ireland,Dublin,18,18
+Israel,Haifa,18,18
+Israel,Tel Aviv-Yafo,18,18
+Japan,横浜市,18,18
+Kazakhstan,Astana,18,18
+Mexico,Oaxaca de Juárez,18,18
+Netherlands,Utrecht,18,18
+Pakistan,Naran,18,18
+Spain,Malaga,18,18
+Spain,Palma,18,18
+Switzerland,Bern,18,18
+Thailand,กรุงเทพมหานคร,18,18
+United Arab Emirates,Al Ain,18,18
+United Arab Emirates,Ras Al Khaimah,18,18
+United States,Los Angeles (California),18,18
+United States,San Diego (California),18,18
+United States,West Hollywood,18,18
+Bahamas,Nassau,17,17
+Denmark,Aarhus,17,17
+India,Calangute,17,17
+Japan,葛飾区,17,17
+Mexico,Mérida,17,17
+Thailand,Amphoe Mueang Chiang Mai,17,17
+Thailand,Chaweng Beach,17,17
+Thailand,Koh Samui,17,17
+Australia,Braddon,16,16
+Australia,Pyrmont,16,16
+China,Xian,16,16
+Indonesia,Lombok,16,16
+Italy,Turin,16,16
+Japan,Sumida City,16,16
+Japan,奈良市,16,16
+Portugal,Lisbon,16,16
+South Africa,Thohoyandou,16,16
+Switzerland,Lausanne,16,16
+United States,Miami Beach,16,16
+United States,Millersburg,16,16
+Uruguay,Punta del Este,16,16
+Argentina,Capital Federal,15,15
+Australia,Cairns,15,15
+Australia,Glebe,15,15
+Australia,Noosaville,15,15
+Brazil,Sao Paulo,15,15
+Georgia,T'bilisi,15,15
+Georgia,Tbilisi,15,15
+Mexico,Zapopan,15,15
+South Africa,Berea,15,15
+Thailand,Muang Pattaya,15,15
+Thailand,phuket,15,15
+United Arab Emirates,Ras Al-Khaimah,15,15
+United States,Portland (Oregon),15,15
+Vietnam,Thành phố Hội An,15,15
+Cambodia,Siem Reap,14,14
+Israel,Jerusalem,14,14
+Japan,東京,14,14
+Kazakhstan,Almaty,14,14
+Malaysia,Kuah,14,14
+Saudi Arabia,الدمام,14,14
+Sweden,Gothenburg,14,14
+Thailand,อำเภอเมืองภูเก็ต,14,14
+Tunisia,Djerba,14,14
+United States,Boston (Massachusetts),14,14
+United States,Kings County,14,14
+Vietnam,Thành phố Huế,14,14
+Australia,Broadbeach,13,13
+Australia,Northbridge,13,13
+Australia,South Yarra,13,13
+Canada,Toronto (Ontario),13,13
+Egypt,Abdeen,13,13
+Egypt,Qasr El Nil,13,13
+Indonesia,Kabupaten Lombok Tengah,13,13
+South Africa,Gqeberha,13,13
+Switzerland,Luzern,13,13
+Thailand,Lamai Beach,13,13
+United States,Columbus,13,13
+United States,Orlando (Florida),13,13
+United States,Washington DC,13,13
+Australia,Battery Point,12,12
+Australia,Spring Hill,12,12
+Canada,Edmonton (Alberta),12,12
+Canada,Montréal (Québec),12,12
+Chile,Las Condes,12,12
+Chile,Providencia,12,12
+Cyprus,Limassol,12,12
+Egypt,اول المنتزه,12,12
+Japan,渋谷区,12,12
+Oman,صلالة,12,12
+Uzbekistan,Samarqand,12,12
+Uzbekistan,Tashkent,12,12
+Uzbekistan,Самарканд,12,12
+Uzbekistan,Тоshkent,12,12
+Argentina,Comuna 1,11,11
+Australia,Darwin City,11,11
+Barbados,Bridgetown,11,11
+Cambodia,Krong Siem Reap,11,11
+Canada,Winnipeg (Manitoba),11,11
+Egypt,El Raml 1,11,11
+Egypt,Siwa,11,11
+India,Goa,11,11
+Italy,Milan,11,11
+Japan,品川区,11,11
+Japan,大阪,11,11
+Malaysia,Georgetown,11,11
+Mexico,Oaxaca City,11,11
+Netherlands,Vinkeveen,11,11
+Oman,مسقط,11,11
+Portugal,Caniço,11,11
+South Africa,Queenstown,11,11
+Spain,Playa de Palma,11,11
+Thailand,Amphoe Ko Samui,11,11
+Thailand,Jomtien Beach,11,11
+Thailand,Lamai,11,11
+Thailand,PHUKET,11,11
+Thailand,Pattaya North,11,11
+Thailand,Pattaya South,11,11
+United States,Houston (Texas),11,11
+United States,Philadelphia (Pennsylvania),11,11
+Australia,Burwood,10,10
+Australia,East Brisbane,10,10
+Australia,Hamilton,10,10
+Australia,McMahons Point,10,10
+Australia,Noosa Heads,10,10
+Australia,Scarborough,10,10
+Belgium,Etterbeek,10,10
+Belgium,Saint-Gilles,10,10
+Brazil,Brasilia (Distrito Federal),10,10
+Brazil,Florianópolis (Santa Catarina),10,10
+Egypt,عابدين,10,10
+Egypt,قسم سيدى جابر,10,10
+Indonesia,Kota Bandung,10,10
+Italy,Genoa,10,10
+Italy,Naples,10,10
+Japan,Kochi,10,10
+Japan,北区,10,10
+Jordan,Wadi Musa,10,10
+Nigeria,Lekki,10,10
+Portugal,Machico,10,10
+Thailand,Krabi Town,10,10
+United Arab Emirates,الشارقة,10,10
+United Kingdom,East Sussex,10,10
+United Kingdom,LONDON,10,10
+United States,Arvada,10,10
+United States,Denver (Colorado),10,10
+Australia,Chatswood,9,9
+Australia,North Melbourne,9,9
+Australia,Port Melbourne,9,9
+Australia,Richmond,9,9
+Australia,Sydney Olympic Park,9,9
+Australia,Ultimo,9,9
+Canada,Calgary (Alberta),9,9
+Canada,Halifax,9,9
+Cayman Islands,Grand Cayman,9,9
+Colombia,Cartagena De Indias,9,9
+Egypt,الاسكندريه,9,9
+Indonesia,Kabupaten Semarang,9,9
+Japan,Nara,9,9
+Japan,京都府京都市,9,9
+Japan,東京都墨田区,9,9
+Japan,江戸川区,9,9
+Japan,港区,9,9
+Kazakhstan,Астана,9,9
+Malaysia,Batu Ferringhi,9,9
+Morocco,rabat,9,9
+Netherlands,Loosdrecht,9,9
+Peru,Miraflores,9,9
+South Africa,Komani,9,9
+Thailand,Krabi town,9,9
+Thailand,เมืองภูเก็ต,9,9
+United Kingdom,Brighton & Hove,9,9
+United Kingdom,Patchway,9,9
+United States,Beverly Hills (California),9,9
+Argentina,Ciudad Autónoma de Buenos Aires,8,8
+Australia,Bondi,8,8
+Australia,Mascot,8,8
+Australia,Paddington,8,8
+Australia,Reid,8,8
+Australia,West End,8,8
+Australia,West Melbourne,8,8
+Belgium,Schaerbeek,8,8
+Brazil,Rio De Janeiro,8,8
+Cyprus,Paphos,8,8
+Czech Republic,Praha 1,8,8
+Egypt,Montaza 2,8,8
+Israel,חיפה,8,8
+Japan,墨田区,8,8
+Japan,東京都豊島区,8,8
+Jordan,العقبة,8,8
+Kuwait,Kuwait,8,8
+Kyrgyzstan,Бишкек,8,8
+Mexico,Centro,8,8
+South Africa,Bluff,8,8
+Spain,Peguera,8,8
+Taiwan,"Xinxing District, Kaohsiung City",8,8
+Taiwan,"Zhongzheng District, Taipei City",8,8
+Thailand,Chiang Khong,8,8
+Thailand,Pattaya,8,8
+Thailand,bangkok,8,8
+Tunisia,Marsa,8,8
+United Kingdom,Eastbourne,8,8
+United Kingdom,Newcastle,8,8
+Australia,Bowen Hills,7,7
+Australia,Chippendale,7,7
+Australia,Coopers Plains,7,7
+Australia,East Perth,7,7
+Australia,Homebush,7,7
+Australia,Lidcombe,7,7
+Australia,Mosman,7,7
+Australia,Norman Park,7,7
+Australia,Queenstown,7,7
+Australia,South Hobart,7,7
+Australia,South Melbourne,7,7
+Australia,Windsor,7,7
+Barbados,Christ Church,7,7
+Belgium,Jette,7,7
+Belgium,Saint-Josse-ten-Noode,7,7
+Brazil,Brasilia,7,7
+Canada,Quebec City,7,7
+Egypt,الإسكندرية,7,7
+Egypt,الاسكندرية,7,7
+France,DIJON,7,7
+India,Agonda,7,7
+Israel,ירושלים,7,7
+Japan,Koto City,7,7
+Japan,Minato City,7,7
+Japan,Shiojiri,7,7
+Japan,世田谷区,7,7
+Kazakhstan,Uralsk,7,7
+Mexico,Merida,7,7
+Nepal,Tarakeshwar,7,7
+Nigeria,Calabar,7,7
+Nigeria,Kubwa,7,7
+Portugal,Moscavide,7,7
+Senegal,DAKAR,7,7
+Spain,Alboraia,7,7
+Spain,Huesca,7,7
+Spain,Llucmajor,7,7
+Spain,Santa Ponsa,7,7
+Thailand,Bophut,7,7
+Thailand,Chaweng,7,7
+Thailand,Mae Nam,7,7
+Turkey,İstanbul,7,7
+United Arab Emirates,Ras al Khaimah,7,7
+United Kingdom,Hove,7,7
+United States,Henderson,7,7
+United States,La Jolla,7,7
+United States,Miami (Florida),7,7
+United States,Miami Beach (Florida),7,7
+United States,North Las Vegas,7,7
+Uzbekistan,Samarkand,7,7
+Uzbekistan,Тошкент,7,7
+Vietnam,Huế,7,7
+Australia,Cairns City,6,6
+Australia,Carlton,6,6
+Australia,Coogee,6,6
+Australia,Cottesloe,6,6
+Australia,East Melbourne,6,6
+Australia,Footscray,6,6
+Australia,Hawthorn,6,6
+Australia,North Bondi,6,6
+Australia,North Ryde,6,6
+Australia,Parramatta,6,6
+Australia,Strahan,6,6
+Australia,Wentworth Point,6,6
+Australia,Woolloomooloo,6,6
+Belgium,Molenbeek-Saint-Jean,6,6
+Brazil,Brasília (Distrito Federal),6,6
+Brazil,Rio De Janeiro (Rio De Janeiro),6,6
+Canada,Québec City (Québec),6,6
+Cayman Islands,West Bay,6,6
+China,北京市,6,6
+China,广州,6,6
+China,深圳,6,6
+Cyprus,Ayia Napa,6,6
+Czech Republic,Prague 1,6,6
+Egypt,Port Said,6,6
+Egypt,قسم أول الرمل,6,6
+Finland,Helsingfors,6,6
+France,Huez,6,6
+Germany,Munich,6,6
+Greece,Marousi,6,6
+India,Jejuri,6,6
+India,agra,6,6
+Japan,Edogawa City,6,6
+Japan,中野区,6,6
+Japan,広島県広島市,6,6
+Japan,東京都新宿区,6,6
+Japan,江東区,6,6
+Japan,足立区,6,6
+Japan,高知市,6,6
+Jordan,معان,6,6
+Kuwait,Salmiya,6,6
+Malaysia,Bukit Mertajam,6,6
+Malaysia,Penang,6,6
+Mexico,Juárez,6,6
+Mexico,San Pedro Tlaquepaque,6,6
+Mexico,cancun,6,6
+Morocco,Tangier,6,6
+Philippines,Pasay,6,6
+Saudi Arabia,الخبر,6,6
+South Africa,Durban North,6,6
+South Africa,Germiston,6,6
+Spain,Formigal,6,6
+Thailand,Chaweng Noi Beach,6,6
+Turkey,Fatih,6,6
+Turkey,Istanbul,6,6
+United Kingdom,Salford,6,6
+United Kingdom,Stretford,6,6
+United Kingdom,london,6,6
+United States,Austin (Texas),6,6
+United States,Brooklyn (New York),6,6
+United States,Charlotte (North Carolina),6,6
+United States,Culver City,6,6
+United States,Lutz,6,6
+United States,Scottsdale,6,6
+United States,Winter Garden,6,6
+Uruguay,Punta Del Este,6,6
+Vietnam,Danang,6,6
+Vietnam,Đà Nẵng,6,6
+Argentina,Ciudad Autonoma de Buenos Aires,5,5
+Argentina,Ciudad de Buenos Aires,5,5
+Argentina,Comuna 14,5,5
+Argentina,San Nicolas,5,5
+Australia,Arncliffe,5,5
+Australia,Belmore,5,5
+Australia,Brighton-Le-Sands,5,5
+Australia,Broadmeadows,5,5
+Australia,Collingwood,5,5
+Australia,Darwin,5,5
+Australia,Dickson,5,5
+Australia,Falls Creek,5,5
+Australia,Kangaroo Point,5,5
+Australia,Kensington,5,5
+Australia,Kogarah,5,5
+Australia,Maroubra,5,5
+Australia,Mount Gravatt East,5,5
+Australia,Newstead,5,5
+Australia,Rocklea,5,5
+Australia,Ryde,5,5
+Australia,South Perth,5,5
+Australia,Sunnybank,5,5
+Australia,Woolloongabba,5,5
+Austria,Götzens,5,5
+Austria,Mutters,5,5
+Belgium,Koekelberg,5,5
+Belgium,Uccle,5,5
+Brazil,Visconde De Maua,5,5
+Brazil,Visconde de Mauá,5,5
+Canada,Halifax (Nova Scotia),5,5
+Canada,Québec (Québec),5,5
+Chile,Ñuñoa,5,5
+China,杭州,5,5
+China,西安,5,5
+China,西安市,5,5
+Egypt,Al Attarin,5,5
+Egypt,Tanta,5,5
+Egypt,سيوه,5,5
+Egypt,قسم الدخيلة,5,5
+India,Morjim,5,5
+India,Palolem,5,5
+India,Rishīkesh,5,5
+Indonesia,Semarang,5,5
+Italy,NAPOLI,5,5
+Japan,Katsushika City,5,5
+Japan,Nakano City,5,5
+Japan,大阪府/大阪市,5,5
+Japan,杉並区,5,5
+Japan,東京都大田区,5,5
+Japan,板橋区,5,5
+Japan,福岡県福岡市,5,5
+Jordan,Irbid,5,5
+Jordan,Petra,5,5
+Kazakhstan,Nur-Sultan,5,5
+Kenya,nairobi,5,5
+Malaysia,Jelutong,5,5
+Malaysia,Wilayah Persekutuan,5,5
+Morocco,MARRAKECH,5,5
+Morocco,RABAT,5,5
+Netherlands,Gouda,5,5
+Netherlands,Maurik,5,5
+Netherlands,Naarden,5,5
+Nigeria,Kano,5,5
+Norway,Vestland,5,5
+Peru,Callao,5,5
+Senegal,dakar,5,5
+Singapore,新加坡,5,5
+Spain,Can Pastilla,5,5
+Spain,Esporles,5,5
+Spain,Illes Balears,5,5
+Spain,Paguera,5,5
+Spain,Palmanova,5,5
+Spain,sevilla,5,5
+Taiwan,"Wanhua District, Taipei City",5,5
+Thailand,Ban Bang Po,5,5
+Thailand,Bangrak Beach,5,5
+Thailand,Tambon Patong,5,5
+Thailand,เชียงใหม่,5,5
+Tunisia,La marsa,5,5
+United Arab Emirates,DUBAI,5,5
+United Arab Emirates,أبو ظبي,5,5
+United Kingdom,East Dean,5,5
+United Kingdom,Nottinghamshire,5,5
+United Kingdom,South Gloucestershire,5,5
+United States,Columbus (Ohio),5,5
+United States,Doral,5,5
+United States,Hartford,5,5
+United States,MIAMI,5,5
+United States,Nashville (Tennessee),5,5
+United States,Oakland,5,5
+United States,Phoenix (Arizona),5,5
+United States,"Washington, D.C. (District Of Columbia)",5,5
+Uzbekistan,Ташкент,5,5
+Vietnam,Hải Châu,5,5
+Argentina,Comuna 13,4,4
+Argentina,Comuna 2,4,4
+Australia,Abbotsford,4,4
+Australia,Barangaroo,4,4
+Australia,Belmont,4,4
+Australia,Cremorne,4,4
+Australia,Darlinghurst,4,4
+Australia,Herston,4,4
+Australia,Highgate Hill,4,4
+Australia,Labrador,4,4
+Australia,MacGregor,4,4
+Australia,Macquarie Park,4,4
+Australia,New Farm,4,4
+Australia,North Hobart,4,4
+Australia,Redfern,4,4
+Australia,Rozelle,4,4
+Australia,Tamarama,4,4
+Australia,Waterloo,4,4
+Australia,West Hobart,4,4
+Austria,Axams,4,4
+Austria,Schruns,4,4
+Austria,Schruns-Tschagguns,4,4
+Belgium,Antwerp,4,4
+Belgium,Evere,4,4
+Brazil,BRASILIA,4,4
+Brazil,São Paulo (Sao Paulo),4,4
+Canada,Dartmouth,4,4
+Canada,Quebec City (Quebec),4,4
+Chad,N'Djamena,4,4
+China,Sichuan,4,4
+China,北京,4,4
+Cyprus,Larnaca,4,4
+Egypt,Siwa Oasis,4,4
+Egypt,القاهرة,4,4
+Egypt,المنصورة,4,4
+Egypt,اول المنصورة,4,4
+Egypt,رأس البر,4,4
+Egypt,سيوة,4,4
+Egypt,قسم رأس البر,4,4
+Egypt,قسم قصر النيل,4,4
+Egypt,مدينة نصر,4,4
+Egypt,مركز الحمام,4,4
+France,AVIGNON,4,4
+France,CANNES,4,4
+France,lyon,4,4
+Georgia,Ushguli,4,4
+Germany,Berlin-Treptow-Köpenick,4,4
+Greece,Kallithea,4,4
+Greece,Μαρούσι,4,4
+Iceland,Reykjavik,4,4
+India,Baga,4,4
+India,Canacona,4,4
+India,Mandrem,4,4
+India,Noida,4,4
+India,Panaji,4,4
+Indonesia,Kabupaten Sleman,4,4
+Israel,Netanya,4,4
+Israel,נתניה,4,4
+Israel,תל אביב-יפו,4,4
+Italy,BOLOGNA,4,4
+Italy,milano,4,4
+Japan,Arakawa City,4,4
+Japan,Itabashi City,4,4
+Japan,Ota City,4,4
+Japan,kyoto,4,4
+Japan,osaka,4,4
+Japan,北海道札幌市,4,4
+Japan,大阪市西成区,4,4
+Japan,文京区,4,4
+Japan,東京都渋谷区,4,4
+Jordan,وادي موسى,4,4
+Malaysia,Kampung Padang Masirat,4,4
+Malaysia,Tanjung Bungah,4,4
+Malaysia,kuala lumpur,4,4
+Mexico,Oaxaca,4,4
+Mexico,Tlaquepaque,4,4
+Morocco,CASABLANCA,4,4
+Morocco,casablanca,4,4
+Morocco,marrakech,4,4
+Netherlands,Delft,4,4
+Netherlands,Zeist,4,4
+Philippines,Makati,4,4
+Philippines,Malay,4,4
+Philippines,Parañaque,4,4
+Poland,Górowo Iławeckie,4,4
+Poland,KrakÃ³w,4,4
+Portugal,FARO,4,4
+Portugal,Lisboa ciudad,4,4
+Portugal,São Vicente,4,4
+South Africa,Bluewater Bay,4,4
+South Africa,City of Tshwane Metropolitan Municipality,4,4
+South Africa,Rosebank,4,4
+South Africa,Simon's Town,4,4
+South Korea,seoul,4,4
+South Korea,부산광역시,4,4
+South Korea,제주시,4,4
+Spain,Alboraya,4,4
+Spain,Cordoba,4,4
+Spain,MÃ¡laga,4,4
+Spain,Seville,4,4
+Spain,Sóller,4,4
+Spain,Valencia / València,4,4
+Sweden,Järfälla,4,4
+Sweden,Vaxholm,4,4
+Sweden,Åkersberga,4,4
+Switzerland,Kriens,4,4
+Taiwan,"Sanmin District, Kaohsiung City",4,4
+Taiwan,"Zhongshan District, Taipei City",4,4
+Thailand,Bangna,4,4
+Thailand,Koh samui,4,4
+Thailand,Lipa Noi,4,4
+Thailand,กรุงเทพ,4,4
+Tunisia,Djerba Midun,4,4
+Tunisia,tunis,4,4
+Turkey,Beyoğlu,4,4
+Turkey,Mardin,4,4
+Turkey,Şanlıurfa,4,4
+United Arab Emirates,Abu dhabi,4,4
+United Arab Emirates,dubai,4,4
+United Arab Emirates,عجمان,4,4
+United Kingdom,City of Bristol,4,4
+United Kingdom,Eccles,4,4
+United Kingdom,Northern Ireland,4,4
+United Kingdom,West Bridgford,4,4
+United Kingdom,YORK,4,4
+United Kingdom,birmingham,4,4
+United Kingdom,cardiff,4,4
+United States,Atlanta (Georgia),4,4
+Argentina,Caba,3,3
+Argentina,Capital,3,3
+Argentina,capital federal,3,3
+Australia,Annandale,3,3
+Australia,Annerley,3,3
+Australia,Auchenflower,3,3
+Australia,Beckenham,3,3
+Australia,Brunswick,3,3
+Australia,Brunswick West,3,3
+Australia,Burleigh Heads,3,3
+Australia,Burswood,3,3
+Australia,Camperdown,3,3
+Australia,Caulfield North,3,3
+Australia,Dinner Plain,3,3
+Australia,Greenslopes,3,3
+Australia,Hampton,3,3
+Australia,Highgate,3,3
+Australia,Ivanhoe,3,3
+Australia,Kirribilli,3,3
+Australia,Marrickville,3,3
+Australia,Milton,3,3
+Australia,Moonee Ponds,3,3
+Australia,Mount Lawley,3,3
+Australia,Neutral Bay,3,3
+Australia,Newtown,3,3
+Australia,North Perth,3,3
+Australia,North Sydney,3,3
+Australia,Palm Beach,3,3
+Australia,Potts Point,3,3
+Australia,Rosebery,3,3
+Australia,Rushcutters Bay,3,3
+Australia,Saint Lucia,3,3
+Australia,Southport,3,3
+Australia,Strathfield,3,3
+Australia,Wolli Creek,3,3
+Austria,Natters,3,3
+Austria,Patsch,3,3
+Austria,Rum,3,3
+Austria,Sankt Gallenkirch,3,3
+Austria,Tschagguns,3,3
+Bahrain,المنامة,3,3
+Belgium,Forest,3,3
+Brazil,Itatiaia,3,3
+Brazil,Visconde de Maua (Rio de Janeiro),3,3
+Cameroon,Yaounde,3,3
+Canada,Ottawa (Ontario),3,3
+China,Xi'An,3,3
+China,chengdu,3,3
+China,shanghai,3,3
+China,成都,3,3
+China,成都市,3,3
+Czech Republic,Praha 5,3,3
+Denmark,København V,3,3
+Egypt,Bawati,3,3
+Egypt,El Nozha,3,3
+Egypt,Fayoum,3,3
+Egypt,Fayoum Center,3,3
+Egypt,New Cairo,3,3
+Egypt,Ras El Bar,3,3
+Egypt,Sidi Gaber,3,3
+Egypt,Zagazig,3,3
+Egypt,alexandria,3,3
+Egypt,cairo,3,3
+Egypt,الجمرك,3,3
+Egypt,الزقازيق,3,3
+Egypt,العلمين,3,3
+Egypt,الفيوم,3,3
+Egypt,الواحات البحرية,3,3
+Egypt,بورسعيد,3,3
+Egypt,قسم باب شرقي,3,3
+Egypt,قسم ثان الزقازيق,3,3
+Egypt,كفر الشيخ,3,3
+Egypt,مركز يوسف الصديق,3,3
+Ethiopia,Addiss ababa,3,3
+France,MONTPELLIER,3,3
+France,PARIS,3,3
+France,ROUEN,3,3
+France,STRASBOURG,3,3
+France,paris,3,3
+Georgia,Tbilisi City,3,3
+Germany,Lohne,3,3
+Germany,Lohne (Oldenburg),3,3
+Germany,Quakenbrück,3,3
+Germany,Steinfeld (Oldenburg),3,3
+Germany,Visbek,3,3
+Ghana,ACCRA,3,3
+Greece,Πέτρα,3,3
+Greece,Παλαιό Φάληρο,3,3
+Iceland,Kópavogur,3,3
+India,AGRA,3,3
+India,Anjuna,3,3
+India,Vagator,3,3
+India,jaipur,3,3
+India,rishikesh,3,3
+Indonesia,Bandungan,3,3
+Indonesia,Central Lombok Regency,3,3
+Indonesia,Kabupaten Lombok Timur,3,3
+Indonesia,Kota Yogyakarta,3,3
+Israel,Caesarea,3,3
+Israel,אשקלון,3,3
+Italy,Provincia di Siena,3,3
+Japan,Chuo-ku,3,3
+Japan,Kita City,3,3
+Japan,"Naka Ward, Hiroshima",3,3
+Japan,"Osaka-shi, Osaka-fu",3,3
+Japan,Shibuya,3,3
+Japan,Shinagawa City,3,3
+Japan,TOKYO,3,3
+Japan,Toshima-ku,3,3
+Japan,千代田区,3,3
+Japan,大阪府大阪市浪速区,3,3
+Japan,愛知県名古屋市,3,3
+Japan,東京都江戸川区,3,3
+Japan,東京都葛飾区,3,3
+Japan,神奈川県,3,3
+Japan,福岡県,3,3
+Jordan,لواء بني كنانة,3,3
+Kazakhstan,Aksay,3,3
+Kazakhstan,Аксай,3,3
+Kenya,MOMBASA,3,3
+Kenya,NAIROBI,3,3
+Kenya,mombasa,3,3
+Malaysia,Bayan Lepas,3,3
+Malaysia,Pantai Kok,3,3
+Malaysia,Pantai Tengah,3,3
+Malaysia,Perai,3,3
+Malaysia,Tanjung Tokong,3,3
+Mexico,CANCUN,3,3
+Mexico,Mexico,3,3
+Morocco,Dar-el-Beida,3,3
+Netherlands,Dordrecht,3,3
+Netherlands,Hilversum,3,3
+Netherlands,Leidschendam,3,3
+Netherlands,Soesterberg,3,3
+New Zealand,Jacks Point,3,3
+Nigeria,ABEOKUTA,3,3
+Nigeria,Abuja Municipal Area Council,3,3
+Nigeria,Auchi,3,3
+Northern Cyprus,Gazimagusa,3,3
+Northern Cyprus,Kyrenia,3,3
+Pakistan,ناران,3,3
+Philippines,Cebu,3,3
+Philippines,Mandaue City,3,3
+Philippines,Manila,3,3
+Philippines,Paranaque City,3,3
+Poland,Gdansk,3,3
+Portugal,Arco da Calheta,3,3
+Portugal,Calheta,3,3
+Portugal,Oporto,3,3
+Portugal,Ponta do Sol,3,3
+Portugal,Ribeira Brava,3,3
+Portugal,Santa Cruz,3,3
+Rwanda,kigali,3,3
+Saudi Arabia,Al Madinah Al Munawwarah,3,3
+Saudi Arabia,مكة المكرمة,3,3
+South Africa,Akasia,3,3
+South Africa,Bedfordview,3,3
+South Africa,Camps Bay,3,3
+South Africa,Constantia,3,3
+South Korea,SEOUL,3,3
+South Korea,인천,3,3
+Spain,Binissalem,3,3
+Spain,Canfranc-Estación,3,3
+Spain,El Arenal,3,3
+Spain,Illetas,3,3
+Spain,Magalluf,3,3
+Spain,Sallent de Gállego,3,3
+Sri Lanka,kandy,3,3
+Sweden,Upplands Väsby,3,3
+Switzerland,Emmetten,3,3
+Switzerland,Geneva,3,3
+Switzerland,Weggis,3,3
+Taiwan,New Taipei City,3,3
+Taiwan,"Qianjin District, Kaohsiung City",3,3
+Taiwan,"Sanchong District, New Taipei City",3,3
+Taiwan,"Yancheng District, Kaohsiung City",3,3
+Thailand,Krabi,3,3
+Thailand,Na Jomtien,3,3
+Thailand,Tambon Chalong,3,3
+Thailand,ภูเก็ต,3,3
+Thailand,อำเภอเกาะสมุย,3,3
+Thailand,เกาะสมุย,3,3
+Tunisia,djerba,3,3
+Tunisia,تونس,3,3
+Turkey,Hatay,3,3
+Turkey,Mezitli,3,3
+Turkey,Pendik,3,3
+Turkey,istanbul,3,3
+United Arab Emirates,Дубай,3,3
+United Arab Emirates,العين,3,3
+United Arab Emirates,الفجيرة,3,3
+United Arab Emirates,دبي,3,3
+United Kingdom,BELFAST,3,3
+United Kingdom,BIRMINGHAM,3,3
+United Kingdom,Beeston,3,3
+United Kingdom,Central London,3,3
+United Kingdom,Clifton,3,3
+United Kingdom,Rutherglen,3,3
+United Kingdom,Wembley,3,3
+United Kingdom,sheffield,3,3
+United Kingdom,york,3,3
+United States,Brooklyn,3,3
+United States,Commerce City,3,3
+United States,Coral Gables,3,3
+United States,Coronado (California),3,3
+United States,Culver City (California),3,3
+United States,East Hartford,3,3
+United States,Four Corners,3,3
+United States,Lakewood,3,3
+United States,Manchester,3,3
+United States,Miami Shores,3,3
+United States,Santa Monica (California),3,3
+United States,Studio City,3,3
+United States,Tampa (Florida),3,3
+United States,West Hollywood (California),3,3
+United States,Westminster,3,3
+Argentina,AAH,2,2
+Argentina,CAPITAL FEDERAL,2,2
+Argentina,Comuna 15,2,2
+Argentina,Recoleta,2,2
+Australia,Acacia Ridge,2,2
+Australia,Balmain East,2,2
+Australia,Bentley,2,2
+Australia,Bondi Junction,2,2
+Australia,Booragoon,2,2
+Australia,Botany,2,2
+Australia,Bronte,2,2
+Australia,Camp Hill,2,2
+Australia,Canterbury,2,2
+Australia,Clayfield,2,2
+Australia,Coomera,2,2
+Australia,Coorparoo,2,2
+Australia,Dawes Point,2,2
+Australia,Eight Mile Plains,2,2
+Australia,Erskineville,2,2
+Australia,Essendon,2,2
+Australia,Fitzroy,2,2
+Australia,George Town,2,2
+Australia,Hawthorn East,2,2
+Australia,Heidelberg,2,2
+Australia,Hope Island,2,2
+Australia,Hotham Heights,2,2
+Australia,Hurstville,2,2
+Australia,Kenwick,2,2
+Australia,Kew,2,2
+Australia,Larrakeyah,2,2
+Australia,Leichhardt,2,2
+Australia,Manly Vale,2,2
+Australia,Matraville,2,2
+Australia,Mermaid Beach,2,2
+Australia,Mermaid Waters,2,2
+Australia,Miami,2,2
+Australia,Milsons Point,2,2
+Australia,Prahran,2,2
+Australia,Randwick,2,2
+Australia,Reservoir,2,2
+Australia,Rose Bay,2,2
+Australia,Roseville,2,2
+Australia,Runcorn,2,2
+Australia,Stanmore,2,2
+Australia,Sunnybank Hills,2,2
+Australia,Tempe,2,2
+Australia,Teneriffe,2,2
+Australia,The Rocks,2,2
+Australia,Travancore,2,2
+Australia,Turner,2,2
+Australia,Upper Mount Gravatt,2,2
+Australia,Victoria Park,2,2
+Australia,Wishart,2,2
+Australia,Wynnum,2,2
+Australia,霍巴特,2,2
+Austria,Lans,2,2
+Austria,Partenen,2,2
+Belgium,Berchem-Sainte-Agathe,2,2
+Belgium,Elsene,2,2
+Belgium,Ganshoren,2,2
+Belgium,Grimbergen,2,2
+Belgium,Watermael-Boitsfort,2,2
+Belgium,Wemmel,2,2
+Belgium,Woluwe-Saint-Lambert,2,2
+Benin,cotonou,2,2
+Brazil,Armacao,2,2
+Brazil,Barra da Tijuca,2,2
+Brazil,Brasilia ( Distrito Federal),2,2
+Brazil,Florianopolis,2,2
+Brazil,Ipanema,2,2
+Brazil,Rio de Janeiro (Rio De Janeiro),2,2
+Cameroon,Edea,2,2
+Cameroon,YAOUNDE,2,2
+Cameroon,douala,2,2
+Canada,North York,2,2
+Canada,Quebec (Quebec),2,2
+Canada,calgary,2,2
+Cayman Islands,George Town,2,2
+China,Guangdong,2,2
+China,Xi'an City,2,2
+China,XiAn,2,2
+China,Zhejiang,2,2
+China,shenzhen,2,2
+China,广东,2,2
+China,杭州市,2,2
+Colombia,BOGOTA,2,2
+Cyprus,Larnaka,2,2
+Cyprus,Limasol,2,2
+Czech Republic,Prague 2,2,2
+Czech Republic,Praha 1 - Nové Město,2,2
+Czech Republic,Praha 2,2,2
+Denmark,Frederiksberg,2,2
+Egypt,6th of October City,2,2
+Egypt,Alexanderia,2,2
+Egypt,Bab Shar',2,2
+Egypt,New Cairo 1,2,2
+Egypt,New Damietta,2,2
+Egypt,Old Cairo,2,2
+Egypt,giza,2,2
+Egypt,اسكندريه,2,2
+Egypt,الأسكندرية,2,2
+Egypt,الساحل الشمالي,2,2
+Egypt,السادات,2,2
+Egypt,العطارين,2,2
+Egypt,قسم أول 6 أكتوبر,2,2
+Egypt,قسم أول القاهرة الجديدة,2,2
+Egypt,قسم السيدة زينب,2,2
+Egypt,ِAlexandria,2,2
+Ethiopia,addis ababa,2,2
+France,Alpes d'Huez,2,2
+France,Auris,2,2
+France,BORDEAUX,2,2
+France,Le Bourg-d'Oisans,2,2
+France,Ostwald,2,2
+France,RENNES,2,2
+Georgia,Aspindza,2,2
+Georgia,Baghdati,2,2
+Georgia,Mestia,2,2
+Georgia,Poti,2,2
+Georgia,Samtredia,2,2
+Georgia,Бакуриани,2,2
+Germany,Frankfurt,2,2
+Germany,Unterföhring,2,2
+Ghana,KUMASI,2,2
+Greece,Agios Dimitrios,2,2
+Greece,Anaxos,2,2
+Greece,Chalandri,2,2
+Greece,Egaleo,2,2
+Greece,Glifada,2,2
+Greece,Mithimna,2,2
+Greece,Míthimna,2,2
+Greece,Paleo Faliro,2,2
+Greece,Άλιμος,2,2
+Greece,Αιγάλεω,2,2
+Greece,Γλυφάδα,2,2
+Greece,Ζωγράφου,2,2
+Greece,Ηράκλειο,2,2
+Greece,Καισαριανή,2,2
+Greece,Καλλιθέα,2,2
+Greece,Μήθυμνα,2,2
+Greece,ΦΙΛΙΑ,2,2
+Hong Kong,Kowloon,2,2
+Hong Kong,九龍,2,2
+India,Benaulim,2,2
+India,Cavelossim,2,2
+India,Colva,2,2
+India,DELHI,2,2
+India,JAIPUR,2,2
+India,KOLKATA,2,2
+India,NEW DELHI,2,2
+India,North Goa,2,2
+India,Saligao,2,2
+India,Sivaganga,2,2
+India,kochi,2,2
+India,जयपुर,2,2
+Indonesia,Ambarawa,2,2
+Indonesia,Jakarta Pusat,2,2
+Indonesia,Kota Jakarta Pusat,2,2
+Ireland,Dublin 1,2,2
+Israel,Ashkelon,2,2
+Israel,Daliyat al-Karmel,2,2
+Israel,אשדוד,2,2
+Israel,באר שבע,2,2
+Israel,עכו,2,2
+Italy,"Borgo Roma, Verona",2,2
+Italy,Città metropolitana di Milano,2,2
+Italy,PALERMO,2,2
+Italy,ROMA,2,2
+Italy,TORINO,2,2
+Italy,bologna,2,2
+Italy,firenze,2,2
+Italy,genova,2,2
+Italy,roma,2,2
+Italy,torino,2,2
+Japan,44-49 Bishamoncho,2,2
+Japan,Bunkyo City,2,2
+Japan,Kiso,2,2
+Japan,"Kyoto-shi, Kyoto",2,2
+Japan,Nerima City,2,2
+Japan,OSAKA,2,2
+Japan,Setagaya City,2,2
+Japan,Suginami City,2,2
+Japan,"Sumida City, Tokyo",2,2
+Japan,Taito-ku,2,2
+Japan,"Tokyo, Shinjuku City",2,2
+Japan,中央区,2,2
+Japan,京都,2,2
+Japan,京都府,2,2
+Japan,大阪市城東区,2,2
+Japan,大阪市東成区,2,2
+Japan,大阪市此花区,2,2
+Japan,大阪市西区,2,2
+Japan,広島市中区,2,2
+Japan,広島県,2,2
+Japan,愛知県,2,2
+Japan,木曽町,2,2
+Japan,東京都台東区,2,2
+Japan,東京都江東区,2,2
+Japan,福岡市中央区,2,2
+Japan,福岡県福岡市博多区,2,2
+Japan,荒川区,2,2
+Japan,高知県 / 高知市,2,2
+Jordan,aqaba,2,2
+Kenya,Kilimani,2,2
+Kuwait,Hawally,2,2
+Kuwait,Kuwait City,2,2
+Kuwait,مدينة الكويت,2,2
+Lebanon,Bayrut,2,2
+Lebanon,Jbeil,2,2
+Lebanon,Matn,2,2
+Macau,Macao,2,2
+Malaysia,Butterworth,2,2
+Malaysia,JOHOR BAHRU,2,2
+Malaysia,"Kuah, Langkawi",2,2
+Malaysia,MALACCA,2,2
+Malaysia,Seberang Jaya,2,2
+Malaysia,Tanjung Rhu,2,2
+Mexico,BENITO JUAREZ,2,2
+Mexico,CANCUN QUINTANA ROO,2,2
+Mexico,Ciudad de Mexico,2,2
+Mexico,Ciudad de MÃ©xico,2,2
+Mexico,Cuauhtémoc,2,2
+Mexico,Mexico city,2,2
+Mexico,Naucalpan,2,2
+Mexico,Oaxaca de Juarez,2,2
+Mexico,Playa de Carmen,2,2
+Mexico,Puerto Morelos,2,2
+Mexico,Santa Fe,2,2
+Mexico,Solidaridad,2,2
+Mexico,Tonalá,2,2
+Morocco,Fez,2,2
+Morocco,Salé,2,2
+Morocco,الرباط,2,2
+Morocco,مراكش,2,2
+Netherlands,Amersfoort,2,2
+Netherlands,Breukelen,2,2
+Netherlands,Eemnes,2,2
+Netherlands,Huizen,2,2
+Netherlands,Leusden,2,2
+Netherlands,Nieuwkoop,2,2
+Netherlands,Scheveningen,2,2
+Netherlands,Schiedam,2,2
+Netherlands,The Hague,2,2
+Netherlands,Zoetermeer,2,2
+Nigeria,ABUJA,2,2
+Nigeria,Aso,2,2
+Nigeria,Benin city,2,2
+Nigeria,Maiduguri,2,2
+Nigeria,New Owerri,2,2
+Nigeria,Okpella,2,2
+Nigeria,Owerri Municipal,2,2
+Nigeria,Port harcourt,2,2
+Nigeria,Victoria Island,2,2
+Northern Cyprus,Famagusta,2,2
+Northern Cyprus,Lefkoşa,2,2
+Northern Cyprus,iskele,2,2
+Northern Cyprus,İskele,2,2
+Norway,OSLO,2,2
+Oman,Mirbat,2,2
+Oman,Mutrah,2,2
+Oman,SALALAH,2,2
+Oman,muscat,2,2
+Pakistan,Nārān,2,2
+Peru,Cuzco,2,2
+Poland,Krakow,2,2
+Poland,Pieniężno,2,2
+Portugal,Ameal,2,2
+Portugal,Areeiro,2,2
+Portugal,Madalena do Mar,2,2
+Portugal,Sacavém,2,2
+Portugal,porto,2,2
+Qatar,DOHA,2,2
+Saudi Arabia,Medina,2,2
+Saudi Arabia,جده,2,2
+Singapore,singapore,2,2
+South Africa,Fourways,2,2
+South Africa,La Lucia,2,2
+South Africa,Morningside,2,2
+South Africa,Newlands Cape,2,2
+South Africa,PORT ELIZABETH,2,2
+South Africa,Pretoria East,2,2
+South Africa,"Sandton, Johannesburg",2,2
+South Africa,Vhembe District Municipality,2,2
+South Africa,Westville,2,2
+South Africa,port elizabeth,2,2
+South Africa,pretoria,2,2
+South Korea,"Ganghwa-gun, Incheon",2,2
+South Korea,부산,2,2
+Spain,Banyalbufar,2,2
+Spain,Camp de Mar,2,2
+Spain,El Pueyo de Jaca,2,2
+Spain,GRANADA,2,2
+Spain,Loporzano,2,2
+Spain,Magaluf,2,2
+Spain,Panticosa,2,2
+Spain,Puerto de Andratx,2,2
+Spain,Valldemossa,2,2
+Spain,bilbao,2,2
+Spain,malaga,2,2
+Spain,valencia,2,2
+Sweden,Huddinge,2,2
+Sweden,Ingarö,2,2
+Sweden,Kista,2,2
+Sweden,Skå,2,2
+Switzerland,Carouge,2,2
+Switzerland,Lancy,2,2
+Switzerland,Le Grand-Saconnex,2,2
+Switzerland,Root,2,2
+Switzerland,Sarnen,2,2
+Switzerland,Vernier,2,2
+Taiwan,Fengshan,2,2
+Taiwan,"Fengshan District, Kaohsiung City",2,2
+Taiwan,"Lingya District, Kaohsiung City",2,2
+Taiwan,"Zhongzheng District., Taipei City",2,2
+Thailand,Bangrak,2,2
+Thailand,Chiangrai,2,2
+Thailand,Choeng Mon Beach,2,2
+Thailand,Chonburi,2,2
+Thailand,Ko Samui,2,2
+Thailand,Lamai beach,2,2
+Thailand,Lipa Noi Beach,2,2
+Thailand,Tambon Ratsada,2,2
+Thailand,ชลบุรี,2,2
+Thailand,ตำบล สถาน,2,2
+Thailand,ตำบลป่าตอง,2,2
+Thailand,พระนคร,2,2
+Thailand,อำเภอเมืองเชียงใหม่,2,2
+Thailand,เมือง,2,2
+Thailand,เมืองพัทยา,2,2
+Thailand,清迈,2,2
+Tunisia,TUNIS,2,2
+Turkey,Artuklu,2,2
+Turkey,Gaziantep,2,2
+Turkey,Maçka,2,2
+Turkey,Mersin,2,2
+Turkey,Silifke,2,2
+Turkey,Trabzon,2,2
+Turkey,Uzungol,2,2
+Uganda,kampala,2,2
+United Kingdom,Audenshaw,2,2
+United Kingdom,BRISTOL,2,2
+United Kingdom,Birmingham City,2,2
+United Kingdom,Birmingham West Midlands,2,2
+United Kingdom,Carlton,2,2
+United Kingdom,Failsworth,2,2
+United Kingdom,GLASGOW,2,2
+United Kingdom,Greater,2,2
+United Kingdom,Londra,2,2
+United Kingdom,Penarth,2,2
+United Kingdom,Prestwich,2,2
+United Kingdom,SHEFFIELD,2,2
+United Kingdom,Stoke Gifford,2,2
+United Kingdom,Vale of Glamorgan,2,2
+United Kingdom,newcastle,2,2
+United States,Apopka,2,2
+United States,Arnold (Missouri),2,2
+United States,Berlin,2,2
+United States,Birmingham (Alabama),2,2
+United States,Celebration,2,2
+United States,Dallas (Texas),2,2
+United States,Dublin (Ohio),2,2
+United States,El Portal,2,2
+United States,Fremont,2,2
+United States,Golden,2,2
+United States,Key Biscayne,2,2
+United States,Kissimmee (Florida),2,2
+United States,LOS ANGELES,2,2
+United States,Marina Del Rey,2,2
+United States,Matthews,2,2
+United States,Orange County,2,2
+United States,San Leandro,2,2
+United States,South Miami,2,2
+United States,Temple Terrace,2,2
+United States,Vancouver,2,2
+United States,Venice,2,2
+United States,Washington D.C. (District of Columbia),2,2
+Vietnam,Thành phố Nha Trang,2,2
+Argentina,AAB,1,1
+Argentina,AAC,1,1
+Argentina,AAN,1,1
+Argentina,ACI,1,1
+Argentina,BVA,1,1
+Argentina,Bueno Aires,1,1
+Argentina,Buenos Aires Argentina,1,1
+Argentina,C.A.B.A,1,1
+Argentina,C.A.B.A.,1,1
+Argentina,C1425AUJ,1,1
+Argentina,Ciudad,1,1
+Argentina,Ciudad Autonoma De Buenos Aires,1,1
+Argentina,Ciudad Autónoma de Buenos Aires (CABA),1,1
+Argentina,Ciudad De Buenos Aires,1,1
+Argentina,Ciudad autonoma de buenos aires,1,1
+Argentina,Ciudad autónoma de Buenos Aires,1,1
+Argentina,Ciudad autónoma de buenos aires,1,1
+Argentina,Comuna 12,1,1
+Argentina,Constitucion,1,1
+Argentina,Cuidad de Buenos AIRES,1,1
+Argentina,DIB,1,1
+Argentina,FOM,1,1
+Argentina,HMD,1,1
+Argentina,Monserrat,1,1
+Argentina,PALERMO,1,1
+Argentina,Palermo,1,1
+Argentina,San Telmo,1,1
+Argentina,Villa Crespo,1,1
+Argentina,Villa Luro,1,1
+Argentina,buenos aires,1,1
+Argentina,ciudad autonoma de bs,1,1
+Argentina,ciudad autónoma de Buenos Aires,1,1
+Argentina,ciudad autónoma de buenos aires,1,1
+Armenia,Ереван,1,1
+Armenia,Масис,1,1
+Armenia,Երևան,1,1
+Australia,Ainslie,1,1
+Australia,Airport West,1,1
+Australia,Albert Park,1,1
+Australia,Alexandria,1,1
+Australia,Applecross,1,1
+Australia,Ascot,1,1
+Australia,Ashfield,1,1
+Australia,Aspley,1,1
+Australia,Attwood,1,1
+Australia,BRISBANE,1,1
+Australia,Bateman,1,1
+Australia,Bayswater,1,1
+Australia,Beaconsfield,1,1
+Australia,Bedford,1,1
+Australia,Bellerive,1,1
+Australia,Bilinga,1,1
+Australia,Birchgrove,1,1
+Australia,Bonogin,1,1
+Australia,Boondall,1,1
+Australia,Brentwood,1,1
+Australia,Brighton,1,1
+Australia,Broadbeach Waters,1,1
+Australia,Bruce,1,1
+Australia,Brunswick East,1,1
+Australia,Bundoora,1,1
+Australia,Cairns North,1,1
+Australia,Cammeray,1,1
+Australia,"Camperdown, New South Wales",1,1
+Australia,"Camperdown, New South Wales 2050",1,1
+Australia,Campsie,1,1
+Australia,Cannon Hill,1,1
+Australia,Carina,1,1
+Australia,Carlisle,1,1
+Australia,Caulfield,1,1
+Australia,Chermside,1,1
+Australia,Civic,1,1
+Australia,Civic (Canberra CBD),1,1
+Australia,Clovelly,1,1
+Australia,Coconut Grove,1,1
+Australia,Concord West,1,1
+Australia,Coolangatta,1,1
+Australia,Crows Nest,1,1
+Australia,Currumbin,1,1
+Australia,Dallas,1,1
+Australia,Darlington,1,1
+Australia,Derwent Park,1,1
+Australia,Dianella,1,1
+Australia,Drummoyne,1,1
+Australia,Dundas Valley,1,1
+Australia,Eastwood,1,1
+Australia,Elanora,1,1
+Australia,Elizabeth Bay,1,1
+Australia,Elwood,1,1
+Australia,Everton Hills,1,1
+Australia,Exeter,1,1
+Australia,Fairfield,1,1
+Australia,Fitzroy North,1,1
+Australia,Forest Lodge,1,1
+Australia,Forrestfield,1,1
+Australia,Freeburgh,1,1
+Australia,Freshwater,1,1
+Australia,Gaythorne,1,1
+Australia,Gladesville,1,1
+Australia,Glendalough,1,1
+Australia,Glenroy,1,1
+Australia,Granville,1,1
+Australia,Greenwich,1,1
+Australia,Harrietville,1,1
+Australia,Hawthorne,1,1
+Australia,Hillarys,1,1
+Australia,Hillsdale,1,1
+Australia,Holland Park,1,1
+Australia,Indooroopilly,1,1
+Australia,Kardinya,1,1
+Australia,Kedron,1,1
+Australia,Kelvin Grove,1,1
+Australia,Kewdale,1,1
+Australia,Kingsford,1,1
+Australia,Kingsgrove,1,1
+Australia,Kogarah Bay,1,1
+Australia,Kurraba Point,1,1
+Australia,Kyle Bay,1,1
+Australia,Landsdale,1,1
+Australia,Lane Cove North,1,1
+Australia,Lane Cove West,1,1
+Australia,Lauderdale,1,1
+Australia,Lilyfield,1,1
+Australia,Lindfield,1,1
+Australia,Lota,1,1
+Australia,Main Beach,1,1
+Australia,Malabar,1,1
+Australia,Malvern,1,1
+Australia,Manly West,1,1
+Australia,Maribyrnong,1,1
+Australia,Marsfield,1,1
+Australia,McKinnon,1,1
+Australia,Meadowbank,1,1
+Australia,Morley,1,1
+Australia,Mosman Park,1,1
+Australia,Mount Beauty,1,1
+Australia,New Acton,1,1
+Australia,New South Wales/ Haymarket,1,1
+Australia,Nicholls,1,1
+Australia,Nightcliff,1,1
+Australia,Nollamara,1,1
+Australia,North Beach,1,1
+Australia,North Parramatta,1,1
+Australia,Northcote,1,1
+Australia,Northgate,1,1
+Australia,O'Connor,1,1
+Australia,Oatlands,1,1
+Australia,Ocean Reef,1,1
+Australia,"Paddington, Sydney",1,1
+Australia,Parap,1,1
+Australia,Parkville,1,1
+Australia,Petersham,1,1
+Australia,Port Sorell,1,1
+Australia,Princes Hill,1,1
+Australia,Putney,1,1
+Australia,Ramsgate Beach,1,1
+Australia,Red Hill,1,1
+Australia,Redcliffe,1,1
+Australia,Rhodes,1,1
+Australia,"Richmond, VIC",1,1
+Australia,Riverton,1,1
+Australia,Rivervale,1,1
+Australia,Robertson,1,1
+Australia,Robigana,1,1
+Australia,Robina,1,1
+Australia,Runaway Bay,1,1
+Australia,Saint James,1,1
+Australia,Saint Kilda,1,1
+Australia,Saint Kilda West,1,1
+Australia,"Saint Kilda, Victoria, AU",1,1
+Australia,Saint Peters,1,1
+Australia,Salisbury,1,1
+Australia,Sandy Bay,1,1
+Australia,Seaforth,1,1
+Australia,Sidmouth,1,1
+Australia,South Coogee,1,1
+Australia,St Kilda East,1,1
+Australia,St Leonards,1,1
+Australia,Subiaco,1,1
+Australia,Sunshine Beach,1,1
+Australia,Taringa,1,1
+Australia,Tewantin,1,1
+Australia,Thornbury,1,1
+Australia,Toorak,1,1
+Australia,Toowong,1,1
+Australia,Tweed Heads,1,1
+Australia,Varsity Lakes,1,1
+Australia,Vaucluse,1,1
+Australia,Watson,1,1
+Australia,Waverley,1,1
+Australia,Waverton,1,1
+Australia,Wembley Downs,1,1
+Australia,West Leederville,1,1
+Australia,West Perth,1,1
+Australia,West Ryde,1,1
+Australia,Westmeadows,1,1
+Australia,Willoughby,1,1
+Australia,Wooloowin,1,1
+Australia,Zetland,1,1
+Australia,Zillmere,1,1
+Australia,mount hotham,1,1
+Australia,sydeny,1,1
+Austria,Adnet,1,1
+Austria,Aldrans,1,1
+Austria,Birgitz,1,1
+Austria,Dalaas,1,1
+Austria,Gaschurn,1,1
+Austria,Gortipohl,1,1
+Austria,Graz-Umgebung,1,1
+Austria,Salzburg/Koppl,1,1
+Austria,St. Gallenkirch,1,1
+Austria,Vandans,1,1
+Austria,"Wien, 10. Bezirk, Favoriten",1,1
+Bahamas,Bahamas,1,1
+Bahamas,Nassau - Paradise Island,1,1
+Bahamas,Nassau(New Providence),1,1
+Bahrain,Al Juffair,1,1
+Bahrain,Al Seef Area,1,1
+Bahrain,Manama - Gudaibiya,1,1
+Bahrain,Zallaq,1,1
+Bahrain,Ø§ÙÙÙØ§ÙØ©,1,1
+Barbados,Bridgetown (Barbados),1,1
+Barbados,"Bridgetown, Christ Church",1,1
+Barbados,Hastings (Christ Church),1,1
+Belgium,1190 Forest,1,1
+Belgium,Assebroek,1,1
+Belgium,Auderghem,1,1
+Belgium,BRUXELLES,1,1
+Belgium,Berchem,1,1
+Belgium,Brussels Uccle,1,1
+Belgium,Drogenbos - Bruxelles,1,1
+Belgium,Forest (Brussels),1,1
+Belgium,"Haren, Bruxelles",1,1
+Belgium,IXELLES,1,1
+Belgium,Kraainem,1,1
+Belgium,Sint-Gillis,1,1
+Belgium,Sint-Joost-ten-Node,1,1
+Belgium,Sint-Pieters-Woluwe,1,1
+Benin,COTONOU,1,1
+Brazil,Aguas Claras (Distrito Federal),1,1
+Brazil,Angra dos Reis,1,1
+Brazil,Asa norte,1,1
+Brazil,BRASÍLIA,1,1
+Brazil,Barra da Lagoa,1,1
+Brazil,Bela Vista,1,1
+Brazil,Bocaina de Minas,1,1
+Brazil,Cachoeira do Bom Jesus,1,1
+Brazil,Candangolandia (Distrito Federal),1,1
+Brazil,Centro Histórico de São Paulo,1,1
+Brazil,"Centro, Rio de Janeiro",1,1
+Brazil,Copacabana,1,1
+Brazil,Higienópolis,1,1
+Brazil,Jardim Paulista,1,1
+Brazil,Jurere,1,1
+Brazil,Paraíso - São Paulo,1,1
+Brazil,RIO  DE JANEIRO,1,1
+Brazil,RIO DE JANEIRO,1,1
+Brazil,Resende,1,1
+Brazil,Rio De Janeiro (Rio de Janeiro),1,1
+Brazil,Rio de janeiro,1,1
+Brazil,SAO PAULO,1,1
+Brazil,Salvador bahia,1,1
+Brazil,Santo Amaro,1,1
+Brazil,Santo Antonio de Lisboa,1,1
+Brazil,Sao Paulo ( Sao Paulo),1,1
+Brazil,Sao Paulo (São Paulo),1,1
+Brazil,SÃO PAULO,1,1
+Brazil,Visconde De Maua (Rio De Janeiro),1,1
+Brazil,Visconde De Mauá (Rio De Janeiro),1,1
+Brazil,Visconde de Maura,1,1
+Brazil,Visconde de maua,1,1
+Brazil,Visconde de mauá,1,1
+Brazil,brasilia,1,1
+Brazil,rio de janeiro,1,1
+Cambodia,Krong Ta Khmau,1,1
+Cambodia,Siem Reap City,1,1
+Cambodia,"Steueng Tmey village, Sangkat Svay Dangkom, Krong Siem Reap",1,1
+Cambodia,シェムリアップ,1,1
+Cameroon,BONAMOUSSADI,1,1
+Cameroon,"BONANJO, DOUALA",1,1
+Cameroon,Edéa,1,1
+Cameroon,Youndé,1,1
+Canada,Bedford,1,1
+Canada,Chestermere,1,1
+Canada,Dartmouth (Nova Scotia),1,1
+Canada,EDMONTON,1,1
+Canada,Eastern Passage,1,1
+Canada,"Edmonton, AB",1,1
+Canada,L'Ancienne-Lorette (Québec),1,1
+Canada,Montreal (Quebec),1,1
+Canada,MontrÃ©al,1,1
+Canada,MontrÃ©al (QuÃ©bec),1,1
+Canada,Northeast,1,1
+Canada,Quebec,1,1
+Canada,Quebec city,1,1
+Canada,QuÃ©bec,1,1
+Canada,Québec City ( Québec),1,1
+Canada,Scarborough,1,1
+Canada,VANCOUVER,1,1
+Canada,Westmount,1,1
+Canada,des Remparts,1,1
+Canada,edmonton,1,1
+Canada,vancouver,1,1
+Cayman Islands,GEORGE TOWN,1,1
+Cayman Islands,Georgetown,1,1
+Cayman Islands,"Grand Cayman, Cayman Islands",1,1
+Chile,"Las Condes, Santiago",1,1
+Chile,Quinta Normal,1,1
+Chile,Santiago - Providencia,1,1
+Chile,Santiago de Chile,1,1
+Chile,santiago,1,1
+China,Foshan,1,1
+China,Guang Zhou Shi,1,1
+China,Guangdong Province,1,1
+China,HANGZHOU,1,1
+China,Hanghzou,1,1
+China,Hangzhou City,1,1
+China,"Hangzhou, Zhejiang Province",1,1
+China,"Jing'an District, Shanghai",1,1
+China,Shaanxi,1,1
+China,Shanxi,1,1
+China,Shen Zhen Shi,1,1
+China,"Shenzhen, Guangdong Province",1,1
+China,X'an,1,1
+China,"Xi'an, Shaanxi",1,1
+China,"Xi'an, Shaanxi Province",1,1
+China,上海,1,1
+China,上海市,1,1
+China,中国广东省广州市,1,1
+China,四川省成都市,1,1
+China,广东省深圳市福田区,1,1
+China,广州市,1,1
+China,深圳市,1,1
+China,陕西省西安市,1,1
+Colombia,Antioquia,1,1
+Colombia,BOLIVAR CARTAGENA,1,1
+Colombia,Bogota - Usaquen,1,1
+Colombia,Bogota D.C.,1,1
+Colombia,Bogotá D.C.,1,1
+Colombia,Cartagena Province,1,1
+Colombia,Cartagena de Indias Morros,1,1
+Colombia,Itagüí,1,1
+Colombia,La Boquilla,1,1
+Colombia,Laureles - Medellín,1,1
+Colombia,Medellin - Laureles,1,1
+Colombia,Medellín - Itagüi,1,1
+Colombia,Medellín - Laureles,1,1
+Colombia,Provincia de Cartagena,1,1
+Colombia,cartagena,1,1
+Cyprus,Aradippou,1,1
+Cyprus,Arminou,1,1
+Cyprus,Askas,1,1
+Cyprus,Kakopetria,1,1
+Cyprus,Nicosia,1,1
+Cyprus,Omodos,1,1
+Cyprus,Oroklini,1,1
+Cyprus,Pafos,1,1
+Cyprus,Sykopetra,1,1
+Cyprus,dromolaxia,1,1
+Cyprus,Δρομολαξιά,1,1
+Cyprus,Λακατάμια,1,1
+Cyprus,Λεμεσός,1,1
+Cyprus,Πάφος,1,1
+Cyprus,Τερσεφάνου,1,1
+Czech Republic,HlavnÃ­ mÄsto Praha,1,1
+Czech Republic,Hlavní město Praha 5,1,1
+Czech Republic,New Town,1,1
+Czech Republic,Prague 5,1,1
+Czech Republic,Praha - Dolní Chabry,1,1
+Czech Republic,Praha - Malá strana,1,1
+Czech Republic,Praha 10,1,1
+Czech Republic,Praha 13 - Stodůlky,1,1
+Czech Republic,Praha 3,1,1
+Czech Republic,Praha 4,1,1
+Czech Republic,Praha 4 - HodkoviÄky,1,1
+Czech Republic,Praha 5 - Jinonice,1,1
+Czech Republic,Praha 6,1,1
+Czech Republic,Praha 6 - Hradčany,1,1
+Czech Republic,Praha 7 Holešovice,1,1
+Czech Republic,Praha 8,1,1
+Czech Republic,Praha 9,1,1
+Czech Republic,Praha-Zbraslav,1,1
+Czech Republic,Ruzyně,1,1
+Czech Republic,Vršovice,1,1
+Czech Republic,praha 9,1,1
+Denmark,Aarhus C,1,1
+Denmark,Arhus,1,1
+Denmark,COPENAGEN,1,1
+Denmark,Copenhagen K,1,1
+Denmark,Hasselager,1,1
+Denmark,Kastrup (Copenhagen),1,1
+Denmark,Kobenhavn,1,1
+Denmark,København S,1,1
+Denmark,Valby,1,1
+Egypt,6 October City,1,1
+Egypt,Abo El Nomros,1,1
+Egypt,Abu Kabir,1,1
+Egypt,Al Alameen City,1,1
+Egypt,Al Amaria First,1,1
+Egypt,Al Azbakeya,1,1
+Egypt,Al Farafra,1,1
+Egypt,Al Giza,1,1
+Egypt,Al Giza Desert,1,1
+Egypt,Al Gomrok,1,1
+Egypt,"Al Mamurah, Alexandria",1,1
+Egypt,Alamein,1,1
+Egypt,Alexandria Governorate,1,1
+Egypt,"Alexandria, Alexandria Governorate, Egypt",1,1
+Egypt,Alexandrie,1,1
+Egypt,Arish,1,1
+Egypt,Az Zaytun,1,1
+Egypt,Bab Sharqi,1,1
+Egypt,Borg El Arab,1,1
+Egypt,Dakhla Oasis,1,1
+Egypt,Dekhela,1,1
+Egypt,Dokki,1,1
+Egypt,Dumitta,1,1
+Egypt,Dumyat,1,1
+Egypt,"Egypt, Cairo",1,1
+Egypt,El Alamein,1,1
+Egypt,El Hammam,1,1
+Egypt,El Obour,1,1
+Egypt,El Raml 2,1,1
+Egypt,El mansoura,1,1
+Egypt,Faiyum,1,1
+Egypt,GIZA,1,1
+Egypt,Gamasa City,1,1
+Egypt,Hadayek El Ahram,1,1
+Egypt,Haram,1,1
+Egypt,Ibsheway,1,1
+Egypt,Kafr El Sheikh,1,1
+Egypt,King Maryout - Alexandria,1,1
+Egypt,Kom Ad Dikah,1,1
+Egypt,Madinaty,1,1
+Egypt,Mansoura,1,1
+Egypt,Markaz Al Alamein,1,1
+Egypt,Menia,1,1
+Egypt,Minya,1,1
+Egypt,Mit Ghamr,1,1
+Egypt,Nasr City,1,1
+Egypt,Natrn Valley,1,1
+Egypt,Nazlat as Samman,1,1
+Egypt,Nazlet El-Semman,1,1
+Egypt,New Damitta,1,1
+Egypt,North Coast,1,1
+Egypt,Oasis Farafra,1,1
+Egypt,Port said,1,1
+Egypt,Portfouad,1,1
+Egypt,Qesm Al Gomrok,1,1
+Egypt,Qism El-Montaza,1,1
+Egypt,Qism Sidi Gabir / Alexandria,1,1
+Egypt,Ras Elbar,1,1
+Egypt,"Ras Elbar, Dumyat",1,1
+Egypt,Rosetta,1,1
+Egypt,Sadat New Industrial City,1,1
+Egypt,San stefano,1,1
+Egypt,Second Al Amreya,1,1
+Egypt,Second New Cairo,1,1
+Egypt,Sheikh Zayed City,1,1
+Egypt,"Sidi Beshr Bahri, Montaza",1,1
+Egypt,Tanis,1,1
+Egypt,Zagazig 2,1,1
+Egypt,Zaghloul,1,1
+Egypt,cairo - nasr city,1,1
+Egypt,siwa,1,1
+Egypt,أول المنيا,1,1
+Egypt,أول ناصية خالد بن الوليد. فوق مطعم عروس دمشق,1,1
+Egypt,الأسكندريه,1,1
+Egypt,الجيزة,1,1
+Egypt,الجيزه,1,1
+Egypt,الحمام,1,1
+Egypt,السنطه,1,1
+Egypt,الظهير الصحراوى الوادى الجديد,1,1
+Egypt,الظهير الصحراوى للفرافرة,1,1
+Egypt,الظهير الصحراوى لمحافظة ال,1,1
+Egypt,القاهره,1,1
+Egypt,القاهره الجديده,1,1
+Egypt,الكورنيش مع عباس الاعصر سيدي بشر,1,1
+Egypt,الكيلو 84,1,1
+Egypt,المندره الاسكندريه,1,1
+Egypt,المنصوره,1,1
+Egypt,الواحات الداخلة,1,1
+Egypt,اول الرمل,1,1
+Egypt,بور فؤاد,1,1
+Egypt,بورسعيد/ بورفؤاد,1,1
+Egypt,تانى الرمل,1,1
+Egypt,ثانى القاهرة الجديدة,1,1
+Egypt,جمصه,1,1
+Egypt,دمياط,1,1
+Egypt,دمياط الجديدة,1,1
+Egypt,راس البر,1,1
+Egypt,راس البر - دمياط,1,1
+Egypt,سيدي بشر بحري,1,1
+Egypt,شبين الكوم,1,1
+Egypt,فيلا ٩٤ شارع احمد الزمر - مدينة نصر - القاهرة - بجوار بنزينه موبيل وامام الوفاء والامل,1,1
+Egypt,قسم أول العامرية,1,1
+Egypt,قسم أول طنطا،,1,1
+Egypt,قسم العرب,1,1
+Egypt,قسم الهرم,1,1
+Egypt,قسم ثالث العريش,1,1
+Egypt,قسم ثان,1,1
+Egypt,قويسنا,1,1
+Egypt,مارينا,1,1
+Egypt,مدينة السادات,1,1
+Egypt,مدينة رأس البر,1,1
+Egypt,مدينه السادات,1,1
+Egypt,مدينه السادس من اكتوبر,1,1
+Egypt,مركز الفرافرة,1,1
+Egypt,مركز المنصورة,1,1
+Egypt,مركز بدر,1,1
+Egypt,مركز دمياط,1,1
+Egypt,مركز شبين الكوم,1,1
+Egypt,مركز طلخا,1,1
+Egypt,مركز طنطا,1,1
+Egypt,مركز كفر الزيات,1,1
+Egypt,مصر الجديده,1,1
+Egypt,مطروح,1,1
+Egypt,موط,1,1
+Egypt,ميت غمر,1,1
+Egypt,نزله السمان,1,1
+Ethiopia,Addis Abeba,1,1
+Ethiopia,Addis ababa,1,1
+Ethiopia,Addiss Abeba,1,1
+Ethiopia,Bole,1,1
+Ethiopia,Kirkos Subcity,1,1
+Ethiopia,አዲስ አበባ,1,1
+Ethiopia,亚的斯亚贝巴,1,1
+France,ALLEMOND,1,1
+France,Allemont,1,1
+France,Alpe-D'huez,1,1
+France,Avignon (84),1,1
+France,Avignon Sud,1,1
+France,BORDEAUX ,1,1
+France,Bourg d'Oisans,1,1
+France,Eckbolsheim,1,1
+France,Faches-Thumesnil,1,1
+France,Ivry-sur-Seine,1,1
+France,Juvignac,1,1
+France,L'Alpe d'Huez,1,1
+France,LILLE,1,1
+France,LYON,1,1
+France,La Garde En Oisans,1,1
+France,La Madeleine,1,1
+France,Le Bourg d'Oisans,1,1
+France,Le Cannet,1,1
+France,Les Deux Alpes,1,1
+France,Les Pennes-Mirabeau,1,1
+France,Lille - La Madeleine,1,1
+France,Lille Cedex,1,1
+France,Lyon-5E-Arrondissement,1,1
+France,Lyon-8E-Arrondissement,1,1
+France,MARSEILLE,1,1
+France,NANTES,1,1
+France,NICE,1,1
+France,Neudorf,1,1
+France,Paris 19 Buttes-Chaumont,1,1
+France,Pessac,1,1
+France,Presqu´île,1,1
+France,TOULOUSE,1,1
+France,gentilly,1,1
+France,l'ALPE D HUEZ,1,1
+France,marseille,1,1
+France,nantes,1,1
+Georgia,Abasha,1,1
+Georgia,Adigeni,1,1
+Georgia,Adishi,1,1
+Georgia,Alismereti,1,1
+Georgia,"Batumi, Kvariati",1,1
+Georgia,Grigoleti,1,1
+Georgia,Ianeti,1,1
+Georgia,Kala,1,1
+Georgia,Khala Village,1,1
+Georgia,Khelvach'auri,1,1
+Georgia,Kobuleti,1,1
+Georgia,Kutaisi,1,1
+Georgia,Kvariati,1,1
+Georgia,Lentekhi,1,1
+Georgia,Mulakhi,1,1
+Georgia,Olaverdi,1,1
+Georgia,Oni,1,1
+Georgia,Senaki,1,1
+Georgia,Tbilissi,1,1
+Georgia,Tsalenjikha,1,1
+Georgia,Tsikhisdziri,1,1
+Georgia,Vardzia,1,1
+Georgia,Varjanisi,1,1
+Georgia,Vichnashi,1,1
+Georgia,Zugdidi,1,1
+Georgia,bakuriani,1,1
+Georgia,batumi,1,1
+Georgia,laxiri,1,1
+Georgia,samtredia,1,1
+Georgia,Кобулети,1,1
+Georgia,Самтредиа,1,1
+Georgia,ბათუმი,1,1
+Georgia,ლენტეხი,1,1
+Georgia,ცალდაში,1,1
+Germany,Berlin - Marzahn,1,1
+Germany,Berlin-Adlershof,1,1
+Germany,COLONIA,1,1
+Germany,Diepholz,1,1
+Germany,Dinklage,1,1
+Germany,Dresden (Cossebaude),1,1
+Germany,Duesseldorf,1,1
+Germany,Dusseldorf,1,1
+Germany,Eimsbuttel- Hamburg,1,1
+Germany,Großenkneten,1,1
+Germany,Hamburg Duvenstedt,1,1
+Germany,Holdorf,1,1
+Germany,Karlshorst,1,1
+Germany,Kerpen -Sindorf(Köln),1,1
+Germany,Korntal-Münchingen,1,1
+Germany,KÃ¶ln,1,1
+Germany,M,1,1
+Germany,MÃ¼nchen,1,1
+Germany,München-Freiham,1,1
+Germany,Nurnberg,1,1
+Germany,NÃ¼rnberg,1,1
+Germany,"Nürnberg, Mitte",1,1
+Germany,Nürnberg-Mitte,1,1
+Germany,Ostfildern,1,1
+Germany,Radebeul,1,1
+Germany,Stuttgart-Hedelfingen,1,1
+Germany,Vechta,1,1
+Germany,Vechta-Langförden,1,1
+Germany,Wernsdorf,1,1
+Ghana,Adenta Municipality,1,1
+Ghana,"Dzorwulu, Accra",1,1
+Ghana,"East Legon, Accra",1,1
+Ghana,Ejisu,1,1
+Ghana,Nungua,1,1
+Ghana,Osu,1,1
+Ghana,Westlands (Adom Avenue),1,1
+Greece,Agia Paraskevi,1,1
+Greece,Alimos,1,1
+Greece,"Athens, (Vouliagmeni)",1,1
+Greece,"Athens, Glyfada",1,1
+Greece,Atthens,1,1
+Greece,Ilioupoli,1,1
+Greece,Kesariani,1,1
+Greece,Lesvos,1,1
+Greece,Mithymna,1,1
+Greece,Nea Ionia,1,1
+Greece,Petra,1,1
+Greece,Pétra,1,1
+Greece,Vironas,1,1
+Greece,Voula,1,1
+Greece,"Vouliagmeni, Athens",1,1
+Greece,Άναξος,1,1
+Greece,ΑΘΗΝΑ,1,1
+Greece,Αμπέλια,1,1
+Greece,Βαφειος,1,1
+Greece,Βούλα,1,1
+Greece,Γέρακας,1,1
+Greece,Κλειώ,1,1
+Greece,ΛΕΣΒΟΥ,1,1
+Greece,Μενεμένη,1,1
+Greece,Νέα Ερυθραία,1,1
+Greece,Νέο Ψυχικό,1,1
+Greece,ΣΚΑΛΑ ΚΑΛΛΟΝΗΣ,1,1
+Greece,Φιλοθέη,1,1
+Hong Kong,HK,1,1
+Hong Kong,Hong Kong Island,1,1
+Hong Kong,Hong kong,1,1
+Hong Kong,Mong Kok,1,1
+Hong Kong,Prince Edward,1,1
+Hong Kong,Sheung Wan,1,1
+Hong Kong,"Tsim Sha Tsui, Hong Kong",1,1
+Hong Kong,tsim sha tsui,1,1
+Hong Kong,香港,1,1
+Hungary,"Budapest, V.",1,1
+Hungary,"Budapest, XIV.",1,1
+Iceland,ReykjavÃ­k,1,1
+Iceland,Seltjarnarnes,1,1
+India,400050,1,1
+India,Assagao,1,1
+India,BENGALURU,1,1
+India,"Bardez, North Goa",1,1
+India,Bastora,1,1
+India,"Bengaluru,",1,1
+India,Betalbatim,1,1
+India,Bogmalo,1,1
+India,CHENNAI,1,1
+India,Canacona Goa,1,1
+India,"Canacona, Goa",1,1
+India,Cola,1,1
+India,Devalkajjan,1,1
+India,Dona Paula,1,1
+India,Faridabad,1,1
+India,Fort Kochi,1,1
+India,Ghaziabad,1,1
+India,HYDERABAD,1,1
+India,Howrah,1,1
+India,"Hyderabad, Telangana, Ind...",1,1
+India,"Indiranagar, Bangalore",1,1
+India,Jaaipur,1,1
+India,"Jaipur, Rajasthan, India",1,1
+India,Jejūri,1,1
+India,Jogiyana,1,1
+India,Kalayarkoil,1,1
+India,Kanaka Nagar,1,1
+India,Karnataka,1,1
+India,Kondapur,1,1
+India,Madhapur,1,1
+India,Maharashtra,1,1
+India,Manamadurai,1,1
+India,Miramar,1,1
+India,Moira,1,1
+India,Morgaon,1,1
+India,Nanakaramguda,1,1
+India,Nandambakkam,1,1
+India,Narayanpur,1,1
+India,New Delhi (India),1,1
+India,PANJIM,1,1
+India,PUNE,1,1
+India,Paramakudi,1,1
+India,Pernem,1,1
+India,Queula,1,1
+India,Rajasthan,1,1
+India,Rajeshwar Chauhan,1,1
+India,"Rishikesh, Uttarakhand, I...",1,1
+India,Rohini,1,1
+India,Saswad,1,1
+India,"Secunderabad, Hyderabad",1,1
+India,Sisiyawas,1,1
+India,UDAIPUR,1,1
+India,"Udaipur, Rajasthan",1,1
+India,Uthandi,1,1
+India,Utorda,1,1
+India,Uttarakhand,1,1
+India,Varca,1,1
+India,Veerbhadra,1,1
+India,Venkateshwara Colony,1,1
+India,Zendewadi,1,1
+India,bairagarh,1,1
+India,chennai,1,1
+India,delhi,1,1
+India,goa,1,1
+India,hyderabad,1,1
+India,jodhpur,1,1
+India,kolkata,1,1
+India,mumbai,1,1
+India,new delhi,1,1
+India,pune,1,1
+India,tingre nagar,1,1
+India,varanasi,1,1
+Indonesia,Jakarta Barat,1,1
+Indonesia,KUTA Central Lombok Regency,1,1
+Indonesia,Kabupaten Bantul,1,1
+Indonesia,Kota Jakarta Barat,1,1
+Indonesia,Kota Surabaya,1,1
+Indonesia,Kulon Progo,1,1
+Indonesia,Kuta,1,1
+Indonesia,"Kuta Mandalika, Lombok",1,1
+Indonesia,LOMBOK TENGAH,1,1
+Indonesia,"Mandalika, Lombok",1,1
+Indonesia,Mataram,1,1
+Indonesia,Ungaran,1,1
+Indonesia,West Java Bandung,1,1
+Indonesia,"kuta, lombok",1,1
+Ireland,Dublin 3,1,1
+Israel,Acre,1,1
+Israel,Akko,1,1
+Israel,Ashqelon,1,1
+Israel,Bat Yam,1,1
+Israel,Be'er Milka,1,1
+Israel,Beer Sheva,1,1
+Israel,Daliyat el-Carmel,1,1
+Israel,"Israel, Haifa, Daliyat al-Karmel",1,1
+Israel,JERUSALEM,1,1
+Israel,Katzir,1,1
+Israel,Nazareth,1,1
+Israel,Tel Aviv,1,1
+Israel,Ze'elim,1,1
+Israel,Zikhron Ya‘aqov,1,1
+Israel,אור יהודה,1,1
+Israel,בני נצרים,1,1
+Israel,דאלית אל-כרמל,1,1
+Israel,חולון,1,1
+Israel,יהוד,1,1
+Israel,עוספיה,1,1
+Israel,עין הוד,1,1
+Israel,עכו עתיקה old akko,1,1
+Israel,פרדס חנה כרכור,1,1
+Israel,קיסריה,1,1
+Israel,קרית אונו,1,1
+Israel,קרית אתא,1,1
+Israel,שלומי,1,1
+Italy,Centro,1,1
+Italy,Città Metropolitana di Bologna,1,1
+Italy,Città Metropolitana di Firenze,1,1
+Italy,Città Metropolitana di Milano,1,1
+Italy,Città Metropolitana di Napoli,1,1
+Italy,Coverciano,1,1
+Italy,Florencia,1,1
+Italy,GE - Genova,1,1
+Italy,GENOVA,1,1
+Italy,Ghezzano,1,1
+Italy,Granarolo dell'Emilia,1,1
+Italy,"Impruneta, Firenze",1,1
+Italy,Madonna Dell'acqua,1,1
+Italy,"Musei Vaticani, Roma",1,1
+Italy,"Napoli, centro storico",1,1
+Italy,Piano Primo,1,1
+Italy,Provincia di Pisa,1,1
+Italy,ROME,1,1
+Italy,Riglione,1,1
+Italy,Roma (RM),1,1
+Italy,SIENA,1,1
+Italy,San Paolo,1,1
+Italy,VERONA,1,1
+Italy,pisa,1,1
+Ivory Coast,Avia,1,1
+Jamaica,Greenwood,1,1
+Jamaica,Montego Bay (Montego Bay),1,1
+Jamaica,"Montego Bay, St James",1,1
+Japan,64-7 Hirano Miyanishicho,1,1
+Japan,"8chome-20-2  kameido, kodou City",1,1
+Japan,Adachi City,1,1
+Japan,Adachi-ku,1,1
+Japan,Chiyoda,1,1
+Japan,Chiyoda City,1,1
+Japan,"Chuo Ward, Osaka",1,1
+Japan,"Chuo-ku, Osaka",1,1
+Japan,"Chuo-ku,Takatsu 3-9-5",1,1
+Japan,Daitō,1,1
+Japan,"Edogawa City, Tokyo",1,1
+Japan,Edogawa-Ku,1,1
+Japan,Edogawa-ku,1,1
+Japan,HIroshima,1,1
+Japan,Higashi Osaka,1,1
+Japan,Higashiyama,1,1
+Japan,Higashiyama-ku Kyoto,1,1
+Japan,Hokkaido,1,1
+Japan,Ina,1,1
+Japan,Kamiinagun,1,1
+Japan,Kiso-gun,1,1
+Japan,Koto-ku,1,1
+Japan,Koto-ku Tokyo,1,1
+Japan,"Kotobuki, Taito-ku, Tokyo",1,1
+Japan,"Kuramae, Taito-ku, Tokyo",1,1
+Japan,Meguro-ku,1,1
+Japan,"Nagoya-shi, Aichi",1,1
+Japan,"Naniwa-ku, Osaka",1,1
+Japan,"Osaka, Naniwa Ward, Nanbanaka, 3-chōme−12−21",1,1
+Japan,"Osaka,大阪",1,1
+Japan,Osaka-shi,1,1
+Japan,"Osaka-shi,Osaka-fu",1,1
+Japan,Sapporo City,1,1
+Japan,Sapporo Shiroishi-ku,1,1
+Japan,Shinjuku,1,1
+Japan,"Shinjuku-ku, Tokyo",1,1
+Japan,Sumida-ku,1,1
+Japan,"Sumida-ku, Tokyo",1,1
+Japan,Taito,1,1
+Japan,Tokyo-to,1,1
+Japan,Toshima City Tokyo,1,1
+Japan,Yokohama-shi,1,1
+Japan,"nishiayase,  adachi-ku, Tokyo",1,1
+Japan,tokyo,1,1
+Japan,æ±äº¬é½æ±æ±åº,1,1
+Japan,ç®é»åº,1,1
+Japan,东京练马区,1,1
+Japan,京都市上京区,1,1
+Japan,京都市中京区,1,1
+Japan,京都市中京区黒門通六角下上黒門町３８９,1,1
+Japan,京都府京都市下京区二人司町,1,1
+Japan,京都府京都市学林町,1,1
+Japan,伊那市西町4908-8,1,1
+Japan,北区 東京都,1,1
+Japan,北海道　札幌市,1,1
+Japan,北海道札幌市中央区南6条,1,1
+Japan,千葉県,1,1
+Japan,台東区根岸1-8-4,1,1
+Japan,名古屋,1,1
+Japan,名古屋市中村区,1,1
+Japan,塩尻市,1,1
+Japan,大田区西蒲田,1,1
+Japan,大阪市/都島区,1,1
+Japan,大阪市中央区,1,1
+Japan,大阪市中央区南船場,1,1
+Japan,大阪市中央区島之内,1,1
+Japan,大阪市北区,1,1
+Japan,大阪市大正区,1,1
+Japan,大阪市東城区,1,1
+Japan,大阪市浪速区大国,1,1
+Japan,大阪市浪速区恵美須東1,1,1
+Japan,大阪市浪速区日本橋東,1,1
+Japan,大阪市浪速区難波中,1,1
+Japan,大阪市港区,1,1
+Japan,大阪市西成区天下茶屋,1,1
+Japan,大阪市西成区太子１丁目,1,1
+Japan,大阪市西成区岸里東1-17-3,1,1
+Japan,大阪市西成区橘3-8-15,1,1
+Japan,大阪市西成区萩之茶屋,1,1
+Japan,大阪市西成区西成区,1,1
+Japan,大阪市西淀川区,1,1
+Japan,大阪府大阪市中央区,1,1
+Japan,大阪府大阪市北区,1,1
+Japan,大阪府大阪市浪速区恵美須西,1,1
+Japan,大阪府大阪市浪速区敷津東3-3-11,1,1
+Japan,大阪府大阪市浪速区敷津西2丁目,1,1
+Japan,大阪府大阪市浪速区難波中,1,1
+Japan,大阪府大阪市西成区花園北,1,1
+Japan,大阪府大阪市西成区花園南1-8-7,1,1
+Japan,奈良,1,1
+Japan,奈良県奈良市,1,1
+Japan,市川市,1,1
+Japan,広島市西区,1,1
+Japan,愛知県/名古屋市,1,1
+Japan,朝日村,1,1
+Japan,木曽郡,1,1
+Japan,札幌市中央区,1,1
+Japan,杉並区高円寺北1-18-13,1,1
+Japan,東京堵台東区,1,1
+Japan,東京都 / 中野区,1,1
+Japan,東京都/台東区,1,1
+Japan,東京都/品川区,1,1
+Japan,東京都/墨田区,1,1
+Japan,東京都/大田区,1,1
+Japan,東京都/文京区,1,1
+Japan,東京都/新宿区,1,1
+Japan,東京都北区,1,1
+Japan,東京都北区中十条,1,1
+Japan,東京都千代田区,1,1
+Japan,東京都台東区谷中5-2-14,1,1
+Japan,東京都品川区,1,1
+Japan,東京都墨田区緑1-22-4,1,1
+Japan,東京都大田区東蒲田1-21-17,1,1
+Japan,東京都大田区蒲田4-37-2,1,1
+Japan,東京都大田區,1,1
+Japan,東京都新宿区中落合2-20−10,1,1
+Japan,東京都杉並区,1,1
+Japan,東京都板橋区仲町16－2　株式会社FCR　コスモス,1,1
+Japan,東京都江戸川区北小岩２丁目２１,1,1
+Japan,東京都港区,1,1
+Japan,東京都港区芝,1,1
+Japan,東京都港区芝大門2-7-1,1,1
+Japan,東京都港区西麻布3-13-21,1,1
+Japan,東京都葛飾区堀切4-9-4,1,1
+Japan,東京都豊島区池袋,1,1
+Japan,東京都足立区,1,1
+Japan,東大阪市,1,1
+Japan,松本市,1,1
+Japan,横浜市西区花咲町4丁目126－4,1,1
+Japan,渋谷区代々木,1,1
+Japan,目黒区,1,1
+Japan,神奈川県 / 横浜市,1,1
+Japan,神奈川県横浜市,1,1
+Japan,福岡市南区,1,1
+Japan,福岡市南区大橋3-21-20,1,1
+Japan,福岡市東区千早2丁目16-19,1,1
+Japan,福岡県福岡市南区,1,1
+Japan,福岡福岡市,1,1
+Japan,福津市,1,1
+Japan,長野県,1,1
+Japan,高知県 高知市,1,1
+Japan,高知県高知市,1,1
+Jordan,AL MAFRAQ,1,1
+Jordan,Ajloun,1,1
+Jordan,Bani Kenanah District,1,1
+Jordan,Ma'an,1,1
+Jordan,Mafraq,1,1
+Jordan,Petra District,1,1
+Jordan,Umm Qais,1,1
+Jordan,أم صيحون,1,1
+Jordan,البتراء,1,1
+Kazakhstan,Нур-Султан,1,1
+Kenya,Karen,1,1
+Kenya,LAVINGTON,1,1
+Kenya,Nairobi Upper Hill,1,1
+Kenya,Ngong,1,1
+Kenya,"Westlands, Nairobi",1,1
+Kenya,kileleshwa,1,1
+Kenya,westlands,1,1
+Kuwait,Abu halifa,1,1
+Kuwait,Al Farwaniyah,1,1
+Kuwait,"Al Jahra, Kuwait",1,1
+Kuwait,Al Kuwayt,1,1
+Kuwait,Alshaab,1,1
+Kuwait,Bneid Al Qar,1,1
+Kuwait,Bnied Al Gar,1,1
+Kuwait,Fahaheel,1,1
+Kuwait,"Kuwait , salmiya  , Al Bida Roundabout",1,1
+Kuwait,Mangaf,1,1
+Kuwait,Messilah,1,1
+Kuwait,Sabah Al Salem,1,1
+Kuwait,Salmiyah,1,1
+Kuwait,الجابرية,1,1
+Kuwait,الرقعي,1,1
+Kuwait,السالمية,1,1
+Kuwait,السالميه,1,1
+Kuwait,الشعب البحري,1,1
+Kuwait,الفنطاس,1,1
+Kuwait,الكويت,1,1
+Kuwait,المهبولة,1,1
+Kuwait,بنيد القار,1,1
+Lebanon,Annaya,1,1
+Lebanon,Bcharre,1,1
+Lebanon,Byblos,1,1
+Lebanon,Chouf,1,1
+Lebanon,Fidar El Faouqa,1,1
+Lebanon,Kesrouane,1,1
+Lebanon,Khalde,1,1
+Lebanon,Koubba,1,1
+Lebanon,Koura,1,1
+Lebanon,Mayrouba,1,1
+Lebanon,Minieh,1,1
+Lebanon,Qalhat,1,1
+Lebanon,Qobayat,1,1
+Lebanon,TRIPOLI,1,1
+Macau,macau,1,1
+Macau,澳门,1,1
+Malaysia,Ampang,1,1
+Malaysia,Cheras,1,1
+Malaysia,George town,1,1
+Malaysia,GeorgeTown,1,1
+Malaysia,Iskandar Puteri,1,1
+Malaysia,Iskandar puteri,1,1
+Malaysia,"Johor Bahru, Johor",1,1
+Malaysia,Johor bahru,1,1
+Malaysia,KEDAH,1,1
+Malaysia,KL,1,1
+Malaysia,"KUAH, PULAU LANGKAWI (KEDAH)",1,1
+Malaysia,KUALA LUMPUR,1,1
+Malaysia,Kedah,1,1
+Malaysia,Kedah Darul Aman,1,1
+Malaysia,Kuah Langkawi,1,1
+Malaysia,Kuala Lampur,1,1
+Malaysia,"Kuala Lumpur Federal Territory, Kuala Lumpur",1,1
+Malaysia,"Kuala Lumpur, Federal Territory of Kuala Lumpur",1,1
+Malaysia,Kubang Semang,1,1
+Malaysia,Kula Lumpur,1,1
+Malaysia,LANGKAWI,1,1
+Malaysia,"LANGKAWI, KEDAH",1,1
+Malaysia,Langkawi Kedah,1,1
+Malaysia,"Langkawi, Kedah",1,1
+Malaysia,Malaysia,1,1
+Malaysia,PENANG,1,1
+Malaysia,"Padang Matsirat, Langkawi",1,1
+Malaysia,Padang matsirat,1,1
+Malaysia,Petaling Jaya,1,1
+Malaysia,"Petaling Jaya, Selangor Darul Ehsan",1,1
+Malaysia,Plentong,1,1
+Malaysia,Rebak Island,1,1
+Malaysia,Setapak,1,1
+Malaysia,Simpang Ampat,1,1
+Malaysia,Skudai,1,1
+Malaysia,Taman Bukit Indah,1,1
+Malaysia,Tanjong Tokong,1,1
+Malaysia,Teluk Bahang,1,1
+Malaysia,georgetown,1,1
+Malaysia,johor bahru,1,1
+Malaysia,kuala Lumpur,1,1
+Malaysia,kualalumpur,1,1
+Malaysia,melaka,1,1
+Malaysia,pantai tengah,1,1
+Mexico,Alfredo V. Bonfil,1,1
+Mexico,Americana,1,1
+Mexico,Benito Juarez,1,1
+Mexico,Benito Juárez,1,1
+Mexico,CABO SAN LUCAS,1,1
+Mexico,"CANCUN, Q.R.",1,1
+Mexico,CDMX,1,1
+Mexico,CancÃºn,1,1
+Mexico,Cancún Quintana Roo,1,1
+Mexico,"Cancún, Quintana Roo",1,1
+Mexico,Ciudad De Mexico,1,1
+Mexico,Ciudad de Méxco,1,1
+Mexico,Colonia Juárez,1,1
+Mexico,Cuauhtemoc,1,1
+Mexico,Ejido del Centro,1,1
+Mexico,El Salto,1,1
+Mexico,Guadalajara (Jalisco),1,1
+Mexico,Isla Mujeres,1,1
+Mexico,Las Pintitas,1,1
+Mexico,Los Cabos,1,1
+Mexico,Mexico DF,1,1
+Mexico,MÉXICO,1,1
+Mexico,Naucalpan de Juárez,1,1
+Mexico,PLAYA DEL CARMEN centro,1,1
+Mexico,Playa Del Carmen,1,1
+Mexico,"Playa del Carmen, Q.R.",1,1
+Mexico,"Playa del Carmen, Solidaridad",1,1
+Mexico,Polanco,1,1
+Mexico,Puerto Vallarta (Jalisco),1,1
+Mexico,Quintana Roo,1,1
+Mexico,Satelite,1,1
+Mexico,Tlalnepantla,1,1
+Mexico,Tlalnepantla de Galeana,1,1
+Mexico,Xcumpich,1,1
+Mexico,"Zona Hotelera, Cancun",1,1
+Mexico,cancun quinta roo,1,1
+Mexico,"cancun, mex",1,1
+Mexico,cuidad de mexico,1,1
+Mexico,oaxaca de juarez,1,1
+Mexico,playa del carmen,1,1
+Morocco,AGADIR,1,1
+Morocco,ANZA,1,1
+Morocco,Anza,1,1
+Morocco,Casablanca El Maarif,1,1
+Morocco,FES,1,1
+Morocco,FES-MEDINA,1,1
+Morocco,Fes Medina,1,1
+Morocco,Fés,1,1
+Morocco,"Gueliz, Marrakech 40000",1,1
+Morocco,Moulay Yacoub,1,1
+Morocco,Rabat Sale,1,1
+Morocco,TANGER,1,1
+Morocco,fes,1,1
+Morocco,rabat hassan,1,1
+Morocco,الدار البيضاء,1,1
+Morocco,طنجة,1,1
+Morocco,فاس,1,1
+Mozambique,Sommerschield,1,1
+Mozambique,maputo,1,1
+Namibia,WINDHOEK,1,1
+Namibia,Windhoek West,1,1
+Namibia,windhoek,1,1
+Nepal,तारकेश्वर,1,1
+Netherlands,'S Gravenzande,1,1
+Netherlands,'s-Gravenzande,1,1
+Netherlands,Amstelveen,1,1
+Netherlands,Ankeveen,1,1
+Netherlands,Beesd,1,1
+Netherlands,Bilthoven,1,1
+Netherlands,Bodegraven,1,1
+Netherlands,Brielle,1,1
+Netherlands,Bunnik,1,1
+Netherlands,Bunschoten,1,1
+Netherlands,Buren,1,1
+Netherlands,Bussum,1,1
+Netherlands,Callantsoog,1,1
+Netherlands,Culemborg,1,1
+Netherlands,De Bilt,1,1
+Netherlands,De Lier,1,1
+Netherlands,De Ronde Venen,1,1
+Netherlands,Den Hoorn,1,1
+Netherlands,Diemen,1,1
+Netherlands,Doorn,1,1
+Netherlands,Driebergen-Rijsenburg,1,1
+Netherlands,Driebruggen,1,1
+Netherlands,"Duivendrecht, Amsterdam",1,1
+Netherlands,Haarzuilens,1,1
+Netherlands,Haastrecht,1,1
+Netherlands,Hazerswoude-Dorp,1,1
+Netherlands,Houten,1,1
+Netherlands,Klaaswaal,1,1
+Netherlands,LEUSDEN,1,1
+Netherlands,Lage Vuursche,1,1
+Netherlands,Lekkerkerk,1,1
+Netherlands,Linschoten,1,1
+Netherlands,Loenen aan de Vecht,1,1
+Netherlands,Maarssen,1,1
+Netherlands,Maartensdijk,1,1
+Netherlands,Maasdam / Binnenmaas,1,1
+Netherlands,"Mijnsheerenland, Binnenmaas",1,1
+Netherlands,Molenaarsgraaf,1,1
+Netherlands,Montfoort,1,1
+Netherlands,Nieuwegein,1,1
+Netherlands,Nieuwersluis,1,1
+Netherlands,Nieuwland,1,1
+Netherlands,Oud-Loosdrecht,1,1
+Netherlands,Oudewater,1,1
+Netherlands,Reeuwijk,1,1
+Netherlands,Scherpenzeel,1,1
+Netherlands,Simonshaven,1,1
+Netherlands,Stolwijk,1,1
+Netherlands,Ter Heijde aan Zee,1,1
+Netherlands,Tull en Het Waal,1,1
+Netherlands,Vlaardingen,1,1
+Netherlands,Voorburg,1,1
+Netherlands,Waal,1,1
+Netherlands,Waalre,1,1
+Netherlands,Wassenaar,1,1
+Netherlands,Woerden,1,1
+Netherlands,Zevenhuizen,1,1
+Netherlands,voorschoten,1,1
+New Zealand,Auckland 2019,1,1
+New Zealand,Closeburn,1,1
+New Zealand,Glenholme,1,1
+New Zealand,Grey Lynn,1,1
+New Zealand,Johnsonville,1,1
+New Zealand,Saint Heliers,1,1
+New Zealand,Wellington CBD,1,1
+New Zealand,wellington,1,1
+New Zealand,奥克兰,1,1
+Nigeria,ABEOKUTA SOUTH,1,1
+Nigeria,Abẹ́òkúta,1,1
+Nigeria,Aguleri,1,1
+Nigeria,"Ajah, Sangotedo",1,1
+Nigeria,"Ajao Estate, Lagos",1,1
+Nigeria,"Arepo, Ogun state",1,1
+Nigeria,Aso Drive,1,1
+Nigeria,CALABAR,1,1
+Nigeria,Calabar Municipality,1,1
+Nigeria,DAMATURU YOBE STATE,1,1
+Nigeria,Delta,1,1
+Nigeria,ENUGU,1,1
+Nigeria,FCT,1,1
+Nigeria,"FCT ,Abuja",1,1
+Nigeria,"Fct, Abuja.",1,1
+Nigeria,"Garki 2, Abuja",1,1
+Nigeria,Gwarinpa,1,1
+Nigeria,IBADAN,1,1
+Nigeria,Igando,1,1
+Nigeria,Ikeja Lagos,1,1
+Nigeria,Ikot Omin,1,1
+Nigeria,Ikoyi,1,1
+Nigeria,Imo State,1,1
+Nigeria,KUBWA,1,1
+Nigeria,Karu,1,1
+Nigeria,LAGOS,1,1
+Nigeria,"Lekki phase 1, Lagos",1,1
+Nigeria,Lifecamp,1,1
+Nigeria,Lugbe,1,1
+Nigeria,Mangoro,1,1
+Nigeria,Ogun state,1,1
+Nigeria,Otokutu,1,1
+Nigeria,Porthacourt,1,1
+Nigeria,Portharcourt,1,1
+Nigeria,UYO,1,1
+Nigeria,"Wuse 2, Abuja",1,1
+Nigeria,abuja,1,1
+Nigeria,benin city,1,1
+Nigeria,ibadan,1,1
+Nigeria,kubwa,1,1
+Nigeria,uyo,1,1
+Nigeria,warri,1,1
+Northern Cyprus,Boğaz,1,1
+Northern Cyprus,Girne,1,1
+Northern Cyprus,Karpaz Penincula-İskele,1,1
+Northern Cyprus,LEFKOŞA,1,1
+Northern Cyprus,North Nicosia,1,1
+Northern Cyprus,Rizokarpaso,1,1
+Northern Cyprus,Yeni Erenkoy,1,1
+Northern Cyprus,gazimagusa,1,1
+Northern Cyprus,Çatalköy,1,1
+Oman,MUSCAT,1,1
+Oman,Marbat,1,1
+Oman,Mu‘askar al Murtafi‘ah,1,1
+Oman,Taqah,1,1
+Oman,salalah,1,1
+Oman,صلالة -ظفار,1,1
+Oman,مرباط,1,1
+Palestinian Territory,Hebron,1,1
+Palestinian Territory,Hebron-west bank,1,1
+Peru,Barranco,1,1
+Peru,Chorrillos,1,1
+Peru,La Victoria,1,1
+Peru,Lince,1,1
+Peru,Provincia de Lima,1,1
+Peru,San Miguel,1,1
+Peru,Santiago de Surco,1,1
+Philippines,Aklan,1,1
+Philippines,Cebu city,1,1
+Philippines,"Malay, Aklan",1,1
+Philippines,"Paranaque City, Metro Manila",1,1
+Philippines,Pasig,1,1
+Philippines,Quezon city,1,1
+Poland,Gdańs,1,1
+Poland,Kraków ( Stare Podgórze ),1,1
+Poland,Kraków (Kraków-Śródmieście),1,1
+Poland,Kraków-Śródmieście,1,1
+Poland,Lelkowo,1,1
+Poland,Lidzbark Warmiński,1,1
+Poland,WrocÅ‚aw,1,1
+Poland,warszawa,1,1
+Portugal,Algés,1,1
+Portugal,Amieira,1,1
+Portugal,Arroios,1,1
+Portugal,Barros da Fonte Santa,1,1
+Portugal,Bonfim,1,1
+Portugal,Camacha,1,1
+Portugal,Campo de Baixo,1,1
+Portugal,Caniçal,1,1
+Portugal,Caniço de Baixo · Madeira,1,1
+Portugal,Câmara de Lobos,1,1
+Portugal,Estoi; FARO,1,1
+Portugal,Estreito da Calheta,1,1
+Portugal,Fajã da Ovelha,1,1
+Portugal,Far,1,1
+Portugal,Faro- Algarve,1,1
+Portugal,Jardim do Mar,1,1
+Portugal,LISBOA,1,1
+Portugal,LISBON,1,1
+Portugal,Lisboa-Parque das Nações,1,1
+Portugal,Madeira,1,1
+Portugal,Montenegro,1,1
+Portugal,Olival Basto,1,1
+Portugal,PONTA DO SOL,1,1
+Portugal,Paul do Mar,1,1
+Portugal,Paúl do Mar,1,1
+Portugal,Ponta Delgada,1,1
+Portugal,Ponta do Pargo,1,1
+Portugal,Porto Santo,1,1
+Portugal,Praia de Faro,1,1
+Portugal,Prazeres,1,1
+Portugal,Ribeira Brava (Madeira),1,1
+Portugal,SAO MARTINHO,1,1
+Portugal,Santa Bárbara de Nexe,1,1
+Portugal,Santana,1,1
+Portugal,Santo António Da Serra,1,1
+Portugal,Santo da Serra,1,1
+Portugal,São Pedro,1,1
+Portugal,campo pequeno,1,1
+Portugal,coimbra,1,1
+Portugal,faro,1,1
+Portugal,vilha,1,1
+Qatar,"The Pearl-Qatar, Doha",1,1
+Qatar,الدوحة,1,1
+Rwanda,Gikondo,1,1
+Rwanda,Gisozi,1,1
+Rwanda,Kacyiru,1,1
+Rwanda,Kanombe,1,1
+Rwanda,Kigali Gikondo,1,1
+Rwanda,Kiigali,1,1
+Rwanda,"Kimihurura, kigali",1,1
+Rwanda,"Rebero, Kigali",1,1
+Saudi Arabia,23028,1,1
+Saudi Arabia,AL MADINAH,1,1
+Saudi Arabia,AL Madinah AL Munawwarah,1,1
+Saudi Arabia,Hittin,1,1
+Saudi Arabia,JEDDAH,1,1
+Saudi Arabia,MADINAH,1,1
+Saudi Arabia,Madina Manwara,1,1
+Saudi Arabia,Mecca,1,1
+Saudi Arabia,"Riyadh, Riyadh Region, Saudi Arabia",1,1
+Saudi Arabia,Sha‘īb al Malqāh,1,1
+Saudi Arabia,jeddah,1,1
+Saudi Arabia,makka,1,1
+Saudi Arabia,riyadh,1,1
+Saudi Arabia,العريض,1,1
+Saudi Arabia,المدينه المنورة,1,1
+Saudi Arabia,المدينه المنوره,1,1
+Singapore,Changi Village,1,1
+Singapore,Singapore 199905,1,1
+South Africa,Bruma,1,1
+South Africa,Bryanston,1,1
+South Africa,"Camps Bay,  Cape Town",1,1
+South Africa,"Cape Town City Centre, Cape Town",1,1
+South Africa,Cape Town Metropolitan Municipality,1,1
+South Africa,Cape Town/ Camps Bay,1,1
+South Africa,Centurion,1,1
+South Africa,City Centre,1,1
+South Africa,Claremont,1,1
+South Africa,Crawford,1,1
+South Africa,"Cyrildene, Johannesburg",1,1
+South Africa,De Waterkant,1,1
+South Africa,"Durban North, Kwa-Zulu Natal",1,1
+South Africa,Eastern Cape,1,1
+South Africa,Fairmount,1,1
+South Africa,Ferndale,1,1
+South Africa,Fordsburg,1,1
+South Africa,Fresnaye,1,1
+South Africa,Garsfontein,1,1
+South Africa,Glencairn,1,1
+South Africa,Groenkloof,1,1
+South Africa,"Hatfield, Pretoria",1,1
+South Africa,"Hout Bay, Cape Town",1,1
+South Africa,Hurlingham,1,1
+South Africa,Illovo,1,1
+South Africa,Kaapstad,1,1
+South Africa,"Kensington, Johannesburg",1,1
+South Africa,Killarney,1,1
+South Africa,KwaZulu-Natal,1,1
+South Africa,Limpopo,1,1
+South Africa,Lyndhurst,1,1
+South Africa,Lynnwood Glen,1,1
+South Africa,MELROSE,1,1
+South Africa,"Melville, Johannesburg",1,1
+South Africa,"Menly, Pretoria",1,1
+South Africa,Metsweding,1,1
+South Africa,Milnerton,1,1
+South Africa,Montana Park,1,1
+South Africa,PRETORIA,1,1
+South Africa,Parkwood,1,1
+South Africa,Plumstead,1,1
+South Africa,Port Elizabeth SOUTH AFRICA,1,1
+South Africa,Pretoria (Tshwane),1,1
+South Africa,Randburrg,1,1
+South Africa,Rietvalleirand,1,1
+South Africa,"Sandton, Johanessburg",1,1
+South Africa,Savannah Country Estate,1,1
+South Africa,Sea Point,1,1
+South Africa,Sea View,1,1
+South Africa,Sibasa,1,1
+South Africa,Simonstown,1,1
+South Africa,Simonʼs Town,1,1
+South Africa,"Tshisaulu, Thohoyandou",1,1
+South Africa,Umhlanga Rocks,1,1
+South Africa,ZWARTKOPPIES X47,1,1
+South Africa,durban,1,1
+South Africa,randburg ferndale,1,1
+South Africa,umhlanga,1,1
+South Korea,BUSAN,1,1
+South Korea,IN CHEON,1,1
+South Korea,Seocho-gu,1,1
+South Korea,Seogwipo-si,1,1
+South Korea,jeju,1,1
+South Korea,강남구,1,1
+South Korea,경주시,1,1
+South Korea,부산시,1,1
+South Korea,서,1,1
+South Korea,서귀포시,1,1
+South Korea,"서울, 대한민국 (GMT+09:00)",1,1
+South Korea,서울시 강남구,1,1
+South Korea,서울시 마포구,1,1
+South Korea,서울특별,1,1
+South Korea,서을시,1,1
+South Korea,성동구,1,1
+South Korea,종로구,1,1
+Spain,ALICANTE,1,1
+Spain,Alaro,1,1
+Spain,Alaró,1,1
+Spain,Alcolea,1,1
+Spain,Alicante/Alacant,1,1
+Spain,BINIARAIX,1,1
+Spain,BIlbao,1,1
+Spain,Barakaldo,1,1
+Spain,Biniali,1,1
+Spain,Bolea,1,1
+Spain,Cala Blava,1,1
+Spain,Cala Vinyes,1,1
+Spain,Caleta de Velez,1,1
+Spain,Cenes de la Vega,1,1
+Spain,Centro Historico,1,1
+Spain,Chiva,1,1
+Spain,Consell,1,1
+Spain,Costa de la Calma,1,1
+Spain,CÃ³rdoba,1,1
+Spain,DEIA,1,1
+Spain,Deia,1,1
+Spain,El Fargue (Granada),1,1
+Spain,El Palo,1,1
+Spain,Es Camp de Mar,1,1
+Spain,Escarrilla Huesca,1,1
+Spain,Estellencs,1,1
+Spain,FORMIGAL,1,1
+Spain,Galilea,1,1
+Spain,MADRID,1,1
+Spain,MALAGA,1,1
+Spain,Maioris,1,1
+Spain,Málaga Centro,1,1
+Spain,Nívar,1,1
+Spain,Ogíjares,1,1
+Spain,PALMANOVA,1,1
+Spain,Palma De Mallorca,1,1
+Spain,Palma Nova,1,1
+Spain,Palmanyola,1,1
+Spain,Playa De Palma,1,1
+Spain,Port de Soller,1,1
+Spain,Portals Nous,1,1
+Spain,Puerto de Soller,1,1
+Spain,Puigderrós,1,1
+Spain,Sa Cabaneta,1,1
+Spain,Sa Cabaneta/Marratxi,1,1
+Spain,Sa Coma de Bunyola,1,1
+Spain,Sa Torre - Llucmajor,1,1
+Spain,Sant Adrià de Besòs,1,1
+Spain,Santa Eugenia,1,1
+Spain,Santa Ponça,1,1
+Spain,Sencelles,1,1
+Spain,Sietamo,1,1
+Spain,Tardienta,1,1
+Spain,Tramacastilla de Tena,1,1
+Spain,VALENCIA,1,1
+Spain,Villanúa,1,1
+Spain,Yaso,1,1
+Spain,Yaso - Bierge,1,1
+Spain,huelva,1,1
+Spain,sant fost de campcestelle,1,1
+Spain,Аликанте,1,1
+Sri Lanka,Galle Fort,1,1
+Sri Lanka,KANDY,1,1
+Sri Lanka,Sirimalwatte Kandy,1,1
+Sweden,41328,1,1
+Sweden,BROMMA,1,1
+Sweden,"Baggeby-Larsberg, Stockholm",1,1
+Sweden,Bromma,1,1
+Sweden,Gustavsberg,1,1
+Sweden,GÖTEBORG,1,1
+Sweden,Hisings-Backa,1,1
+Sweden,Hässelby,1,1
+Sweden,Rönninge,1,1
+Sweden,Saltsjö boo,1,1
+Sweden,Segeltorp,1,1
+Sweden,Skärholmen,1,1
+Sweden,Skår,1,1
+Sweden,Sollentuna,1,1
+Sweden,Stcokholm,1,1
+Sweden,Stockholms län,1,1
+Sweden,Svartsjö,1,1
+Sweden,Tynningö,1,1
+Sweden,Tyresö,1,1
+Sweden,Täby,1,1
+Sweden,Ulfsunda,1,1
+Sweden,Vega,1,1
+Sweden,Vendelsö,1,1
+Sweden,Värmdö,1,1
+Sweden,Västa Frölunda,1,1
+Sweden,jarfalla,1,1
+Sweden,stockholm,1,1
+Sweden,upplands väsby,1,1
+Sweden,vallentuna,1,1
+Sweden,ÅKERSBERGA,1,1
+Switzerland,Abtwil,1,1
+Switzerland,Allschwil,1,1
+Switzerland,Alpnach,1,1
+Switzerland,Beckenried,1,1
+Switzerland,Buochs,1,1
+Switzerland,Burgenstock,1,1
+Switzerland,Cheseaux sur Lausanne,1,1
+Switzerland,Châtelaine,1,1
+Switzerland,Chêne-Bougeries,1,1
+Switzerland,Confignon,1,1
+Switzerland,Ecublens Lausanne,1,1
+Switzerland,Ecublens Lausanne (VD),1,1
+Switzerland,Eich,1,1
+Switzerland,Emmen,1,1
+Switzerland,Flüeli-Ranft,1,1
+Switzerland,Gelfingen,1,1
+Switzerland,Gersau,1,1
+Switzerland,Goldau,1,1
+Switzerland,Grosswangen,1,1
+Switzerland,Hasle,1,1
+Switzerland,Hellbühl,1,1
+Switzerland,Hergiswil,1,1
+Switzerland,Hildisrieden,1,1
+Switzerland,Isenthal,1,1
+Switzerland,Kehrsiten,1,1
+Switzerland,Knutwil,1,1
+Switzerland,Kriens bei Luzern,1,1
+Switzerland,Meggen,1,1
+Switzerland,Menziken,1,1
+Switzerland,Meyrin,1,1
+Switzerland,Morschach,1,1
+Switzerland,Muri bei Bern,1,1
+Switzerland,Neudorf,1,1
+Switzerland,Onex,1,1
+Switzerland,Plan-les-Ouates,1,1
+Switzerland,Rigi-Kaltbad,1,1
+Switzerland,SUIISE,1,1
+Switzerland,Sattel,1,1
+Switzerland,Schüpfheim,1,1
+Switzerland,Seelisberg,1,1
+Switzerland,Seewen,1,1
+Switzerland,Sigigen,1,1
+Switzerland,Stans,1,1
+Switzerland,Stettlen bei Bern,1,1
+Switzerland,Walchwil,1,1
+Switzerland,Wolfenschiessen,1,1
+Switzerland,Zollikofen,1,1
+Switzerland,Zug,1,1
+Taiwan,"Banqiao District, New Taipei City",1,1
+Taiwan,"Da'an Dist., Taipei City",1,1
+Taiwan,"Daan District, Taipei City",1,1
+Taiwan,"Datong District, Taipei City",1,1
+Taiwan,"Gushan Dist., Kaohsiung City",1,1
+Taiwan,"Gushan District, Kaohsiung City",1,1
+Taiwan,Kaosiung City,1,1
+Taiwan,"Lingya Dist., Kaohsiung City",1,1
+Taiwan,Luzhou,1,1
+Taiwan,"Nangang District, Taipei City",1,1
+Taiwan,"Qianjin District., Kaohsiung City",1,1
+Taiwan,"Qianzhen Dist., Kaohsiung City",1,1
+Taiwan,"Qianzhen District, Kaohsiung",1,1
+Taiwan,"Qianzhen District, Kaohsiung City",1,1
+Taiwan,"Samin Disc., Kaohsiung City",1,1
+Taiwan,Taipei city,1,1
+Taiwan,"Wanhua District., Taipei City",1,1
+Taiwan,"Yancheng Dist., Kaohsiung City",1,1
+Taiwan,"Zhongshan Dist.,Taipei City Taiwan",1,1
+Taiwan,高雄市,1,1
+Tanzania,ARUSHA,1,1
+Tanzania,"Western of City Center, Amaani Zanzibar",1,1
+Tanzania,Zanzibar City,1,1
+Tanzania,Zanzibar Town,1,1
+Thailand,Amphoe Mueang Chiang Rai,1,1
+Thailand,"Ao Nang, Krabi",1,1
+Thailand,Ban Don Maha Wan,1,1
+Thailand,Ban Mai,1,1
+Thailand,Ban Thung Si Kan,1,1
+Thailand,Bang Kapi,1,1
+Thailand,Bang Rak beach,1,1
+Thailand,Bang Sare,1,1
+Thailand,Bang Tao Beach,1,1
+Thailand,Bangkok Noi,1,1
+Thailand,"Bangkok, Thailand",1,1
+Thailand,"Bangrak, Bangkok",1,1
+Thailand,Bkk,1,1
+Thailand,Bo Phut,1,1
+Thailand,Bophut Beach,1,1
+Thailand,Chalong,1,1
+Thailand,Chiang Mai,1,1
+Thailand,Chiangkhong,1,1
+Thailand,Chiangmai,1,1
+Thailand,Chon Buri,1,1
+Thailand,"Chonburi, Pattaya",1,1
+Thailand,Kathun,1,1
+Thailand,Khet Khlong Toei,1,1
+Thailand,Khlong Taei,1,1
+Thailand,Kho samui,1,1
+Thailand,KohSamui,1,1
+Thailand,Muang,1,1
+Thailand,Muang ChiangMai,1,1
+Thailand,Mueang,1,1
+Thailand,Mueang Chiang Mai,1,1
+Thailand,Na Mueang,1,1
+Thailand,Pathumthani,1,1
+Thailand,Pattaya City,1,1
+Thailand,Phayathai,1,1
+Thailand,Phra Khanong,1,1
+Thailand,Phuket Province,1,1
+Thailand,Plai Laem,1,1
+Thailand,Rawai,1,1
+Thailand,Rawai Beach,1,1
+Thailand,Samui,1,1
+Thailand,Silom (Bangkok),1,1
+Thailand,"Suan Luang, Bangkok",1,1
+Thailand,Suratthani,1,1
+Thailand,Talat Yai,1,1
+Thailand,Taling Ngam Beach,1,1
+Thailand,Tambon Ao Nang,1,1
+Thailand,Tambon Choeng Thale,1,1
+Thailand,Tambon Ko Kaeo,1,1
+Thailand,Tambon Na Chom Thian,1,1
+Thailand,Tambon Pak Nam,1,1
+Thailand,Tambon Si Sunthon,1,1
+Thailand,Tambon Wichit,1,1
+Thailand,Thonglor,1,1
+Thailand,Wiang,1,1
+Thailand,Wiang Kaen,1,1
+Thailand,Wichit,1,1
+Thailand,bankok,1,1
+Thailand,chalong supalai,1,1
+Thailand,chiang mai,1,1
+Thailand,chiangmai,1,1
+Thailand,dindang,1,1
+Thailand,koh samui,1,1
+Thailand,pattaya,1,1
+Thailand,Пхукет,1,1
+Thailand,จ. เชียงราย,1,1
+Thailand,จังหวัดเชียงใหม่,1,1
+Thailand,ตำบล ตลาดใหญ่,1,1
+Thailand,ตำบล รัษฎา,1,1
+Thailand,ตำบลป่าแดด,1,1
+Thailand,ถลาง,1,1
+Thailand,สวนหลวง,1,1
+Thailand,สุราษฎร์ธานี,1,1
+Thailand,อ.เมืองกระบี่,1,1
+Thailand,อำเภอเมืองเชียงราย,1,1
+Thailand,ฺBangkok,1,1
+Thailand,เขตพระนคร,1,1
+Thailand,เชียงของ,1,1
+Thailand,เชียงราย,1,1
+Thailand,เชียงใหม่ ประเทศไทย,1,1
+Thailand,เมืองกระบี่,1,1
+Thailand,普吉,1,1
+Thailand,普吉岛,1,1
+Thailand,普吉市,1,1
+Thailand,普吉府,1,1
+Tunisia,DJERBA,1,1
+Tunisia,El Marsa,1,1
+Tunisia,Jerba,1,1
+Tunisia,Lac  Aouina,1,1
+Tunisia,Les Berges du Lac,1,1
+Tunisia,Menzah 9,1,1
+Tunisia,Site archéologique de Carthage,1,1
+Tunisia,TUNISIE,1,1
+Tunisia,Tunise,1,1
+Tunisia,la Marsa,1,1
+Tunisia,la marsa,1,1
+Turkey,ADANA,1,1
+Turkey,ADIYAMAN,1,1
+Turkey,Adana,1,1
+Turkey,Akdeniz,1,1
+Turkey,Arapgir,1,1
+Turkey,"Arnavutköy, 34345 Beşiktaş/İstanbul",1,1
+Turkey,Beşiktaş,1,1
+Turkey,Bitlis,1,1
+Turkey,Buyuktashane,1,1
+Turkey,Diyarbakir,1,1
+Turkey,Diyarbakır,1,1
+Turkey,Elazığ,1,1
+Turkey,Erzincan Merkez,1,1
+Turkey,Eyyubiye,1,1
+Turkey,Eyyübiye,1,1
+Turkey,Harran,1,1
+Turkey,KadÄ±kÃ¶y,1,1
+Turkey,Karatas,1,1
+Turkey,Kayseri,1,1
+Turkey,Kemalpaşa,1,1
+Turkey,Kocasinan,1,1
+Turkey,Kızkalesi,1,1
+Turkey,MARDİN MERKEZ,1,1
+Turkey,Malatya,1,1
+Turkey,Mardin Merkez,1,1
+Turkey,Mardin/Artuklu,1,1
+Turkey,Melikgazi,1,1
+Turkey,Niğde,1,1
+Turkey,Osmaniye Merkez,1,1
+Turkey,Rize,1,1
+Turkey,Rize/Çamlıhemşin,1,1
+Turkey,RİZE,1,1
+Turkey,Sanliurfa,1,1
+Turkey,Seyhan,1,1
+Turkey,Sur,1,1
+Turkey,Yahyalı,1,1
+Turkey,Yakutiye,1,1
+Turkey,Yandere,1,1
+Turkey,Yenişehir,1,1
+Turkey,adana/seyhan,1,1
+Turkey,erzurum,1,1
+Turkey,trabzon,1,1
+Turkey,Çamlıhemşin,1,1
+Turkey,Çaykara,1,1
+Turkey,Çukurova,1,1
+Turkey,İskenderun,1,1
+Turkey,Şahinbey,1,1
+Turkey,Şanlıurfa Şehir Merkezi,1,1
+Uganda,KAMPALA,1,1
+Uganda,Near Movit Products Limited,1,1
+United Arab Emirates,AJMAN,1,1
+United Arab Emirates,Abudhabi,1,1
+United Arab Emirates,Al Hamra Village,1,1
+United Arab Emirates,Al Mafraq,1,1
+United Arab Emirates,Al Rumailah - Al Rumailah 1-2 - Ajman,1,1
+United Arab Emirates,Al Sharjah,1,1
+United Arab Emirates,Al-Bustan,1,1
+United Arab Emirates,Business Bay,1,1
+United Arab Emirates,Downtown Dubai,1,1
+United Arab Emirates,Dowtown Dubai,1,1
+United Arab Emirates,"Dubai ,UAE",1,1
+United Arab Emirates,Dubai Academic City,1,1
+United Arab Emirates,Dubai Creek Harbour,1,1
+United Arab Emirates,Dubai Marina,1,1
+United Arab Emirates,Dubái,1,1
+United Arab Emirates,Emirates Hills,1,1
+United Arab Emirates,FUJAIRAH,1,1
+United Arab Emirates,"Fujairah,UAE",1,1
+United Arab Emirates,Fujarah,1,1
+United Arab Emirates,Jumeirah Beach Residence,1,1
+United Arab Emirates,Palm Jumeirah,1,1
+United Arab Emirates,RAS AL KHAIMAH,1,1
+United Arab Emirates,Ras Al Khima,1,1
+United Arab Emirates,Ras Al khaimah,1,1
+United Arab Emirates,Ras al khaimah,1,1
+United Arab Emirates,Sharjah Emirates,1,1
+United Arab Emirates,abu dhabi,1,1
+United Arab Emirates,ajman,1,1
+United Arab Emirates,alain,1,1
+United Arab Emirates,fujairah,1,1
+United Arab Emirates,"murqquab,dubai",1,1
+United Arab Emirates,أبوظبي,1,1
+United Arab Emirates,رأس الخيمة,1,1
+United Arab Emirates,راس الخيمة,1,1
+United Arab Emirates,迪拜,1,1
+United Kingdom,125 Maida Vale,1,1
+United Kingdom,Alfriston,1,1
+United Kingdom,Allerthorpe,1,1
+United Kingdom,Anfield,1,1
+United Kingdom,Arnold,1,1
+United Kingdom,BATH,1,1
+United Kingdom,Barton Hill,1,1
+United Kingdom,"Bath, Somerset",1,1
+United Kingdom,Belffast,1,1
+United Kingdom,"Birmingham City, West Midlands",1,1
+United Kingdom,Bristol city,1,1
+United Kingdom,Buildings,1,1
+United Kingdom,Caerdydd,1,1
+United Kingdom,"Canary Wharf, Greater London",1,1
+United Kingdom,Canning Town,1,1
+United Kingdom,Colwick,1,1
+United Kingdom,"Corstorphine, Edinburgh",1,1
+United Kingdom,Crumlin,1,1
+United Kingdom,Droylsden,1,1
+United Kingdom,Dunmurry,1,1
+United Kingdom,Elephant & Castle,1,1
+United Kingdom,"Eynsham, Oxfordshire",1,1
+United Kingdom,Filton,1,1
+United Kingdom,"Fitzrovia, W1",1,1
+United Kingdom,Freshford,1,1
+United Kingdom,Gamston,1,1
+United Kingdom,Garston,1,1
+United Kingdom,Great Eversden,1,1
+United Kingdom,Hammersmith,1,1
+United Kingdom,"Hampstead, London",1,1
+United Kingdom,"Highbury, London",1,1
+United Kingdom,Huntington,1,1
+United Kingdom,Kensington,1,1
+United Kingdom,LEEDS,1,1
+United Kingdom,LEICESTER,1,1
+United Kingdom,Leeds LS2 8JB,1,1
+United Kingdom,"Leicester, Leicester City Central",1,1
+United Kingdom,Leicestershire,1,1
+United Kingdom,"Leith, Edynburg",1,1
+United Kingdom,Liverpool City Centre,1,1
+United Kingdom,"Liverpool, Merseyside",1,1
+United Kingdom,Llandough,1,1
+United Kingdom,"London, Shoreditch",1,1
+United Kingdom,"London, West End",1,1
+United Kingdom,Londres,1,1
+United Kingdom,"Manchester,",1,1
+United Kingdom,"Marston, Oxford",1,1
+United Kingdom,NewCastle,1,1
+United Kingdom,Newcastle on Tyne,1,1
+United Kingdom,OXFORD,1,1
+United Kingdom,Oxwich,1,1
+United Kingdom,"Papworth, Cambridge",1,1
+United Kingdom,"Patcham, Brighton",1,1
+United Kingdom,Pevensey Bay,1,1
+United Kingdom,Quinton,1,1
+United Kingdom,"Quinton,  Birmingham",1,1
+United Kingdom,"Rawcliffe, near York",1,1
+United Kingdom,SOUTHAMPTON,1,1
+United Kingdom,Sandford-on-Thames,1,1
+United Kingdom,Scotland,1,1
+United Kingdom,Sheffield South Yorkshire,1,1
+United Kingdom,Sheffield city centre,1,1
+United Kingdom,Solihull,1,1
+United Kingdom,"Tower Hamlets, London",1,1
+United Kingdom,Waterbeach,1,1
+United Kingdom,"Waterbeach, Cambridge",1,1
+United Kingdom,West Highland Way,1,1
+United Kingdom,Wigginton,1,1
+United Kingdom,Wythenshawe,1,1
+United Kingdom,bristol,1,1
+United Kingdom,cambridge,1,1
+United Kingdom,leeds,1,1
+United Kingdom,leicester,1,1
+United Kingdom,newcastle upon tyne,1,1
+United Kingdom,글래스고,1,1
+United States,ATHENS,1,1
+United States,Agoura Hills,1,1
+United States,Akron,1,1
+United States,Altamonte Springs,1,1
+United States,Athens (Georgia),1,1
+United States,Aurora,1,1
+United States,Bedford,1,1
+United States,Bloomfield,1,1
+United States,Brighton,1,1
+United States,Casselberry,1,1
+United States,Castro Valley,1,1
+United States,Chicago (Illinios),1,1
+United States,"Chicago, IL",1,1
+United States,"Chicago, Illinois",1,1
+United States,Coconut Grove (Florida),1,1
+United States,College Park,1,1
+United States,Concord,1,1
+United States,Cromwell,1,1
+United States,Davenport,1,1
+United States,Decatur (Alabama),1,1
+United States,Del Valle,1,1
+United States,District of Columbia,1,1
+United States,Dundee,1,1
+United States,East Hampton,1,1
+United States,East Hampton (Connecticut),1,1
+United States,East Point,1,1
+United States,FULLERTON,1,1
+United States,Florida,1,1
+United States,Fremont (California),1,1
+United States,Fullerton,1,1
+United States,Glendale,1,1
+United States,HEWITT,1,1
+United States,Hapeville,1,1
+United States,Hayward,1,1
+United States,Hayward (California),1,1
+United States,Hermosa Beach,1,1
+United States,Hollywood (California),1,1
+United States,"Honolulu (Oahu,Hawaii)",1,1
+United States,Inglewood,1,1
+United States,Key Biscayne (Florida),1,1
+United States,LAS VEGAS,1,1
+United States,La Jolla (California),1,1
+United States,La Mesa,1,1
+United States,Lake Buena Vista (Florida),1,1
+United States,Lewis Center,1,1
+United States,Littleton,1,1
+United States,Livermore,1,1
+United States,Longwood,1,1
+United States,Los  Angeles,1,1
+United States,"Los Angeles , California",1,1
+United States,Los Angeles County,1,1
+United States,"Los Angeles, California",1,1
+United States,Malibu,1,1
+United States,Maricopa County,1,1
+United States,Marina Del Ray,1,1
+United States,"Marina Del Ray, CA",1,1
+United States,Marina del Rey (California),1,1
+United States,Medina,1,1
+United States,Millersburg (Ohio),1,1
+United States,Mission Beach,1,1
+United States,"NE Atlanta, GA",1,1
+United States,Nashville(Tennessee),1,1
+United States,New Orleans(Louisiana),1,1
+United States,North Bay Village,1,1
+United States,North Hollywood,1,1
+United States,North Royalton,1,1
+United States,Phoennix,1,1
+United States,Pineville,1,1
+United States,Pleasanton,1,1
+United States,Pleasanton (California),1,1
+United States,SAN DIEGO,1,1
+United States,SEATTLE,1,1
+United States,San Ramon,1,1
+United States,Seville (Ohio),1,1
+United States,South Houston,1,1
+United States,South Pasadena (California),1,1
+United States,Spacious Condo Downtown Phoenix,1,1
+United States,Studio City (California),1,1
+United States,Sunny Isles Beach (Florida),1,1
+United States,"Tampa, Florida",1,1
+United States,Thornton,1,1
+United States,Tolland,1,1
+United States,Unincorporated,1,1
+United States,Vancouver (Washington),1,1
+United States,Venice (California),1,1
+United States,Waikiki,1,1
+United States,Washington (DC),1,1
+United States,Washington (District of Columbia),1,1
+United States,"Washington, D.C. (District of Columbia)",1,1
+United States,"Washington, D.C.(District Of Columbia)",1,1
+United States,Windsor,1,1
+United States,Winter Park,1,1
+United States,charlotte,1,1
+United States,honolulu,1,1
+United States,"marina del rey, Los Angeles",1,1
+United States,miami little havana,1,1
+United States,orlando,1,1
+United States,tampa,1,1
+United States,venice,1,1
+Uruguay,Punta Ballena,1,1
+Uzbekistan,Samarkand City,1,1
+Uzbekistan,Тashkent,1,1
+Vietnam,An Hải,1,1
+Vietnam,Cẩm Lệ,1,1
+Vietnam,HUE,1,1
+Vietnam,Hai Chau,1,1
+Vietnam,Hội An,1,1
+Vietnam,Khanh Hoa,1,1
+Vietnam,"Ngõ 171, đường Cửa Đại, phường Cẩm Châu",1,1
+Vietnam,Ngũ Hành Sơn,1,1
+Vietnam,Quang Nam,1,1
+Vietnam,Son Tra,1,1
+Vietnam,Sơn Trà,1,1
+Vietnam,TP NHA TRANG,1,1
+Vietnam,TP Đà Nẵng,1,1
+Vietnam,huế,1,1
+Vietnam,Đà Nẵng,1,1
