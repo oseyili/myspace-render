@@ -1,4 +1,5 @@
 ﻿import os
+import requests
 import smtplib
 from email.message import EmailMessage
 import sqlite3
@@ -73,52 +74,49 @@ DB_FILE = os.path.join(os.path.dirname(__file__), "hotel_catalog.db")
 SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "reservations@myspace-hotel.com")
 
 
-def send_availability_email(req):
-    smtp_host = os.getenv("SMTP_HOST", "").strip()
-    smtp_port = int(os.getenv("SMTP_PORT", "587").strip() or "587")
-    smtp_from = os.getenv("SMTP_FROM", "").strip()
-    smtp_user = os.getenv("SMTP_USERNAME", "").strip()
-    smtp_pass = os.getenv("SMTP_PASSWORD", "").strip()
-    smtp_tls = os.getenv("SMTP_USE_TLS", "true").strip().lower() != "false"
-    receiver = os.getenv("ADMIN_NOTIFICATION_EMAIL", "").strip() or SUPPORT_EMAIL
 
-    if not smtp_host or not smtp_from or not smtp_user or not smtp_pass or not receiver:
-        raise RuntimeError("SMTP email settings are incomplete.")
+def send_availability_email(req):
+    resend_key = os.getenv("RESEND_API_KEY", "").strip()
+    sender = os.getenv("RESEND_FROM", "onboarding@resend.dev").strip()
+    receiver = os.getenv("RESERVATIONS_EMAIL", "").strip() or os.getenv("ADMIN_NOTIFICATION_EMAIL", "").strip() or SUPPORT_EMAIL
+
+    if not resend_key:
+        raise RuntimeError("RESEND_API_KEY is missing.")
+    if not receiver:
+        raise RuntimeError("RESERVATIONS_EMAIL is missing.")
 
     hotel_name = getattr(req, "hotel_name", "") or getattr(req, "property", "") or getattr(req, "selected_hotel", "") or "Selected stay"
     customer_name = getattr(req, "name", "") or ""
     customer_email = getattr(req, "email", "") or ""
     message_text = getattr(req, "message", "") or ""
 
-    msg = EmailMessage()
-    msg["Subject"] = f"New availability request - {hotel_name}"
-    msg["From"] = smtp_from
-    msg["To"] = receiver
-    if customer_email:
-        msg["Reply-To"] = customer_email
+    response = requests.post(
+        "https://api.resend.com/emails",
+        headers={
+            "Authorization": f"Bearer {resend_key}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "from": sender,
+            "to": [receiver],
+            "subject": f"New availability request - {hotel_name}",
+            "reply_to": customer_email,
+            "html": f"""
+            <h2>New availability request</h2>
+            <p><b>Hotel / stay:</b> {hotel_name}</p>
+            <p><b>Customer name:</b> {customer_name}</p>
+            <p><b>Customer email:</b> {customer_email}</p>
+            <p><b>Request:</b><br>{message_text}</p>
+            """,
+        },
+        timeout=30,
+    )
 
-    msg.set_content(f"""New availability request
-
-Hotel / stay:
-{hotel_name}
-
-Customer name:
-{customer_name}
-
-Customer email:
-{customer_email}
-
-Request:
-{message_text}
-""")
-
-    with smtplib.SMTP(smtp_host, smtp_port, timeout=30) as server:
-        if smtp_tls:
-            server.starttls()
-        server.login(smtp_user, smtp_pass)
-        server.send_message(msg)
+    if response.status_code >= 300:
+        raise RuntimeError(f"Resend failed: {response.status_code} {response.text[:300]}")
 
     return True
+
 
 
 app = FastAPI(title="My Space Hotel Backend")
