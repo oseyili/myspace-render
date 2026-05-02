@@ -1,392 +1,364 @@
-﻿import os
-import sqlite3
-import requests
-from pathlib import Path
-from typing import Optional
-from fastapi import FastAPI
+# =========================================================
+# MY SPACE HOTEL — LOW STORAGE 300K SCALABLE BACKEND
+# NON-AFFILIATE — DISCOVERY + RESERVATION PLATFORM
+# =========================================================
+
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from datetime import datetime
+import requests
+import os
+import json
 
-BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "hotel_catalog.db"
+app = FastAPI()
 
-def load_env():
-    env_path = BASE_DIR / ".env"
-    if env_path.exists():
-        for line in env_path.read_text(encoding="utf-8", errors="ignore").splitlines():
-            line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
-                k, v = line.split("=", 1)
-                os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
-
-load_env()
-
-SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "reservations@myspace-hotel.com")
-RESERVATIONS_EMAIL = os.getenv("RESERVATIONS_EMAIL", "reservations@myspace-hotel.com")
-
-app = FastAPI(title="My Space Hotel Backend")
-
+# =========================================================
+# CORS
+# =========================================================
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "https://myspace-hotel.com",
-        "https://www.myspace-hotel.com",
-        "https://myspace-frontend.vercel.app",
-        "https://myspace-hotel.vercel.app",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-def db():
-    con = sqlite3.connect(DB_PATH)
-    con.row_factory = sqlite3.Row
-    return con
+# =========================================================
+# PATHS
+# =========================================================
+DATA_DIR = "data"
+INDEX_FILE = os.path.join(DATA_DIR, "hotels_index.jsonl")
+RESERVATION_FILE = os.path.join(DATA_DIR, "reservations.json")
 
-def first(row, names, default=""):
-    keys = row.keys()
-    for name in names:
-        if name in keys and row[name] not in [None, ""]:
-            return row[name]
-    return default
+os.makedirs(DATA_DIR, exist_ok=True)
 
-def hotel_to_dict(row):
-    raw = dict(row)
-    image = first(row, ["image", "high_res_image", "image_url", "photo_url", "main_photo_url", "max_photo_url"])
-    return {
-        "id": str(first(row, ["id", "hotel_id", "supplier_hotel_id"])),
-        "name": str(first(row, ["name", "hotel_name"], "Unnamed stay")),
-        "country": str(first(row, ["country", "country_trans", "country_name"], "")),
-        "city": str(first(row, ["city", "city_name", "destination"], "")),
-        "area": str(first(row, ["area", "district", "districts"], "")),
-        "address": str(first(row, ["address", "address_trans"], "")),
-        "rating": str(first(row, ["rating", "class", "review_score"], "")),
-        "review_score": str(first(row, ["review_score", "rating"], "")),
-        "review_count": str(first(row, ["review_count", "review_nr"], "")),
-        "price": str(first(row, ["price", "min_total_price", "gross_price"], "")),
-        "currency": str(first(row, ["currency", "currencycode", "currency_code"], "")),
-        "image": str(image),
-        "high_res_image": str(image),
-        "facilities": str(first(row, ["facilities", "hotel_facilities"], "")),
-        "description": str(first(row, ["description", "accommodation_type_name"], "")),
-        "latitude": str(first(row, ["latitude", "lat"], "")),
-        "longitude": str(first(row, ["longitude", "lon", "lng"], "")),
-        "source": str(first(row, ["source_note", "supplier"], "hotel_catalog")),
-        "raw": raw,
-    }
+# =========================================================
+# API CONFIG
+# =========================================================
+RAPIDAPI_HOST = "booking-com.p.rapidapi.com"
+RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY")
+
+HEADERS = {
+    "X-RapidAPI-Key": RAPIDAPI_KEY,
+    "X-RapidAPI-Host": RAPIDAPI_HOST,
+}
+
+# =========================================================
+# UTILS
+# =========================================================
+
+def append_index(record):
+    with open(INDEX_FILE, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record) + "\n")
+
+
+def load_index():
+    if not os.path.exists(INDEX_FILE):
+        return []
+
+    with open(INDEX_FILE, "r", encoding="utf-8") as f:
+        return [json.loads(line) for line in f]
+
+
+def hotel_exists(hotel_id):
+    if not os.path.exists(INDEX_FILE):
+        return False
+
+    with open(INDEX_FILE, "r", encoding="utf-8") as f:
+        for line in f:
+            if hotel_id in line:
+                return True
+    return False
+
+
+def rapid_get(path, params):
+    url = f"https://{RAPIDAPI_HOST}{path}"
+    try:
+        r = requests.get(url, headers=HEADERS, params=params, timeout=25)
+        if r.status_code != 200:
+            return None
+        return r.json()
+    except:
+        return None
+
+
+# =========================================================
+# DESTINATION FIX (IMPORTANT)
+# =========================================================
+
+def find_destination(city):
+    data = rapid_get("/v1/hotels/locations", {
+        "name": city,
+        "locale": "en-gb"
+    })
+
+    if not data:
+        return None
+
+    # Prefer city/district results
+    for item in data:
+        if item.get("dest_type") in ["city", "district", "region"]:
+            return item
+
+    return data[0]
+
+
+# =========================================================
+# DISCOVERY ENGINE
+# =========================================================
+
+def discover_city(city):
+    dest = find_destination(city)
+    if not dest:
+        return 0
+
+    dest_id = dest["dest_id"]
+    added = 0
+
+    # MULTI PAGE EXPANSION
+    for page in range(0, 5):
+
+        data = rapid_get("/v1/hotels/search", {
+            "dest_id": dest_id,
+            "dest_type": "city",
+            "checkin_date": "2026-06-01",
+            "checkout_date": "2026-06-02",
+            "adults_number": 2,
+            "room_number": 1,
+            "page_number": page,
+            "locale": "en-gb"
+        })
+
+        if not data or "result" not in data:
+            continue
+
+        for h in data["result"]:
+            hid = str(h.get("hotel_id"))
+
+            if not hid or hotel_exists(hid):
+                continue
+
+            record = {
+                "hotel_id": hid,
+                "name": h.get("hotel_name"),
+                "city": city,
+                "country": h.get("country_trans"),
+                "lat": h.get("latitude"),
+                "lon": h.get("longitude"),
+                "last_seen": datetime.utcnow().isoformat()
+            }
+
+            append_index(record)
+            added += 1
+
+    return added
+
+
+# =========================================================
+# API ROUTES
+# =========================================================
 
 @app.get("/")
-def root():
-    return {"ok": True, "app": "My Space Hotel Backend", "support": SUPPORT_EMAIL}
+def home():
+    return {"status": "My Space Hotel backend running (300K mode)"}
 
-@app.get("/api/health")
-def health():
-    return {"ok": True, "database_exists": DB_PATH.exists()}
 
-@app.get("/api/admin/catalogue-status")
-def catalogue_status():
-    con = db()
-    try:
-        total = con.execute("SELECT COUNT(*) FROM hotels").fetchone()[0]
-        countries = [r[0] for r in con.execute("SELECT DISTINCT country FROM hotels WHERE country IS NOT NULL AND country != '' ORDER BY country LIMIT 80").fetchall()]
-        cities = [r[0] for r in con.execute("SELECT DISTINCT city FROM hotels WHERE city IS NOT NULL AND city != '' ORDER BY city LIMIT 80").fetchall()]
-        return {
-            "total_hotels": total,
-            "countries_loaded": countries,
-            "cities_loaded": cities,
-            "database_file": str(DB_PATH),
-            "database_protected": True,
-            "fake_data": False,
-            "rapidapi_key_loaded": bool(os.getenv("RAPIDAPI_KEY")),
-            "email_ready": bool(os.getenv("RESEND_API_KEY")),
-        }
-    finally:
-        con.close()
+@app.get("/search")
+def search(city: str = Query(...)):
+    results = []
 
-def normalize_search_terms(*values):
-    terms = []
-    for value in values:
-        value = str(value or "").strip()
-        if not value:
-            continue
-        value = value.replace(",", " ")
-        for part in value.split():
-            part = part.strip()
-            if len(part) >= 2:
-                terms.append(part)
-    return terms
+    if os.path.exists(INDEX_FILE):
+        with open(INDEX_FILE, "r", encoding="utf-8") as f:
+            for line in f:
+                if city.lower() in line.lower():
+                    results.append(json.loads(line))
+                if len(results) >= 50:
+                    break
 
-def search_hotels_core(country="", city="", destination="", q="", facilities="", page=1, page_size=60, limit=None):
-    page = max(int(page or 1), 1)
-    page_size = int(limit or page_size or 60)
-    page_size = max(1, min(page_size, 100))
-    offset = (page - 1) * page_size
+    # Auto-grow if empty
+    if not results:
+        discover_city(city)
+        return search(city)
 
-    where = []
-    params = []
-
-    country = str(country or "").strip()
-    city = str(city or "").strip()
-    destination = str(destination or "").strip()
-    q = str(q or "").strip()
-    facilities = str(facilities or "").strip()
-
-    if country:
-        country_aliases = {
-            "uk": ["United Kingdom", "UK", "England", "Scotland", "Wales", "Northern Ireland"],
-            "usa": ["United States", "USA", "US", "America"],
-            "us": ["United States", "USA", "US", "America"],
-            "uae": ["United Arab Emirates", "UAE", "Dubai", "Abu Dhabi"],
-        }
-        options = country_aliases.get(country.lower(), [country])
-        where.append("(" + " OR ".join(["LOWER(COALESCE(country,'')) LIKE LOWER(?)" for _ in options]) + ")")
-        params.extend([f"%{x}%" for x in options])
-
-    text_terms = normalize_search_terms(city, destination, q)
-
-    for term in text_terms:
-        where.append("""
-        (
-            LOWER(COALESCE(name,'')) LIKE LOWER(?) OR
-            LOWER(COALESCE(city,'')) LIKE LOWER(?) OR
-            LOWER(COALESCE(country,'')) LIKE LOWER(?) OR
-            LOWER(COALESCE(area,'')) LIKE LOWER(?) OR
-            LOWER(COALESCE(address,'')) LIKE LOWER(?) OR
-            LOWER(COALESCE(description,'')) LIKE LOWER(?)
-        )
-        """)
-        params.extend([f"%{term}%"] * 6)
-
-    if facilities:
-        wanted = [x.strip().lower() for x in facilities.split(",") if x.strip()]
-        if wanted:
-            facility_clauses = []
-            for item in wanted:
-                facility_clauses.append("LOWER(COALESCE(facilities,'')) LIKE LOWER(?)")
-                params.append(f"%{item}%")
-            where.append("(" + " OR ".join(facility_clauses) + ")")
-
-    sql_where = "WHERE " + " AND ".join(where) if where else ""
-
-    con = db()
-    try:
-        total = con.execute(f"SELECT COUNT(*) FROM hotels {sql_where}", params).fetchone()[0]
-
-        if total == 0 and (country or city or destination or q):
-            fallback_terms = normalize_search_terms(country, city, destination, q)
-            fallback_where = []
-            fallback_params = []
-            for term in fallback_terms[:3]:
-                fallback_where.append("""
-                (
-                    LOWER(COALESCE(name,'')) LIKE LOWER(?) OR
-                    LOWER(COALESCE(city,'')) LIKE LOWER(?) OR
-                    LOWER(COALESCE(country,'')) LIKE LOWER(?) OR
-                    LOWER(COALESCE(area,'')) LIKE LOWER(?) OR
-                    LOWER(COALESCE(address,'')) LIKE LOWER(?)
-                )
-                """)
-                fallback_params.extend([f"%{term}%"] * 5)
-
-            fallback_sql = "WHERE " + " OR ".join(fallback_where) if fallback_where else ""
-            total = con.execute(f"SELECT COUNT(*) FROM hotels {fallback_sql}", fallback_params).fetchone()[0]
-            rows = con.execute(
-                f"""
-                SELECT * FROM hotels
-                {fallback_sql}
-                ORDER BY
-                  CASE WHEN image IS NOT NULL AND image != '' THEN 0 ELSE 1 END,
-                  CASE WHEN rating IS NOT NULL AND rating != '' THEN 0 ELSE 1 END,
-                  name
-                LIMIT ? OFFSET ?
-                """,
-                fallback_params + [page_size, offset],
-            ).fetchall()
-        else:
-            rows = con.execute(
-                f"""
-                SELECT * FROM hotels
-                {sql_where}
-                ORDER BY
-                  CASE WHEN image IS NOT NULL AND image != '' THEN 0 ELSE 1 END,
-                  CASE WHEN rating IS NOT NULL AND rating != '' THEN 0 ELSE 1 END,
-                  name
-                LIMIT ? OFFSET ?
-                """,
-                params + [page_size, offset],
-            ).fetchall()
-
-        items = [hotel_to_dict(r) for r in rows]
-
-        return {
-            "ok": True,
-            "source": "database",
-            "fake_data": False,
-            "total": total,
-            "shown": len(items),
-            "page": page,
-            "page_size": page_size,
-            "has_more": offset + len(items) < total,
-            "hotels": items,
-            "results": items,
-            "items": items,
-            "message": "" if total else "No matching stays were found.",
-        }
-    finally:
-        con.close()
-
-@app.get("/api/hotels/search")
-def hotels_search(
-    country: str = "",
-    city: str = "",
-    destination: str = "",
-    q: str = "",
-    facilities: str = "",
-    page: int = 1,
-    page_size: int = 60,
-    limit: Optional[int] = None,
-):
-    return search_hotels_core(country, city, destination, q, facilities, page, page_size, limit)
-
-@app.get("/api/hotels")
-def hotels(
-    country: str = "",
-    city: str = "",
-    destination: str = "",
-    q: str = "",
-    facilities: str = "",
-    page: int = 1,
-    page_size: int = 60,
-    limit: Optional[int] = None,
-):
-    return search_hotels_core(country, city, destination, q, facilities, page, page_size, limit)
-
-@app.get("/api/hotels-premium")
-def hotels_premium(
-    country: str = "",
-    city: str = "",
-    destination: str = "",
-    q: str = "",
-    facilities: str = "",
-    page: int = 1,
-    page_size: int = 60,
-    limit: Optional[int] = None,
-):
-    return search_hotels_core(country, city, destination, q, facilities, page, page_size, limit)
-
-class AvailabilityRequest(BaseModel):
-    name: str = ""
-    email: str = ""
-    message: str = ""
-    hotel_name: str = ""
-    hotel_id: str = ""
-    property: str = ""
-    selected_hotel: str = ""
-
-def send_resend_email(to_email: str, subject: str, html: str, reply_to: str = ""):
-    resend_key = os.getenv("RESEND_API_KEY", "").strip()
-    sender = os.getenv("RESEND_FROM", "reservations@myspace-hotel.com").strip()
-
-    if not resend_key:
-        raise RuntimeError("RESEND_API_KEY is missing.")
-    if not to_email:
-        raise RuntimeError("Recipient email is missing.")
-
-    payload = {
-        "from": sender,
-        "to": [to_email],
-        "subject": subject,
-        "html": html,
+    return {
+        "city": city,
+        "count": len(results),
+        "results": results
     }
 
-    if reply_to:
-        payload["reply_to"] = reply_to
 
-    response = requests.post(
-        "https://api.resend.com/emails",
-        headers={
-            "Authorization": f"Bearer {resend_key}",
-            "Content-Type": "application/json",
-        },
-        json=payload,
-        timeout=30,
-    )
+@app.get("/hotel")
+def hotel_details(hotel_id: str):
+    data = rapid_get("/v1/hotels/get-hotel-details", {
+        "hotel_id": hotel_id,
+        "locale": "en-gb"
+    })
 
-    if response.status_code >= 300:
-        raise RuntimeError(f"Resend failed: {response.status_code} {response.text[:500]}")
+    return data if data else {"error": "not found"}
 
-    return True
 
-def send_availability_email(req: AvailabilityRequest):
-    hotel_name = req.hotel_name or req.property or req.selected_hotel or "Selected stay"
-    customer_name = req.name or "Customer"
-    customer_email = req.email.strip()
-    message_text = req.message or ""
+# =========================================================
+# RESERVATION SYSTEM (NON-AFFILIATE)
+# =========================================================
 
-    admin_html = f"""
-    <h2>New availability request</h2>
-    <p><b>Hotel / stay:</b> {hotel_name}</p>
-    <p><b>Customer name:</b> {customer_name}</p>
-    <p><b>Customer email:</b> {customer_email}</p>
-    <p><b>Request:</b><br>{message_text}</p>
-    """
+@app.post("/reserve")
+def reserve(
+    hotel_id: str,
+    hotel_name: str,
+    city: str,
+    customer_name: str,
+    customer_email: str,
+    checkin: str,
+    checkout: str
+):
+    record = {
+        "hotel_id": hotel_id,
+        "hotel_name": hotel_name,
+        "city": city,
+        "customer_name": customer_name,
+        "customer_email": customer_email,
+        "checkin": checkin,
+        "checkout": checkout,
+        "created_at": datetime.utcnow().isoformat()
+    }
 
-    send_resend_email(
-        RESERVATIONS_EMAIL,
-        f"New availability request - {hotel_name}",
-        admin_html,
-        reply_to=customer_email,
-    )
+    data = []
+    if os.path.exists(RESERVATION_FILE):
+        with open(RESERVATION_FILE, "r") as f:
+            data = json.load(f)
 
-    if customer_email:
-        customer_html = f"""
-        <h2>Your availability request has been received</h2>
-        <p>Hello {customer_name},</p>
-        <p>Thank you for contacting My Space Hotel.</p>
-        <p>We have received your request for:</p>
-        <p><b>{hotel_name}</b></p>
-        <p>Our reservations team will review your request and continue by email.</p>
-        <p><b>Your message:</b><br>{message_text}</p>
-        <p>Kind regards,<br>My Space Hotel Reservations</p>
-        """
+    data.append(record)
 
-        send_resend_email(
-            customer_email,
-            f"We received your request - {hotel_name}",
-            customer_html,
-            reply_to=RESERVATIONS_EMAIL,
-        )
+    with open(RESERVATION_FILE, "w") as f:
+        json.dump(data, f)
 
-    return True
+    return {"status": "reservation saved"}
 
-def send_reservation_email(payload):
-    if isinstance(payload, dict):
-        return send_availability_email(AvailabilityRequest(**payload))
-    return send_availability_email(payload)
 
-@app.post("/api/request-availability")
-def request_availability(req: AvailabilityRequest):
+@app.get("/reservations")
+def get_reservations():
+    if not os.path.exists(RESERVATION_FILE):
+        return []
+
+    with open(RESERVATION_FILE, "r") as f:
+        return json.load(f)
+
+
+# =========================================================
+# STATS
+# =========================================================
+
+@app.get("/stats")
+def stats():
+    count = 0
+
+    if os.path.exists(INDEX_FILE):
+        with open(INDEX_FILE, "r") as f:
+            for _ in f:
+                count += 1
+
+    return {"total_hotels": count}
+
+
+# =========================================================
+# GROWTH ENDPOINTS
+# =========================================================
+
+@app.post("/grow")
+def grow():
+    cities = [
+        "London", "Paris", "Dubai", "New York", "Tokyo",
+        "Rome", "Barcelona", "Amsterdam", "Berlin",
+        "Istanbul", "Bangkok", "Singapore"
+    ]
+
+    report = {}
+
+    for c in cities:
+        added = discover_city(c)
+        report[c] = added
+
+    return report
+
+
+@app.post("/grow-country")
+def grow_country(country: str):
+    # Smart expansion keywords
+    seeds = [
+        country,
+        f"{country} capital",
+        f"{country} city",
+        f"{country} tourism",
+        f"{country} airport",
+        f"{country} downtown"
+    ]
+
+    report = {}
+
+    for s in seeds:
+        added = discover_city(s)
+        report[s] = added
+
+    return report
+# =========================================================
+# PUBLIC HOTEL COUNT / STATUS ENDPOINTS
+# Safe public endpoints for Render customer-visible database status.
+# =========================================================
+from pathlib import Path as _Path
+import sqlite3 as _sqlite3
+
+def _public_hotel_db_path():
+    return _Path(__file__).resolve().parent / "hotel_catalog.db"
+
+def _public_hotel_count():
+    db_path = _public_hotel_db_path()
+    if not db_path.exists():
+        return {
+            "database_found": False,
+            "total_hotels": 0,
+            "database_path": str(db_path.name),
+            "message": "Public hotel database is not present on this Render service."
+        }
+
     try:
-        send_availability_email(req)
+        con = _sqlite3.connect(db_path)
+        total = con.execute("SELECT COUNT(*) FROM hotels").fetchone()[0]
+        countries = con.execute("SELECT COUNT(DISTINCT country) FROM hotels WHERE country IS NOT NULL AND country != ''").fetchone()[0]
+        cities = con.execute("SELECT COUNT(DISTINCT city) FROM hotels WHERE city IS NOT NULL AND city != ''").fetchone()[0]
+        con.close()
         return {
-            "ok": True,
-            "email_sent": True,
-            "message": "Availability request received.",
-            "support_email": SUPPORT_EMAIL,
+            "database_found": True,
+            "total_hotels": int(total),
+            "countries_loaded": int(countries),
+            "cities_loaded": int(cities),
+            "database_path": str(db_path.name),
+            "message": "Public hotel database loaded."
         }
-    except Exception as e:
-        print("AVAILABILITY EMAIL ERROR:", str(e))
+    except Exception as exc:
         return {
-            "ok": False,
-            "email_sent": False,
-            "message": "Request was received but email could not be sent.",
-            "error": str(e),
-            "support_email": SUPPORT_EMAIL,
+            "database_found": True,
+            "total_hotels": 0,
+            "database_path": str(db_path.name),
+            "error": str(exc),
+            "message": "Public hotel database exists but could not be counted."
         }
 
-@app.post("/api/reservation-request")
-def reservation_request(req: AvailabilityRequest):
-    return request_availability(req)
+@app.get("/status")
+def public_status():
+    data = _public_hotel_count()
+    data["ok"] = True
+    data["app"] = "My Space Hotel Backend"
+    data["support"] = "reservations@myspace-hotel.com"
+    return data
+
+@app.get("/stats")
+def public_stats():
+    return public_status()
+
+@app.get("/api/status")
+def public_api_status():
+    return public_status()
+
+@app.get("/api/stats")
+def public_api_stats():
+    return public_status()
