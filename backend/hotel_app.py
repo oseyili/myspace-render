@@ -29,7 +29,7 @@ app = FastAPI(title="My Space Hotel Backend")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -39,33 +39,42 @@ def db():
     con.row_factory = sqlite3.Row
     return con
 
-def first(row, names, default=""):
-    keys = row.keys()
-    for name in names:
-        if name in keys and row[name] not in [None, ""]:
+def columns():
+    con = db()
+    try:
+        return [r[1] for r in con.execute("PRAGMA table_info(hotels)").fetchall()]
+    finally:
+        con.close()
+
+def get(row, name, default=""):
+    try:
+        if name in row.keys() and row[name] not in [None, ""]:
             return row[name]
+    except Exception:
+        pass
     return default
 
 def hotel_to_dict(row):
-    image = first(row, ["image", "high_res_image", "image_url", "photo_url", "main_photo_url", "max_photo_url"])
+    image = get(row, "image") or get(row, "high_res_image")
     return {
-        "id": str(first(row, ["id", "hotel_id", "supplier_hotel_id"])),
-        "name": str(first(row, ["name", "hotel_name"], "Unnamed stay")),
-        "country": str(first(row, ["country", "country_trans", "country_name"], "")),
-        "city": str(first(row, ["city", "city_name", "destination"], "")),
-        "area": str(first(row, ["area", "district", "districts"], "")),
-        "address": str(first(row, ["address", "address_trans"], "")),
-        "rating": str(first(row, ["rating", "class", "review_score"], "")),
-        "review_score": str(first(row, ["review_score", "rating"], "")),
-        "review_count": str(first(row, ["review_count", "review_nr"], "")),
-        "price": str(first(row, ["price", "min_total_price", "gross_price"], "")),
-        "currency": str(first(row, ["currency", "currencycode", "currency_code"], "")),
+        "id": str(get(row, "id") or get(row, "supplier_hotel_id")),
+        "supplier_hotel_id": str(get(row, "supplier_hotel_id")),
+        "name": str(get(row, "name", "Unnamed stay")),
+        "country": str(get(row, "country")),
+        "city": str(get(row, "city")),
+        "area": str(get(row, "area")),
+        "address": str(get(row, "address")),
+        "currency": str(get(row, "currency")),
+        "price": str(get(row, "price")),
+        "rating": str(get(row, "rating")),
+        "review_score": str(get(row, "review_score")),
+        "review_count": str(get(row, "review_count")),
         "image": str(image),
         "high_res_image": str(image),
-        "facilities": str(first(row, ["facilities", "hotel_facilities"], "")),
-        "description": str(first(row, ["description", "accommodation_type_name"], "")),
-        "latitude": str(first(row, ["latitude", "lat"], "")),
-        "longitude": str(first(row, ["longitude", "lon", "lng"], "")),
+        "latitude": str(get(row, "latitude")),
+        "longitude": str(get(row, "longitude")),
+        "facilities": str(get(row, "facilities")),
+        "description": str(get(row, "description")),
     }
 
 @app.get("/")
@@ -74,7 +83,7 @@ def root():
 
 @app.get("/api/health")
 def health():
-    return {"ok": True, "database_exists": DB_PATH.exists()}
+    return {"ok": True, "database_exists": DB_PATH.exists(), "columns": columns()}
 
 @app.get("/api/admin/catalogue-status")
 def catalogue_status():
@@ -92,15 +101,15 @@ def catalogue_status():
     finally:
         con.close()
 
-def country_options(value):
+def country_terms(value):
     v = str(value or "").strip().lower()
-    if v in ["uk", "gb", "england", "britain"]:
-        return ["United Kingdom", "England", "Scotland", "Wales", "Northern Ireland", "GB", "UK"]
-    if v in ["usa", "us", "america"]:
+    if v in ["uk", "gb", "england", "britain", "united kingdom"]:
+        return ["United Kingdom", "England", "Scotland", "Wales", "Northern Ireland", "UK", "GB"]
+    if v in ["usa", "us", "america", "united states"]:
         return ["United States", "USA", "US", "America"]
-    if v == "ng":
+    if v in ["ng", "nigeria"]:
         return ["Nigeria"]
-    if v == "uae":
+    if v in ["uae", "united arab emirates"]:
         return ["United Arab Emirates", "Dubai", "Abu Dhabi"]
     return [value] if value else []
 
@@ -113,34 +122,34 @@ def search_core(country="", city="", destination="", area="", q="", keyword="", 
     where = []
     params = []
 
-    options = country_options(country)
-    if options:
-        where.append("(" + " OR ".join(["LOWER(COALESCE(country,'')) LIKE LOWER(?)" for _ in options]) + ")")
-        params.extend([f"%{x}%" for x in options])
+    c_terms = country_terms(country)
+    if c_terms:
+        where.append("(" + " OR ".join(["LOWER(country) LIKE LOWER(?)" for _ in c_terms]) + ")")
+        params.extend([f"%{x}%" for x in c_terms])
 
     city = str(city or "").strip()
     if city:
-        where.append("(LOWER(COALESCE(city,'')) LIKE LOWER(?) OR LOWER(COALESCE(area,'')) LIKE LOWER(?) OR LOWER(COALESCE(address,'')) LIKE LOWER(?))")
+        where.append("(LOWER(city) LIKE LOWER(?) OR LOWER(area) LIKE LOWER(?) OR LOWER(address) LIKE LOWER(?))")
         params.extend([f"%{city}%", f"%{city}%", f"%{city}%"])
 
     place = str(destination or area or "").strip()
     if len(place) > 2:
-        where.append("(LOWER(COALESCE(area,'')) LIKE LOWER(?) OR LOWER(COALESCE(address,'')) LIKE LOWER(?) OR LOWER(COALESCE(city,'')) LIKE LOWER(?))")
+        where.append("(LOWER(area) LIKE LOWER(?) OR LOWER(address) LIKE LOWER(?) OR LOWER(city) LIKE LOWER(?))")
         params.extend([f"%{place}%", f"%{place}%", f"%{place}%"])
 
     text = str(q or keyword or "").strip()
     if len(text) > 2:
-        where.append("(LOWER(COALESCE(name,'')) LIKE LOWER(?) OR LOWER(COALESCE(description,'')) LIKE LOWER(?))")
+        where.append("(LOWER(name) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?))")
         params.extend([f"%{text}%", f"%{text}%"])
 
     if facilities:
-        selected = [x.strip() for x in facilities.split(",") if x.strip()]
-        if selected:
-            clauses = []
-            for f in selected:
-                clauses.append("LOWER(COALESCE(facilities,'')) LIKE LOWER(?)")
-                params.append(f"%{f}%")
-            where.append("(" + " OR ".join(clauses) + ")")
+        wanted = [x.strip() for x in facilities.split(",") if x.strip()]
+        if wanted:
+            parts = []
+            for item in wanted:
+                parts.append("LOWER(facilities) LIKE LOWER(?)")
+                params.append(f"%{item}%")
+            where.append("(" + " OR ".join(parts) + ")")
 
     sql_where = "WHERE " + " AND ".join(where) if where else ""
 
@@ -154,7 +163,6 @@ def search_core(country="", city="", destination="", area="", q="", keyword="", 
             {sql_where}
             ORDER BY
               CASE WHEN image IS NOT NULL AND image != '' THEN 0 ELSE 1 END,
-              CASE WHEN rating IS NOT NULL AND rating != '' THEN 0 ELSE 1 END,
               name
             LIMIT ? OFFSET ?
             """,
@@ -175,6 +183,16 @@ def search_core(country="", city="", destination="", area="", q="", keyword="", 
             "results": items,
             "items": items,
             "message": "" if total else "No matching stays were found.",
+        }
+    except Exception as e:
+        return {
+            "ok": False,
+            "error": str(e),
+            "total": 0,
+            "hotels": [],
+            "results": [],
+            "items": [],
+            "message": "Search error.",
         }
     finally:
         con.close()
