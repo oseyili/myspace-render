@@ -1,5 +1,6 @@
 ﻿backend/hotel_catalog.db
 backend/*.db
+!backend/hotel_catalog_seed.db.gz
 database_backups/
 *.db
 .env
