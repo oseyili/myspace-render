@@ -1,10 +1,21 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import "./App.css";
 
 const API_BASE = "https://hotel-backend-1-ee5z.onrender.com";
 const SUPPORT_EMAIL = "reservations@myspace-hotel.com";
 
-const FACILITIES = ["wifi","gym","pool","airport shuttle","beach access","spa","restaurant","parking","family rooms","business lounge"];
+const FACILITIES = [
+  "wifi",
+  "gym",
+  "pool",
+  "airport shuttle",
+  "beach access",
+  "spa",
+  "restaurant",
+  "parking",
+  "family rooms",
+  "business lounge"
+];
 
 const INFO = {
   faq: {
@@ -47,23 +58,50 @@ function getHotels(payload) {
 }
 
 function cleanImage(hotel) {
-  const url = hotel?.image || hotel?.high_res_image || hotel?.max_photo_url || hotel?.main_photo_url || hotel?.photo_url || hotel?.image_url || "";
+  const url =
+    hotel?.image ||
+    hotel?.high_res_image ||
+    hotel?.max_photo_url ||
+    hotel?.main_photo_url ||
+    hotel?.photo_url ||
+    hotel?.image_url ||
+    "";
+
   if (!url || typeof url !== "string") return "";
-  return url.replace("square60", "max1280x900").replace("square200", "max1280x900").replace("max300", "max1280x900").replace("max500", "max1280x900");
+
+  return url
+    .replace("square60", "max1280x900")
+    .replace("square200", "max1280x900")
+    .replace("max300", "max1280x900")
+    .replace("max500", "max1280x900");
+}
+
+function normalizeCountry(value) {
+  const v = String(value || "").trim().toLowerCase();
+
+  if (v === "uk" || v === "gb" || v === "england") return "United Kingdom";
+  if (v === "usa" || v === "us" || v === "america") return "United States";
+  if (v === "ng") return "Nigeria";
+  if (v === "uae") return "United Arab Emirates";
+
+  return value;
 }
 
 export default function App() {
   const [activePage, setActivePage] = useState("home");
+
   const [country, setCountry] = useState("uk");
   const [city, setCity] = useState("london");
   const [area, setArea] = useState("");
   const [keyword, setKeyword] = useState("");
   const [guests, setGuests] = useState(2);
   const [selectedFacilities, setSelectedFacilities] = useState([]);
+
   const [hotels, setHotels] = useState([]);
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
+
   const [page, setPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
   const [hasMore, setHasMore] = useState(false);
@@ -75,7 +113,9 @@ export default function App() {
   const [requestNotice, setRequestNotice] = useState("");
 
   function toggleFacility(name) {
-    setSelectedFacilities((old) => old.includes(name) ? old.filter((x) => x !== name) : [...old, name]);
+    setSelectedFacilities((old) =>
+      old.includes(name) ? old.filter((x) => x !== name) : [...old, name]
+    );
   }
 
   async function searchHotels(nextPage = 1) {
@@ -91,27 +131,55 @@ export default function App() {
     }
 
     try {
-      const params = new URLSearchParams({
-        country,
-        city,
-        destination: area,
-        q: keyword,
-        guests: String(guests),
-        page: String(nextPage),
-        page_size: "100",
-        limit: "100"
+      const params = new URLSearchParams();
+
+      const cleanCountry = normalizeCountry(country);
+      const cleanCity = city.trim();
+      const cleanArea = area.trim();
+      const cleanKeyword = keyword.trim();
+
+      if (cleanCountry) params.set("country", cleanCountry);
+      if (cleanCity) params.set("city", cleanCity);
+      if (cleanArea.length > 2) {
+        params.set("area", cleanArea);
+        params.set("destination", cleanArea);
+      }
+      if (cleanKeyword.length > 2) {
+        params.set("keyword", cleanKeyword);
+        params.set("q", cleanKeyword);
+      }
+
+      params.set("guests", String(guests));
+      params.set("page", String(nextPage));
+      params.set("page_size", "100");
+      params.set("limit", "100");
+
+      if (selectedFacilities.length) {
+        params.set("facilities", selectedFacilities.join(","));
+      }
+
+      const res = await fetch(`${API_BASE}/api/hotels/search?${params.toString()}`, {
+        cache: "no-store"
       });
 
-      if (selectedFacilities.length) params.set("facilities", selectedFacilities.join(","));
-
-      const res = await fetch(`${API_BASE}/api/hotels/search?${params.toString()}`, { cache: "no-store" });
       const payload = await res.json();
       const list = getHotels(payload);
 
-      setHotels((old) => nextPage === 1 ? list : [...old, ...list]);
+      setHotels((old) => (nextPage === 1 ? list : [...old, ...list]));
       setPage(nextPage);
-      setTotalResults(Number(payload?.total || 0));
-      setHasMore(Boolean(payload?.has_more));
+
+      const total =
+        Number(payload?.total || 0) ||
+        Number(payload?.count || 0) ||
+        (nextPage === 1 ? list.length : hotels.length + list.length);
+
+      setTotalResults(total);
+
+      const more =
+        Boolean(payload?.has_more) ||
+        list.length >= 100;
+
+      setHasMore(more);
 
       if (!list.length && nextPage === 1) {
         setNotice("No hotel matched this search. Try country and city only first, then add area, hotel name, or facilities.");
@@ -176,13 +244,21 @@ export default function App() {
 
   if (activePage === "guide") {
     const mapQuery = encodeURIComponent([area, city, country].filter(Boolean).join(" ") || "London");
+
     return (
       <main className="app-shell">
         <section className="page-card">
-          <button className="yellow-small" onClick={() => setActivePage("home")}>Back to hotel search</button>
+          <button className="yellow-small" onClick={() => setActivePage("home")}>
+            Back to hotel search
+          </button>
           <h1>Travel Guides</h1>
           <p className="page-intro">Use the map to understand the destination area before choosing a stay.</p>
-          <iframe title="Travel guide map" src={`https://www.google.com/maps?q=${mapQuery}&output=embed`} className="guide-map" loading="lazy" />
+          <iframe
+            title="Travel guide map"
+            src={`https://www.google.com/maps?q=${mapQuery}&output=embed`}
+            className="guide-map"
+            loading="lazy"
+          />
         </section>
       </main>
     );
@@ -190,10 +266,13 @@ export default function App() {
 
   if (activePage !== "home") {
     const content = INFO[activePage];
+
     return (
       <main className="app-shell">
         <section className="page-card">
-          <button className="yellow-small" onClick={() => setActivePage("home")}>Back to hotel search</button>
+          <button className="yellow-small" onClick={() => setActivePage("home")}>
+            Back to hotel search
+          </button>
           <h1>{content.title}</h1>
           <p className="page-intro">{content.intro}</p>
           <div className="answer-grid">
@@ -214,8 +293,13 @@ export default function App() {
       <section className="hero-grid">
         <section className="hero-card">
           <div className="brand">MY SPACE HOTEL</div>
+
           <h1>Find hotels around the world, compare stays clearly, and request availability with confidence.</h1>
-          <p>Search by destination, compare location, facilities, images, and ratings, then continue only when the stay fits your trip.</p>
+
+          <p>
+            Search by destination, compare location, facilities, images, and ratings,
+            then continue only when the stay fits your trip.
+          </p>
 
           <div className="nav-buttons">
             <button onClick={() => setActivePage("guide")}>Travel Guides</button>
@@ -236,22 +320,67 @@ export default function App() {
           <h2>Search stays</h2>
           <p>Start with country and city. Add filters only when you want a narrower result.</p>
 
-          <input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Country, e.g. UK, USA, NG" />
-          <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City, e.g. London, Abuja" />
-          <input value={area} onChange={(e) => setArea(e.target.value)} placeholder="Area, e.g. Mayfair, Lekki, City Centre" />
-          <input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Hotel name or keyword" />
+          <input
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            placeholder="Country, e.g. UK, USA, NG"
+          />
+
+          <input
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder="City, e.g. London, Abuja"
+          />
+
+          <input
+            value={area}
+            onChange={(e) => setArea(e.target.value)}
+            placeholder="Area, e.g. Mayfair, Lekki, City Centre"
+          />
+
+          <input
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            placeholder="Hotel name or keyword"
+          />
 
           <div className="guest-row">
             <b>Guests</b>
-            {[1,2,3,4,5,6].map((n) => <button key={n} className={guests === n ? "active" : ""} onClick={() => setGuests(n)}>{n}</button>)}
+            {[1, 2, 3, 4, 5, 6].map((n) => (
+              <button
+                key={n}
+                className={guests === n ? "active" : ""}
+                onClick={() => setGuests(n)}
+              >
+                {n}
+              </button>
+            ))}
           </div>
 
           <div className="facility-box">
             <h3>Choose preferred facilities</h3>
-            <div>{FACILITIES.map((f) => <label key={f}><input type="checkbox" checked={selectedFacilities.includes(f)} onChange={() => toggleFacility(f)} />{f}</label>)}</div>
+            <div>
+              {FACILITIES.map((f) => (
+                <label key={f}>
+                  <input
+                    type="checkbox"
+                    checked={selectedFacilities.includes(f)}
+                    onChange={() => toggleFacility(f)}
+                  />
+                  {f}
+                </label>
+              ))}
+            </div>
           </div>
 
-          <button className="search-button" onClick={() => searchHotels(1)} disabled={loading}>{loading ? "Searching..." : "Search hotels"}</button>
+          <button
+            className="search-button"
+            onClick={() => searchHotels(1)}
+            disabled={loading}
+          >
+            {loading ? "Searching..." : "Search hotels"}
+          </button>
+
           {notice && <div className="notice">{notice}</div>}
         </section>
       </section>
@@ -259,22 +388,39 @@ export default function App() {
       <section className="results-grid">
         <section className="results-card">
           <h2>AVAILABLE STAYS</h2>
+
           <p>
             {hotels.length
               ? `Showing ${hotels.length}${totalResults ? ` of ${totalResults}` : ""} matching stays`
-              : "Search to see available matching stays"}
+              : "Search to see matching stays"}
           </p>
 
           <div className="hotel-list">
             {hotels.map((hotel, index) => {
               const img = cleanImage(hotel);
+
               return (
-                <button key={`${hotel.id || "hotel"}-${index}`} className="hotel-card" onClick={() => { setSelectedHotel(hotel); setRequestNotice(""); }}>
-                  {img ? <img src={img} alt={hotel.name || "Hotel"} loading="lazy" /> : <div className="no-image">Image not supplied</div>}
+                <button
+                  key={`${hotel.id || hotel.hotel_id || "hotel"}-${index}`}
+                  className="hotel-card"
+                  onClick={() => {
+                    setSelectedHotel(hotel);
+                    setRequestNotice("");
+                  }}
+                >
+                  {img ? (
+                    <img src={img} alt={hotel.name || "Hotel"} loading="lazy" />
+                  ) : (
+                    <div className="no-image">Image not supplied</div>
+                  )}
+
                   <div>
-                    <h3>{hotel.name || "Hotel"}</h3>
+                    <h3>{hotel.name || hotel.hotel_name || "Hotel"}</h3>
                     <p>{[hotel.area, hotel.city, hotel.country].filter(Boolean).join(", ")}</p>
-                    <b>{hotel.rating ? `${hotel.rating} star` : "Rating not supplied"}{hotel.review_score ? ` â€¢ Review ${hotel.review_score}` : ""}</b>
+                    <b>
+                      {hotel.rating ? `${hotel.rating} star` : "Rating not supplied"}
+                      {hotel.review_score ? ` • Review ${hotel.review_score}` : ""}
+                    </b>
                     {hotel.address && <p>{hotel.address}</p>}
                   </div>
                 </button>
@@ -283,7 +429,11 @@ export default function App() {
           </div>
 
           {hasMore && (
-            <button className="search-button" onClick={() => searchHotels(page + 1)} disabled={loading}>
+            <button
+              className="search-button"
+              onClick={() => searchHotels(page + 1)}
+              disabled={loading}
+            >
               {loading ? "Loading..." : "Load more matching stays"}
             </button>
           )}
@@ -292,13 +442,33 @@ export default function App() {
         <section className="request-card">
           <h2>REQUEST AVAILABILITY</h2>
           <h3>Send your reservation request</h3>
-          <div className="selected-hotel">{selectedHotel ? selectedHotel.name : "Select a hotel from the list to continue."}</div>
 
-          <input value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Your name" />
-          <input value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="Your email" />
-          <textarea value={customerMessage} onChange={(e) => setCustomerMessage(e.target.value)} placeholder="Special requests, dates, room needs, or questions" />
+          <div className="selected-hotel">
+            {selectedHotel ? selectedHotel.name || selectedHotel.hotel_name : "Select a hotel from the list to continue."}
+          </div>
 
-          <button onClick={submitAvailability} disabled={requesting}>{requesting ? "Sending request..." : "Request availability"}</button>
+          <input
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+            placeholder="Your name"
+          />
+
+          <input
+            value={customerEmail}
+            onChange={(e) => setCustomerEmail(e.target.value)}
+            placeholder="Your email"
+          />
+
+          <textarea
+            value={customerMessage}
+            onChange={(e) => setCustomerMessage(e.target.value)}
+            placeholder="Special requests, dates, room needs, or questions"
+          />
+
+          <button onClick={submitAvailability} disabled={requesting}>
+            {requesting ? "Sending request..." : "Request availability"}
+          </button>
+
           {requestNotice && <div className="notice">{requestNotice}</div>}
         </section>
       </section>
