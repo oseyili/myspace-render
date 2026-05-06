@@ -27,6 +27,82 @@ app.add_middleware(
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 PUBLIC_APP_URL = os.getenv("PUBLIC_APP_URL", "http://localhost:5173").rstrip("/")
 HOTELBEDS_DEFAULT_DESTINATION = os.getenv("HOTELBEDS_DEFAULT_DESTINATION", "LON")
+
+DESTINATION_LOCAL_CURRENCY = {
+    "LON": "GBP", "DUB": "EUR",
+    "PAR": "EUR", "BCN": "EUR", "MAD": "EUR", "PMI": "EUR", "AGP": "EUR", "ALC": "EUR",
+    "AMS": "EUR", "BER": "EUR", "VIE": "EUR", "FAO": "EUR", "NCE": "EUR", "ATH": "EUR", "ROM": "EUR", "LIS": "EUR",
+    "PRG": "CZK",
+    "IST": "TRY",
+    "DXB": "AED",
+    "NYC": "USD",
+    "BKK": "THB",
+    "TYO": "JPY",
+    "SIN": "SGD",
+    "ABV": "NGN", "LOS": "NGN", "NG": "NGN",
+}
+
+# Conservative display-only FX estimates against GBP. Stripe/payment still uses supplier/account currency.
+GBP_TO_LOCAL_ESTIMATE = {
+    "GBP": 1.0,
+    "EUR": 1.17,
+    "USD": 1.25,
+    "AED": 4.59,
+    "CZK": 29.3,
+    "TRY": 40.4,
+    "NGN": 1880.0,
+    "THB": 45.8,
+    "JPY": 193.0,
+    "SGD": 1.69,
+}
+
+def expected_local_currency(destination_code):
+    return DESTINATION_LOCAL_CURRENCY.get(clean(destination_code).upper(), "")
+
+def safe_float(value):
+    try:
+        return float(clean(value).replace(",", ""))
+    except Exception:
+        return 0.0
+
+def local_display_price(destination_code, amount, payment_currency):
+    payment_currency = clean(payment_currency or "GBP").upper()
+    local_currency = expected_local_currency(destination_code) or payment_currency
+    amount_number = safe_float(amount)
+
+    if amount_number <= 0:
+        return {
+            "display_amount": "",
+            "display_currency": local_currency,
+            "payment_amount": clean(amount),
+            "payment_currency": payment_currency,
+            "currency_note": "",
+            "currency_is_estimate": False,
+        }
+
+    if local_currency == payment_currency:
+        display_amount = amount_number
+        note = ""
+        estimate = False
+    elif payment_currency == "GBP" and local_currency in GBP_TO_LOCAL_ESTIMATE:
+        display_amount = amount_number * GBP_TO_LOCAL_ESTIMATE[local_currency]
+        note = f"Local estimate shown in {local_currency}; payment provider may charge in {payment_currency}."
+        estimate = True
+    else:
+        display_amount = amount_number
+        local_currency = payment_currency
+        note = f"Price shown in payment currency {payment_currency}."
+        estimate = False
+
+    return {
+        "display_amount": f"{display_amount:.2f}",
+        "display_currency": local_currency,
+        "payment_amount": clean(amount),
+        "payment_currency": payment_currency,
+        "currency_note": note,
+        "currency_is_estimate": estimate,
+    }
+
 RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY", "").strip()
 RAPIDAPI_HOST = os.getenv("RAPIDAPI_HOST", "booking-com15.p.rapidapi.com").strip()
 RAPIDAPI_HEADERS = {
@@ -714,6 +790,9 @@ def get_cached_hotels(destination_code="LON", checkin="", checkout="", guests=2,
             cancellation_policies = []
 
         image_data = get_verified_image_for_hotel(con, r[0])
+        payment_currency = clean(r[13] or "GBP").upper()
+        payment_amount = clean(r[12] or r[11])
+        display_price = local_display_price(selected_destination, payment_amount, payment_currency)
 
         hotels.append({
             "id": clean(r[0]),
@@ -733,9 +812,16 @@ def get_cached_hotels(destination_code="LON", checkin="", checkout="", guests=2,
             "longitude": clean(r[5]),
             "first_rate": {
                 "rate_key": clean(r[9]),
-                "currency": clean(r[13] or "GBP"),
+                "currency": display_price["display_currency"],
+                "display_currency": display_price["display_currency"],
+                "display_amount": display_price["display_amount"],
+                "payment_currency": display_price["payment_currency"],
+                "payment_amount": display_price["payment_amount"],
+                "currency_note": display_price["currency_note"],
+                "currency_is_estimate": display_price["currency_is_estimate"],
                 "net": clean(r[11]),
-                "selling_rate": clean(r[12] or r[11]),
+                "selling_rate": display_price["display_amount"],
+                "supplier_selling_rate": payment_amount,
                 "board_name": clean(r[8]),
                 "room_name": clean(r[7] or "Selected room"),
                 "cancellation_policies": cancellation_policies,
@@ -925,7 +1011,9 @@ def get_cached_rate(rate_key):
         "payment_type": clean(row[6]),
         "net": clean(row[7]),
         "amount": clean(row[8] or row[7]),
-        "currency": clean(row[9] or "GBP"),
+        "currency": clean(row[9] or "GBP").upper(),
+        "payment_amount": clean(row[8] or row[7]),
+        "payment_currency": clean(row[9] or "GBP").upper(),
         "cancellation_policies": cancellation_policies,
         "packaging": clean(row[11]),
         "allotment": clean(row[12]),
@@ -1129,8 +1217,8 @@ async def create_reservation(req: Request):
     created = now_iso()
 
     hotel_name = clean(data.get("hotel_name") or cached_rate["hotel_name"] or "Selected hotel")
-    amount_raw = clean(cached_rate.get("amount") or data.get("amount") or "50")
-    currency = clean(cached_rate.get("currency") or data.get("currency") or "GBP").lower()
+    amount_raw = clean(cached_rate.get("payment_amount") or cached_rate.get("amount") or data.get("payment_amount") or data.get("amount") or "50")
+    currency = clean(cached_rate.get("payment_currency") or cached_rate.get("currency") or data.get("payment_currency") or data.get("currency") or "GBP").lower()
 
     try:
         amount_pence = int(round(float(amount_raw) * 100))
