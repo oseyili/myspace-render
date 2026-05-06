@@ -1,3 +1,9 @@
 ﻿node_modules/
 .env
 *.db
+
+# Local database backups - never push to GitHub
+database_backups/
+*.db
+*.sqlite
+*.sqlite3
