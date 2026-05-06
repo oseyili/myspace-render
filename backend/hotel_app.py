@@ -72,6 +72,61 @@ def ensure_column(con, table, column, definition):
         con.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
 
 
+
+
+def import_seed_data_if_empty():
+    data_dir = Path(__file__).parent / "data"
+    rates_path = data_dir / "hotel_live_rates_london_seed.json"
+    images_path = data_dir / "hotel_images_live_backup.json"
+
+    con = db()
+
+    try:
+        existing_rates = con.execute("SELECT COUNT(*) FROM hotel_live_rates").fetchone()[0]
+        existing_images = con.execute("SELECT COUNT(*) FROM hotel_images").fetchone()[0]
+
+        if existing_rates == 0 and rates_path.exists():
+            import json
+            rates = json.loads(rates_path.read_text(encoding="utf-8"))
+
+            for r in rates:
+                columns = list(r.keys())
+                values = [r.get(c) for c in columns]
+                placeholders = ",".join(["?"] * len(columns))
+                col_sql = ",".join(columns)
+
+                con.execute(
+                    f"INSERT OR IGNORE INTO hotel_live_rates ({col_sql}) VALUES ({placeholders})",
+                    values,
+                )
+
+            print("SEEDED LIVE RATES:", len(rates))
+
+        if existing_images == 0 and images_path.exists():
+            import json
+            images = json.loads(images_path.read_text(encoding="utf-8"))
+
+            for item in images:
+                save_verified_image(
+                    con,
+                    clean(item.get("hotel_code")),
+                    clean(item.get("destination_code")).upper(),
+                    clean(item.get("hotel_name")),
+                    clean(item.get("image_url")),
+                    clean(item.get("source") or "seeded_live_image_backup"),
+                )
+
+            print("SEEDED IMAGE URLS:", len(images))
+
+        con.commit()
+
+    except Exception as exc:
+        print("SEED IMPORT SKIPPED:", str(exc)[:500])
+
+    finally:
+        con.close()
+
+
 def init_db():
     con = db()
 
@@ -204,6 +259,7 @@ def init_db():
 @app.on_event("startup")
 def startup():
     init_db()
+    import_seed_data_if_empty()
 
 
 def pick(item, keys, default=""):
