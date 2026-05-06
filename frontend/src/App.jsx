@@ -63,11 +63,20 @@ function getRateKey(rate) {
 }
 
 function getRateAmount(rate) {
-  return rate?.selling_rate || rate?.sellingRate || rate?.net || rate?.amount || "";
+  return rate?.display_amount || rate?.selling_rate || rate?.sellingRate || rate?.net || rate?.amount || "";
 }
 
 function getRateCurrency(rate) {
-  return rate?.currency || "";
+  return rate?.display_currency || rate?.currency || "";
+}
+
+function getPaymentCurrencyNote(rate) {
+  if (!rate) return "";
+  if (rate.currency_note) return rate.currency_note;
+  if (rate.payment_currency && rate.display_currency && rate.payment_currency !== rate.display_currency) {
+    return `Displayed locally in ${rate.display_currency}. Payment may be processed in ${rate.payment_currency}.`;
+  }
+  return "";
 }
 
 function getPropertyImageUrl(hotel) {
@@ -83,7 +92,7 @@ function getPropertyImageUrl(hotel) {
   if (upper.includes("PEXELS")) return "";
   if (upper.includes("PIXABAY")) return "";
 
-  return `${API_BASE}/image-proxy?url=${encodeURIComponent(url)}`;
+  return url;
 }
 
 function PropertyImage({ hotel }) {
@@ -327,8 +336,10 @@ export default function App() {
         customer_phone: customerPhone.trim() || "0000000000",
         note: note.trim(),
         rate_key: getRateKey(rate),
-        amount: getRateAmount(rate),
-        currency: getRateCurrency(rate),
+        amount: rate.payment_amount || getRateAmount(rate),
+        currency: rate.payment_currency || getRateCurrency(rate),
+        display_amount: getRateAmount(rate),
+        display_currency: getRateCurrency(rate),
         room_name: rate.room_name || "",
         board_name: rate.board_name || "",
         payment_type: rate.payment_type || "",
@@ -454,7 +465,7 @@ export default function App() {
                           <p><b>Room:</b> {rate.room_name || "Selected room"}</p>
                           <p><b>Board:</b> {rate.board_name || "Board details available at booking"}</p>
                           <p><b>Payment:</b> {rate.payment_type || "Secure payment"}</p>
-                          <p><b>Price:</b> {getRateCurrency(rate)} {getRateAmount(rate) || "Available at checkout"}</p>
+                          <p><b>Price:</b> {getRateCurrency(rate)} {getRateAmount(rate) || "Available at checkout"}</p>{getPaymentCurrencyNote(rate) && <p style={styles.currencyNote}>{getPaymentCurrencyNote(rate)}</p>}
                         </>
                       ) : (
                         <>
@@ -478,7 +489,7 @@ export default function App() {
               <div style={styles.rateBox}>
                 <p><b>Room:</b> {selectedRate.room_name || "Selected room"}</p>
                 <p><b>Board:</b> {selectedRate.board_name || "Board details available at booking"}</p>
-                <p><b>Amount:</b> {getRateCurrency(selectedRate)} {getRateAmount(selectedRate) || "Available at checkout"}</p>
+                <p><b>Amount:</b> {getRateCurrency(selectedRate)} {getRateAmount(selectedRate) || "Available at checkout"}</p>{getPaymentCurrencyNote(selectedRate) && <p style={styles.currencyNote}>{getPaymentCurrencyNote(selectedRate)}</p>}
               </div>
             )}
 
@@ -551,6 +562,7 @@ const styles = {
   selectedBox: { background: "#f3f7ff", borderRadius: 18, padding: 20, margin: "14px 0", fontWeight: 900, fontSize: 18 },
   mapBox: { background: "white", padding: 10, borderRadius: 18, marginBottom: 14 },
   map: { width: "100%", height: 260, border: 0, borderRadius: 14 },
+  currencyNote: { margin: "8px 0 0", color: "#7a4b00", fontSize: 13, fontWeight: 800 },
   safeNote: { background: "#dff7e6", borderRadius: 14, padding: 15, marginTop: 14, fontWeight: 800 },
   rateGood: { background: "#dff7e6", borderRadius: 14, padding: 12, margin: "12px 0", fontWeight: 900, color: "#075b24" },
   ratePending: { background: "#fff2be", borderRadius: 14, padding: 12, margin: "12px 0", fontWeight: 900, color: "#7a4b00" },
