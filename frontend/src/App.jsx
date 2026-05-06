@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 
-const API_BASE = "http://127.0.0.1:5050";
+const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://127.0.0.1:5050" : "https://hotel-backend-1-ee5z.onrender.com";
 
 const DESTINATIONS = {
   LON: {
