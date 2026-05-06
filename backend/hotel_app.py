@@ -76,7 +76,7 @@ def ensure_column(con, table, column, definition):
 
 def import_seed_data_if_empty():
     data_dir = Path(__file__).parent / "data"
-    rates_path = data_dir / "hotel_live_rates_london_seed.json"
+    rates_path = data_dir / "hotel_live_rates_seed.json"
     images_path = data_dir / "hotel_images_live_backup.json"
 
     con = db()
