@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "myspace-backend",
   "version": "1.0.0",
   "main": "server.js",
@@ -8,8 +8,11 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
-    "pg": "^8.11.3"
+    "nodemailer": "^8.0.7",
+    "pg": "^8.11.3",
+    "stripe": "^22.1.1"
   }
 }
