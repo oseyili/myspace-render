@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 
-const API_BASE = "http://127.0.0.1:5050";
+const API_BASE = import.meta.env.VITE_API_BASE || import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:5050";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
