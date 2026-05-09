@@ -9,14 +9,14 @@ const nodemailer = require("nodemailer");
 
 const app = express();
 const PORT = Number(process.env.PORT || 5050);
-const PUBLIC_FRONTEND_URL = process.env.PUBLIC_FRONTEND_URL || "http://localhost:5173";
+const PUBLIC_FRONTEND_URL = process.env.PUBLIC_FRONTEND_URL || process.env.PUBLIC_APP_URL || process.env.FRONTEND_URL || "http://localhost:5173";
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || "";
 
 const SMTP_HOST = process.env.SMTP_HOST || "";
 const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
-const SMTP_USER = process.env.SMTP_USER || "";
-const SMTP_PASS = process.env.SMTP_PASS || "";
-const SMTP_FROM = process.env.SMTP_FROM || "reservations@myspace-hotel.com";
+const SMTP_USER = process.env.SMTP_USER || process.env.SMTP_USERNAME || "";
+const SMTP_PASS = process.env.SMTP_PASS || process.env.SMTP_PASSWORD || "";
+const SMTP_FROM = process.env.SMTP_FROM || process.env.RESEND_FROM || process.env.RESERVATIONS_EMAIL || "reservations@myspace-hotel.com";
 
 let stripe = null;
 if (STRIPE_SECRET_KEY) {
@@ -521,6 +521,40 @@ app.get("/image-proxy", (req, res) => {
   res.redirect(url);
 });
 
+
+app.get("/api/currency/convert", (req, res) => {
+  const amount = num(req.query.amount);
+  const from = clean(req.query.from || "GBP").toUpperCase();
+  const to = clean(req.query.to || "USD").toUpperCase();
+
+  const ratesToGBP = {
+    GBP: 1,
+    USD: 0.79,
+    EUR: 0.86,
+    NGN: 0.00062,
+    AED: 0.215,
+    CAD: 0.58,
+    AUD: 0.52,
+    ZAR: 0.043,
+    CHF: 0.94,
+    JPY: 0.0053
+  };
+
+  if (!amount || !ratesToGBP[from] || !ratesToGBP[to]) {
+    return res.json({ ok: false, message: "Conversion unavailable." });
+  }
+
+  const gbp = amount * ratesToGBP[from];
+  const converted = gbp / ratesToGBP[to];
+
+  res.json({
+    ok: true,
+    amount,
+    from,
+    to,
+    converted: Number(converted.toFixed(2))
+  });
+});
 app.post("/reservation-request", async (req, res) => {
   try {
     const body = req.body || {};
@@ -608,3 +642,4 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`Stripe enabled: ${Boolean(stripe)}`);
   console.log(`SMTP enabled: ${Boolean(transporter)}`);
 });
+
