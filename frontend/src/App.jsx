@@ -207,11 +207,14 @@ function Confirmed() {
 }
 
 export default function App() {
+  const pageParams = new URLSearchParams(window.location.search);
+  const page = pageParams.get("page");
   const path = window.location.pathname;
-  if (path === "/travel") return <TravelGuides />;
-  if (path === "/faq") return <FAQs />;
-  if (path === "/terms") return <Terms />;
-  if (path === "/support") return <Support />;
+
+  if (page === "travel" || path === "/travel") return <TravelGuides />;
+  if (page === "faq" || path === "/faq") return <FAQs />;
+  if (page === "terms" || path === "/terms") return <Terms />;
+  if (page === "support" || path === "/support") return <Support />;
   if (path === "/reservation-confirmed") return <Confirmed />;
 
   const [catalog, setCatalog] = useState([]);
@@ -244,10 +247,38 @@ export default function App() {
     return catalog.find((x) => x.country === country) || null;
   }, [catalog, country]);
 
-  const cities = selectedCountry?.cities || [];
+  const cities = useMemo(() => {
+    const source = selectedCountry?.cities || [];
+    const map = new Map();
+
+    for (const item of source) {
+      const rawCity = String(item.city || "").trim();
+      if (!rawCity) continue;
+
+      const cleanCity = rawCity
+        .replace(/\s+/g, " ")
+        .replace(/\s*,\s*/g, ", ")
+        .trim();
+
+      const key = cleanCity.toLowerCase();
+
+      if (!map.has(key)) {
+        map.set(key, { ...item, city: cleanCity });
+      } else {
+        const existing = map.get(key);
+        map.set(key, {
+          ...existing,
+          live_hotels: Math.max(Number(existing.live_hotels || 0), Number(item.live_hotels || 0)),
+          image_hotels: Math.max(Number(existing.image_hotels || 0), Number(item.image_hotels || 0)),
+        });
+      }
+    }
+
+    return [...map.values()].sort((a, b) => String(a.city).localeCompare(String(b.city)));
+  }, [selectedCountry]);
 
   function clearConverted() {
-    setConvertedTotal("");
+    setConvertedTotal("0.00");
   }
 
   function selectHotel(hotel) {
@@ -356,7 +387,7 @@ export default function App() {
 
   async function convertTotal() {
     if (!selectedHotel?.live_rate_ready || !Number(selectedHotel?.first_rate?.amount || 0)) {
-      setConvertedTotal("Live price required before conversion.");
+      setConvertedTotal("0.00");
       return;
     }
 
@@ -371,13 +402,13 @@ export default function App() {
       const data = await res.json();
 
       if (!data.ok) {
-        setConvertedTotal("Conversion unavailable.");
+        setConvertedTotal("0.00");
         return;
       }
 
       setConvertedTotal(`${targetCurrency} ${money(data.converted)}`);
     } catch {
-      setConvertedTotal("Conversion unavailable.");
+      setConvertedTotal("0.00");
     }
   }
 
@@ -462,10 +493,10 @@ export default function App() {
         </div>
 
         <div style={styles.buttonRow}>
-          <button style={styles.whiteButton} onClick={() => (window.location.href = "/travel")}>Guide</button>
-          <button style={styles.whiteButton} onClick={() => (window.location.href = "/faq")}>FAQ</button>
-          <button style={styles.whiteButton} onClick={() => (window.location.href = "/terms")}>Terms</button>
-          <button style={styles.whiteButton} onClick={() => (window.location.href = "/support")}>Contact</button>
+          <button style={styles.whiteButton} onClick={() => (window.location.href = "/?page=travel")}>Guide</button>
+          <button style={styles.whiteButton} onClick={() => (window.location.href = "/?page=faq")}>FAQ</button>
+          <button style={styles.whiteButton} onClick={() => (window.location.href = "/?page=terms")}>Terms</button>
+          <button style={styles.whiteButton} onClick={() => (window.location.href = "/?page=support")}>Contact</button>
         </div>
       </section>
 
@@ -482,7 +513,7 @@ export default function App() {
             <select style={styles.input} value={country} onChange={(e) => changeCountry(e.target.value)}>
               {catalog.map((c) => (
                 <option key={c.country} value={c.country}>
-                  {c.country} - {c.city_count} cities
+                  {c.country}
                 </option>
               ))}
             </select>
@@ -496,7 +527,7 @@ export default function App() {
             }}>
               {cities.map((c) => (
                 <option key={c.city} value={c.city}>
-                  {c.city} {Number(c.live_hotels || 0) > 0 ? `- ${c.live_hotels} live hotels` : "- catalogue only"}
+                  {c.city}
                 </option>
               ))}
             </select>
@@ -660,7 +691,7 @@ export default function App() {
                 <div style={styles.currencyRow}>
                   <select style={styles.currencySelect} value={targetCurrency} onChange={(e) => {
                     setTargetCurrency(e.target.value);
-                    setConvertedTotal("");
+                    setConvertedTotal("0.00");
                   }}>
                     {["USD", "GBP", "EUR", "NGN", "AED", "CAD", "AUD", "ZAR", "CHF", "JPY"].map((c) => (
                       <option key={c} value={c}>{c}</option>
@@ -671,7 +702,7 @@ export default function App() {
                   </button>
                 </div>
                 <div style={styles.convertedText}>
-                  {convertedTotal || "Select a live price hotel to convert total room price."}
+                  {convertedTotal || "0.00"}
                 </div>
               </div>
 
@@ -779,3 +810,5 @@ const styles = {
   simpleGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginTop: 24 },
   simpleBox: { background: "white", color: "#07111f", borderRadius: 20, padding: 22, fontSize: 18, lineHeight: 1.5 },
 };
+
+
