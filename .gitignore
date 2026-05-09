@@ -1,20 +1,9 @@
-﻿# Ignore state files
-backend/*_state.json
-
-# Ignore backups
-backend/*BACKUP*.py
-backend/*BEFORE*.py
-backend/*.backup
-frontend/*.backup
-frontend/src/*BACKUP*.jsx
-
-# Ignore cache
-backend/__pycache__/
-frontend/node_modules/
-
-# Ignore logs
-logs/
-
-# Ignore env backups (KEEP real .env)
-backend/.env.backup
-frontend/.env.local.backup
+﻿.env
+.env.*
+*.env
+backend/.env
+backend/.env.*
+backend/.env.txt
+frontend/.env
+frontend/.env.*
+frontend/.env.production

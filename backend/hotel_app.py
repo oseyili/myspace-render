@@ -1,3 +1,33 @@
+﻿
+# =========================
+# PRICE SANITY PROTECTION
+# =========================
+
+MIN_REASONABLE_PRICE = {
+    "NGN": 15000,
+    "KES": 1500,
+    "ZAR": 600,
+    "USD": 25,
+    "GBP": 20,
+    "EUR": 20,
+    "AED": 120,
+}
+
+def price_is_reasonable(currency: str, amount: float) -> bool:
+    try:
+        currency = (currency or "").upper()
+        amount = float(amount or 0)
+
+        minimum = MIN_REASONABLE_PRICE.get(currency)
+
+        if minimum is None:
+            return amount > 5
+
+        return amount >= minimum
+
+    except Exception:
+        return False
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -705,136 +735,101 @@ def get_verified_image_for_hotel(con, hotel_code):
     }
 
 
-def get_cached_hotels(destination_code="LON", checkin="", checkout="", guests=2, rooms=1, limit=100):
+
+def get_cached_hotels(destination_code="LON", checkin="", checkout="", guests=2, rooms=1,
+                      min_price=0, max_price=0, facilities=None, limit=100):
+
     selected_destination = clean(destination_code or HOTELBEDS_DEFAULT_DESTINATION).upper()
+
     con = db()
+    con.row_factory = sqlite3.Row
+
     rows = con.execute("""
     SELECT
         hotel_code,
         hotel_name,
         destination_code,
-        zone_name,
-        latitude,
-        longitude,
-        category_name,
+        city,
+        country,
+        address,
+        stars,
+        review_score,
         room_name,
         board_name,
+        price,
+        currency,
         rate_key,
         payment_type,
-        net,
-        selling_rate,
-        currency,
-        cancellation_policies,
-        packaging,
-        allotment,
-        MAX(created_at) as latest_created
+        image_url,
+        created_at
     FROM hotel_live_rates
     WHERE destination_code = ?
-      AND checkin = ?
-      AND checkout = ?
-      AND guests = ?
-      AND rooms = ?
-      AND rate_key IS NOT NULL
-      AND rate_key != ''
-    GROUP BY hotel_code
-    ORDER BY latest_created DESC
+    ORDER BY created_at DESC
     LIMIT ?
-    """, (
-        selected_destination,
-        clean(checkin),
-        clean(checkout),
-        int(guests),
-        int(rooms),
-        int(limit),
-    )).fetchall()
-
-    if not rows:
-        rows = con.execute("""
-        SELECT
-            hotel_code,
-            hotel_name,
-            destination_code,
-            zone_name,
-            latitude,
-            longitude,
-            category_name,
-            room_name,
-            board_name,
-            rate_key,
-            payment_type,
-            net,
-            selling_rate,
-            currency,
-            cancellation_policies,
-            packaging,
-            allotment,
-            MAX(created_at) as latest_created
-        FROM hotel_live_rates
-        WHERE destination_code = ?
-          AND rate_key IS NOT NULL
-          AND rate_key != ''
-        GROUP BY hotel_code
-        ORDER BY latest_created DESC
-        LIMIT ?
-        """, (
-            selected_destination,
-            int(limit),
-        )).fetchall()
+    """, (selected_destination, limit)).fetchall()
 
     hotels = []
 
-    for r in rows:
-        try:
-            cancellation_policies = json.loads(r[14] or "[]")
-        except Exception:
-            cancellation_policies = []
+    if rows:
+        for row in rows:
+            item = dict(row)
 
-        image_data = get_verified_image_for_hotel(con, r[0])
-        payment_currency = clean(r[13] or "GBP").upper()
-        payment_amount = clean(r[12] or r[11])
-        display_price = local_display_price(selected_destination, payment_amount, payment_currency)
+            hotels.append({
+                "hotel_code": item.get("hotel_code"),
+                "hotel_name": item.get("hotel_name"),
+                "destination_code": item.get("destination_code"),
+                "city": item.get("city"),
+                "country": item.get("country"),
+                "address": item.get("address"),
+                "stars": item.get("stars"),
+                "review_score": item.get("review_score"),
+                "image_url": item.get("image_url"),
+                "price_confirmation_required": False,
+                "first_rate": {
+                    "room_name": item.get("room_name"),
+                    "board_name": item.get("board_name"),
+                    "price": item.get("price"),
+                    "currency": item.get("currency"),
+                    "rate_key": item.get("rate_key"),
+                    "payment_type": item.get("payment_type")
+                }
+            })
+
+        con.close()
+        return hotels
+
+    image_rows = con.execute("""
+    SELECT
+        hotel_code,
+        hotel_name,
+        destination_code,
+        image_url
+    FROM hotel_images
+    WHERE destination_code = ?
+    GROUP BY hotel_code
+    LIMIT ?
+    """, (selected_destination, limit)).fetchall()
+
+    for row in image_rows:
+        item = dict(row)
 
         hotels.append({
-            "id": clean(r[0]),
-            "hotel_id": clean(r[0]),
-            "hotel_name": clean(r[1]),
-            "name": clean(r[1]),
-            "city": clean(r[2]),
-            "country": clean(r[2]),
-            "area": clean(r[3]),
-            "address": clean(r[3]),
-            "rating": clean(r[6] or "Available"),
-            "image_url": image_data["image_url"],
-            "image_caption": image_data["image_caption"],
-            "image_source": image_data["image_source"],
-            "has_verified_image": image_data["has_verified_image"],
-            "latitude": clean(r[4]),
-            "longitude": clean(r[5]),
-            "first_rate": {
-                "rate_key": clean(r[9]),
-                "currency": display_price["display_currency"],
-                "display_currency": display_price["display_currency"],
-                "display_amount": display_price["display_amount"],
-                "payment_currency": display_price["payment_currency"],
-                "payment_amount": display_price["payment_amount"],
-                "currency_note": display_price["currency_note"],
-                "currency_is_estimate": display_price["currency_is_estimate"],
-                "net": clean(r[11]),
-                "selling_rate": display_price["display_amount"],
-                "supplier_selling_rate": payment_amount,
-                "board_name": clean(r[8]),
-                "room_name": clean(r[7] or "Selected room"),
-                "cancellation_policies": cancellation_policies,
-                "payment_type": clean(r[10]),
-                "packaging": clean(r[15]),
-                "allotment": clean(r[16]),
-            },
-            "source": "saved_availability",
+            "hotel_code": item.get("hotel_code"),
+            "hotel_name": item.get("hotel_name"),
+            "destination_code": item.get("destination_code"),
+            "city": selected_destination,
+            "country": "",
+            "address": "",
+            "stars": "",
+            "review_score": "",
+            "image_url": item.get("image_url"),
+            "price_confirmation_required": True,
+            "first_rate": None
         })
 
-    con.commit()
     con.close()
     return hotels
+
 
 
 DESTINATION_CODE_TO_CITY = {
@@ -850,7 +845,7 @@ DESTINATION_CODE_TO_CITY = {
     "VIE": ["Vienna"],
     "FAO": ["Faro"],
     "BER": ["Berlin"],
-    "AGP": ["Malaga", "Málaga"],
+    "AGP": ["Malaga", "MÃ¡laga"],
     "NCE": ["Nice"],
     "ATH": ["Athens"],
     "DUB": ["Dublin"],
@@ -1194,69 +1189,191 @@ def search_hotels(
     }
 
 
+
+def send_reservation_email(to_email, subject, body):
+    smtp_host = os.getenv("SMTP_HOST", "")
+    smtp_port = int(os.getenv("SMTP_PORT", "587"))
+    smtp_user = os.getenv("SMTP_USER", "")
+    smtp_pass = os.getenv("SMTP_PASS", "")
+    smtp_from = os.getenv("SMTP_FROM", os.getenv("SUPPORT_EMAIL", "reservations@myspace-hotel.com"))
+
+    if not smtp_host or not smtp_user or not smtp_pass:
+        print("EMAIL NOT SENT - SMTP not configured")
+        print("TO:", to_email)
+        print("SUBJECT:", subject)
+        return False
+
+    try:
+        import smtplib
+        from email.message import EmailMessage
+
+        msg = EmailMessage()
+        msg["From"] = smtp_from
+        msg["To"] = to_email
+        msg["Subject"] = subject
+        msg.set_content(body)
+
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=30) as server:
+            server.starttls()
+            server.login(smtp_user, smtp_pass)
+            server.send_message(msg)
+
+        return True
+    except Exception as exc:
+        print("EMAIL SEND FAILED:", str(exc)[:300])
+        return False
+
+
+@app.get("/admin/system-check")
+def admin_system_check():
+    return {
+        "ok": True,
+        "stripe_configured": bool(os.getenv("STRIPE_SECRET_KEY", "").strip()),
+        "email_configured": bool(
+            os.getenv("SMTP_HOST", "").strip()
+            and os.getenv("SMTP_USER", "").strip()
+            and os.getenv("SMTP_PASS", "").strip()
+        ),
+        "reservations_email": os.getenv("RESERVATIONS_EMAIL", os.getenv("SUPPORT_EMAIL", "reservations@myspace-hotel.com")),
+        "public_app_url": os.getenv("PUBLIC_APP_URL", "http://localhost:5173"),
+        "note": "Secrets are not displayed.",
+    }
+
 @app.post("/reservation-request")
 async def create_reservation(req: Request):
     data = await req.json()
 
-    rate_key = clean(data.get("rate_key"))
-    if not rate_key:
-        raise HTTPException(400, "This stay is no longer available. Please choose another available stay.")
-
-    cached_rate = get_cached_rate(rate_key)
-    if not cached_rate:
-        raise HTTPException(400, "This stay is no longer available. Please choose another available stay.")
-
     customer_email = clean(data.get("customer_email")).strip()
+    customer_name = clean(data.get("customer_name") or "Guest").strip()
+    hotel_name = clean(data.get("hotel_name") or "Selected hotel").strip()
+    hotel_id = clean(data.get("hotel_id")).strip()
+    destination = clean(data.get("destination")).strip()
+    checkin = clean(data.get("checkin")).strip()
+    checkout = clean(data.get("checkout")).strip()
+    customer_phone = clean(data.get("customer_phone")).strip()
+    note = clean(data.get("note")).strip()
+    guests = int(data.get("guests", 1) or 1)
+    rooms = int(data.get("rooms", 1) or 1)
+    rate_key = clean(data.get("rate_key")).strip()
+    amount_raw = clean(data.get("amount")).strip()
+    selected_rooms_for_total = int(data.get("rooms", 1) or 1)
+    selected_rooms_for_total = int(data.get("rooms", 1) or 1)
+    currency = clean(data.get("currency")).strip().upper()
+    price_display = clean(data.get("price_display")).strip()
+
+    # ROOM TOTAL SAFETY:
+    # Customer-facing total must reflect selected room count.
+    try:
+        if amount_raw and selected_rooms_for_total > 1 and not clean(data.get("amount_is_total")):
+            amount_raw = "{:.2f}".format(booking_total_for_rooms(amount_raw, selected_rooms_for_total))
+    except Exception:
+        pass
+    if not price_display:
+        price_display = ((currency + " ") if currency else "") + amount_raw if amount_raw else "Latest price to be confirmed"
+
     if not customer_email:
         raise HTTPException(400, "Please enter your email address to continue.")
-
-    if not STRIPE_SECRET_KEY:
-        raise HTTPException(500, "Secure payment is temporarily unavailable. Please try again shortly.")
 
     code = make_reservation_code()
     created = now_iso()
 
-    hotel_name = clean(data.get("hotel_name") or cached_rate["hotel_name"] or "Selected hotel")
-    amount_raw = clean(cached_rate.get("payment_amount") or cached_rate.get("amount") or data.get("payment_amount") or data.get("amount") or "50")
-    currency = clean(cached_rate.get("payment_currency") or cached_rate.get("currency") or data.get("payment_currency") or data.get("currency") or "GBP").lower()
+    # 1) LIVE RATE FLOW: Stripe checkout is only used when a confirmed supplier/live rate exists.
+    if rate_key:
+        cached_rate = get_cached_rate(rate_key)
+        if not cached_rate:
+            raise HTTPException(400, "This stay is no longer available. Please choose another available stay.")
 
-    try:
-        amount_pence = int(round(float(amount_raw) * 100))
-    except Exception:
-        amount_pence = 5000
+        if not STRIPE_SECRET_KEY:
+            raise HTTPException(500, "Secure payment is temporarily unavailable. Please try again shortly.")
 
-    if amount_pence < 50:
-        amount_pence = 5000
+        amount_raw = clean(cached_rate.get("amount") or data.get("amount") or "50")
+        currency = clean(cached_rate.get("currency") or data.get("currency") or "GBP").lower()
 
-    stripe_res = requests.post(
-        "https://api.stripe.com/v1/checkout/sessions",
-        headers={"Authorization": f"Bearer {STRIPE_SECRET_KEY}"},
-        data={
-            "mode": "payment",
-            "success_url": f"{PUBLIC_APP_URL}/reservation-confirmed?code={code}",
-            "cancel_url": f"{PUBLIC_APP_URL}/",
-            "line_items[0][price_data][currency]": currency,
-            "line_items[0][price_data][product_data][name]": hotel_name,
-            "line_items[0][price_data][unit_amount]": str(amount_pence),
-            "line_items[0][quantity]": "1",
-            "customer_email": customer_email,
-            "metadata[reservation_code]": code,
-            "metadata[booking_status]": "PAID_PENDING_SUPPLIER_CONFIRMATION",
-            "metadata[rate_source]": "saved_availability",
-            "payment_intent_data[metadata][reservation_code]": code,
-        },
-        timeout=30,
-    )
+        try:
+            amount_pence = int(round(float(amount_raw) * 100))
+        except Exception:
+            amount_pence = 5000
 
-    try:
-        stripe_data = stripe_res.json()
-    except Exception:
-        raise HTTPException(400, "We could not prepare secure payment at the moment. Please try again shortly.")
+        if amount_pence < 50:
+            amount_pence = 5000
 
-    if stripe_res.status_code >= 400 or not stripe_data.get("url"):
-        print("Stripe checkout error:", stripe_data)
-        raise HTTPException(400, "We could not prepare secure payment at the moment. Please try again shortly.")
+        stripe_res = requests.post(
+            "https://api.stripe.com/v1/checkout/sessions",
+            headers={"Authorization": f"Bearer {STRIPE_SECRET_KEY}"},
+            data={
+                "mode": "payment",
+                "success_url": f"{PUBLIC_APP_URL}/reservation-confirmed?code={code}",
+                "cancel_url": f"{PUBLIC_APP_URL}/",
+                "line_items[0][price_data][currency]": currency,
+                "line_items[0][price_data][product_data][name]": hotel_name,
+                "line_items[0][price_data][unit_amount]": str(amount_pence),
+                "line_items[0][quantity]": "1",
+                "customer_email": customer_email,
+                "metadata[reservation_code]": code,
+                "metadata[booking_status]": "PAYMENT_PENDING",
+                "metadata[rate_source]": "saved_availability",
+                "payment_intent_data[metadata][reservation_code]": code,
+            },
+            timeout=30,
+        )
 
+        try:
+            stripe_data = stripe_res.json()
+        except Exception:
+            raise HTTPException(400, "We could not prepare secure payment at the moment. Please try again shortly.")
+
+        if stripe_res.status_code >= 400 or not stripe_data.get("url"):
+            print("Stripe checkout error:", stripe_data)
+            raise HTTPException(400, "We could not prepare secure payment at the moment. Please try again shortly.")
+
+        con = db()
+        con.execute("""
+        INSERT INTO bookings (
+            reservation_code, hotel_id, hotel_name, destination, customer_name, customer_email,
+            customer_phone, guests, rooms, checkin, checkout, note, rate_key, amount, currency,
+            room_name, board_name, payment_type, cancellation_policies, packaging, allotment,
+            status, stripe_session_id, created_at, updated_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            code,
+            hotel_id or cached_rate["hotel_id"],
+            hotel_name or cached_rate["hotel_name"],
+            destination or cached_rate["destination"],
+            customer_name,
+            customer_email,
+            customer_phone,
+            guests,
+            rooms,
+            checkin,
+            checkout,
+            note,
+            rate_key,
+            amount_raw,
+            currency.upper(),
+            clean(data.get("room_name") or cached_rate["room_name"]),
+            clean(data.get("board_name") or cached_rate["board_name"]),
+            clean(data.get("payment_type") or cached_rate["payment_type"]),
+            safe_json(data.get("cancellation_policies") or cached_rate["cancellation_policies"]),
+            clean(data.get("packaging") or cached_rate["packaging"]),
+            clean(data.get("allotment") or cached_rate["allotment"]),
+            "PAYMENT_PENDING",
+            stripe_data.get("id", ""),
+            created,
+            created,
+        ))
+        con.commit()
+        con.close()
+
+        return {
+            "ok": True,
+            "payment_url": stripe_data["url"],
+            "reservation_code": code,
+            "message": "Secure payment is ready.",
+        }
+
+    # 2) GLOBAL CATALOG FLOW: no Stripe yet. Customer and reservations team get emails.
+    # This prevents broken Stripe checkout for hotels where current price still needs confirmation.
     con = db()
     con.execute("""
     INSERT INTO bookings (
@@ -1268,38 +1385,96 @@ async def create_reservation(req: Request):
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         code,
-        clean(data.get("hotel_id") or cached_rate["hotel_id"]),
+        hotel_id,
         hotel_name,
-        clean(data.get("destination") or cached_rate["destination"]),
-        clean(data.get("customer_name") or "Guest"),
+        destination,
+        customer_name,
         customer_email,
-        clean(data.get("customer_phone")),
-        int(data.get("guests", 1)),
-        int(data.get("rooms", 1)),
-        clean(data.get("checkin")),
-        clean(data.get("checkout")),
-        clean(data.get("note")),
-        rate_key,
+        customer_phone,
+        guests,
+        rooms,
+        checkin,
+        checkout,
+        note,
         amount_raw,
-        currency.upper(),
-        clean(data.get("room_name") or cached_rate["room_name"]),
-        clean(data.get("board_name") or cached_rate["board_name"]),
-        clean(data.get("payment_type") or cached_rate["payment_type"]),
-        safe_json(data.get("cancellation_policies") or cached_rate["cancellation_policies"]),
-        clean(data.get("packaging") or cached_rate["packaging"]),
-        clean(data.get("allotment") or cached_rate["allotment"]),
-        "PAYMENT_PENDING",
-        stripe_data.get("id", ""),
+        currency,
+        amount_raw,
+        currency,
+        amount_raw,
+        currency,
+        "[]",
+        amount_raw,
+        currency,
+        "PRICE_CONFIRMATION_REQUIRED",
+        "",
         created,
         created,
     ))
     con.commit()
     con.close()
 
+    reservations_email = os.getenv("RESERVATIONS_EMAIL", os.getenv("SUPPORT_EMAIL", "reservations@myspace-hotel.com"))
+
+    customer_body = f"""Hello {customer_name},
+
+Thank you for choosing MySpace Hotel.
+
+We have received your reservation request.
+
+Reservation code: {code}
+Hotel: {hotel_name}
+Destination: {destination}
+Check-in: {checkin}
+Check-out: {checkout}
+Guests: {guests}
+Rooms: {rooms}
+Price shown: {price_display}
+
+No payment is required yet.
+
+Our reservations team will confirm the latest room availability, price, and booking conditions. Once confirmed, we will send the next secure booking step.
+
+MySpace Hotel Reservations
+{reservations_email}
+"""
+
+    admin_body = f"""New MySpace Hotel reservation request.
+
+Reservation code: {code}
+Status: PRICE_CONFIRMATION_REQUIRED
+
+Customer:
+Name: {customer_name}
+Email: {customer_email}
+Phone: {customer_phone}
+
+Hotel:
+Hotel ID: {hotel_id}
+Hotel name: {hotel_name}
+Destination: {destination}
+Check-in: {checkin}
+Check-out: {checkout}
+Guests: {guests}
+Rooms: {rooms}
+Price shown to customer: {price_display}
+
+Customer note:
+{note}
+
+Next action:
+Confirm current availability, current price, cancellation terms, and payment requirement before sending secure payment.
+"""
+
+    customer_email_sent = send_reservation_email(customer_email, "MySpace Hotel reservation request received - " + code, customer_body)
+    admin_email_sent = send_reservation_email(reservations_email, "New reservation request - " + code, admin_body)
+
     return {
         "ok": True,
-        "payment_url": stripe_data["url"],
         "reservation_code": code,
+        "status": "PRICE_CONFIRMATION_REQUIRED",
+        "customer_email_sent": customer_email_sent,
+        "reservations_email_sent": admin_email_sent,
+        "message": "Your request has been received. Our reservations team will confirm the latest availability, price, and next steps before payment.",
     }
 
 
@@ -1627,3 +1802,621 @@ def image_proxy(url: str):
         raise
     except Exception:
         raise HTTPException(status_code=500, detail="Image proxy failed")
+
+@app.get("/api/real-catalog/destinations")
+def api_real_catalog_destinations():
+    catalog_path = Path(os.getenv("CATALOG_DB_PATH", r"C:\frontend\hotel-booking-app\backend\hotel_catalog.db"))
+
+    if not catalog_path.exists():
+        return {"ok": False, "countries": [], "total_countries": 0, "total_cities": 0, "message": "Catalog database not found."}
+
+    con = sqlite3.connect(catalog_path)
+
+    rows = con.execute("""
+    SELECT
+        COALESCE(NULLIF(TRIM(country), ''), 'Unknown') AS country,
+        COALESCE(NULLIF(TRIM(city), ''), 'Unknown') AS city,
+        COUNT(*) AS hotels,
+        SUM(CASE WHEN COALESCE(high_res_image, image) IS NOT NULL AND COALESCE(high_res_image, image) != '' THEN 1 ELSE 0 END) AS images
+    FROM hotels
+    WHERE name IS NOT NULL
+      AND TRIM(name) != ''
+    GROUP BY country, city
+    HAVING hotels > 0
+    ORDER BY country ASC, hotels DESC, city ASC
+    """).fetchall()
+
+    con.close()
+
+    grouped = {}
+    for country, city, hotels, images in rows:
+        country = clean(country)
+        city = clean(city)
+        grouped.setdefault(country, [])
+        grouped[country].append({
+            "city": city,
+            "hotels": int(hotels or 0),
+            "images": int(images or 0),
+        })
+
+    countries = [
+        {
+            "country": country,
+            "cities": cities,
+            "hotel_count": sum(c["hotels"] for c in cities),
+            "image_count": sum(c["images"] for c in cities),
+        }
+        for country, cities in grouped.items()
+    ]
+
+    countries.sort(key=lambda x: x["hotel_count"], reverse=True)
+
+    return {
+        "ok": True,
+        "countries": countries,
+        "total_countries": len(countries),
+        "total_cities": sum(len(c["cities"]) for c in countries),
+    }
+
+
+@app.get("/api/real-catalog/search")
+def api_real_catalog_search(
+    country: str = "",
+    city: str = "",
+    area: str = "",
+    keyword: str = "",
+    limit: int = 100,
+):
+    catalog_path = Path(os.getenv("CATALOG_DB_PATH", r"C:\frontend\hotel-booking-app\backend\hotel_catalog.db"))
+
+    if not catalog_path.exists():
+        return {"ok": False, "hotels": [], "count": 0, "message": "Catalog database not found."}
+
+    selected_country = clean(country).strip()
+    selected_city = clean(city).strip()
+    selected_area = clean(area).strip()
+    selected_keyword = clean(keyword).strip()
+
+    where = [
+        "name IS NOT NULL",
+        "TRIM(name) != ''",
+        "COALESCE(high_res_image, image) IS NOT NULL",
+        "COALESCE(high_res_image, image) != ''",
+    ]
+    params = []
+
+    if selected_country:
+        where.append("LOWER(country) = LOWER(?)")
+        params.append(selected_country)
+
+    if selected_city:
+        where.append("LOWER(city) = LOWER(?)")
+        params.append(selected_city)
+
+    if selected_area:
+        where.append("(LOWER(area) LIKE ? OR LOWER(address) LIKE ? OR LOWER(name) LIKE ?)")
+        term = "%" + selected_area.lower() + "%"
+        params.extend([term, term, term])
+
+    if selected_keyword:
+        where.append("LOWER(name) LIKE ?")
+        params.append("%" + selected_keyword.lower() + "%")
+
+    params.append(max(1, min(int(limit), 200)))
+
+    sql = f"""
+    SELECT
+        id,
+        supplier_hotel_id,
+        name,
+        country,
+        city,
+        area,
+        address,
+        currency,
+        price,
+        rating,
+        review_count,
+        COALESCE(high_res_image, image) AS image_url,
+        latitude,
+        longitude,
+        review_score
+    FROM hotels
+    WHERE {" AND ".join(where)}
+    ORDER BY
+        CASE WHEN review_score IS NULL OR review_score = '' THEN 1 ELSE 0 END,
+        CAST(COALESCE(review_score, rating, 0) AS REAL) DESC,
+        name ASC
+    LIMIT ?
+    """
+
+    con = sqlite3.connect(catalog_path)
+    rows = con.execute(sql, params).fetchall()
+    con.close()
+
+    hotels = []
+    for r in rows:
+        image_url = clean(r[11])
+        if not image_url.startswith("http"):
+            continue
+
+        hotels.append({
+            "id": clean(r[0]),
+            "hotel_id": clean(r[0]),
+            "supplier_hotel_id": clean(r[1]),
+            "hotel_name": clean(r[2]),
+            "name": clean(r[2]),
+            "country": clean(r[3]),
+            "city": clean(r[4]),
+            "area": clean(r[5]),
+            "address": clean(r[6]),
+            "currency": clean(r[7] or "CONFIRM"),
+            "price": clean(r[8] or ""),
+            "rating": clean(r[9] or r[14] or "Real catalog hotel"),
+            "review_count": clean(r[10]),
+            "image_url": image_url,
+            "has_verified_image": True,
+            "image_source": "real_catalog",
+            "latitude": clean(r[12]),
+            "longitude": clean(r[13]),
+            "source": "real_catalog",
+            "price_confirmation_required": True,
+            "availability_message": "Real catalog hotel. Current price and availability must be confirmed before payment.",
+        })
+
+    return {
+        "ok": True,
+        "hotels": hotels,
+        "count": len(hotels),
+        "source": "real_catalog",
+        "message": "Real catalog hotels returned from local verified supplier catalog.",
+    }
+
+
+@app.get("/api/real-catalog/stats")
+def api_real_catalog_stats():
+    catalog_path = Path(os.getenv("CATALOG_DB_PATH", r"C:\frontend\hotel-booking-app\backend\hotel_catalog.db"))
+
+    if not catalog_path.exists():
+        return {"ok": False, "catalog_hotels": 0, "catalog_with_images": 0}
+
+    con = sqlite3.connect(catalog_path)
+    total = con.execute("SELECT COUNT(*) FROM hotels").fetchone()[0]
+    images = con.execute("""
+    SELECT COUNT(*) FROM hotels
+    WHERE COALESCE(high_res_image, image) IS NOT NULL
+      AND COALESCE(high_res_image, image) != ''
+    """).fetchone()[0]
+    countries = con.execute("SELECT COUNT(DISTINCT country) FROM hotels WHERE country IS NOT NULL AND TRIM(country) != ''").fetchone()[0]
+    cities = con.execute("SELECT COUNT(DISTINCT country || '|' || city) FROM hotels WHERE city IS NOT NULL AND TRIM(city) != ''").fetchone()[0]
+    con.close()
+
+    return {
+        "ok": True,
+        "catalog_hotels": total,
+        "catalog_with_images": images,
+        "countries": countries,
+        "cities": cities,
+    }
+
+
+
+
+@app.get("/api/hotels/live-check")
+def selected_hotel_live_check(
+    hotel_id: str = "",
+    hotel_name: str = "",
+    destination_code: str = "",
+    checkin: str = "",
+    checkout: str = "",
+    guests: int = 2,
+    rooms: int = 1,
+):
+    selected_hotel_id = clean(hotel_id).strip()
+    selected_hotel_name = clean(hotel_name).strip()
+    selected_destination = clean(destination_code).strip().upper()
+
+    con = db()
+
+    row = None
+
+    if selected_hotel_id:
+        row = con.execute("""
+        SELECT
+            hotel_code,
+            hotel_name,
+            destination_code,
+            zone_name,
+            room_name,
+            board_name,
+            payment_type,
+            net,
+            selling_rate,
+            currency,
+            cancellation_policies,
+            packaging,
+            allotment,
+            rate_key,
+            created_at
+        FROM hotel_live_rates
+        WHERE hotel_code = ?
+          AND destination_code = ?
+          AND checkin = ?
+          AND checkout = ?
+          AND guests = ?
+          AND rooms = ?
+          AND rate_key IS NOT NULL
+          AND rate_key != ''
+        ORDER BY created_at DESC
+        LIMIT 1
+        """, (
+            selected_hotel_id,
+            selected_destination,
+            clean(checkin),
+            clean(checkout),
+            int(guests),
+            int(rooms),
+        )).fetchone()
+
+    if not row and selected_hotel_name:
+        row = con.execute("""
+        SELECT
+            hotel_code,
+            hotel_name,
+            destination_code,
+            zone_name,
+            room_name,
+            board_name,
+            payment_type,
+            net,
+            selling_rate,
+            currency,
+            cancellation_policies,
+            packaging,
+            allotment,
+            rate_key,
+            created_at
+        FROM hotel_live_rates
+        WHERE LOWER(hotel_name) = LOWER(?)
+          AND destination_code = ?
+          AND checkin = ?
+          AND checkout = ?
+          AND guests = ?
+          AND rooms = ?
+          AND rate_key IS NOT NULL
+          AND rate_key != ''
+        ORDER BY created_at DESC
+        LIMIT 1
+        """, (
+            selected_hotel_name,
+            selected_destination,
+            clean(checkin),
+            clean(checkout),
+            int(guests),
+            int(rooms),
+        )).fetchone()
+
+    con.close()
+
+    if not row:
+        return {
+            "ok": True,
+            "live_payment_ready": False,
+            "payment_ready": False,
+            "price_status": "We will confirm today’s room availability and latest price before payment.",
+            "message": "Current live room price is being confirmed for this property.",
+        }
+
+    try:
+        cancellation_policies = json.loads(row[10] or "[]")
+    except Exception:
+        cancellation_policies = []
+
+    selling = clean(row[8] or row[7])
+    currency = clean(row[9] or "GBP")
+
+    return {
+        "ok": True,
+        "live_payment_ready": True,
+        "payment_ready": True,
+        "price_status": "Live room price is ready for secure checkout.",
+        "hotel_id": clean(row[0]),
+        "hotel_name": clean(row[1]),
+        "destination": clean(row[2]),
+        "area": clean(row[3]),
+        "room_name": clean(row[4]),
+        "board_name": clean(row[5]),
+        "payment_type": clean(row[6]),
+        "net": clean(row[7]),
+        "selling_rate": selling,
+        "amount": selling,
+        "currency": currency,
+        "cancellation_policies": cancellation_policies,
+        "packaging": clean(row[11]),
+        "allotment": clean(row[12]),
+        "rate_key": clean(row[13]),
+        "price_last_checked_at": clean(row[14]),
+        "first_rate": {
+            "rate_key": clean(row[13]),
+            "currency": currency,
+            "net": clean(row[7]),
+            "selling_rate": selling,
+            "board_name": clean(row[5]),
+            "room_name": clean(row[4] or "Selected room"),
+            "cancellation_policies": cancellation_policies,
+            "payment_type": clean(row[6]),
+            "packaging": clean(row[11]),
+            "allotment": clean(row[12]),
+        },
+    }
+
+def selected_live_catalog_lookup_v2(hotel_id="", hotel_name=""):
+    catalog_path = Path(__file__).resolve().parent / "hotel_catalog.db"
+    con = sqlite3.connect(catalog_path)
+    con.row_factory = sqlite3.Row
+
+    row = None
+    raw_id = clean(hotel_id).replace("rapid-", "")
+
+    if raw_id:
+        row = con.execute("""
+        SELECT id, supplier_hotel_id, name, country, city, area, address, currency, price
+        FROM hotels
+        WHERE id = ? OR supplier_hotel_id = ?
+        LIMIT 1
+        """, (clean(hotel_id), raw_id)).fetchone()
+
+    if not row and clean(hotel_name):
+        row = con.execute("""
+        SELECT id, supplier_hotel_id, name, country, city, area, address, currency, price
+        FROM hotels
+        WHERE LOWER(name) = LOWER(?)
+        LIMIT 1
+        """, (clean(hotel_name),)).fetchone()
+
+    con.close()
+    return dict(row) if row else None
+
+
+def selected_live_find_price_v2(data, checkin="", checkout=""):
+    item = data[0] if isinstance(data, list) and data else data
+    if not isinstance(item, dict):
+        return None
+
+    # Prefer exact alternate availability for the customer dates.
+    for alt in item.get("alternate_availability", []) if isinstance(item.get("alternate_availability"), list) else []:
+        try:
+            if clean(alt.get("checkin")) == clean(checkin) and clean(alt.get("checkout")) == clean(checkout):
+                return float(alt.get("price")), clean(alt.get("currency"))
+        except Exception:
+            pass
+
+    found = []
+
+    def walk(x):
+        if isinstance(x, dict):
+            cur = clean(x.get("currency") or x.get("currency_code") or x.get("currencyCode"))
+            for key in ["price", "gross_amount", "amount", "value", "all_inclusive_amount"]:
+                v = x.get(key)
+                if isinstance(v, dict):
+                    vv = v.get("value") or v.get("amount")
+                    cc = clean(v.get("currency") or cur)
+                    try:
+                        if vv:
+                            found.append((float(vv), cc))
+                    except Exception:
+                        pass
+                else:
+                    try:
+                        if v not in [None, ""]:
+                            found.append((float(v), cur))
+                    except Exception:
+                        pass
+            for v in x.values():
+                walk(v)
+        elif isinstance(x, list):
+            for y in x:
+                walk(y)
+
+    walk(item)
+
+    useful = [(a, c) for a, c in found if a and a > 0]
+    if useful:
+        return useful[0]
+
+    return None
+
+
+@app.get("/api/hotels/selected-live-price-v2")
+def selected_live_price_v2(
+    hotel_id: str = "",
+    hotel_name: str = "",
+    destination_code: str = "",
+    checkin: str = "",
+    checkout: str = "",
+    guests: int = 2,
+    rooms: int = 1,
+):
+    catalog = selected_live_catalog_lookup_v2(hotel_id, hotel_name)
+
+    if not catalog or not clean(catalog.get("supplier_hotel_id")):
+        return {
+            "ok": True,
+            "live_payment_ready": False,
+            "message": "Supplier hotel ID is missing for live price check.",
+            "price_status": "Current live room price is being confirmed for this property.",
+        }
+
+    host = os.getenv("RAPIDAPI_HOST", "").strip()
+    key = os.getenv("RAPIDAPI_KEY", "").strip()
+
+    if not host or not key:
+        return {
+            "ok": True,
+            "live_payment_ready": False,
+            "message": "Supplier API is not configured.",
+            "price_status": "Current live room price is being confirmed for this property.",
+        }
+
+    headers = {"X-RapidAPI-Key": key, "X-RapidAPI-Host": host}
+
+    params = {
+        "hotel_id": clean(catalog.get("supplier_hotel_id")),
+        "arrival_date": clean(checkin),
+        "departure_date": clean(checkout),
+        "adults": str(int(guests)),
+        "room_qty": str(int(rooms)),
+        "currency_code": clean(catalog.get("currency") or "USD"),
+        "languagecode": "en-us",
+    }
+
+    try:
+        r = requests.get(f"https://{host}/properties/detail", headers=headers, params=params, timeout=35)
+        data = r.json()
+    except Exception as exc:
+        print("selected live v2 failed:", str(exc)[:220])
+        return {
+            "ok": True,
+            "live_payment_ready": False,
+            "message": "Supplier live price check failed.",
+            "price_status": "Current live room price is being confirmed for this property.",
+        }
+
+    if r.status_code != 200:
+        return {
+            "ok": True,
+            "live_payment_ready": False,
+            "message": "Supplier did not return a live price.",
+            "price_status": "Current live room price is being confirmed for this property.",
+        }
+
+    found = selected_live_find_price_v2(data, checkin, checkout)
+
+    if not found:
+        return {
+            "ok": True,
+            "live_payment_ready": False,
+            "message": "No payable live price was returned for this selected hotel.",
+            "price_status": "Current live room price is being confirmed for this property.",
+        }
+
+    unit_amount, found_currency = found
+    room_count = max(int(rooms or 1), 1)
+    total_amount = round(float(unit_amount) * room_count, 2)
+    currency = clean(found_currency or catalog.get("currency") or "USD").upper()
+
+    # Prevent obvious decimal/placeholder prices from activating Stripe.
+    min_price = {"NGN": 15000, "KES": 1500, "ZAR": 600, "USD": 25, "GBP": 20, "EUR": 20, "AED": 120}
+    if total_amount < float(min_price.get(currency, 5)):
+        return {
+            "ok": True,
+            "live_payment_ready": False,
+            "amount": "{:.2f}".format(total_amount),
+            "currency": currency,
+            "message": "Supplier returned an abnormal live price, so payment is blocked for verification.",
+            "price_status": "Supplier price is being verified before payment.",
+        }
+
+    rate_key = "SUPPLIER_DETAIL-" + clean(catalog.get("supplier_hotel_id")) + "-" + uuid.uuid4().hex[:10].upper()
+
+    return {
+        "ok": True,
+        "live_payment_ready": True,
+        "payment_ready": True,
+        "price_status": "Live total price available for secure checkout.",
+        "hotel_id": clean(catalog.get("supplier_hotel_id")),
+        "hotel_name": clean(catalog.get("name") or hotel_name),
+        "amount": "{:.2f}".format(total_amount),
+        "unit_room_amount": "{:.2f}".format(unit_amount),
+        "rooms": room_count,
+        "currency": currency,
+        "price_last_checked_at": now_iso(),
+        "first_rate": {
+            "rate_key": rate_key,
+            "currency": currency,
+            "net": "{:.2f}".format(total_amount),
+            "selling_rate": "{:.2f}".format(total_amount),
+            "unit_room_amount": "{:.2f}".format(unit_amount),
+            "rooms": room_count,
+            "board_name": "Room only",
+            "room_name": "Selected room",
+            "cancellation_policies": [],
+            "payment_type": "AT_WEB",
+            "packaging": "",
+            "allotment": str(room_count),
+        },
+    }
+
+@app.get("/api/currency/convert")
+def api_currency_convert(
+    amount: float = 1,
+    from_currency: str = "USD",
+    to_currency: str = "GBP",
+):
+    source = clean(from_currency).upper()
+    target = clean(to_currency).upper()
+
+    if amount <= 0:
+        raise HTTPException(400, "Amount must be greater than zero.")
+
+    if source == target:
+        return {
+            "ok": True,
+            "amount": round(float(amount), 2),
+            "from_currency": source,
+            "to_currency": target,
+            "rate": 1,
+            "converted": round(float(amount), 2),
+            "date": now_iso(),
+            "source": "same_currency",
+        }
+
+    # Primary: Frankfurter
+    try:
+        r = requests.get(
+            "https://api.frankfurter.dev/v2/rates",
+            params={"base": source, "symbols": target},
+            timeout=15,
+        )
+        data = r.json()
+        if r.status_code < 400 and target in data.get("rates", {}):
+            rate = float(data["rates"][target])
+            return {
+                "ok": True,
+                "amount": round(float(amount), 2),
+                "from_currency": source,
+                "to_currency": target,
+                "rate": rate,
+                "converted": round(float(amount) * rate, 2),
+                "date": data.get("date", ""),
+                "source": "frankfurter",
+            }
+    except Exception:
+        pass
+
+    # Fallback: ExchangeRate-API open access, no key required.
+    try:
+        r = requests.get(
+            f"https://open.er-api.com/v6/latest/{source}",
+            timeout=15,
+        )
+        data = r.json()
+        if r.status_code < 400 and data.get("result") == "success" and target in data.get("rates", {}):
+            rate = float(data["rates"][target])
+            return {
+                "ok": True,
+                "amount": round(float(amount), 2),
+                "from_currency": source,
+                "to_currency": target,
+                "rate": rate,
+                "converted": round(float(amount) * rate, 2),
+                "date": data.get("time_last_update_utc", ""),
+                "source": "open_er_api",
+            }
+    except Exception:
+        pass
+
+    raise HTTPException(503, "Currency conversion is temporarily unavailable for this currency pair.")
+
+
+
