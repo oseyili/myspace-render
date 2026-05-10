@@ -86,6 +86,101 @@ function GuideSection({ title, items }) {
   );
 }
 
+function InfoPage({ title, subtitle, children }) {
+  return (
+    <div style={styles.infoPage}>
+      <div style={styles.infoCardWide}>
+        <div style={styles.brandSmall}>MYSPACE HOTEL</div>
+        <h1 style={styles.infoTitle}>{title}</h1>
+        {subtitle && <p style={styles.infoSubtitle}>{subtitle}</p>}
+        <div style={styles.infoBody}>{children}</div>
+        <button style={styles.goldSmall} onClick={() => (window.location.href = "/")}>
+          Back to hotel search
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function FAQs() {
+  return (
+    <InfoPage title="Frequently asked questions" subtitle="Clear answers before customers reserve or pay.">
+      <div style={styles.simpleGrid}>
+        <div style={styles.simpleBox}>
+          <b>Can I pay online?</b>
+          <br />
+          Yes. Payment is enabled only when a valid live supplier rate is available.
+        </div>
+        <div style={styles.simpleBox}>
+          <b>Are images fake?</b>
+          <br />
+          No. Missing hotel photos show a trust notice instead of fake hotel images.
+        </div>
+        <div style={styles.simpleBox}>
+          <b>Why no price?</b>
+          <br />
+          Some hotels are catalogue-only or unavailable for the selected dates.
+        </div>
+        <div style={styles.simpleBox}>
+          <b>Will I get confirmation?</b>
+          <br />
+          Reservation updates are sent to the email address provided at checkout.
+        </div>
+      </div>
+    </InfoPage>
+  );
+}
+
+function Terms() {
+  return (
+    <InfoPage title="Booking terms" subtitle="Customer trust depends on accurate hotel and rate information.">
+      <div style={styles.simpleGrid}>
+        <div style={styles.simpleBox}>
+          Review hotel name, room, board, dates, guests, currency, amount, and cancellation details before payment.
+        </div>
+        <div style={styles.simpleBox}>
+          Prices and availability can change until the reservation is completed and supplier confirmation is received.
+        </div>
+        <div style={styles.simpleBox}>
+          Payment is enabled only for hotels with valid live rate keys and payable amounts.
+        </div>
+        <div style={styles.simpleBox}>
+          No fake photos, no fake prices, and no misleading availability should be shown.
+        </div>
+      </div>
+    </InfoPage>
+  );
+}
+
+function Support() {
+  return (
+    <InfoPage title="Customer support" subtitle="Reservation support for safer booking decisions.">
+      <div style={styles.simpleGrid}>
+        <div style={styles.simpleBox}>
+          <b>Email</b>
+          <br />
+          reservations@myspace-hotel.com
+        </div>
+        <div style={styles.simpleBox}>
+          <b>Booking help</b>
+          <br />
+          Include hotel name, dates, destination, and booking email.
+        </div>
+        <div style={styles.simpleBox}>
+          <b>Check-in problems</b>
+          <br />
+          Include reservation code, hotel name, guest name, and the issue at reception.
+        </div>
+        <div style={styles.simpleBox}>
+          <b>Special requests</b>
+          <br />
+          Add mobility, room, arrival, or family requirements before payment.
+        </div>
+      </div>
+    </InfoPage>
+  );
+}
+
 function TravelGuidePage() {
   const [country, setCountry] = useState("United Kingdom");
   const [city, setCity] = useState("London");
@@ -226,6 +321,9 @@ export default function App() {
   const page = pageParams.get("page");
 
   if (path === "/travel" || page === "travel") return <TravelGuidePage />;
+  if (path === "/faq" || page === "faq") return <FAQs />;
+  if (path === "/terms" || page === "terms") return <Terms />;
+  if (path === "/support" || page === "support") return <Support />;
   if (path === "/reservation-confirmed") return <Confirmed />;
 
   const [catalog, setCatalog] = useState([]);
@@ -497,15 +595,15 @@ export default function App() {
           <div style={styles.brand}>MYSPACE HOTEL</div>
           <h1 style={styles.heroTitle}>Hotelbeds live rates with secure reserve and pay.</h1>
           <p style={styles.heroText}>
-            Full supplier catalogue loaded. Payment is only available for hotels with live Hotelbeds rates.
+            Full supplier catalogue loaded. Payment is only available for hotels with live supplier rates.
           </p>
         </div>
 
         <div style={styles.buttonRow}>
           <button style={styles.whiteButton} onClick={() => (window.location.href = "/?page=travel")}>Guide</button>
-          <button style={styles.whiteButton}>FAQ</button>
-          <button style={styles.whiteButton}>Terms</button>
-          <button style={styles.whiteButton}>Contact</button>
+          <button style={styles.whiteButton} onClick={() => (window.location.href = "/?page=faq")}>FAQ</button>
+          <button style={styles.whiteButton} onClick={() => (window.location.href = "/?page=terms")}>Terms</button>
+          <button style={styles.whiteButton} onClick={() => (window.location.href = "/?page=support")}>Contact</button>
         </div>
       </section>
 
@@ -557,22 +655,56 @@ export default function App() {
             <div style={styles.twoInput}>
               <div>
                 <label style={styles.formLabel}>Check-in</label>
-                <input style={styles.input} type="date" value={checkin} onChange={(e) => { setCheckin(e.target.value); clearConverted(); }} />
+                <input
+                  style={styles.input}
+                  type="date"
+                  value={checkin}
+                  onChange={(e) => {
+                    setCheckin(e.target.value);
+                    clearConverted();
+                  }}
+                />
               </div>
               <div>
                 <label style={styles.formLabel}>Check-out</label>
-                <input style={styles.input} type="date" value={checkout} onChange={(e) => { setCheckout(e.target.value); clearConverted(); }} />
+                <input
+                  style={styles.input}
+                  type="date"
+                  value={checkout}
+                  onChange={(e) => {
+                    setCheckout(e.target.value);
+                    clearConverted();
+                  }}
+                />
               </div>
             </div>
 
             <div style={styles.twoInput}>
               <div>
                 <label style={styles.formLabel}>Guests</label>
-                <input style={styles.input} type="number" min="1" value={guests} onChange={(e) => { setGuests(Number(e.target.value)); clearConverted(); }} />
+                <input
+                  style={styles.input}
+                  type="number"
+                  min="1"
+                  value={guests}
+                  onChange={(e) => {
+                    setGuests(Number(e.target.value));
+                    clearConverted();
+                  }}
+                />
               </div>
               <div>
                 <label style={styles.formLabel}>Rooms</label>
-                <input style={styles.input} type="number" min="1" value={rooms} onChange={(e) => { setRooms(Number(e.target.value)); clearConverted(); }} />
+                <input
+                  style={styles.input}
+                  type="number"
+                  min="1"
+                  value={rooms}
+                  onChange={(e) => {
+                    setRooms(Number(e.target.value));
+                    clearConverted();
+                  }}
+                />
               </div>
             </div>
 
@@ -603,7 +735,8 @@ export default function App() {
                   <div style={styles.hotelBody}>
                     <h2 style={styles.hotelName}>{hotel.hotel_name}</h2>
                     <p style={styles.hotelLocation}>
-                      {hotel.area ? `${hotel.area}, ` : ""}{hotel.city}, {hotel.country}
+                      {hotel.area ? `${hotel.area}, ` : ""}
+                      {hotel.city}, {hotel.country}
                     </p>
 
                     <div style={canPay ? styles.rateGood : styles.rateBlocked}>
@@ -621,13 +754,22 @@ export default function App() {
                     )}
 
                     <div style={styles.buttonPair}>
-                      <button style={styles.reserveMini} onClick={(e) => { e.stopPropagation(); selectHotel(hotel); }}>
+                      <button
+                        style={styles.reserveMini}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          selectHotel(hotel);
+                        }}
+                      >
                         Reserve
                       </button>
                       <button
                         style={canPay ? styles.payMini : styles.payDisabled}
                         disabled={!canPay}
-                        onClick={(e) => { e.stopPropagation(); requestBooking(hotel); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          requestBooking(hotel);
+                        }}
                       >
                         {canPay ? "Pay" : "Unavailable"}
                       </button>
@@ -707,16 +849,24 @@ export default function App() {
               <textarea style={styles.textarea} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Special requests" />
 
               <div style={styles.buttonPairLarge}>
-                <button style={styles.reserveLarge} disabled={requesting} onClick={() => setMessage(`Reserved for review: ${selectedHotel.hotel_name}.`)}>
+                <button
+                  style={styles.reserveLarge}
+                  disabled={requesting}
+                  onClick={() => setMessage(`Reserved for review: ${selectedHotel.hotel_name}.`)}
+                >
                   Reserve
                 </button>
 
-                <button style={selectedCanPay ? styles.payLarge : styles.payDisabledLarge} disabled={!selectedCanPay || requesting} onClick={() => requestBooking(selectedHotel)}>
+                <button
+                  style={selectedCanPay ? styles.payLarge : styles.payDisabledLarge}
+                  disabled={!selectedCanPay || requesting}
+                  onClick={() => requestBooking(selectedHotel)}
+                >
                   {requesting ? "Preparing Stripe..." : selectedCanPay ? "Pay" : "Unavailable"}
                 </button>
               </div>
 
-              <div style={styles.safeNote}>Payment is only enabled for valid live Hotelbeds rate keys.</div>
+              <div style={styles.safeNote}>Payment is only enabled for valid live supplier rate keys.</div>
             </div>
           )}
         </div>
@@ -769,7 +919,7 @@ const styles = {
   reserveLarge: { width: "100%", background: "#10254a", color: "white", border: 0, borderRadius: 14, padding: "15px 18px", fontSize: 18, fontWeight: 900, cursor: "pointer" },
   payLarge: { width: "100%", background: "#ffd34d", color: "#07111f", border: "2px solid #07111f", borderRadius: 14, padding: "15px 18px", fontSize: 18, fontWeight: 900, cursor: "pointer" },
   payDisabledLarge: { width: "100%", background: "#c8d0dd", color: "#52627c", border: 0, borderRadius: 14, padding: "15px 18px", fontSize: 18, fontWeight: 900, cursor: "not-allowed" },
-  emptyBox: { background: "white", borderRadius: 18, padding: 22, fontWeight: 900, lineHeight: 1.5 },
+  emptyBox: { background: "white", color: "#07111f", borderRadius: 18, padding: 22, fontWeight: 900, lineHeight: 1.5 },
   reservePanel: { background: "white", borderRadius: 18, padding: 16, overflow: "auto" },
   selectedPrice: { color: "#0f4db3", fontSize: 26, fontWeight: 900, marginBottom: 14 },
   selectedUnavailable: { background: "#ffe1e1", color: "#8a1111", padding: 13, borderRadius: 14, marginBottom: 14, fontWeight: 900 },
@@ -788,6 +938,13 @@ const styles = {
   confirmText: { fontSize: 20, lineHeight: 1.55 },
   codeBox: { background: "rgba(255,255,255,0.14)", borderRadius: 18, padding: 22, margin: "24px 0", fontSize: 18 },
   codeText: { fontSize: 28, marginTop: 10, fontWeight: 900, color: "#ffd34d" },
+  infoPage: { minHeight: "100vh", background: "linear-gradient(135deg,#06101f,#123a7a)", color: "white", padding: 34, fontFamily: "Arial, sans-serif" },
+  infoCardWide: { maxWidth: 1180, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 28, padding: 40 },
+  infoTitle: { fontSize: 46, color: "#ffd34d", marginBottom: 8 },
+  infoSubtitle: { fontSize: 22, fontWeight: 800, lineHeight: 1.4 },
+  infoBody: { fontSize: 18, lineHeight: 1.6 },
+  simpleGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginTop: 24 },
+  simpleBox: { background: "white", color: "#07111f", borderRadius: 20, padding: 22, fontSize: 18, lineHeight: 1.5 },
   guideSearchCard: { background: "white", color: "#07111f", borderRadius: 22, padding: 20 },
   destinationBanner: { background: "#123a7a", borderRadius: 20, padding: 18, fontSize: 28, fontWeight: 900, marginBottom: 18 },
   emergencyBox: { background: "#ffefef", color: "#07111f", borderRadius: 24, padding: 24, marginBottom: 22 },
