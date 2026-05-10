@@ -1,9 +1,44 @@
 import React, { useEffect, useMemo, useState } from "react";
+import ReactGA from "react-ga4";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
   import.meta.env.VITE_API_BASE_URL ||
   "http://127.0.0.1:5050";
+
+const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || "";
+
+let GA_READY = false;
+
+function initGA() {
+  if (!GA_READY && GA_MEASUREMENT_ID && GA_MEASUREMENT_ID.startsWith("G-")) {
+    ReactGA.initialize(GA_MEASUREMENT_ID);
+    GA_READY = true;
+  }
+}
+
+function trackPage(pageTitle) {
+  initGA();
+
+  if (!GA_READY) return;
+
+  ReactGA.send({
+    hitType: "pageview",
+    page: window.location.pathname + window.location.search,
+    title: pageTitle || document.title || "MySpace Hotel",
+  });
+}
+
+function trackEvent(action, params = {}) {
+  initGA();
+
+  if (!GA_READY) return;
+
+  ReactGA.event(action, {
+    app_name: "MySpace Hotel",
+    ...params,
+  });
+}
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -24,6 +59,11 @@ function safeText(v) {
 
 function openLink(url) {
   if (!url) return;
+
+  trackEvent("guide_open_map", {
+    url,
+  });
+
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
@@ -87,6 +127,10 @@ function GuideSection({ title, items }) {
 }
 
 function InfoPage({ title, subtitle, children }) {
+  useEffect(() => {
+    trackPage(title);
+  }, [title]);
+
   return (
     <div style={styles.infoPage}>
       <div style={styles.infoCardWide}>
@@ -94,7 +138,13 @@ function InfoPage({ title, subtitle, children }) {
         <h1 style={styles.infoTitle}>{title}</h1>
         {subtitle && <p style={styles.infoSubtitle}>{subtitle}</p>}
         <div style={styles.infoBody}>{children}</div>
-        <button style={styles.goldSmall} onClick={() => (window.location.href = "/")}>
+        <button
+          style={styles.goldSmall}
+          onClick={() => {
+            trackEvent("navigation_back_to_search", { from_page: title });
+            window.location.href = "/";
+          }}
+        >
           Back to hotel search
         </button>
       </div>
@@ -194,6 +244,12 @@ function TravelGuidePage() {
     setMessage("");
     setGuide(null);
 
+    trackEvent("travel_guide_search", {
+      country,
+      city,
+      area,
+    });
+
     try {
       const params = new URLSearchParams();
       params.set("country", country);
@@ -205,18 +261,36 @@ function TravelGuidePage() {
 
       if (!data.ok) {
         setMessage(data.message || "Guide unavailable.");
+        trackEvent("travel_guide_failed", {
+          country,
+          city,
+          area,
+        });
         return;
       }
 
       setGuide(data.guide);
+
+      trackEvent("travel_guide_loaded", {
+        country,
+        city,
+        area,
+        destination: data.guide?.destination || "",
+      });
     } catch {
       setMessage("Could not load travel guide.");
+      trackEvent("travel_guide_error", {
+        country,
+        city,
+        area,
+      });
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
+    trackPage("Premium live destination guide");
     loadGuide();
   }, []);
 
@@ -246,7 +320,13 @@ function TravelGuidePage() {
             {loading ? "Building live guide..." : "Build Live Guide"}
           </button>
 
-          <button style={styles.reserveMini} onClick={() => (window.location.href = "/")}>
+          <button
+            style={styles.reserveMini}
+            onClick={() => {
+              trackEvent("navigation_back_to_portal", { from_page: "guide" });
+              window.location.href = "/";
+            }}
+          >
             Back to hotel portal
           </button>
         </div>
@@ -291,10 +371,38 @@ function Confirmed() {
   const [status, setStatus] = useState("Confirming payment update...");
 
   useEffect(() => {
+    trackPage("Reservation confirmed");
+    trackEvent("payment_returned_to_app", {
+      reservation_code: code,
+    });
+
     if (!code || code === "Your reservation") return;
+
     fetch(`${API_BASE}/reservation/${code}/mark-paid`, { method: "POST" })
-      .then(() => setStatus("Payment received. Reservation update is being processed securely."))
-      .catch(() => setStatus("Payment received. Reservation update is being processed securely."));
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok && data.ok && data.supplier_reference) {
+          setStatus("Payment received. Supplier booking confirmed.");
+          trackEvent("supplier_booking_confirmed", {
+            reservation_code: code,
+            supplier_reference: data.supplier_reference,
+          });
+          return;
+        }
+
+        setStatus("Payment received, but supplier confirmation is still being checked.");
+        trackEvent("supplier_booking_pending_or_failed", {
+          reservation_code: code,
+          message: data.message || "",
+        });
+      })
+      .catch(() => {
+        setStatus("Payment received. Reservation update is being processed securely.");
+        trackEvent("supplier_booking_check_error", {
+          reservation_code: code,
+        });
+      });
   }, [code]);
 
   return (
@@ -307,7 +415,16 @@ function Confirmed() {
           <b>Reservation code:</b>
           <div style={styles.codeText}>{code}</div>
         </div>
-        <button style={styles.goldSmall} onClick={() => (window.location.href = "/")}>
+        <button
+          style={styles.goldSmall}
+          onClick={() => {
+            trackEvent("navigation_back_to_search", {
+              from_page: "reservation-confirmed",
+              reservation_code: code,
+            });
+            window.location.href = "/";
+          }}
+        >
           Back to hotel search
         </button>
       </div>
@@ -319,6 +436,10 @@ export default function App() {
   const path = window.location.pathname;
   const pageParams = new URLSearchParams(window.location.search);
   const page = pageParams.get("page");
+
+  useEffect(() => {
+    initGA();
+  }, []);
 
   if (path === "/travel" || page === "travel") return <TravelGuidePage />;
   if (path === "/faq" || page === "faq") return <FAQs />;
@@ -351,6 +472,10 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [requesting, setRequesting] = useState(false);
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    trackPage("Hotel search portal");
+  }, []);
 
   const countries = useMemo(() => {
     return [...catalog]
@@ -386,6 +511,14 @@ export default function App() {
       return;
     }
 
+    trackEvent("currency_convert_clicked", {
+      hotel_id: selectedHotel.hotel_id || "",
+      hotel_name: selectedHotel.hotel_name || "",
+      from_currency: selectedHotel.first_rate.currency || "",
+      to_currency: targetCurrency,
+      amount: Number(selectedHotel.first_rate.amount || 0),
+    });
+
     try {
       const params = new URLSearchParams();
       params.set("amount", String(Number(selectedHotel.first_rate.amount || 0)));
@@ -397,12 +530,23 @@ export default function App() {
 
       if (!data.ok) {
         setConvertedTotal("Conversion unavailable");
+        trackEvent("currency_convert_failed", {
+          to_currency: targetCurrency,
+        });
         return;
       }
 
       setConvertedTotal(`${targetCurrency} ${money(data.converted)}`);
+
+      trackEvent("currency_convert_success", {
+        to_currency: targetCurrency,
+        converted: Number(data.converted || 0),
+      });
     } catch {
       setConvertedTotal("Conversion unavailable");
+      trackEvent("currency_convert_error", {
+        to_currency: targetCurrency,
+      });
     }
   }
 
@@ -419,6 +563,17 @@ export default function App() {
     setSelectedHotel(null);
     clearConverted();
     setMessage("");
+
+    trackEvent("hotel_search_started", {
+      country: searchCountry,
+      city: searchCity,
+      area,
+      keyword,
+      checkin,
+      checkout,
+      guests,
+      rooms,
+    });
 
     try {
       const params = new URLSearchParams();
@@ -438,6 +593,15 @@ export default function App() {
       const list = Array.isArray(data.hotels) ? data.hotels : [];
       setHotels(list);
 
+      trackEvent("hotel_search_completed", {
+        country: searchCountry,
+        city: searchCity,
+        area,
+        keyword,
+        result_count: list.length,
+        live_rate_count: list.filter((h) => h.live_rate_ready).length,
+      });
+
       if (list.length > 0) {
         setSelectedHotel(list[0]);
         setMessage(`${list.length} best matches found in ${searchCity}.`);
@@ -447,6 +611,11 @@ export default function App() {
     } catch {
       setHotels([]);
       setMessage("Backend unavailable. Restart backend and frontend.");
+
+      trackEvent("hotel_search_error", {
+        country: searchCountry,
+        city: searchCity,
+      });
     } finally {
       setLoading(false);
     }
@@ -462,6 +631,10 @@ export default function App() {
         const loadedCountries = Array.isArray(data.countries) ? data.countries : [];
 
         setCatalog(loadedCountries);
+
+        trackEvent("catalog_loaded", {
+          countries_count: loadedCountries.length,
+        });
 
         const uk =
           loadedCountries.find((c) => safeText(c.country).toLowerCase() === "united kingdom") ||
@@ -483,6 +656,8 @@ export default function App() {
         }
       } catch {
         setMessage("Could not load country and city catalogue.");
+
+        trackEvent("catalog_load_error", {});
       } finally {
         setLoadingCatalog(false);
       }
@@ -502,6 +677,11 @@ export default function App() {
     setSelectedHotel(null);
     clearConverted();
     setMessage(firstCity ? "Country changed. Press Search." : "No city found for this country.");
+
+    trackEvent("country_changed", {
+      country: nextCountry,
+      first_city: firstCity,
+    });
   }
 
   function changeCity(nextCity) {
@@ -510,27 +690,59 @@ export default function App() {
     setSelectedHotel(null);
     clearConverted();
     setMessage("City changed. Press Search.");
+
+    trackEvent("city_changed", {
+      country,
+      city: nextCity,
+    });
   }
 
   function selectHotel(hotel) {
     setSelectedHotel(hotel);
     clearConverted();
+
+    trackEvent("hotel_selected", {
+      hotel_id: hotel.hotel_id || "",
+      hotel_name: hotel.hotel_name || "",
+      country: hotel.country || "",
+      city: hotel.city || "",
+      live_rate_ready: Boolean(hotel.live_rate_ready),
+      amount: Number(hotel?.first_rate?.amount || 0),
+      currency: hotel?.first_rate?.currency || "",
+    });
   }
 
   async function requestBooking(hotel = selectedHotel) {
     if (!hotel) return setMessage("Select a live-rate hotel first.");
 
     if (!hotel.live_rate_ready || !Number(hotel?.first_rate?.amount || 0)) {
+      trackEvent("payment_blocked_no_live_rate", {
+        hotel_id: hotel.hotel_id || "",
+        hotel_name: hotel.hotel_name || "",
+      });
       return setMessage("Payment blocked because this hotel has no live rate.");
     }
 
     if (!customerName.trim() || !customerEmail.trim()) {
+      trackEvent("payment_blocked_missing_customer", {
+        hotel_id: hotel.hotel_id || "",
+        hotel_name: hotel.hotel_name || "",
+      });
       return setMessage("Enter your name and email before payment.");
     }
 
     selectHotel(hotel);
     setRequesting(true);
     setMessage("Preparing secure Stripe checkout...");
+
+    trackEvent("payment_attempt_started", {
+      hotel_id: hotel.hotel_id || "",
+      hotel_name: hotel.hotel_name || "",
+      country: hotel.country || "",
+      city: hotel.city || "",
+      amount: Number(hotel?.first_rate?.amount || 0),
+      currency: hotel?.first_rate?.currency || "",
+    });
 
     try {
       const rate = hotel.first_rate || {};
@@ -567,8 +779,23 @@ export default function App() {
 
       if (!res.ok || !data.ok) {
         setMessage(data.message || "Could not prepare secure checkout.");
+
+        trackEvent("payment_checkout_failed", {
+          hotel_id: hotel.hotel_id || "",
+          hotel_name: hotel.hotel_name || "",
+          message: data.message || "",
+        });
+
         return;
       }
+
+      trackEvent("payment_checkout_created", {
+        hotel_id: hotel.hotel_id || "",
+        hotel_name: hotel.hotel_name || "",
+        reservation_code: data.reservation_code || "",
+        currency: rate.currency || "",
+        amount: Number(rate.amount || 0),
+      });
 
       if (data.payment_url) {
         window.location.href = data.payment_url;
@@ -578,6 +805,11 @@ export default function App() {
       setMessage(`Reservation created: ${data.reservation_code}.`);
     } catch {
       setMessage("Secure booking service unavailable.");
+
+      trackEvent("payment_checkout_error", {
+        hotel_id: hotel.hotel_id || "",
+        hotel_name: hotel.hotel_name || "",
+      });
     } finally {
       setRequesting(false);
     }
@@ -600,10 +832,42 @@ export default function App() {
         </div>
 
         <div style={styles.buttonRow}>
-          <button style={styles.whiteButton} onClick={() => (window.location.href = "/?page=travel")}>Guide</button>
-          <button style={styles.whiteButton} onClick={() => (window.location.href = "/?page=faq")}>FAQ</button>
-          <button style={styles.whiteButton} onClick={() => (window.location.href = "/?page=terms")}>Terms</button>
-          <button style={styles.whiteButton} onClick={() => (window.location.href = "/?page=support")}>Contact</button>
+          <button
+            style={styles.whiteButton}
+            onClick={() => {
+              trackEvent("top_nav_clicked", { page: "guide" });
+              window.location.href = "/?page=travel";
+            }}
+          >
+            Guide
+          </button>
+          <button
+            style={styles.whiteButton}
+            onClick={() => {
+              trackEvent("top_nav_clicked", { page: "faq" });
+              window.location.href = "/?page=faq";
+            }}
+          >
+            FAQ
+          </button>
+          <button
+            style={styles.whiteButton}
+            onClick={() => {
+              trackEvent("top_nav_clicked", { page: "terms" });
+              window.location.href = "/?page=terms";
+            }}
+          >
+            Terms
+          </button>
+          <button
+            style={styles.whiteButton}
+            onClick={() => {
+              trackEvent("top_nav_clicked", { page: "support" });
+              window.location.href = "/?page=support";
+            }}
+          >
+            Contact
+          </button>
         </div>
       </section>
 
@@ -662,6 +926,7 @@ export default function App() {
                   onChange={(e) => {
                     setCheckin(e.target.value);
                     clearConverted();
+                    trackEvent("checkin_changed", { checkin: e.target.value });
                   }}
                 />
               </div>
@@ -674,6 +939,7 @@ export default function App() {
                   onChange={(e) => {
                     setCheckout(e.target.value);
                     clearConverted();
+                    trackEvent("checkout_changed", { checkout: e.target.value });
                   }}
                 />
               </div>
@@ -690,6 +956,7 @@ export default function App() {
                   onChange={(e) => {
                     setGuests(Number(e.target.value));
                     clearConverted();
+                    trackEvent("guests_changed", { guests: Number(e.target.value) });
                   }}
                 />
               </div>
@@ -703,6 +970,7 @@ export default function App() {
                   onChange={(e) => {
                     setRooms(Number(e.target.value));
                     clearConverted();
+                    trackEvent("rooms_changed", { rooms: Number(e.target.value) });
                   }}
                 />
               </div>
@@ -759,6 +1027,11 @@ export default function App() {
                         onClick={(e) => {
                           e.stopPropagation();
                           selectHotel(hotel);
+                          trackEvent("reserve_clicked", {
+                            hotel_id: hotel.hotel_id || "",
+                            hotel_name: hotel.hotel_name || "",
+                            live_rate_ready: Boolean(canPay),
+                          });
                         }}
                       >
                         Reserve
@@ -813,6 +1086,7 @@ export default function App() {
                     onChange={(e) => {
                       setTargetCurrency(e.target.value);
                       clearConverted();
+                      trackEvent("target_currency_changed", { currency: e.target.value });
                     }}
                   >
                     {["USD", "GBP", "EUR", "NGN", "AED", "CAD", "AUD", "ZAR", "CHF", "JPY"].map((c) => (
@@ -852,7 +1126,13 @@ export default function App() {
                 <button
                   style={styles.reserveLarge}
                   disabled={requesting}
-                  onClick={() => setMessage(`Reserved for review: ${selectedHotel.hotel_name}.`)}
+                  onClick={() => {
+                    setMessage(`Reserved for review: ${selectedHotel.hotel_name}.`);
+                    trackEvent("reserve_for_review_clicked", {
+                      hotel_id: selectedHotel.hotel_id || "",
+                      hotel_name: selectedHotel.hotel_name || "",
+                    });
+                  }}
                 >
                   Reserve
                 </button>
