@@ -7,3 +7,9 @@ backend/.env.txt
 frontend/.env
 frontend/.env.*
 frontend/.env.production
+
+SAFE_PROJECT_REPORT.txt
+*.backup.*
+*.bak
+*.tmp
+
