@@ -146,3 +146,4 @@
     "supplier_error": "{\"auditData\":{\"processTime\":\"1\",\"timestamp\":\"2026-05-10 03:49:06.268\",\"requestHost\":\"\",\"serverId\":\"\",\"environment\":\"\",\"release\":\"\",\"token\":\"607F9EAE54494652B9FD672AE639BB04\",\"internal\":\"0|07~~2241b1~-1637007690~N~~~NOR~~893A5949BB2C4FA177785801333305AAUK0083000000000122d173|UK|01|83|0|||||||||||R|0|1|~1~2~0||0|BAR RO|0|f4cbae48e7a1e5e8a8031906cebda095||||\"},\"error\":{\"code\":\"INVALID_DATA\",\"message\":\"The check-in must be in the future.\"}}"
   }
 ]
+
