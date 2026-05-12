@@ -13,3 +13,8 @@ SAFE_PROJECT_REPORT.txt
 *.bak
 *.tmp
 
+
+# MySpace Hotel live-rate cache protection
+backend/data/live_rate_cache.json
+backend/data/live_rate_cache_BACKUP_*.json
+backend/data/*BACKUP*.json
