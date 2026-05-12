@@ -7,3 +7,5 @@ database_backups/
 *.db
 *.sqlite
 *.sqlite3
+data/live-rate-cache/*.ndjson
+data/live-rate-cache/*.tmp
