@@ -1,0 +1,18 @@
+{
+  "generated_at": "2026-05-12T14:00:38.153Z",
+  "total_live_rates": 237936,
+  "total_countries": 1,
+  "countries": [
+    {
+      "country": "Unknown",
+      "live_rates": 237936,
+      "city_count": 1,
+      "top_cities": [
+        {
+          "city": "Paris",
+          "live_rates": 237936
+        }
+      ]
+    }
+  ]
+}
