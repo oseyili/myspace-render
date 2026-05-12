@@ -18,3 +18,7 @@ SAFE_PROJECT_REPORT.txt
 backend/data/live_rate_cache.json
 backend/data/live_rate_cache_BACKUP_*.json
 backend/data/*BACKUP*.json
+
+backend/data/live_rate_cache.json
+backend/data/live_rate_cache_BACKUP_*.json
+backend/data/live_rate_cache_render.json
