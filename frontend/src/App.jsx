@@ -1,30 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
-import ReactGA from "react-ga4";
+﻿import React, { useEffect, useMemo, useState } from "react";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
   import.meta.env.VITE_API_BASE_URL ||
   "http://127.0.0.1:5050";
-
-const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || "";
-let GA_READY = false;
-
-function initGA() {
-  if (!GA_READY && GA_MEASUREMENT_ID && GA_MEASUREMENT_ID.startsWith("G-")) {
-    ReactGA.initialize(GA_MEASUREMENT_ID);
-    GA_READY = true;
-  }
-}
-
-function trackPage(title) {
-  initGA();
-  if (!GA_READY) return;
-  ReactGA.send({
-    hitType: "pageview",
-    page: window.location.pathname + window.location.search,
-    title,
-  });
-}
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -37,6 +16,33 @@ function tomorrowISO() {
 function safeText(v) {
   return String(v || "").trim();
 }
+
+function fixImageUrl(url) {
+  const raw = safeText(url);
+
+  if (!raw) return "";
+
+  let fixed = raw;
+
+  if (
+    fixed.includes("127.0.0.1:5050") &&
+    !API_BASE.includes("127.0.0.1")
+  ) {
+    fixed = fixed
+      .replace("http://127.0.0.1:5050", API_BASE)
+      .replace("https://127.0.0.1:5050", API_BASE);
+  }
+
+  fixed = fixed
+    .replace("/max1024x768/", "/max500/")
+    .replace("/max1280x900/", "/max500/")
+    .replace("/max1440x1080/", "/max500/")
+    .replace("/max3000/", "/max500/")
+    .replace("/bigger/", "/medium/");
+
+  return fixed;
+}
+
 
 function money(v) {
   const n = Number(v || 0);
@@ -66,9 +72,7 @@ function normalizeCountries(raw) {
   return (Array.isArray(raw) ? raw : [])
     .map((c) => ({
       country: safeText(c?.country),
-      cities: (Array.isArray(c?.cities) ? c.cities : [])
-        .map(normalizeCity)
-        .filter((x) => x.city),
+      cities: (Array.isArray(c?.cities) ? c.cities : []).map(normalizeCity).filter((x) => x.city),
     }))
     .filter((c) => c.country && c.cities.length)
     .sort((a, b) => a.country.localeCompare(b.country));
@@ -83,53 +87,11 @@ function baseSupplierRate(rate) {
 }
 
 function finalCustomerTotal(rate, rooms) {
-  const roomRate = baseCustomerRate(rate);
-  const count = roomCount(rooms);
-  return Number((roomRate * count).toFixed(2));
+  return Number((baseCustomerRate(rate) * roomCount(rooms)).toFixed(2));
 }
 
 function finalSupplierTotal(rate, rooms) {
-  const supplierRate = baseSupplierRate(rate);
-  const count = roomCount(rooms);
-  return Number((supplierRate * count).toFixed(2));
-}
-
-function hotelImageUrl(value) {
-  const raw = safeText(value);
-  if (!raw) return "";
-  if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
-
-  const cleaned = raw
-    .replace(/^\/+/, "")
-    .replace(/^giata\//i, "")
-    .replace(/^bigger\//i, "")
-    .replace(/^medium\//i, "")
-    .replace(/^small\//i, "");
-
-  return `https://photos.hotelbeds.com/giata/bigger/${cleaned}`;
-}
-
-function extractImageFromRaw(rawValue) {
-  const raw = safeText(rawValue);
-  if (!raw) return "";
-
-  try {
-    const parsed = JSON.parse(raw);
-    const images = Array.isArray(parsed?.images) ? parsed.images : [];
-
-    for (const img of images) {
-      const p =
-        safeText(img?.path) ||
-        safeText(img?.url) ||
-        safeText(img?.imageUrl) ||
-        safeText(img?.image_url);
-
-      const url = hotelImageUrl(p);
-      if (url) return url;
-    }
-  } catch {}
-
-  return "";
+  return Number((baseSupplierRate(rate) * roomCount(rooms)).toFixed(2));
 }
 
 function PropertyImage({ hotel, large = false }) {
@@ -137,23 +99,16 @@ function PropertyImage({ hotel, large = false }) {
 
   useEffect(() => {
     setFailed(false);
-  }, [hotel?.hotel_id, hotel?.image_url, hotel?.raw_hotel_json]);
+  }, [hotel?.hotel_id, hotel?.image_url, hotel?.direct_image_url]);
 
-  const url =
-    hotelImageUrl(hotel?.image_url) ||
-    hotelImageUrl(hotel?.direct_image_url) ||
-    hotelImageUrl(hotel?.main_image) ||
-    hotelImageUrl(hotel?.thumbnail) ||
-    hotelImageUrl(hotel?.photo) ||
-    hotelImageUrl(hotel?.picture) ||
-    extractImageFromRaw(hotel?.raw_hotel_json);
+  const url = fixImageUrl(hotel?.image_url || hotel?.direct_image_url);
 
   if (!url || failed) {
     return (
-      <div style={large ? styles.imageMissingLarge : styles.imageMissing}>
-        <div style={styles.imageBadge}>MYSPACE HOTEL</div>
-        <div style={styles.imageMissingTitle}>Verified property image unavailable</div>
-        <div style={styles.imageMissingText}>No fake hotel photo is displayed.</div>
+      <div className={large ? "imageMissing largeImage" : "imageMissing"}>
+        <div className="imageBadge">MYSPACE HOTEL</div>
+        <div className="imageMissingTitle">Verified property image unavailable</div>
+        <div className="imageMissingText">No fake hotel photo is displayed.</div>
       </div>
     );
   }
@@ -162,10 +117,10 @@ function PropertyImage({ hotel, large = false }) {
     <img
       src={url}
       alt={hotel?.hotel_name || "Hotel"}
-      style={large ? styles.hotelImageLarge : styles.hotelImage}
+      className={large ? "hotelImage largeImage" : "hotelImage"}
       loading={large ? "eager" : "lazy"}
       decoding="async"
-      fetchPriority={large ? "high" : "auto"}
+      fetchPriority={large ? "high" : "low"}
       referrerPolicy="no-referrer"
       onError={() => setFailed(true)}
     />
@@ -180,40 +135,13 @@ function PriceBreakdown({ rate, checkin, checkout, rooms, guests, compact = fals
   const currency = rate?.currency || "GBP";
 
   return (
-    <div style={compact ? styles.priceBreakdownCompact : styles.priceBreakdown}>
-      <div style={styles.priceLine}>
-        <span>Stay length</span>
-        <b>
-          {nights} night{nights === 1 ? "" : "s"}
-        </b>
-      </div>
-      <div style={styles.priceLine}>
-        <span>Guests</span>
-        <b>{guests}</b>
-      </div>
-      <div style={styles.priceLine}>
-        <span>Rooms selected</span>
-        <b>{count}</b>
-      </div>
-      <div style={styles.priceLine}>
-        <span>Rate per room</span>
-        <b>
-          {currency} {money(base)}
-        </b>
-      </div>
-      <div style={styles.priceLine}>
-        <span>Total check</span>
-        <b>
-          {currency} {money(base)} × {count}
-        </b>
-      </div>
-      <div style={styles.totalLine}>
-        <span>Total to pay</span>
-        <b>
-          {currency} {money(total)}
-        </b>
-      </div>
-      <div style={styles.priceTrustNote}>Secure checkout must match this exact room total.</div>
+    <div className={compact ? "priceBox compactPrice" : "priceBox"}>
+      <div className="priceLine"><span>Stay length</span><b>{nights} night{nights === 1 ? "" : "s"}</b></div>
+      <div className="priceLine"><span>Guests</span><b>{guests}</b></div>
+      <div className="priceLine"><span>Rooms selected</span><b>{count}</b></div>
+      <div className="priceLine"><span>Rate per room</span><b>{currency} {money(base)}</b></div>
+      <div className="priceLine"><span>Total check</span><b>{currency} {money(base)} Ã— {count}</b></div>
+      <div className="totalLine"><span>Total to pay</span><b>{currency} {money(total)}</b></div>
     </div>
   );
 }
@@ -222,21 +150,18 @@ function GuideTable({ title, items, red = false }) {
   const list = Array.isArray(items) ? items : [];
 
   return (
-    <section style={styles.guideTableWrap}>
-      <div style={red ? styles.guideTableTitleRed : styles.guideTableTitle}>{title}</div>
-      <div style={styles.guideTable}>
-        {list.length === 0 && <div style={styles.guideEmpty}>No nearby result loaded yet.</div>}
+    <section className="guideTableWrap">
+      <div className={red ? "guideTableTitleRed" : "guideTableTitle"}>{title}</div>
+      <div className="guideTable">
+        {list.length === 0 && <div className="guideEmpty">No nearby result loaded yet.</div>}
         {list.map((item, index) => (
-          <div key={`${title}-${index}`} style={styles.guideRow}>
-            <div style={styles.guideCellMain}>
+          <div key={`${title}-${index}`} className="guideRow">
+            <div className="guideCellMain">
               <b>{item.name || item.type || "Nearby place"}</b>
               <span>{item.purpose || item.address || item.type || ""}</span>
             </div>
-            <div style={styles.guideCellType}>{item.type || "Nearby"}</div>
-            <button
-              style={red ? styles.mapBtnRed : styles.mapBtn}
-              onClick={() => item.maps && window.open(item.maps, "_blank", "noopener,noreferrer")}
-            >
+            <div className="guideCellType">{item.type || "Nearby"}</div>
+            <button className={red ? "mapBtnRed" : "mapBtn"} onClick={() => item.maps && window.open(item.maps, "_blank", "noopener,noreferrer")}>
               Map
             </button>
           </div>
@@ -247,20 +172,15 @@ function GuideTable({ title, items, red = false }) {
 }
 
 function InfoPage({ title, subtitle, children }) {
-  useEffect(() => {
-    trackPage(title);
-  }, [title]);
-
   return (
-    <div style={styles.infoPage}>
-      <div style={styles.infoCardWide}>
-        <div style={styles.brandSmall}>MYSPACE HOTEL</div>
-        <h1 style={styles.infoTitle}>{title}</h1>
-        {subtitle && <p style={styles.infoSubtitle}>{subtitle}</p>}
-        <div style={styles.infoBody}>{children}</div>
-        <button style={styles.goldSmall} onClick={() => (window.location.href = "/")}>
-          Back to hotel search
-        </button>
+    <div className="infoPage">
+      <AppStyles />
+      <div className="infoCard">
+        <div className="brandSmall">MYSPACE HOTEL</div>
+        <h1 className="infoTitle">{title}</h1>
+        <p className="infoSubtitle">{subtitle}</p>
+        {children}
+        <button className="goldSmall" onClick={() => (window.location.href = "/")}>Back to hotel search</button>
       </div>
     </div>
   );
@@ -269,27 +189,11 @@ function InfoPage({ title, subtitle, children }) {
 function FAQs() {
   return (
     <InfoPage title="Frequently asked questions" subtitle="Clear answers before customers reserve or pay.">
-      <div style={styles.simpleGrid}>
-        <div style={styles.simpleBox}>
-          <b>Can I pay online?</b>
-          <br />
-          Yes. Payment is available only when a valid live rate is available.
-        </div>
-        <div style={styles.simpleBox}>
-          <b>Are images fake?</b>
-          <br />
-          No. Missing hotel photos show a clear notice instead of fake hotel images.
-        </div>
-        <div style={styles.simpleBox}>
-          <b>Why no price?</b>
-          <br />
-          Some hotels are unavailable for the selected dates or city.
-        </div>
-        <div style={styles.simpleBox}>
-          <b>Will I get confirmation?</b>
-          <br />
-          Reservation updates are sent to the email address provided at checkout.
-        </div>
+      <div className="simpleGrid">
+        <div className="simpleBox"><b>Can I pay online?</b><br />Yes. Payment is available only when a valid live rate is available.</div>
+        <div className="simpleBox"><b>Are images fake?</b><br />No. Missing photos show a trust notice instead of fake hotel images.</div>
+        <div className="simpleBox"><b>Why no price?</b><br />Some hotels are unavailable for the selected dates or city.</div>
+        <div className="simpleBox"><b>Will I get confirmation?</b><br />Reservation updates are sent to the email address provided at checkout.</div>
       </div>
     </InfoPage>
   );
@@ -298,13 +202,11 @@ function FAQs() {
 function Terms() {
   return (
     <InfoPage title="Booking terms" subtitle="Customer trust depends on accurate hotel and rate information.">
-      <div style={styles.simpleGrid}>
-        <div style={styles.simpleBox}>
-          Review hotel name, room, board, dates, guests, currency, amount, and cancellation details before payment.
-        </div>
-        <div style={styles.simpleBox}>Prices and availability can change until confirmation is completed.</div>
-        <div style={styles.simpleBox}>Payment is enabled only for stays with valid live rate keys and payable amounts.</div>
-        <div style={styles.simpleBox}>No fake photos, no fake prices, and no misleading availability are shown.</div>
+      <div className="simpleGrid">
+        <div className="simpleBox">Review hotel name, room, board, dates, guests, currency, amount, and cancellation details before payment.</div>
+        <div className="simpleBox">Prices and availability can change until confirmation is completed.</div>
+        <div className="simpleBox">Payment is enabled only for stays with valid live rate keys and payable amounts.</div>
+        <div className="simpleBox">No fake photos, no fake prices, and no misleading availability are shown.</div>
       </div>
     </InfoPage>
   );
@@ -313,27 +215,11 @@ function Terms() {
 function Support() {
   return (
     <InfoPage title="Customer support" subtitle="Reservation support for safer booking decisions.">
-      <div style={styles.simpleGrid}>
-        <div style={styles.simpleBox}>
-          <b>Email</b>
-          <br />
-          reservations@myspace-hotel.com
-        </div>
-        <div style={styles.simpleBox}>
-          <b>Booking help</b>
-          <br />
-          Include hotel name, dates, destination, and booking email.
-        </div>
-        <div style={styles.simpleBox}>
-          <b>Arrival help</b>
-          <br />
-          Include reservation code, guest name, and hotel name.
-        </div>
-        <div style={styles.simpleBox}>
-          <b>Special requests</b>
-          <br />
-          Add room, accessibility, family, or arrival needs before payment.
-        </div>
+      <div className="simpleGrid">
+        <div className="simpleBox"><b>Email</b><br />reservations@myspace-hotel.com</div>
+        <div className="simpleBox"><b>Booking help</b><br />Include hotel name, dates, destination, and booking email.</div>
+        <div className="simpleBox"><b>Arrival help</b><br />Include reservation code, guest name, and hotel name.</div>
+        <div className="simpleBox"><b>Special requests</b><br />Add room, accessibility, family, or arrival needs before payment.</div>
       </div>
     </InfoPage>
   );
@@ -381,13 +267,12 @@ function TravelGuidePage() {
   async function loadCatalog() {
     try {
       let loaded = [];
-
-      const res1 = await fetch(`${API_BASE}/api/real-catalog/destinations`, { cache: "no-store" });
+      const res1 = await fetch(`${API_BASE}/api/bootstrap`, { cache: "no-store" });
       const data1 = await res1.json().catch(() => ({}));
       loaded = Array.isArray(data1.countries) ? data1.countries : [];
 
       if (!loaded.length) {
-        const res2 = await fetch(`${API_BASE}/api/bootstrap`, { cache: "no-store" });
+        const res2 = await fetch(`${API_BASE}/api/real-catalog/destinations`, { cache: "no-store" });
         const data2 = await res2.json().catch(() => ({}));
         loaded = Array.isArray(data2.countries) ? data2.countries : [];
       }
@@ -410,13 +295,16 @@ function TravelGuidePage() {
   }
 
   useEffect(() => {
-    trackPage("Destination guide");
     loadCatalog();
   }, []);
 
   function changeCountry(v) {
     const found = countries.find((x) => x.country === v);
-    const firstCity = found?.cities?.[0]?.city || "";
+    const firstCity =
+      found?.cities?.find((c) => Number(c.live_hotels || 0) > 0)?.city ||
+      found?.cities?.[0]?.city ||
+      "";
+
     setCountry(v);
     setCity(firstCity);
     setGuide(null);
@@ -432,74 +320,60 @@ function TravelGuidePage() {
   const emergency = guide?.emergency || {};
 
   return (
-    <div style={styles.guidePage}>
-      <section style={styles.guideTop}>
+    <div className="guidePage">
+      <AppStyles />
+      <section className="guideTop">
         <div>
-          <div style={styles.guideBrand}>MYSPACE HOTEL</div>
-          <h1 style={styles.guideHeadline}>Know the area before you arrive.</h1>
-          <p style={styles.guideCopy}>
-            Local help, nearby stays, food, transport, attractions and maps for the destination you selected.
-          </p>
+          <div className="guideBrand">MYSPACE HOTEL</div>
+          <h1 className="guideHeadline">Know the area before you arrive.</h1>
+          <p className="guideCopy">Local help, nearby stays, food, transport, attractions and maps for the destination you selected.</p>
         </div>
 
-        <div style={styles.guideControls}>
-          <select style={styles.guideInput} value={country} onChange={(e) => changeCountry(e.target.value)}>
+        <div className="guideControls">
+          <select className="input" value={country} onChange={(e) => changeCountry(e.target.value)}>
             <option value="">Choose country</option>
-            {countries.map((c) => (
-              <option key={c.country} value={c.country}>
-                {c.country}
-              </option>
-            ))}
+            {countries.map((c) => <option key={c.country} value={c.country}>{c.country}</option>)}
           </select>
 
-          <select style={styles.guideInput} value={city} onChange={(e) => changeCity(e.target.value)}>
+          <select className="input" value={city} onChange={(e) => changeCity(e.target.value)}>
             <option value="">Choose city</option>
-            {cities.map((c) => (
-              <option key={`${country}-${c.city}`} value={c.city}>
-                {c.city}
-                {c.live_hotels ? ` (${c.live_hotels})` : ""}
-              </option>
-            ))}
+            {cities.map((c) => <option key={`${country}-${c.city}`} value={c.city}>{c.city}{c.live_hotels ? ` (${c.live_hotels})` : ""}</option>)}
           </select>
 
-          <input style={styles.guideInput} value={area} placeholder="Area or district" onChange={(e) => setArea(e.target.value)} />
-
-          <button style={styles.guidePrimary} onClick={() => loadGuide(country, city, area)} disabled={loading || !country || !city}>
+          <input className="input" value={area} placeholder="Area or district" onChange={(e) => setArea(e.target.value)} />
+          <button className="guidePrimary" onClick={() => loadGuide(country, city, area)} disabled={loading || !country || !city}>
             {loading ? "Loading..." : "Refresh"}
           </button>
-
-          <button style={styles.guideSecondary} onClick={() => (window.location.href = "/")}>
-            Back
-          </button>
+          <button className="guideSecondary" onClick={() => (window.location.href = "/")}>Back</button>
         </div>
       </section>
 
-      {message && <div style={styles.notice}>{message}</div>}
+      {message && <div className="notice">{message}</div>}
 
       {guide && (
         <>
-          <div style={styles.destinationBar}>
+          <div className="destinationBar">
             <div>
-              <div style={styles.destinationSmall}>Your destination</div>
-              <div style={styles.destinationBig}>{guide.destination}</div>
-              <div style={styles.destinationSub}>Hotels, medical help, safety, food, transport and places to visit around this location.</div>
+              <div className="destinationSmall">Your destination</div>
+              <div className="destinationBig">{guide.destination}</div>
+              <div className="destinationSub">Hotels, medical help, safety, food, transport and places to visit around this location.</div>
             </div>
-            <div style={styles.guideTrust}>Maps • Nearby help • Arrival confidence</div>
+            <div className="guideTrust">Maps â€¢ Nearby help â€¢ Arrival confidence</div>
           </div>
 
-          <div style={styles.guideContentGrid}>
-            <section style={styles.emergencyPanel}>
-              <div style={styles.emergencyHeader}>
+          <div className="guideContentGrid">
+            <section className="emergencyPanel">
+              <div className="emergencyHeader">
                 <div>
-                  <div style={styles.redSmall}>Important</div>
-                  <h2 style={styles.emergencyTitle}>Emergency contacts</h2>
+                  <div className="redSmall">Important</div>
+                  <h2 className="emergencyTitle">Emergency contacts</h2>
                 </div>
-                <div style={styles.emergencyNumber}>{emergency.emergency || "112"}</div>
+                <div className="emergencyNumber">{emergency.emergency || "112"}</div>
               </div>
 
-              <div style={styles.emergencyGrid}>
+              <div className="emergencyGrid">
                 {Object.entries(emergency).map(([k, v]) => (
-                  <div key={k} style={styles.emergencyItem}>
+                  <div key={k} className="emergencyItem">
                     <span>{k.replace(/_/g, " ")}</span>
                     <b>{v}</b>
                   </div>
@@ -507,7 +381,7 @@ function TravelGuidePage() {
               </div>
             </section>
 
-            <div style={styles.guideTables}>
+            <div className="guideTables">
               <GuideTable title="Selected stay area" items={guide.hotels} />
               <GuideTable title="Medical help" items={guide.hospitals} red />
               <GuideTable title="Safety support" items={guide.police} red />
@@ -529,8 +403,6 @@ function Confirmed() {
   const [status, setStatus] = useState("Confirming payment update...");
 
   useEffect(() => {
-    trackPage("Reservation confirmed");
-
     if (!code || code === "Your reservation") return;
 
     fetch(`${API_BASE}/reservation/${code}/mark-paid`, { method: "POST" })
@@ -539,18 +411,14 @@ function Confirmed() {
   }, [code]);
 
   return (
-    <div style={styles.confirmPage}>
-      <div style={styles.confirmCard}>
-        <div style={styles.brandSmall}>MYSPACE HOTEL</div>
-        <h1 style={styles.confirmTitle}>Payment received</h1>
-        <p style={styles.confirmText}>{status}</p>
-        <div style={styles.codeBox}>
-          <b>Reservation code:</b>
-          <div style={styles.codeText}>{code}</div>
-        </div>
-        <button style={styles.goldSmall} onClick={() => (window.location.href = "/")}>
-          Back to hotel search
-        </button>
+    <div className="confirmPage">
+      <AppStyles />
+      <div className="confirmCard">
+        <div className="brandSmall">MYSPACE HOTEL</div>
+        <h1 className="confirmTitle">Payment received</h1>
+        <p className="confirmText">{status}</p>
+        <div className="codeBox"><b>Reservation code:</b><div className="codeText">{code}</div></div>
+        <button className="goldSmall" onClick={() => (window.location.href = "/")}>Back to hotel search</button>
       </div>
     </div>
   );
@@ -578,10 +446,6 @@ function MainPortal() {
   const [loading, setLoading] = useState(false);
   const [requesting, setRequesting] = useState(false);
   const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    trackPage("Hotel search portal");
-  }, []);
 
   const countries = useMemo(() => normalizeCountries(catalog), [catalog]);
   const selectedCountry = useMemo(() => countries.find((x) => x.country === country) || null, [countries, country]);
@@ -636,35 +500,30 @@ function MainPortal() {
     setLoadingCatalog(true);
 
     try {
-      let loaded = [];
-      let bootHotels = [];
-      let bootCountry = "";
-      let bootCity = "";
+      const bootRes = await fetch(`${API_BASE}/api/bootstrap`, { cache: "no-store" });
+      const boot = await bootRes.json().catch(() => ({}));
 
-      const res1 = await fetch(`${API_BASE}/api/real-catalog/destinations`, { cache: "no-store" });
-      const data1 = await res1.json().catch(() => ({}));
-      loaded = Array.isArray(data1.countries) ? data1.countries : [];
+      let loaded = Array.isArray(boot.countries) ? boot.countries : [];
+      let bootHotels = Array.isArray(boot.hotels) ? boot.hotels : [];
 
-      const res2 = await fetch(`${API_BASE}/api/bootstrap`, { cache: "no-store" });
-      const data2 = await res2.json().catch(() => ({}));
-
-      if (!loaded.length) loaded = Array.isArray(data2.countries) ? data2.countries : [];
-      bootHotels = Array.isArray(data2.hotels) ? data2.hotels : [];
-      bootCountry = safeText(data2.default_country);
-      bootCity = safeText(data2.default_city);
+      if (!loaded.length) {
+        const catRes = await fetch(`${API_BASE}/api/real-catalog/destinations`, { cache: "no-store" });
+        const cat = await catRes.json().catch(() => ({}));
+        loaded = Array.isArray(cat.countries) ? cat.countries : [];
+      }
 
       const normalized = normalizeCountries(loaded);
       setCatalog(normalized);
 
       const preferred =
-        normalized.find((c) => c.country === bootCountry) ||
-        normalized.find((c) => c.country.toLowerCase() === "united kingdom") ||
+        normalized.find((c) => safeText(c.country).toLowerCase() === safeText(boot.default_country).toLowerCase()) ||
+        normalized.find((c) => safeText(c.country).toLowerCase() === "united kingdom") ||
         normalized[0] ||
         null;
 
       const preferredCity =
-        preferred?.cities?.find((c) => c.city === bootCity) ||
-        preferred?.cities?.find((c) => c.live_hotels > 0) ||
+        preferred?.cities?.find((c) => safeText(c.city).toLowerCase() === safeText(boot.default_city).toLowerCase()) ||
+        preferred?.cities?.find((c) => Number(c.live_hotels || 0) > 0) ||
         preferred?.cities?.[0] ||
         null;
 
@@ -674,14 +533,14 @@ function MainPortal() {
       setCountry(firstCountry);
       setCity(firstCity);
 
-      if (bootHotels.length && firstCountry && firstCity) {
+      if (bootHotels.length) {
         setHotels(bootHotels);
         setSelectedHotel(bootHotels[0] || null);
         setMessage(`${bootHotels.length} stays ready.`);
       } else if (firstCountry && firstCity) {
-        runSearch(firstCountry, firstCity);
+        await runSearch(firstCountry, firstCity);
       } else {
-        setMessage("No country/city catalogue loaded. Check backend data JSON files.");
+        setMessage("No countries loaded from backend.");
       }
     } catch {
       setMessage("Could not load country and city catalogue.");
@@ -696,7 +555,10 @@ function MainPortal() {
 
   function changeCountry(nextCountry) {
     const found = countries.find((x) => x.country === nextCountry);
-    const firstCity = found?.cities?.[0]?.city || "";
+    const firstCity =
+      found?.cities?.find((c) => Number(c.live_hotels || 0) > 0)?.city ||
+      found?.cities?.[0]?.city ||
+      "";
 
     setCountry(nextCountry);
     setCity(firstCity);
@@ -704,7 +566,7 @@ function MainPortal() {
     setSelectedHotel(null);
     clearConverted();
 
-    if (firstCity) runSearch(nextCountry, firstCity);
+    if (nextCountry && firstCity) runSearch(nextCountry, firstCity);
     else setMessage("No city found for this country.");
   }
 
@@ -713,16 +575,12 @@ function MainPortal() {
     setHotels([]);
     setSelectedHotel(null);
     clearConverted();
+
     if (country && nextCity) runSearch(country, nextCity);
   }
 
-  function selectHotel(hotel) {
-    setSelectedHotel(hotel);
-    clearConverted();
-  }
-
   async function convertTotal() {
-    if (!selectedHotel?.live_rate_ready || !Number(selectedHotel?.first_rate?.amount || 0)) {
+    if (!selectedHotel?.live_rate_ready || !selectedHotel?.first_rate) {
       setConvertedTotal("0.00");
       return;
     }
@@ -821,115 +679,113 @@ function MainPortal() {
     finalCustomerTotal(selectedHotel?.first_rate, rooms) > 0;
 
   return (
-    <div style={styles.page}>
-      <section style={styles.hero}>
+    <div className="page">
+      <AppStyles />
+
+      <section className="hero">
         <div>
-          <div style={styles.brand}>MYSPACE HOTEL</div>
-          <h1 style={styles.heroTitle}>Book with clarity before you arrive.</h1>
-          <p style={styles.heroText}>Choose your destination, review the stay, check your total and explore the area with confidence.</p>
+          <div className="brand">MYSPACE HOTEL</div>
+          <h1 className="heroTitle">Book with clarity before you arrive.</h1>
+          <p className="heroText">Choose your destination, review the stay, check your total and explore the area with confidence.</p>
         </div>
 
-        <div style={styles.buttonRow}>
-          <button style={styles.whiteButton} onClick={() => (window.location.href = `/?page=travel&country=${encodeURIComponent(country)}&city=${encodeURIComponent(city)}&area=${encodeURIComponent(area)}`)}>Destination Guide</button>
-          <button style={styles.whiteButton} onClick={() => (window.location.href = "/?page=faq")}>FAQ</button>
-          <button style={styles.whiteButton} onClick={() => (window.location.href = "/?page=terms")}>Terms</button>
-          <button style={styles.whiteButton} onClick={() => (window.location.href = "/?page=support")}>Contact</button>
+        <div className="buttonRow">
+          <button className="whiteButton" onClick={() => (window.location.href = `/?page=travel&country=${encodeURIComponent(country)}&city=${encodeURIComponent(city)}&area=${encodeURIComponent(area)}`)}>Destination Guide</button>
+          <button className="whiteButton" onClick={() => (window.location.href = "/?page=faq")}>FAQ</button>
+          <button className="whiteButton" onClick={() => (window.location.href = "/?page=terms")}>Terms</button>
+          <button className="whiteButton" onClick={() => (window.location.href = "/?page=support")}>Contact</button>
         </div>
       </section>
 
-      <section style={styles.mainGrid}>
-        <div style={styles.column}>
-          <div style={styles.label}>SEARCH</div>
+      <section className="mainGrid">
+        <div className="column">
+          <div className="labelTop">SEARCH</div>
 
-          <div style={styles.searchBox}>
-            <p style={styles.muted}>{loadingCatalog ? "Loading catalogue..." : `${countries.length} countries ready.`}</p>
+          <div className="searchBox">
+            <p className="muted">{loadingCatalog ? "Loading catalogue..." : `${countries.length} countries ready.`}</p>
 
-            <label style={styles.formLabel}>Country</label>
-            <select style={styles.input} value={country} onChange={(e) => changeCountry(e.target.value)}>
+            <label className="formLabel">Country</label>
+            <select className="input" value={country} onChange={(e) => changeCountry(e.target.value)}>
               <option value="">Choose country</option>
               {countries.map((c) => <option key={c.country} value={c.country}>{c.country}</option>)}
             </select>
 
-            <label style={styles.formLabel}>City</label>
-            <select style={styles.input} value={city} onChange={(e) => changeCity(e.target.value)}>
+            <label className="formLabel">City</label>
+            <select className="input" value={city} onChange={(e) => changeCity(e.target.value)}>
               <option value="">Choose city</option>
               {cities.map((c) => (
                 <option key={`${country}-${c.city}`} value={c.city}>{c.city}{c.live_hotels ? ` (${c.live_hotels})` : ""}</option>
               ))}
             </select>
 
-            <label style={styles.formLabel}>Area</label>
-            <input style={styles.input} value={area} onChange={(e) => setArea(e.target.value)} placeholder="Neighbourhood or area" />
+            <label className="formLabel">Area</label>
+            <input className="input" value={area} onChange={(e) => setArea(e.target.value)} placeholder="Neighbourhood or area" />
 
-            <label style={styles.formLabel}>Keyword</label>
-            <input style={styles.input} value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Hotel name or landmark" />
+            <label className="formLabel">Keyword</label>
+            <input className="input" value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Hotel name or landmark" />
 
-            <div style={styles.twoInput}>
+            <div className="twoInput">
               <div>
-                <label style={styles.formLabel}>Check-in</label>
-                <input style={styles.input} type="date" value={checkin} onChange={(e) => { setCheckin(e.target.value); clearConverted(); }} />
+                <label className="formLabel">Check-in</label>
+                <input className="input" type="date" value={checkin} onChange={(e) => { setCheckin(e.target.value); clearConverted(); }} />
               </div>
               <div>
-                <label style={styles.formLabel}>Check-out</label>
-                <input style={styles.input} type="date" value={checkout} onChange={(e) => { setCheckout(e.target.value); clearConverted(); }} />
-              </div>
-            </div>
-
-            <div style={styles.twoInput}>
-              <div>
-                <label style={styles.formLabel}>Guests</label>
-                <input style={styles.input} type="number" min="1" value={guests} onChange={(e) => { setGuests(Number(e.target.value)); clearConverted(); }} />
-              </div>
-              <div>
-                <label style={styles.formLabel}>Rooms</label>
-                <input style={styles.input} type="number" min="1" value={rooms} onChange={(e) => { setRooms(roomCount(e.target.value)); clearConverted(); }} />
+                <label className="formLabel">Check-out</label>
+                <input className="input" type="date" value={checkout} onChange={(e) => { setCheckout(e.target.value); clearConverted(); }} />
               </div>
             </div>
 
-            <button style={styles.goldButton} onClick={() => runSearch()} disabled={loading || loadingCatalog}>
+            <div className="twoInput">
+              <div>
+                <label className="formLabel">Guests</label>
+                <input className="input" type="number" min="1" value={guests} onChange={(e) => { setGuests(Number(e.target.value)); clearConverted(); }} />
+              </div>
+              <div>
+                <label className="formLabel">Rooms</label>
+                <input className="input" type="number" min="1" value={rooms} onChange={(e) => { setRooms(roomCount(e.target.value)); clearConverted(); }} />
+              </div>
+            </div>
+
+            <button className="goldButton" onClick={() => runSearch()} disabled={loading || loadingCatalog}>
               {loading ? "Loading..." : "Search stays"}
             </button>
 
-            {message && <div style={styles.notice}>{message}</div>}
+            {message && <div className="notice">{message}</div>}
           </div>
         </div>
 
-        <div style={styles.column}>
-          <div style={styles.label}>STAYS</div>
+        <div className="column">
+          <div className="labelTop">STAYS</div>
 
-          <div style={styles.scroll}>
+          <div className="scroll">
             {hotels.map((hotel) => {
               const rate = hotel.first_rate || {};
               const canPay = hotel.live_rate_ready && rate.rate_key && finalCustomerTotal(rate, rooms) > 0;
 
               return (
-                <div
-                  key={hotel.hotel_id}
-                  style={selectedHotel?.hotel_id === hotel.hotel_id ? styles.hotelCardSelected : styles.hotelCard}
-                  onClick={() => selectHotel(hotel)}
-                >
+                <div key={hotel.hotel_id} className={selectedHotel?.hotel_id === hotel.hotel_id ? "hotelCardSelected" : "hotelCard"} onClick={() => { setSelectedHotel(hotel); clearConverted(); }}>
                   <PropertyImage hotel={hotel} />
 
-                  <div style={styles.hotelBody}>
-                    <h2 style={styles.hotelName}>{hotel.hotel_name}</h2>
-                    <p style={styles.hotelLocation}>{hotel.area ? `${hotel.area}, ` : ""}{hotel.city}, {hotel.country}</p>
+                  <div className="hotelBody">
+                    <h2 className="hotelName">{hotel.hotel_name}</h2>
+                    <p className="hotelLocation">{hotel.area ? `${hotel.area}, ` : ""}{hotel.city}, {hotel.country}</p>
 
-                    <div style={canPay ? styles.rateGood : styles.rateBlocked}>{canPay ? "Ready to reserve" : "Price unavailable"}</div>
+                    <div className={canPay ? "rateGood" : "rateBlocked"}>{canPay ? "Ready to reserve" : "Price unavailable"}</div>
 
                     {canPay ? (
-                      <div style={styles.rateBox}>
+                      <div className="rateBox">
                         <p><b>Room:</b> {rate.room_name || "Selected room"}</p>
                         <p><b>Board:</b> {rate.board_name || "Room only"}</p>
                         <p><b>Final price:</b> {rate.currency} {money(finalCustomerTotal(rate, rooms))}</p>
                         <PriceBreakdown rate={rate} checkin={checkin} checkout={checkout} rooms={rooms} guests={guests} compact />
                       </div>
                     ) : (
-                      <div style={styles.rateBox}>No unavailable price is shown.</div>
+                      <div className="rateBox">No unavailable price is shown.</div>
                     )}
 
-                    <div style={styles.buttonPair}>
-                      <button style={styles.reserveMini} onClick={(e) => { e.stopPropagation(); selectHotel(hotel); }}>View</button>
-                      <button style={canPay ? styles.payMini : styles.payDisabled} disabled={!canPay} onClick={(e) => { e.stopPropagation(); requestBooking(hotel); }}>
+                    <div className="buttonPair">
+                      <button className="reserveMini" onClick={(e) => { e.stopPropagation(); setSelectedHotel(hotel); clearConverted(); }}>View</button>
+                      <button className={canPay ? "payMini" : "payDisabled"} disabled={!canPay} onClick={(e) => { e.stopPropagation(); requestBooking(hotel); }}>
                         {canPay ? "Pay" : "Unavailable"}
                       </button>
                     </div>
@@ -938,48 +794,46 @@ function MainPortal() {
               );
             })}
 
-            {!loading && hotels.length === 0 && <div style={styles.emptyBox}>No stays loaded yet.</div>}
+            {!loading && hotels.length === 0 && <div className="emptyBox">No stays loaded yet.</div>}
           </div>
         </div>
 
-        <div style={styles.column}>
-          <div style={styles.label}>RESERVE / PAY</div>
+        <div className="column">
+          <div className="labelTop">RESERVE / PAY</div>
 
           {!selectedHotel ? (
-            <div style={styles.emptyBox}>Select a stay to continue.</div>
+            <div className="emptyBox">Select a stay to continue.</div>
           ) : (
-            <div style={styles.reservePanel}>
+            <div className="reservePanel">
               <PropertyImage hotel={selectedHotel} large />
 
-              <h2 style={styles.hotelName}>{selectedHotel.hotel_name}</h2>
-              <p style={styles.hotelLocation}>{selectedHotel.city}, {selectedHotel.country}</p>
+              <h2 className="hotelName">{selectedHotel.hotel_name}</h2>
+              <p className="hotelLocation">{selectedHotel.city}, {selectedHotel.country}</p>
 
               {selectedCanPay ? (
                 <>
-                  <div style={styles.selectedPrice}>
-                    {selectedHotel.first_rate.currency} {money(finalCustomerTotal(selectedHotel.first_rate, rooms))}
-                  </div>
+                  <div className="selectedPrice">{selectedHotel.first_rate.currency} {money(finalCustomerTotal(selectedHotel.first_rate, rooms))}</div>
                   <PriceBreakdown rate={selectedHotel.first_rate} checkin={checkin} checkout={checkout} rooms={rooms} guests={guests} />
                 </>
               ) : (
-                <div style={styles.selectedUnavailable}>Price unavailable for this stay.</div>
+                <div className="selectedUnavailable">Price unavailable for this stay.</div>
               )}
 
-              <div style={styles.currencyBox}>
-                <div style={styles.currencyTitle}>Currency converter</div>
-                <div style={styles.currencyRow}>
-                  <select style={styles.currencySelect} value={targetCurrency} onChange={(e) => { setTargetCurrency(e.target.value); clearConverted(); }}>
+              <div className="currencyBox">
+                <div className="currencyTitle">Currency converter</div>
+                <div className="currencyRow">
+                  <select className="currencySelect" value={targetCurrency} onChange={(e) => { setTargetCurrency(e.target.value); clearConverted(); }}>
                     {["USD", "GBP", "EUR", "NGN", "AED", "CAD", "AUD", "ZAR", "CHF", "JPY"].map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
-                  <button style={styles.convertButton} onClick={convertTotal}>Convert</button>
+                  <button className="convertButton" onClick={convertTotal}>Convert</button>
                 </div>
-                <div style={styles.convertedText}>{convertedTotal || "Select currency and convert"}</div>
+                <div className="convertedText">{convertedTotal || "Select currency and convert"}</div>
               </div>
 
-              <div style={styles.mapBox}>
+              <div className="mapBox">
                 <iframe
                   title="Hotel map"
-                  style={styles.map}
+                  className="map"
                   loading="lazy"
                   src={
                     selectedHotel.latitude && selectedHotel.longitude
@@ -989,19 +843,19 @@ function MainPortal() {
                 />
               </div>
 
-              <input style={styles.input} value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Your full name" />
-              <input style={styles.input} value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="Your email" />
-              <input style={styles.input} value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="Phone number" />
-              <textarea style={styles.textarea} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Special requests" />
+              <input className="input" value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Your full name" />
+              <input className="input" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="Your email" />
+              <input className="input" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="Phone number" />
+              <textarea className="textarea" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Special requests" />
 
-              <div style={styles.buttonPairLarge}>
-                <button style={styles.reserveLarge} disabled={requesting} onClick={() => setMessage(`Saved for review: ${selectedHotel.hotel_name}.`)}>Save</button>
-                <button style={selectedCanPay ? styles.payLarge : styles.payDisabledLarge} disabled={!selectedCanPay || requesting} onClick={() => requestBooking(selectedHotel)}>
+              <div className="buttonPairLarge">
+                <button className="reserveLarge" disabled={requesting} onClick={() => setMessage(`Saved for review: ${selectedHotel.hotel_name}.`)}>Save</button>
+                <button className={selectedCanPay ? "payLarge" : "payDisabledLarge"} disabled={!selectedCanPay || requesting} onClick={() => requestBooking(selectedHotel)}>
                   {requesting ? "Preparing..." : selectedCanPay ? "Pay exact total" : "Unavailable"}
                 </button>
               </div>
 
-              <button style={styles.guideSideButton} onClick={() => (window.location.href = `/?page=travel&country=${encodeURIComponent(selectedHotel.country)}&city=${encodeURIComponent(selectedHotel.city)}&area=${encodeURIComponent(selectedHotel.area || area)}`)}>
+              <button className="guideSideButton" onClick={() => (window.location.href = `/?page=travel&country=${encodeURIComponent(selectedHotel.country)}&city=${encodeURIComponent(selectedHotel.city)}&area=${encodeURIComponent(selectedHotel.area || area)}`)}>
                 Open destination guide
               </button>
             </div>
@@ -1012,13 +866,161 @@ function MainPortal() {
   );
 }
 
+function AppStyles() {
+  return (
+    <style>{`
+      html { scroll-behavior: smooth; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #06101f; }
+      .page { min-height: 100vh; background: #06101f; color: white; padding: 18px; font-family: Arial, sans-serif; }
+      .hero { background: linear-gradient(135deg,#0f2f69,#1e5cc7); border-radius: 24px; padding: 24px; display: grid; grid-template-columns: 1.2fr .8fr; gap: 20px; align-items: center; margin-bottom: 16px; }
+      .brand { letter-spacing: 14px; font-weight: 900; color: #ffd34d; margin-bottom: 12px; }
+      .brandSmall { letter-spacing: 10px; font-weight: 900; margin-bottom: 20px; }
+      .heroTitle { font-size: 38px; line-height: 1.1; margin: 0; }
+      .heroText { font-size: 18px; line-height: 1.5; margin-top: 12px; }
+      .buttonRow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .whiteButton { background: white; color: #07111f; border: 0; border-radius: 14px; padding: 14px 18px; font-weight: 900; font-size: 16px; cursor: pointer; }
+      .mainGrid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+      .column { height: 73vh; background: #eaf2fb; color: #07111f; border-radius: 24px; padding: 18px; overflow: hidden; display: flex; flex-direction: column; }
+      .labelTop { letter-spacing: 4px; color: #63738e; font-weight: 900; margin-bottom: 12px; }
+      .searchBox, .reservePanel, .emptyBox { background: white; border-radius: 18px; padding: 16px; }
+      .searchBox, .reservePanel { overflow: auto; }
+      .muted { color: #63738e; font-weight: 800; }
+      .formLabel { display: block; font-weight: 900; margin-top: 10px; margin-bottom: 5px; }
+      .input, .textarea, .currencySelect { width: 100%; padding: 12px 13px; margin: 4px 0; border-radius: 12px; border: 1px solid #c6d5e8; font-size: 15px; background: white; color: #07111f; }
+      .textarea { min-height: 82px; resize: vertical; }
+      .twoInput { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .goldButton, .goldSmall { background: #ffd34d; color: #07111f; border: 2px solid #07111f; border-radius: 14px; padding: 15px 18px; font-size: 18px; font-weight: 900; cursor: pointer; }
+      .goldButton { width: 100%; margin-top: 14px; }
+      .goldSmall { margin-top: 22px; }
+      .notice { background: #fff2be; padding: 13px; border-radius: 14px; margin-top: 14px; font-weight: 900; color: #07111f; }
+      .scroll { overflow-y: auto; padding-right: 6px; }
+      .hotelCard, .hotelCardSelected { background: white; border-radius: 20px; margin-bottom: 16px; overflow: hidden; cursor: pointer; }
+      .hotelCard { border: 2px solid transparent; }
+      .hotelCardSelected { border: 4px solid #ffd34d; }
+      .hotelImage { width: 100%; height: 180px; object-fit: cover; display: block; background: #10254a; }
+      .largeImage { height: 190px; border-radius: 16px; margin-bottom: 12px; }
+      .imageMissing { height: 180px; background: linear-gradient(135deg,#10254a,#1d4da8); color: white; display: flex; flex-direction: column; justify-content: center; padding: 18px; }
+      .imageBadge { letter-spacing: 7px; font-weight: 900; font-size: 11px; opacity: .8; }
+      .imageMissingTitle { font-size: 22px; font-weight: 900; margin-top: 12px; }
+      .imageMissingText { font-size: 14px; line-height: 1.4; margin-top: 8px; }
+      .hotelBody { padding: 14px; }
+      .hotelName { font-size: 21px; margin: 0 0 8px; font-weight: 900; }
+      .hotelLocation { color: #52627c; margin: 0; }
+      .rateGood { background: #dff7e6; border-radius: 12px; padding: 9px; margin: 10px 0; font-weight: 900; color: #075b24; }
+      .rateBlocked { background: #ffe1e1; border-radius: 12px; padding: 9px; margin: 10px 0; font-weight: 900; color: #8a1111; }
+      .rateBox, .priceBox { background: #f6f8fc; border-radius: 14px; padding: 13px; margin: 12px 0; font-size: 14px; }
+      .compactPrice { background: white; border-radius: 12px; padding: 10px; margin-top: 10px; }
+      .priceLine { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px solid #d9e3f2; font-size: 14px; }
+      .totalLine { display: flex; justify-content: space-between; gap: 10px; padding: 9px 0; font-size: 17px; font-weight: 900; color: #0f4db3; }
+      .buttonPair, .buttonPairLarge { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .buttonPairLarge { margin-top: 14px; }
+      .reserveMini, .reserveLarge, .guideSideButton { background: #10254a; color: white; border: 0; font-weight: 900; cursor: pointer; }
+      .reserveMini { width: 100%; border-radius: 12px; padding: 12px; margin-top: 10px; }
+      .reserveLarge, .payLarge, .payDisabledLarge { width: 100%; border-radius: 14px; padding: 15px 18px; font-size: 18px; }
+      .payMini, .payLarge { background: #ffd34d; color: #07111f; border: 2px solid #07111f; font-weight: 900; cursor: pointer; }
+      .payMini, .payDisabled { width: 100%; border-radius: 12px; padding: 12px; font-weight: 900; }
+      .payDisabled, .payDisabledLarge { background: #c8d0dd; color: #52627c; border: 0; cursor: not-allowed; font-weight: 900; }
+      .selectedPrice { color: #0f4db3; font-size: 26px; font-weight: 900; margin-bottom: 14px; }
+      .selectedUnavailable { background: #ffe1e1; color: #8a1111; padding: 13px; border-radius: 14px; margin-bottom: 14px; font-weight: 900; }
+      .currencyBox { background: #f6f8fc; border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+      .currencyTitle { font-weight: 900; margin-bottom: 10px; }
+      .currencyRow { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+      .convertButton { background: #123a7a; color: white; border: 0; border-radius: 12px; padding: 12px 18px; font-weight: 900; cursor: pointer; }
+      .convertedText { margin-top: 10px; font-weight: 900; color: #123a7a; }
+      .mapBox { background: #f6f8fc; padding: 8px; border-radius: 16px; margin-bottom: 12px; }
+      .map { width: 100%; height: 170px; border: 0; border-radius: 12px; }
+      .guideSideButton { margin-top: 10px; width: 100%; border-radius: 14px; padding: 14px; }
+
+      .guidePage { min-height: 100vh; background: linear-gradient(135deg,#06101f,#071b38 45%,#0b2f6f); color: white; padding: 14px; font-family: Arial, sans-serif; overflow-y: auto; }
+      .guideTop { display: grid; grid-template-columns: 1.1fr .9fr; gap: 12px; margin-bottom: 10px; }
+      .guideBrand { color: #ffd34d; font-weight: 900; letter-spacing: 10px; font-size: 11px; margin-bottom: 8px; }
+      .guideHeadline { font-size: 34px; line-height: 1.02; margin: 0; }
+      .guideCopy { color: #d8e7ff; font-size: 15px; line-height: 1.35; margin: 8px 0 0; }
+      .guideControls { background: rgba(255,255,255,.12); border-radius: 18px; padding: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .guidePrimary { background: #ffd34d; color: #07111f; border: 0; border-radius: 11px; padding: 11px; font-weight: 900; cursor: pointer; }
+      .guideSecondary { background: rgba(255,255,255,.15); color: white; border: 1px solid rgba(255,255,255,.2); border-radius: 11px; padding: 11px; font-weight: 900; cursor: pointer; }
+      .destinationBar { background: rgba(255,255,255,.1); border-radius: 16px; padding: 11px; display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 10px; }
+      .destinationSmall { color: #ffd34d; font-weight: 900; font-size: 10px; letter-spacing: 2px; }
+      .destinationBig { font-weight: 900; font-size: 22px; margin-top: 2px; }
+      .destinationSub { color: #d8e7ff; font-size: 12px; margin-top: 3px; }
+      .guideTrust { background: rgba(255,255,255,.13); border-radius: 999px; padding: 8px 10px; font-size: 12px; font-weight: 900; white-space: nowrap; }
+      .guideContentGrid { display: grid; grid-template-columns: 360px 1fr; gap: 10px; align-items: start; }
+      .emergencyPanel { background: linear-gradient(135deg,#fff0f0,#ffffff); color: #07111f; border-radius: 16px; padding: 12px; }
+      .emergencyHeader { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 9px; }
+      .redSmall { color: #9d1111; font-weight: 900; font-size: 10px; letter-spacing: 1.5px; }
+      .emergencyTitle { margin: 2px 0 0; font-size: 22px; }
+      .emergencyNumber { background: #9d1111; color: white; border-radius: 14px; padding: 8px 11px; font-weight: 900; font-size: 22px; }
+      .emergencyGrid { display: grid; gap: 7px; }
+      .emergencyItem { background: white; border-radius: 11px; padding: 9px; display: grid; gap: 3px; box-shadow: 0 6px 14px rgba(0,0,0,.08); }
+      .guideTables { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .guideTableWrap { background: rgba(255,255,255,.96); color: #07111f; border-radius: 16px; padding: 10px; }
+      .guideTableTitle { font-weight: 900; font-size: 16px; margin-bottom: 8px; color: #123a7a; }
+      .guideTableTitleRed { font-weight: 900; font-size: 16px; margin-bottom: 8px; color: #9d1111; }
+      .guideTable { display: grid; gap: 6px; }
+      .guideEmpty { background: #f6f8fc; border-radius: 10px; padding: 9px; font-weight: 900; color: #52627c; font-size: 12px; }
+      .guideRow { display: grid; grid-template-columns: 1fr 92px 56px; gap: 7px; align-items: center; background: #f6f8fc; border: 1px solid #e1e8f4; border-radius: 10px; padding: 7px; }
+      .guideCellMain { display: grid; gap: 3px; font-size: 12px; line-height: 1.25; }
+      .guideCellType { font-size: 11px; font-weight: 900; color: #52627c; }
+      .mapBtn, .mapBtnRed { color: white; border: 0; border-radius: 8px; padding: 7px 8px; font-weight: 900; font-size: 11px; cursor: pointer; }
+      .mapBtn { background: #123a7a; }
+      .mapBtnRed { background: #9d1111; }
+
+      .infoPage { min-height: 100vh; background: linear-gradient(135deg,#06101f,#123a7a); color: white; padding: 34px; font-family: Arial, sans-serif; }
+      .infoCard { max-width: 1180px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); border-radius: 28px; padding: 40px; }
+      .infoTitle { font-size: 46px; color: #ffd34d; margin-bottom: 8px; }
+      .infoSubtitle { font-size: 22px; font-weight: 800; line-height: 1.4; }
+      .simpleGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 24px; }
+      .simpleBox { background: white; color: #07111f; border-radius: 20px; padding: 22px; font-size: 18px; line-height: 1.5; }
+      .confirmPage { min-height: 100vh; background: linear-gradient(90deg,#06101f 0%,#123a7a 52%,#06101f 52%); color: white; display: flex; align-items: center; padding: 34px; font-family: Arial, sans-serif; }
+      .confirmCard { max-width: 780px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); border-radius: 28px; padding: 40px; }
+      .confirmTitle { font-size: 48px; color: #ffd34d; margin: 0 0 20px; }
+      .confirmText { font-size: 20px; line-height: 1.55; }
+      .codeBox { background: rgba(255,255,255,0.14); border-radius: 18px; padding: 22px; margin: 24px 0; font-size: 18px; }
+      .codeText { font-size: 28px; margin-top: 10px; font-weight: 900; color: #ffd34d; }
+
+      @media (max-width: 980px) {
+        .page { padding: 10px; overflow: auto; }
+        .hero { grid-template-columns: 1fr; padding: 18px; border-radius: 18px; }
+        .brand { letter-spacing: 8px; font-size: 12px; }
+        .heroTitle { font-size: 32px; }
+        .heroText { font-size: 16px; }
+        .buttonRow { grid-template-columns: 1fr 1fr; }
+        .mainGrid { grid-template-columns: 1fr; gap: 12px; }
+        .column { height: auto; min-height: auto; border-radius: 18px; padding: 14px; }
+        .scroll { max-height: none; overflow: visible; }
+        .hotelImage, .imageMissing, .largeImage { height: 220px; }
+        .guideTop, .guideContentGrid, .guideTables { grid-template-columns: 1fr; }
+        .guideControls { grid-template-columns: 1fr; }
+        .destinationBar { display: block; }
+        .guideTrust { margin-top: 10px; display: inline-block; white-space: normal; }
+        .simpleGrid { grid-template-columns: 1fr; }
+        .infoPage, .confirmPage { padding: 16px; }
+        .infoCard, .confirmCard { padding: 22px; border-radius: 20px; }
+        .infoTitle, .confirmTitle { font-size: 34px; }
+      }
+
+      @media (max-width: 560px) {
+        .page { padding: 8px; }
+        .hero { padding: 16px; }
+        .heroTitle { font-size: 28px; }
+        .heroText { font-size: 15px; }
+        .buttonRow, .twoInput, .buttonPair, .buttonPairLarge, .currencyRow { grid-template-columns: 1fr; }
+        .whiteButton, .goldButton, .reserveLarge, .payLarge, .payDisabledLarge { width: 100%; font-size: 15px; padding: 14px; }
+        .column { padding: 12px; }
+        .searchBox, .reservePanel, .emptyBox { padding: 14px; }
+        .hotelName { font-size: 20px; }
+        .selectedPrice { font-size: 24px; }
+        .guideRow { grid-template-columns: 1fr; }
+        .mapBtn, .mapBtnRed { width: 100%; }
+      }
+    `}</style>
+  );
+}
+
 export default function App() {
   const path = window.location.pathname;
   const page = new URLSearchParams(window.location.search).get("page");
-
-  useEffect(() => {
-    initGA();
-  }, []);
 
   if (path === "/travel" || page === "travel") return <TravelGuidePage />;
   if (path === "/faq" || page === "faq") return <FAQs />;
@@ -1029,115 +1031,4 @@ export default function App() {
   return <MainPortal />;
 }
 
-const styles = {
-  page: { minHeight: "100vh", background: "#06101f", color: "white", padding: 18, fontFamily: "Arial, sans-serif", overflow: "hidden" },
-  hero: { background: "linear-gradient(135deg,#0f2f69,#1e5cc7)", borderRadius: 24, padding: 24, display: "grid", gridTemplateColumns: "1.2fr .8fr", gap: 20, alignItems: "center", marginBottom: 16 },
-  brand: { letterSpacing: 14, fontWeight: 900, color: "#ffd34d", marginBottom: 12 },
-  brandSmall: { letterSpacing: 10, fontWeight: 900, marginBottom: 20 },
-  heroTitle: { fontSize: 38, lineHeight: 1.1, margin: 0 },
-  heroText: { fontSize: 18, lineHeight: 1.5, marginTop: 12 },
-  buttonRow: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 },
-  whiteButton: { background: "white", color: "#07111f", border: 0, borderRadius: 14, padding: "14px 18px", fontWeight: 900, fontSize: 16, cursor: "pointer" },
-  mainGrid: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18 },
-  column: { height: "73vh", background: "#eaf2fb", color: "#07111f", borderRadius: 24, padding: 18, overflow: "hidden", display: "flex", flexDirection: "column" },
-  label: { letterSpacing: 4, color: "#63738e", fontWeight: 900, marginBottom: 12 },
-  searchBox: { background: "white", borderRadius: 18, padding: 16, overflow: "auto" },
-  muted: { color: "#63738e", fontWeight: 800 },
-  formLabel: { display: "block", fontWeight: 900, marginTop: 10, marginBottom: 5 },
-  input: { width: "100%", boxSizing: "border-box", padding: "12px 13px", margin: "4px 0", borderRadius: 12, border: "1px solid #c6d5e8", fontSize: 15, background: "white", color: "#07111f" },
-  textarea: { width: "100%", boxSizing: "border-box", minHeight: 82, padding: "12px 13px", margin: "7px 0", borderRadius: 12, border: "1px solid #c6d5e8", fontSize: 15 },
-  twoInput: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 },
-  goldButton: { width: "100%", background: "#ffd34d", color: "#07111f", border: "2px solid #07111f", borderRadius: 14, padding: "15px 18px", fontSize: 18, fontWeight: 900, cursor: "pointer", marginTop: 14 },
-  goldSmall: { background: "#ffd34d", color: "#07111f", border: 0, borderRadius: 14, padding: "15px 22px", fontSize: 18, fontWeight: 900, cursor: "pointer", marginTop: 22 },
-  notice: { background: "#fff2be", padding: 13, borderRadius: 14, marginTop: 14, fontWeight: 900, color: "#07111f" },
-  scroll: { overflowY: "auto", paddingRight: 6 },
-  hotelCard: { background: "white", borderRadius: 20, marginBottom: 16, overflow: "hidden", cursor: "pointer", border: "2px solid transparent" },
-  hotelCardSelected: { background: "white", borderRadius: 20, marginBottom: 16, overflow: "hidden", cursor: "pointer", border: "4px solid #ffd34d" },
-  hotelImage: { width: "100%", height: 180, objectFit: "cover", display: "block", background: "#10254a" },
-  hotelImageLarge: { width: "100%", height: 190, objectFit: "cover", display: "block", borderRadius: 16, background: "#10254a", marginBottom: 12 },
-  imageMissing: { height: 180, background: "linear-gradient(135deg,#10254a,#1d4da8)", color: "white", display: "flex", flexDirection: "column", justifyContent: "center", padding: 18, boxSizing: "border-box" },
-  imageMissingLarge: { height: 190, background: "linear-gradient(135deg,#10254a,#1d4da8)", color: "white", display: "flex", flexDirection: "column", justifyContent: "center", padding: 18, boxSizing: "border-box", borderRadius: 16, marginBottom: 12 },
-  imageBadge: { letterSpacing: 7, fontWeight: 900, fontSize: 11, opacity: 0.8 },
-  imageMissingTitle: { fontSize: 22, fontWeight: 900, marginTop: 12 },
-  imageMissingText: { fontSize: 14, lineHeight: 1.4, marginTop: 8 },
-  hotelBody: { padding: 14 },
-  hotelName: { fontSize: 21, margin: "0 0 8px", fontWeight: 900 },
-  hotelLocation: { color: "#52627c", margin: 0 },
-  rateGood: { background: "#dff7e6", borderRadius: 12, padding: 9, margin: "10px 0", fontWeight: 900, color: "#075b24" },
-  rateBlocked: { background: "#ffe1e1", borderRadius: 12, padding: 9, margin: "10px 0", fontWeight: 900, color: "#8a1111" },
-  rateBox: { background: "#f6f8fc", borderRadius: 14, padding: 13, margin: "12px 0", fontSize: 14 },
-  priceBreakdown: { background: "#f6f8fc", borderRadius: 16, padding: 13, marginBottom: 12 },
-  priceBreakdownCompact: { background: "white", borderRadius: 12, padding: 10, marginTop: 10 },
-  priceLine: { display: "flex", justifyContent: "space-between", gap: 10, padding: "5px 0", borderBottom: "1px solid #d9e3f2", fontSize: 14 },
-  totalLine: { display: "flex", justifyContent: "space-between", gap: 10, padding: "9px 0", fontSize: 17, fontWeight: 900, color: "#0f4db3" },
-  priceTrustNote: { background: "#dff7e6", color: "#075b24", borderRadius: 10, padding: 10, fontWeight: 900, fontSize: 12, marginTop: 8 },
-  buttonPair: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 },
-  buttonPairLarge: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 14 },
-  reserveMini: { width: "100%", background: "#10254a", color: "white", border: 0, borderRadius: 12, padding: 12, fontWeight: 900, cursor: "pointer", marginTop: 10 },
-  payMini: { width: "100%", background: "#ffd34d", color: "#07111f", border: "2px solid #07111f", borderRadius: 12, padding: 12, fontWeight: 900, cursor: "pointer" },
-  payDisabled: { width: "100%", background: "#c8d0dd", color: "#52627c", border: 0, borderRadius: 12, padding: 12, fontWeight: 900, cursor: "not-allowed" },
-  reserveLarge: { width: "100%", background: "#10254a", color: "white", border: 0, borderRadius: 14, padding: "15px 18px", fontSize: 18, fontWeight: 900, cursor: "pointer" },
-  payLarge: { width: "100%", background: "#ffd34d", color: "#07111f", border: "2px solid #07111f", borderRadius: 14, padding: "15px 18px", fontSize: 18, fontWeight: 900, cursor: "pointer" },
-  payDisabledLarge: { width: "100%", background: "#c8d0dd", color: "#52627c", border: 0, borderRadius: 14, padding: "15px 18px", fontSize: 18, fontWeight: 900, cursor: "not-allowed" },
-  emptyBox: { background: "white", color: "#07111f", borderRadius: 18, padding: 22, fontWeight: 900, lineHeight: 1.5 },
-  reservePanel: { background: "white", borderRadius: 18, padding: 16, overflow: "auto" },
-  selectedPrice: { color: "#0f4db3", fontSize: 26, fontWeight: 900, marginBottom: 14 },
-  selectedUnavailable: { background: "#ffe1e1", color: "#8a1111", padding: 13, borderRadius: 14, marginBottom: 14, fontWeight: 900 },
-  currencyBox: { background: "#f6f8fc", borderRadius: 16, padding: 14, marginBottom: 12 },
-  currencyTitle: { fontWeight: 900, marginBottom: 10 },
-  currencyRow: { display: "grid", gridTemplateColumns: "1fr auto", gap: 10 },
-  currencySelect: { padding: 12, borderRadius: 12, border: "1px solid #c6d5e8", fontWeight: 900, background: "white", color: "#07111f" },
-  convertButton: { background: "#123a7a", color: "white", border: 0, borderRadius: 12, padding: "12px 18px", fontWeight: 900, cursor: "pointer" },
-  convertedText: { marginTop: 10, fontWeight: 900, color: "#123a7a" },
-  mapBox: { background: "#f6f8fc", padding: 8, borderRadius: 16, marginBottom: 12 },
-  map: { width: "100%", height: 170, border: 0, borderRadius: 12 },
-  guideSideButton: { marginTop: 10, width: "100%", background: "#10254a", color: "white", border: 0, borderRadius: 14, padding: 14, fontWeight: 900, cursor: "pointer" },
 
-  guidePage: { minHeight: "100vh", background: "linear-gradient(135deg,#06101f,#071b38 45%,#0b2f6f)", color: "white", padding: 14, fontFamily: "Arial, sans-serif", boxSizing: "border-box", overflowY: "auto" },
-  guideTop: { display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 12, marginBottom: 10 },
-  guideBrand: { color: "#ffd34d", fontWeight: 900, letterSpacing: 10, fontSize: 11, marginBottom: 8 },
-  guideHeadline: { fontSize: 34, lineHeight: 1.02, margin: 0 },
-  guideCopy: { color: "#d8e7ff", fontSize: 15, lineHeight: 1.35, margin: "8px 0 0" },
-  guideControls: { background: "rgba(255,255,255,.12)", borderRadius: 18, padding: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 },
-  guideInput: { width: "100%", boxSizing: "border-box", border: 0, borderRadius: 11, padding: "10px 11px", fontSize: 14, background: "white", color: "#07111f" },
-  guidePrimary: { background: "#ffd34d", color: "#07111f", border: 0, borderRadius: 11, padding: 11, fontWeight: 900, cursor: "pointer" },
-  guideSecondary: { background: "rgba(255,255,255,.15)", color: "white", border: "1px solid rgba(255,255,255,.2)", borderRadius: 11, padding: 11, fontWeight: 900, cursor: "pointer" },
-  destinationBar: { background: "rgba(255,255,255,.1)", borderRadius: 16, padding: 11, display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 10 },
-  destinationSmall: { color: "#ffd34d", fontWeight: 900, fontSize: 10, letterSpacing: 2 },
-  destinationBig: { fontWeight: 900, fontSize: 22, marginTop: 2 },
-  destinationSub: { color: "#d8e7ff", fontSize: 12, marginTop: 3 },
-  guideTrust: { background: "rgba(255,255,255,.13)", borderRadius: 999, padding: "8px 10px", fontSize: 12, fontWeight: 900, whiteSpace: "nowrap" },
-  guideContentGrid: { display: "grid", gridTemplateColumns: "360px 1fr", gap: 10, alignItems: "start" },
-  emergencyPanel: { background: "linear-gradient(135deg,#fff0f0,#ffffff)", color: "#07111f", borderRadius: 16, padding: 12 },
-  emergencyHeader: { display: "flex", justifyContent: "space-between", alignItems: "start", gap: 8, marginBottom: 9 },
-  redSmall: { color: "#9d1111", fontWeight: 900, fontSize: 10, letterSpacing: 1.5 },
-  emergencyTitle: { margin: "2px 0 0", fontSize: 22 },
-  emergencyNumber: { background: "#9d1111", color: "white", borderRadius: 14, padding: "8px 11px", fontWeight: 900, fontSize: 22 },
-  emergencyGrid: { display: "grid", gap: 7 },
-  emergencyItem: { background: "white", borderRadius: 11, padding: 9, display: "grid", gap: 3, boxShadow: "0 6px 14px rgba(0,0,0,.08)" },
-  guideTables: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 },
-  guideTableWrap: { background: "rgba(255,255,255,.96)", color: "#07111f", borderRadius: 16, padding: 10 },
-  guideTableTitle: { fontWeight: 900, fontSize: 16, marginBottom: 8, color: "#123a7a" },
-  guideTableTitleRed: { fontWeight: 900, fontSize: 16, marginBottom: 8, color: "#9d1111" },
-  guideTable: { display: "grid", gap: 6 },
-  guideEmpty: { background: "#f6f8fc", borderRadius: 10, padding: 9, fontWeight: 900, color: "#52627c", fontSize: 12 },
-  guideRow: { display: "grid", gridTemplateColumns: "1fr 92px 56px", gap: 7, alignItems: "center", background: "#f6f8fc", border: "1px solid #e1e8f4", borderRadius: 10, padding: 7 },
-  guideCellMain: { display: "grid", gap: 3, fontSize: 12, lineHeight: 1.25 },
-  guideCellType: { fontSize: 11, fontWeight: 900, color: "#52627c" },
-  mapBtn: { background: "#123a7a", color: "white", border: 0, borderRadius: 8, padding: "7px 8px", fontWeight: 900, fontSize: 11, cursor: "pointer" },
-  mapBtnRed: { background: "#9d1111", color: "white", border: 0, borderRadius: 8, padding: "7px 8px", fontWeight: 900, fontSize: 11, cursor: "pointer" },
-
-  infoPage: { minHeight: "100vh", background: "linear-gradient(135deg,#06101f,#123a7a)", color: "white", padding: 34, fontFamily: "Arial, sans-serif" },
-  infoCardWide: { maxWidth: 1180, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 28, padding: 40 },
-  infoTitle: { fontSize: 46, color: "#ffd34d", marginBottom: 8 },
-  infoSubtitle: { fontSize: 22, fontWeight: 800, lineHeight: 1.4 },
-  infoBody: { fontSize: 18, lineHeight: 1.6 },
-  simpleGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginTop: 24 },
-  simpleBox: { background: "white", color: "#07111f", borderRadius: 20, padding: 22, fontSize: 18, lineHeight: 1.5 },
-  confirmPage: { minHeight: "100vh", background: "linear-gradient(90deg,#06101f 0%,#123a7a 52%,#06101f 52%)", color: "white", display: "flex", alignItems: "center", padding: 34, fontFamily: "Arial, sans-serif" },
-  confirmCard: { maxWidth: 780, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 28, padding: 40 },
-  confirmTitle: { fontSize: 48, color: "#ffd34d", margin: "0 0 20px" },
-  confirmText: { fontSize: 20, lineHeight: 1.55 },
-  codeBox: { background: "rgba(255,255,255,0.14)", borderRadius: 18, padding: 22, margin: "24px 0", fontSize: 18 },
-  codeText: { fontSize: 28, marginTop: 10, fontWeight: 900, color: "#ffd34d" },
-};
