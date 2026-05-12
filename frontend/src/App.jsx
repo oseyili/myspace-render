@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
@@ -17,33 +17,6 @@ function safeText(v) {
   return String(v || "").trim();
 }
 
-function fixImageUrl(url) {
-  const raw = safeText(url);
-
-  if (!raw) return "";
-
-  let fixed = raw;
-
-  if (
-    fixed.includes("127.0.0.1:5050") &&
-    !API_BASE.includes("127.0.0.1")
-  ) {
-    fixed = fixed
-      .replace("http://127.0.0.1:5050", API_BASE)
-      .replace("https://127.0.0.1:5050", API_BASE);
-  }
-
-  fixed = fixed
-    .replace("/max1024x768/", "/max500/")
-    .replace("/max1280x900/", "/max500/")
-    .replace("/max1440x1080/", "/max500/")
-    .replace("/max3000/", "/max500/")
-    .replace("/bigger/", "/medium/");
-
-  return fixed;
-}
-
-
 function money(v) {
   const n = Number(v || 0);
   return Number.isFinite(n) ? n.toFixed(2) : "0.00";
@@ -60,7 +33,7 @@ function nightsBetween(checkin, checkout) {
 }
 
 function normalizeCity(c) {
-  if (typeof c === "string") return { city: c, live_hotels: 0 };
+  if (typeof c === "string") return { city: c, live_hotels: 0, destination_code: "" };
   return {
     city: safeText(c?.city),
     live_hotels: Number(c?.live_hotels || 0),
@@ -72,7 +45,13 @@ function normalizeCountries(raw) {
   return (Array.isArray(raw) ? raw : [])
     .map((c) => ({
       country: safeText(c?.country),
-      cities: (Array.isArray(c?.cities) ? c.cities : []).map(normalizeCity).filter((x) => x.city),
+      cities: (Array.isArray(c?.cities) ? c.cities : [])
+        .map(normalizeCity)
+        .filter((x) => x.city)
+        .sort((a, b) => {
+          if ((b.live_hotels || 0) !== (a.live_hotels || 0)) return (b.live_hotels || 0) - (a.live_hotels || 0);
+          return a.city.localeCompare(b.city);
+        }),
     }))
     .filter((c) => c.country && c.cities.length)
     .sort((a, b) => a.country.localeCompare(b.country));
@@ -94,6 +73,32 @@ function finalSupplierTotal(rate, rooms) {
   return Number((baseSupplierRate(rate) * roomCount(rooms)).toFixed(2));
 }
 
+function fastImageUrl(url) {
+  const raw = safeText(url);
+  if (!raw) return "";
+
+  let fixed = raw;
+
+  if (fixed.includes("127.0.0.1:5050") && !API_BASE.includes("127.0.0.1")) {
+    fixed = fixed
+      .replace("http://127.0.0.1:5050", API_BASE)
+      .replace("https://127.0.0.1:5050", API_BASE);
+  }
+
+  fixed = fixed
+    .replace("/max1024x768/", "/max500/")
+    .replace("/max1280x900/", "/max500/")
+    .replace("/max1440x1080/", "/max500/")
+    .replace("/max3000/", "/max500/")
+    .replace("/bigger/", "/medium/");
+
+  return fixed;
+}
+
+function go(path) {
+  window.location.href = path;
+}
+
 function PropertyImage({ hotel, large = false }) {
   const [failed, setFailed] = useState(false);
 
@@ -101,11 +106,11 @@ function PropertyImage({ hotel, large = false }) {
     setFailed(false);
   }, [hotel?.hotel_id, hotel?.image_url, hotel?.direct_image_url]);
 
-  const url = fixImageUrl(hotel?.image_url || hotel?.direct_image_url);
+  const url = fastImageUrl(hotel?.direct_image_url || hotel?.image_url);
 
   if (!url || failed) {
     return (
-      <div className={large ? "imageMissing largeImage" : "imageMissing"}>
+      <div className={large ? "imageMissing imageLarge" : "imageMissing"}>
         <div className="imageBadge">MYSPACE HOTEL</div>
         <div className="imageMissingTitle">Verified property image unavailable</div>
         <div className="imageMissingText">No fake hotel photo is displayed.</div>
@@ -117,7 +122,7 @@ function PropertyImage({ hotel, large = false }) {
     <img
       src={url}
       alt={hotel?.hotel_name || "Hotel"}
-      className={large ? "hotelImage largeImage" : "hotelImage"}
+      className={large ? "hotelImage imageLarge" : "hotelImage"}
       loading={large ? "eager" : "lazy"}
       decoding="async"
       fetchPriority={large ? "high" : "low"}
@@ -140,7 +145,7 @@ function PriceBreakdown({ rate, checkin, checkout, rooms, guests, compact = fals
       <div className="priceLine"><span>Guests</span><b>{guests}</b></div>
       <div className="priceLine"><span>Rooms selected</span><b>{count}</b></div>
       <div className="priceLine"><span>Rate per room</span><b>{currency} {money(base)}</b></div>
-      <div className="priceLine"><span>Total check</span><b>{currency} {money(base)} Ã— {count}</b></div>
+      <div className="priceLine"><span>Total check</span><b>{currency} {money(base)} × {count}</b></div>
       <div className="totalLine"><span>Total to pay</span><b>{currency} {money(total)}</b></div>
     </div>
   );
@@ -180,7 +185,7 @@ function InfoPage({ title, subtitle, children }) {
         <h1 className="infoTitle">{title}</h1>
         <p className="infoSubtitle">{subtitle}</p>
         {children}
-        <button className="goldSmall" onClick={() => (window.location.href = "/")}>Back to hotel search</button>
+        <button className="goldSmall" onClick={() => go("/")}>Back to hotel search</button>
       </div>
     </div>
   );
@@ -228,8 +233,8 @@ function Support() {
 function TravelGuidePage() {
   const params = new URLSearchParams(window.location.search);
   const [catalog, setCatalog] = useState([]);
-  const [country, setCountry] = useState(params.get("country") || "United Kingdom");
-  const [city, setCity] = useState(params.get("city") || "London");
+  const [country, setCountry] = useState(params.get("country") || "");
+  const [city, setCity] = useState(params.get("city") || "");
   const [area, setArea] = useState(params.get("area") || "");
   const [guide, setGuide] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -239,6 +244,11 @@ function TravelGuidePage() {
   const cities = useMemo(() => countries.find((c) => c.country === country)?.cities || [], [countries, country]);
 
   async function loadGuide(nextCountry = country, nextCity = city, nextArea = area) {
+    if (!nextCountry || !nextCity) {
+      setMessage("Choose a country and city first.");
+      return;
+    }
+
     setLoading(true);
     setMessage("");
 
@@ -267,28 +277,39 @@ function TravelGuidePage() {
   async function loadCatalog() {
     try {
       let loaded = [];
-      const res1 = await fetch(`${API_BASE}/api/bootstrap`, { cache: "no-store" });
-      const data1 = await res1.json().catch(() => ({}));
-      loaded = Array.isArray(data1.countries) ? data1.countries : [];
+
+      const bootRes = await fetch(`${API_BASE}/api/bootstrap`, { cache: "no-store" });
+      const boot = await bootRes.json().catch(() => ({}));
+      loaded = Array.isArray(boot.countries) ? boot.countries : [];
 
       if (!loaded.length) {
-        const res2 = await fetch(`${API_BASE}/api/real-catalog/destinations`, { cache: "no-store" });
-        const data2 = await res2.json().catch(() => ({}));
-        loaded = Array.isArray(data2.countries) ? data2.countries : [];
+        const catRes = await fetch(`${API_BASE}/api/real-catalog/destinations`, { cache: "no-store" });
+        const cat = await catRes.json().catch(() => ({}));
+        loaded = Array.isArray(cat.countries) ? cat.countries : [];
       }
 
       setCatalog(loaded);
 
       const normalized = normalizeCountries(loaded);
-      const pickedCountry = normalized.find((c) => c.country === country)?.country || normalized[0]?.country || country;
-      const pickedCity =
-        normalized.find((c) => c.country === pickedCountry)?.cities?.find((x) => x.city === city)?.city ||
-        normalized.find((c) => c.country === pickedCountry)?.cities?.[0]?.city ||
-        city;
+      const currentCountry = params.get("country") || "";
+      const currentCity = params.get("city") || "";
+      const hasRequestedDestination = currentCountry && currentCity;
 
-      setCountry(pickedCountry);
-      setCity(pickedCity);
-      loadGuide(pickedCountry, pickedCity, area);
+      if (hasRequestedDestination) {
+        const foundCountry = normalized.find((c) => c.country === currentCountry);
+        const foundCity = foundCountry?.cities?.find((c) => c.city === currentCity);
+        const finalCountry = foundCountry?.country || currentCountry;
+        const finalCity = foundCity?.city || currentCity;
+
+        setCountry(finalCountry);
+        setCity(finalCity);
+        loadGuide(finalCountry, finalCity, area);
+      } else {
+        setCountry("");
+        setCity("");
+        setGuide(null);
+        setMessage(`${normalized.length} countries ready. Choose a destination to build your guide.`);
+      }
     } catch {
       setMessage("Could not load destination list.");
     }
@@ -308,12 +329,16 @@ function TravelGuidePage() {
     setCountry(v);
     setCity(firstCity);
     setGuide(null);
+    setMessage("");
+
     if (v && firstCity) loadGuide(v, firstCity, area);
   }
 
   function changeCity(v) {
     setCity(v);
     setGuide(null);
+    setMessage("");
+
     if (country && v) loadGuide(country, v, area);
   }
 
@@ -335,16 +360,18 @@ function TravelGuidePage() {
             {countries.map((c) => <option key={c.country} value={c.country}>{c.country}</option>)}
           </select>
 
-          <select className="input" value={city} onChange={(e) => changeCity(e.target.value)}>
+          <select className="input" value={city} onChange={(e) => changeCity(e.target.value)} disabled={!country}>
             <option value="">Choose city</option>
             {cities.map((c) => <option key={`${country}-${c.city}`} value={c.city}>{c.city}{c.live_hotels ? ` (${c.live_hotels})` : ""}</option>)}
           </select>
 
           <input className="input" value={area} placeholder="Area or district" onChange={(e) => setArea(e.target.value)} />
+
           <button className="guidePrimary" onClick={() => loadGuide(country, city, area)} disabled={loading || !country || !city}>
             {loading ? "Loading..." : "Refresh"}
           </button>
-          <button className="guideSecondary" onClick={() => (window.location.href = "/")}>Back</button>
+
+          <button className="guideSecondary" onClick={() => go("/")}>Back</button>
         </div>
       </section>
 
@@ -358,7 +385,7 @@ function TravelGuidePage() {
               <div className="destinationBig">{guide.destination}</div>
               <div className="destinationSub">Hotels, medical help, safety, food, transport and places to visit around this location.</div>
             </div>
-            <div className="guideTrust">Maps â€¢ Nearby help â€¢ Arrival confidence</div>
+            <div className="guideTrust">Maps • Nearby help • Arrival confidence</div>
           </div>
 
           <div className="guideContentGrid">
@@ -418,7 +445,7 @@ function Confirmed() {
         <h1 className="confirmTitle">Payment received</h1>
         <p className="confirmText">{status}</p>
         <div className="codeBox"><b>Reservation code:</b><div className="codeText">{code}</div></div>
-        <button className="goldSmall" onClick={() => (window.location.href = "/")}>Back to hotel search</button>
+        <button className="goldSmall" onClick={() => go("/")}>Back to hotel search</button>
       </div>
     </div>
   );
@@ -500,11 +527,11 @@ function MainPortal() {
     setLoadingCatalog(true);
 
     try {
+      let loaded = [];
+
       const bootRes = await fetch(`${API_BASE}/api/bootstrap`, { cache: "no-store" });
       const boot = await bootRes.json().catch(() => ({}));
-
-      let loaded = Array.isArray(boot.countries) ? boot.countries : [];
-      let bootHotels = Array.isArray(boot.hotels) ? boot.hotels : [];
+      loaded = Array.isArray(boot.countries) ? boot.countries : [];
 
       if (!loaded.length) {
         const catRes = await fetch(`${API_BASE}/api/real-catalog/destinations`, { cache: "no-store" });
@@ -515,35 +542,19 @@ function MainPortal() {
       const normalized = normalizeCountries(loaded);
       setCatalog(normalized);
 
-      const preferred =
-        normalized.find((c) => safeText(c.country).toLowerCase() === safeText(boot.default_country).toLowerCase()) ||
-        normalized.find((c) => safeText(c.country).toLowerCase() === "united kingdom") ||
-        normalized[0] ||
-        null;
+      setCountry("");
+      setCity("");
+      setHotels([]);
+      setSelectedHotel(null);
+      clearConverted();
 
-      const preferredCity =
-        preferred?.cities?.find((c) => safeText(c.city).toLowerCase() === safeText(boot.default_city).toLowerCase()) ||
-        preferred?.cities?.find((c) => Number(c.live_hotels || 0) > 0) ||
-        preferred?.cities?.[0] ||
-        null;
-
-      const firstCountry = preferred?.country || "";
-      const firstCity = preferredCity?.city || "";
-
-      setCountry(firstCountry);
-      setCity(firstCity);
-
-      if (bootHotels.length) {
-        setHotels(bootHotels);
-        setSelectedHotel(bootHotels[0] || null);
-        setMessage(`${bootHotels.length} stays ready.`);
-      } else if (firstCountry && firstCity) {
-        await runSearch(firstCountry, firstCity);
-      } else {
-        setMessage("No countries loaded from backend.");
-      }
+      setMessage(
+        normalized.length
+          ? `${normalized.length} countries ready. Choose a destination to begin.`
+          : "Destination catalogue unavailable. Please refresh shortly."
+      );
     } catch {
-      setMessage("Could not load country and city catalogue.");
+      setMessage("Could not load destination catalogue.");
     } finally {
       setLoadingCatalog(false);
     }
@@ -565,9 +576,7 @@ function MainPortal() {
     setHotels([]);
     setSelectedHotel(null);
     clearConverted();
-
-    if (nextCountry && firstCity) runSearch(nextCountry, firstCity);
-    else setMessage("No city found for this country.");
+    setMessage(nextCountry && firstCity ? "City selected. Press Search stays to continue." : "No city found for this country.");
   }
 
   function changeCity(nextCity) {
@@ -575,8 +584,7 @@ function MainPortal() {
     setHotels([]);
     setSelectedHotel(null);
     clearConverted();
-
-    if (country && nextCity) runSearch(country, nextCity);
+    setMessage(nextCity ? "Press Search stays to continue." : "Choose a city first.");
   }
 
   async function convertTotal() {
@@ -690,10 +698,10 @@ function MainPortal() {
         </div>
 
         <div className="buttonRow">
-          <button className="whiteButton" onClick={() => (window.location.href = `/?page=travel&country=${encodeURIComponent(country)}&city=${encodeURIComponent(city)}&area=${encodeURIComponent(area)}`)}>Destination Guide</button>
-          <button className="whiteButton" onClick={() => (window.location.href = "/?page=faq")}>FAQ</button>
-          <button className="whiteButton" onClick={() => (window.location.href = "/?page=terms")}>Terms</button>
-          <button className="whiteButton" onClick={() => (window.location.href = "/?page=support")}>Contact</button>
+          <button className="whiteButton" onClick={() => go(`/?page=travel&country=${encodeURIComponent(country)}&city=${encodeURIComponent(city)}&area=${encodeURIComponent(area)}`)}>Destination Guide</button>
+          <button className="whiteButton" onClick={() => go("/?page=faq")}>FAQ</button>
+          <button className="whiteButton" onClick={() => go("/?page=terms")}>Terms</button>
+          <button className="whiteButton" onClick={() => go("/?page=support")}>Contact</button>
         </div>
       </section>
 
@@ -711,7 +719,7 @@ function MainPortal() {
             </select>
 
             <label className="formLabel">City</label>
-            <select className="input" value={city} onChange={(e) => changeCity(e.target.value)}>
+            <select className="input" value={city} onChange={(e) => changeCity(e.target.value)} disabled={!country}>
               <option value="">Choose city</option>
               {cities.map((c) => (
                 <option key={`${country}-${c.city}`} value={c.city}>{c.city}{c.live_hotels ? ` (${c.live_hotels})` : ""}</option>
@@ -746,7 +754,7 @@ function MainPortal() {
               </div>
             </div>
 
-            <button className="goldButton" onClick={() => runSearch()} disabled={loading || loadingCatalog}>
+            <button className="goldButton" onClick={() => runSearch()} disabled={loading || loadingCatalog || !country || !city}>
               {loading ? "Loading..." : "Search stays"}
             </button>
 
@@ -794,7 +802,7 @@ function MainPortal() {
               );
             })}
 
-            {!loading && hotels.length === 0 && <div className="emptyBox">No stays loaded yet.</div>}
+            {!loading && hotels.length === 0 && <div className="emptyBox">Choose a destination, then press Search stays.</div>}
           </div>
         </div>
 
@@ -855,7 +863,7 @@ function MainPortal() {
                 </button>
               </div>
 
-              <button className="guideSideButton" onClick={() => (window.location.href = `/?page=travel&country=${encodeURIComponent(selectedHotel.country)}&city=${encodeURIComponent(selectedHotel.city)}&area=${encodeURIComponent(selectedHotel.area || area)}`)}>
+              <button className="guideSideButton" onClick={() => go(`/?page=travel&country=${encodeURIComponent(selectedHotel.country)}&city=${encodeURIComponent(selectedHotel.city)}&area=${encodeURIComponent(selectedHotel.area || area)}`)}>
                 Open destination guide
               </button>
             </div>
@@ -869,9 +877,9 @@ function MainPortal() {
 function AppStyles() {
   return (
     <style>{`
-      html { scroll-behavior: smooth; }
       * { box-sizing: border-box; }
       body { margin: 0; background: #06101f; }
+      button, select, input, textarea { font-family: inherit; }
       .page { min-height: 100vh; background: #06101f; color: white; padding: 18px; font-family: Arial, sans-serif; }
       .hero { background: linear-gradient(135deg,#0f2f69,#1e5cc7); border-radius: 24px; padding: 24px; display: grid; grid-template-columns: 1.2fr .8fr; gap: 20px; align-items: center; margin-bottom: 16px; }
       .brand { letter-spacing: 14px; font-weight: 900; color: #ffd34d; margin-bottom: 12px; }
@@ -899,7 +907,7 @@ function AppStyles() {
       .hotelCard { border: 2px solid transparent; }
       .hotelCardSelected { border: 4px solid #ffd34d; }
       .hotelImage { width: 100%; height: 180px; object-fit: cover; display: block; background: #10254a; }
-      .largeImage { height: 190px; border-radius: 16px; margin-bottom: 12px; }
+      .imageLarge { height: 190px; border-radius: 16px; margin-bottom: 12px; }
       .imageMissing { height: 180px; background: linear-gradient(135deg,#10254a,#1d4da8); color: white; display: flex; flex-direction: column; justify-content: center; padding: 18px; }
       .imageBadge { letter-spacing: 7px; font-weight: 900; font-size: 11px; opacity: .8; }
       .imageMissingTitle { font-size: 22px; font-weight: 900; margin-top: 12px; }
@@ -989,7 +997,7 @@ function AppStyles() {
         .mainGrid { grid-template-columns: 1fr; gap: 12px; }
         .column { height: auto; min-height: auto; border-radius: 18px; padding: 14px; }
         .scroll { max-height: none; overflow: visible; }
-        .hotelImage, .imageMissing, .largeImage { height: 220px; }
+        .hotelImage, .imageMissing, .imageLarge { height: 220px; }
         .guideTop, .guideContentGrid, .guideTables { grid-template-columns: 1fr; }
         .guideControls { grid-template-columns: 1fr; }
         .destinationBar { display: block; }
@@ -1030,5 +1038,3 @@ export default function App() {
 
   return <MainPortal />;
 }
-
-
