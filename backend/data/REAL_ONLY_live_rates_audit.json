@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-13T04:50:20.533Z",
+  "generated_at": "2026-05-13T05:26:37.758Z",
   "architecture": "MySpace Hotel normalized real-only live-rate engine",
   "suppliers": [
     "Hotelbeds"
@@ -10,197 +10,16 @@
     "Amadeus"
   ],
   "stats": {
-    "source_live_rate_rows": 237936,
-    "kept_real_rows": 19032,
-    "rejected_no_geo": 218904,
+    "source_live_rate_rows": 0,
+    "kept_real_rows": 0,
+    "rejected_no_geo": 0,
     "rejected_not_live": 0,
     "rejected_no_image": 0,
-    "matched_by_id": 1307,
-    "matched_by_name_dest": 13633,
-    "matched_by_name": 4092
+    "matched_by_id": 0,
+    "matched_by_name_dest": 0,
+    "matched_by_name": 0
   },
-  "countries": 12,
-  "cities": 24,
-  "top_countries": [
-    {
-      "country": "France",
-      "cities": 7,
-      "live_rates": 14826,
-      "top_cities": [
-        {
-          "city": "Paris",
-          "live_rates": 12973
-        },
-        {
-          "city": "Neuilly-sur-Seine",
-          "live_rates": 668
-        },
-        {
-          "city": "Roissy en France",
-          "live_rates": 472
-        },
-        {
-          "city": "Aix-en-Provence",
-          "live_rates": 285
-        },
-        {
-          "city": "Choisy-le-Roi",
-          "live_rates": 162
-        },
-        {
-          "city": "Serris",
-          "live_rates": 136
-        },
-        {
-          "city": "Avignon",
-          "live_rates": 130
-        }
-      ]
-    },
-    {
-      "country": "United States",
-      "cities": 5,
-      "live_rates": 881,
-      "top_cities": [
-        {
-          "city": "Dallas",
-          "live_rates": 524
-        },
-        {
-          "city": "South Kortright (New York)",
-          "live_rates": 164
-        },
-        {
-          "city": "Denver",
-          "live_rates": 138
-        },
-        {
-          "city": "New Orleans",
-          "live_rates": 35
-        },
-        {
-          "city": "San Francisco (California)",
-          "live_rates": 20
-        }
-      ]
-    },
-    {
-      "country": "United Kingdom",
-      "cities": 1,
-      "live_rates": 856,
-      "top_cities": [
-        {
-          "city": "Edinburgh",
-          "live_rates": 856
-        }
-      ]
-    },
-    {
-      "country": "Nigeria",
-      "cities": 1,
-      "live_rates": 776,
-      "top_cities": [
-        {
-          "city": "Lagos",
-          "live_rates": 776
-        }
-      ]
-    },
-    {
-      "country": "Italy",
-      "cities": 2,
-      "live_rates": 394,
-      "top_cities": [
-        {
-          "city": "Venice",
-          "live_rates": 298
-        },
-        {
-          "city": "Marina Di Campo",
-          "live_rates": 96
-        }
-      ]
-    },
-    {
-      "country": "Brazil",
-      "cities": 1,
-      "live_rates": 330,
-      "top_cities": [
-        {
-          "city": "Fortaleza (Ceara)",
-          "live_rates": 330
-        }
-      ]
-    },
-    {
-      "country": "Ethiopia",
-      "cities": 1,
-      "live_rates": 287,
-      "top_cities": [
-        {
-          "city": "Addis Ababa",
-          "live_rates": 287
-        }
-      ]
-    },
-    {
-      "country": "Australia",
-      "cities": 2,
-      "live_rates": 196,
-      "top_cities": [
-        {
-          "city": "Brisbane",
-          "live_rates": 176
-        },
-        {
-          "city": "Waverley",
-          "live_rates": 20
-        }
-      ]
-    },
-    {
-      "country": "Japan",
-      "cities": 1,
-      "live_rates": 188,
-      "top_cities": [
-        {
-          "city": "Osaka",
-          "live_rates": 188
-        }
-      ]
-    },
-    {
-      "country": "Spain",
-      "cities": 1,
-      "live_rates": 168,
-      "top_cities": [
-        {
-          "city": "Barcelona",
-          "live_rates": 168
-        }
-      ]
-    },
-    {
-      "country": "Egypt",
-      "cities": 1,
-      "live_rates": 80,
-      "top_cities": [
-        {
-          "city": "Qasr El Nil",
-          "live_rates": 80
-        }
-      ]
-    },
-    {
-      "country": "Morocco",
-      "cities": 1,
-      "live_rates": 50,
-      "top_cities": [
-        {
-          "city": "Fès",
-          "live_rates": 50
-        }
-      ]
-    }
-  ]
+  "countries": 0,
+  "cities": 0,
+  "top_countries": []
 }
