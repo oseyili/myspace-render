@@ -1,26 +1,39 @@
 {
-  "generated_at": "2026-05-13T00:00:26.371Z",
-  "rule": "REAL ONLY: no fake rates, no fake images, no placeholder suppliers, no customer-facing unavailable fake prices.",
+  "generated_at": "2026-05-13T00:22:42.056Z",
+  "architecture": "MySpace Hotel normalized real-only live-rate engine",
+  "suppliers": [
+    "Hotelbeds"
+  ],
+  "future_suppliers": [
+    "Expedia",
+    "Agoda",
+    "Amadeus"
+  ],
   "stats": {
-    "total_rate_rows": 237936,
-    "rejected_not_live_payable": 0,
-    "rejected_no_real_image_or_geo": 232257,
+    "source_live_rate_rows": 237936,
+    "kept_real_rows": 19032,
+    "rejected_no_geo": 218904,
+    "rejected_not_live": 0,
+    "rejected_no_image": 0,
     "matched_by_id": 1307,
-    "matched_by_name_destination": 0,
-    "matched_by_name": 4372,
-    "kept_real_only_rows": 5679
+    "matched_by_name_dest": 13633,
+    "matched_by_name": 4092
   },
   "countries": 12,
-  "cities": 18,
+  "cities": 24,
   "top_countries": [
     {
       "country": "France",
-      "cities": 5,
-      "live_rates": 2117,
+      "cities": 7,
+      "live_rates": 14826,
       "top_cities": [
         {
           "city": "Paris",
-          "live_rates": 1094
+          "live_rates": 12973
+        },
+        {
+          "city": "Neuilly-sur-Seine",
+          "live_rates": 668
         },
         {
           "city": "Roissy en France",
@@ -31,12 +44,43 @@
           "live_rates": 285
         },
         {
+          "city": "Choisy-le-Roi",
+          "live_rates": 162
+        },
+        {
           "city": "Serris",
           "live_rates": 136
         },
         {
           "city": "Avignon",
           "live_rates": 130
+        }
+      ]
+    },
+    {
+      "country": "United States",
+      "cities": 5,
+      "live_rates": 881,
+      "top_cities": [
+        {
+          "city": "Dallas",
+          "live_rates": 524
+        },
+        {
+          "city": "South Kortright (New York)",
+          "live_rates": 164
+        },
+        {
+          "city": "Denver",
+          "live_rates": 138
+        },
+        {
+          "city": "New Orleans",
+          "live_rates": 35
+        },
+        {
+          "city": "San Francisco (California)",
+          "live_rates": 20
         }
       ]
     },
@@ -54,11 +98,26 @@
     {
       "country": "Nigeria",
       "cities": 1,
-      "live_rates": 736,
+      "live_rates": 776,
       "top_cities": [
         {
           "city": "Lagos",
-          "live_rates": 736
+          "live_rates": 776
+        }
+      ]
+    },
+    {
+      "country": "Italy",
+      "cities": 2,
+      "live_rates": 394,
+      "top_cities": [
+        {
+          "city": "Venice",
+          "live_rates": 298
+        },
+        {
+          "city": "Marina Di Campo",
+          "live_rates": 96
         }
       ]
     },
@@ -74,17 +133,6 @@
       ]
     },
     {
-      "country": "Italy",
-      "cities": 1,
-      "live_rates": 298,
-      "top_cities": [
-        {
-          "city": "Venice",
-          "live_rates": 298
-        }
-      ]
-    },
-    {
       "country": "Ethiopia",
       "cities": 1,
       "live_rates": 287,
@@ -96,31 +144,16 @@
       ]
     },
     {
-      "country": "South Africa",
-      "cities": 1,
-      "live_rates": 280,
+      "country": "Australia",
+      "cities": 2,
+      "live_rates": 196,
       "top_cities": [
         {
-          "city": "Cape Town",
-          "live_rates": 280
-        }
-      ]
-    },
-    {
-      "country": "United States",
-      "cities": 3,
-      "live_rates": 193,
-      "top_cities": [
-        {
-          "city": "Denver",
-          "live_rates": 138
+          "city": "Brisbane",
+          "live_rates": 176
         },
         {
-          "city": "New Orleans",
-          "live_rates": 35
-        },
-        {
-          "city": "San Francisco (California)",
+          "city": "Waverley",
           "live_rates": 20
         }
       ]
@@ -137,17 +170,6 @@
       ]
     },
     {
-      "country": "Australia",
-      "cities": 1,
-      "live_rates": 176,
-      "top_cities": [
-        {
-          "city": "Brisbane",
-          "live_rates": 176
-        }
-      ]
-    },
-    {
       "country": "Spain",
       "cities": 1,
       "live_rates": 168,
@@ -155,6 +177,17 @@
         {
           "city": "Barcelona",
           "live_rates": 168
+        }
+      ]
+    },
+    {
+      "country": "Egypt",
+      "cities": 1,
+      "live_rates": 80,
+      "top_cities": [
+        {
+          "city": "Qasr El Nil",
+          "live_rates": 80
         }
       ]
     },
