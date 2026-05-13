@@ -474,7 +474,7 @@ function MainPortal() {
     const searchCity = safeText(nextCity);
 
     if (!searchCountry || !searchCity) {
-      setMessage("Choose a country and city first.");
+      setMessage("Choose an available live-rate destination first.");
       return;
     }
 
@@ -484,27 +484,36 @@ function MainPortal() {
     setMessage("");
 
     try {
-      const p = new URLSearchParams();
-      p.set("country", searchCountry);
-      p.set("city", searchCity);
-      p.set("checkin", checkin);
-      p.set("checkout", checkout);
-      p.set("guests", String(guests));
-      p.set("rooms", String(roomCount(rooms)));
-      if (area.trim()) p.set("area", area.trim());
-      if (keyword.trim()) p.set("keyword", keyword.trim());
+      const key = `${searchCountry}|||${searchCity}`;
+      const staticRes = await fetch("/live-hotels.json", { cache: "no-store" });
+      const staticData = await staticRes.json().catch(() => ({}));
+      let list = staticData?.hotelsByDestination?.[key] || [];
 
-      const res = await fetch(`${API_BASE}/api/hotels/search?${p.toString()}`, { cache: "no-store" });
-      const data = await res.json();
-      const list = Array.isArray(data.hotels) ? data.hotels : [];
+      if (keyword.trim()) {
+        const q = keyword.trim().toLowerCase();
+        list = list.filter((h) =>
+          safeText(h.hotel_name).toLowerCase().includes(q) ||
+          safeText(h.address).toLowerCase().includes(q) ||
+          safeText(h.area).toLowerCase().includes(q)
+        );
+      }
+
+      if (area.trim()) {
+        const q = area.trim().toLowerCase();
+        list = list.filter((h) =>
+          safeText(h.address).toLowerCase().includes(q) ||
+          safeText(h.area).toLowerCase().includes(q) ||
+          safeText(h.hotel_name).toLowerCase().includes(q)
+        );
+      }
 
       setHotels(list);
       setSelectedHotel(list[0] || null);
-      setMessage(list.length ? `${list.length} best matches found in ${searchCity}.` : "No matching live-rate hotels found.");
+      setMessage(list.length ? `${list.length} live-rate stays available in ${searchCity}.` : "No matching live-rate stay found for this filter. Clear area or keyword and search again.");
     } catch {
       setHotels([]);
       setSelectedHotel(null);
-      setMessage("Please choose an available live-rate destination and search again.");
+      setMessage("Live-rate stays are unavailable right now. Please refresh and try again.");
     } finally {
       setLoading(false);
     }
