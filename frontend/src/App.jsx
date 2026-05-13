@@ -504,7 +504,7 @@ function MainPortal() {
     } catch {
       setHotels([]);
       setSelectedHotel(null);
-      setMessage("Backend unavailable. Restart backend and frontend.");
+      setMessage("Please choose an available live-rate destination and search again.");
     } finally {
       setLoading(false);
     }
