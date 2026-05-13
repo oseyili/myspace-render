@@ -1,21 +1,38 @@
 ﻿const fs = require("fs");
-const path = require("path");
+const zlib = require("zlib");
 
-const backend = path.join(__dirname, "backend");
-const frontendPublic = path.join(__dirname, "frontend", "public");
+const gz = "./backend/data/REAL_ONLY_live_rates.json.gz";
+const out = "./frontend/public/live-destinations.json";
 
-const { loadRealOnly } = require(path.join(backend, "real-only-live-index.js"));
-const live = loadRealOnly();
+fs.mkdirSync("./frontend/public", { recursive: true });
 
-const payload = {
-  ok: true,
-  source: "static_real_only_live_destinations",
-  countries: live.countries || []
-};
+const rows = JSON.parse(zlib.gunzipSync(fs.readFileSync(gz)).toString("utf8"));
+const map = new Map();
 
-fs.writeFileSync(
-  path.join(frontendPublic, "live-destinations.json"),
-  JSON.stringify(payload)
-);
+for (const r of rows) {
+  const country = String(r.country || "").trim();
+  const city = String(r.city || "").trim();
+  if (!country || !city) continue;
+  if (country.toLowerCase() === "unknown" || city.toLowerCase() === "unknown") continue;
 
-console.log("Exported live destinations:", payload.countries.length);
+  if (!map.has(country)) map.set(country, new Map());
+  const cities = map.get(country);
+
+  if (!cities.has(city)) {
+    cities.set(city, {
+      city,
+      live_hotels: 0,
+      destination_code: String(r.destination_code || "")
+    });
+  }
+
+  cities.get(city).live_hotels++;
+}
+
+const countries = [...map.entries()].map(([country, cities]) => ({
+  country,
+  cities: [...cities.values()].sort((a, b) => b.live_hotels - a.live_hotels || a.city.localeCompare(b.city))
+})).sort((a, b) => a.country.localeCompare(b.country));
+
+fs.writeFileSync(out, JSON.stringify({ ok: true, countries }, null, 2));
+console.log("Exported:", countries.length, "countries");

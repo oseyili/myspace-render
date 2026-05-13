@@ -275,42 +275,30 @@ function TravelGuidePage() {
   }
 
   async function loadCatalog() {
-    setLoadingCatalog(true);
-
     try {
-      let loaded = [];
-
-      const staticRes = await fetch("/live-destinations.json", { cache: "no-store" });
-      const staticData = await staticRes.json().catch(() => ({}));
-      loaded = Array.isArray(staticData.countries) ? staticData.countries : [];
-
-      if (!loaded.length) {
-        const bootRes = await fetch(`${API_BASE}/api/bootstrap`, { cache: "no-store" });
-        const boot = await bootRes.json().catch(() => ({}));
-        loaded = Array.isArray(boot.countries) ? boot.countries : [];
-      }
+      const res = await fetch("/live-destinations.json", { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      const loaded = Array.isArray(data.countries) ? data.countries : [];
+      setCatalog(loaded);
 
       const normalized = normalizeCountries(loaded);
-      setCatalog(normalized);
+      const currentCountry = params.get("country") || "";
+      const currentCity = params.get("city") || "";
 
-      const firstCountry = normalized[0] || null;
-      const firstCity = firstCountry?.cities?.[0]?.city || "";
-
-      setCountry(firstCountry?.country || "");
-      setCity(firstCity);
-      setHotels([]);
-      setSelectedHotel(null);
-      clearConverted();
-
-      setMessage(
-        firstCountry && firstCity
-          ? "Available live-rate destinations are ready."
-          : "No live-rate destinations are available right now."
-      );
+      if (currentCountry && currentCity) {
+        setCountry(currentCountry);
+        setCity(currentCity);
+        loadGuide(currentCountry, currentCity, area);
+      } else {
+        const firstCountry = normalized[0] || null;
+        const firstCity = firstCountry?.cities?.[0]?.city || "";
+        setCountry(firstCountry?.country || "");
+        setCity(firstCity);
+        setGuide(null);
+        setMessage(firstCountry && firstCity ? "Available live-rate destinations are ready." : "No live-rate destinations are available right now.");
+      }
     } catch {
       setMessage("No live-rate destinations are available right now.");
-    } finally {
-      setLoadingCatalog(false);
     }
   }
 
@@ -526,32 +514,23 @@ function MainPortal() {
     setLoadingCatalog(true);
 
     try {
-      let loaded = [];
-
-      const bootRes = await fetch(`${API_BASE}/api/bootstrap`, { cache: "no-store" });
-      const boot = await bootRes.json().catch(() => ({}));
-      loaded = Array.isArray(boot.countries) ? boot.countries : [];
-
-      if (!loaded.length) {
-        const catRes = await fetch(`${API_BASE}/api/real-catalog/destinations`, { cache: "no-store" });
-        const cat = await catRes.json().catch(() => ({}));
-        loaded = Array.isArray(cat.countries) ? cat.countries : [];
-      }
+      const res = await fetch("/live-destinations.json", { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      const loaded = Array.isArray(data.countries) ? data.countries : [];
 
       const normalized = normalizeCountries(loaded);
       setCatalog(normalized);
 
-      setCountry("");
-      setCity("");
+      const firstCountry = normalized[0] || null;
+      const firstCity = firstCountry?.cities?.[0]?.city || "";
+
+      setCountry(firstCountry?.country || "");
+      setCity(firstCity);
       setHotels([]);
       setSelectedHotel(null);
       clearConverted();
 
-      setMessage(
-        normalized.length
-          ? `Available live-rate destinations are ready.`
-          : "No live-rate destinations are available right now."
-      );
+      setMessage(firstCountry && firstCity ? "Available live-rate destinations are ready." : "No live-rate destinations are available right now.");
     } catch {
       setMessage("No live-rate destinations are available right now.");
     } finally {
