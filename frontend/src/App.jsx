@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
@@ -145,7 +145,7 @@ function PriceBreakdown({ rate, checkin, checkout, rooms, guests, compact = fals
       <div className="priceLine"><span>Guests</span><b>{guests}</b></div>
       <div className="priceLine"><span>Rooms selected</span><b>{count}</b></div>
       <div className="priceLine"><span>Rate per room</span><b>{currency} {money(base)}</b></div>
-      <div className="priceLine"><span>Total check</span><b>{currency} {money(base)} × {count}</b></div>
+      <div className="priceLine"><span>Total check</span><b>{currency} {money(base)} Ã— {count}</b></div>
       <div className="totalLine"><span>Total to pay</span><b>{currency} {money(total)}</b></div>
     </div>
   );
@@ -385,7 +385,7 @@ function TravelGuidePage() {
               <div className="destinationBig">{guide.destination}</div>
               <div className="destinationSub">Hotels, medical help, safety, food, transport and places to visit around this location.</div>
             </div>
-            <div className="guideTrust">Maps • Nearby help • Arrival confidence</div>
+            <div className="guideTrust">Maps â€¢ Nearby help â€¢ Arrival confidence</div>
           </div>
 
           <div className="guideContentGrid">
@@ -550,11 +550,11 @@ function MainPortal() {
 
       setMessage(
         normalized.length
-          ? `${normalized.length} countries ready. Choose a destination to begin.`
-          : "Destination catalogue unavailable. Please refresh shortly."
+          ? `Choose from current live-rate destinations.`
+          : "Live destinations are updating. Please refresh shortly."
       );
     } catch {
-      setMessage("Could not load destination catalogue.");
+      setMessage("Live destinations are updating. Please refresh shortly.");
     } finally {
       setLoadingCatalog(false);
     }
@@ -710,7 +710,7 @@ function MainPortal() {
           <div className="labelTop">SEARCH</div>
 
           <div className="searchBox">
-            <p className="muted">{loadingCatalog ? "Loading catalogue..." : `${countries.length} countries ready.`}</p>
+            <p className="muted">{loadingCatalog ? "Loading catalogue..." : `Choose from current live-rate destinations.`}</p>
 
             <label className="formLabel">Country</label>
             <select className="input" value={country} onChange={(e) => changeCountry(e.target.value)}>
