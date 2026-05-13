@@ -275,43 +275,42 @@ function TravelGuidePage() {
   }
 
   async function loadCatalog() {
+    setLoadingCatalog(true);
+
     try {
       let loaded = [];
 
-      const bootRes = await fetch(`${API_BASE}/api/bootstrap`, { cache: "no-store" });
-      const boot = await bootRes.json().catch(() => ({}));
-      loaded = Array.isArray(boot.countries) ? boot.countries : [];
+      const staticRes = await fetch("/live-destinations.json", { cache: "no-store" });
+      const staticData = await staticRes.json().catch(() => ({}));
+      loaded = Array.isArray(staticData.countries) ? staticData.countries : [];
 
       if (!loaded.length) {
-        const catRes = await fetch(`${API_BASE}/api/real-catalog/destinations`, { cache: "no-store" });
-        const cat = await catRes.json().catch(() => ({}));
-        loaded = Array.isArray(cat.countries) ? cat.countries : [];
+        const bootRes = await fetch(`${API_BASE}/api/bootstrap`, { cache: "no-store" });
+        const boot = await bootRes.json().catch(() => ({}));
+        loaded = Array.isArray(boot.countries) ? boot.countries : [];
       }
-
-      setCatalog(loaded);
 
       const normalized = normalizeCountries(loaded);
-      const currentCountry = params.get("country") || "";
-      const currentCity = params.get("city") || "";
-      const hasRequestedDestination = currentCountry && currentCity;
+      setCatalog(normalized);
 
-      if (hasRequestedDestination) {
-        const foundCountry = normalized.find((c) => c.country === currentCountry);
-        const foundCity = foundCountry?.cities?.find((c) => c.city === currentCity);
-        const finalCountry = foundCountry?.country || currentCountry;
-        const finalCity = foundCity?.city || currentCity;
+      const firstCountry = normalized[0] || null;
+      const firstCity = firstCountry?.cities?.[0]?.city || "";
 
-        setCountry(finalCountry);
-        setCity(finalCity);
-        loadGuide(finalCountry, finalCity, area);
-      } else {
-        setCountry("");
-        setCity("");
-        setGuide(null);
-        setMessage(`${normalized.length} countries ready. Choose a destination to build your guide.`);
-      }
+      setCountry(firstCountry?.country || "");
+      setCity(firstCity);
+      setHotels([]);
+      setSelectedHotel(null);
+      clearConverted();
+
+      setMessage(
+        firstCountry && firstCity
+          ? "Available live-rate destinations are ready."
+          : "No live-rate destinations are available right now."
+      );
     } catch {
-      setMessage("Could not load destination list.");
+      setMessage("No live-rate destinations are available right now.");
+    } finally {
+      setLoadingCatalog(false);
     }
   }
 
@@ -550,11 +549,11 @@ function MainPortal() {
 
       setMessage(
         normalized.length
-          ? `Choose from current live-rate destinations.`
-          : "Live destinations are updating. Please refresh shortly."
+          ? `Available live-rate destinations are ready.`
+          : "No live-rate destinations are available right now."
       );
     } catch {
-      setMessage("Live destinations are updating. Please refresh shortly.");
+      setMessage("No live-rate destinations are available right now.");
     } finally {
       setLoadingCatalog(false);
     }
@@ -710,7 +709,7 @@ function MainPortal() {
           <div className="labelTop">SEARCH</div>
 
           <div className="searchBox">
-            <p className="muted">{loadingCatalog ? "Loading catalogue..." : `Choose from current live-rate destinations.`}</p>
+            <p className="muted">{loadingCatalog ? "Loading catalogue..." : `Available live-rate destinations are ready.`}</p>
 
             <label className="formLabel">Country</label>
             <select className="input" value={country} onChange={(e) => changeCountry(e.target.value)}>
@@ -802,7 +801,7 @@ function MainPortal() {
               );
             })}
 
-            {!loading && hotels.length === 0 && <div className="emptyBox">Choose a destination, then press Search stays.</div>}
+            {!loading && hotels.length === 0 && <div className="emptyBox">Choose an available destination, then press Search stays.</div>}
           </div>
         </div>
 
