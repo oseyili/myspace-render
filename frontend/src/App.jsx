@@ -349,7 +349,7 @@ function TravelGuidePage() {
 
           <select className="input" value={city} onChange={(e) => changeCity(e.target.value)} disabled={!country}>
             <option value="">Choose city</option>
-            {cities.map((c) => <option key={`${country}-${c.city}`} value={c.city}>{c.city}{c.live_hotels ? ` (${c.live_hotels})` : ""}</option>)}
+            {cities.map((c) => <option key={`${country}-${c.city}`} value={c.city}>{c.city}</option>)}
           </select>
 
           <input className="input" value={area} placeholder="Area or district" onChange={(e) => setArea(e.target.value)} />
@@ -709,7 +709,7 @@ function MainPortal() {
             <select className="input" value={city} onChange={(e) => changeCity(e.target.value)} disabled={!country}>
               <option value="">Choose city</option>
               {cities.map((c) => (
-                <option key={`${country}-${c.city}`} value={c.city}>{c.city}{c.live_hotels ? ` (${c.live_hotels})` : ""}</option>
+                <option key={`${country}-${c.city}`} value={c.city}>{c.city}</option>
               ))}
             </select>
 
