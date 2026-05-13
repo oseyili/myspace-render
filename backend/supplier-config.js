@@ -1,4 +1,4 @@
-﻿module.exports = {
+module.exports = {
   suppliers: [
     {
       id: "hotelbeds",
@@ -21,7 +21,8 @@
     noPlaceholders: true,
     noFakeRates: true,
     noFakeImages: true,
-    noAffiliateFallbackUnlessLivePayable: true,
+    noInactiveSupplierPlaceholders: true,
+    onlyShowRealLivePayableRates: true,
     requireFreshDestinationRateOnCustomerSearch: true,
     requireRateKeyBeforePayment: true,
     requirePositivePayableAmount: true,

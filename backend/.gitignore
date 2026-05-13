@@ -9,3 +9,11 @@ database_backups/
 *.sqlite3
 data/live-rate-cache/*.ndjson
 data/live-rate-cache/*.tmp
+data/*.tmp
+data/*.ndjson
+data/live-rate-cache/*.ndjson
+data/live-rate-cache/*.tmp
+data/live_rate_cache_BACKUP*.json
+data/live_rate_cache_joined_geo_images.json
+data/live_rate_cache_joined_geo_images_SMART.json
+data/live_rate_cache_joined_geo_images_DEST_FIXED.json

@@ -1,0 +1,173 @@
+{
+  "generated_at": "2026-05-13T00:00:26.371Z",
+  "rule": "REAL ONLY: no fake rates, no fake images, no placeholder suppliers, no customer-facing unavailable fake prices.",
+  "stats": {
+    "total_rate_rows": 237936,
+    "rejected_not_live_payable": 0,
+    "rejected_no_real_image_or_geo": 232257,
+    "matched_by_id": 1307,
+    "matched_by_name_destination": 0,
+    "matched_by_name": 4372,
+    "kept_real_only_rows": 5679
+  },
+  "countries": 12,
+  "cities": 18,
+  "top_countries": [
+    {
+      "country": "France",
+      "cities": 5,
+      "live_rates": 2117,
+      "top_cities": [
+        {
+          "city": "Paris",
+          "live_rates": 1094
+        },
+        {
+          "city": "Roissy en France",
+          "live_rates": 472
+        },
+        {
+          "city": "Aix-en-Provence",
+          "live_rates": 285
+        },
+        {
+          "city": "Serris",
+          "live_rates": 136
+        },
+        {
+          "city": "Avignon",
+          "live_rates": 130
+        }
+      ]
+    },
+    {
+      "country": "United Kingdom",
+      "cities": 1,
+      "live_rates": 856,
+      "top_cities": [
+        {
+          "city": "Edinburgh",
+          "live_rates": 856
+        }
+      ]
+    },
+    {
+      "country": "Nigeria",
+      "cities": 1,
+      "live_rates": 736,
+      "top_cities": [
+        {
+          "city": "Lagos",
+          "live_rates": 736
+        }
+      ]
+    },
+    {
+      "country": "Brazil",
+      "cities": 1,
+      "live_rates": 330,
+      "top_cities": [
+        {
+          "city": "Fortaleza (Ceara)",
+          "live_rates": 330
+        }
+      ]
+    },
+    {
+      "country": "Italy",
+      "cities": 1,
+      "live_rates": 298,
+      "top_cities": [
+        {
+          "city": "Venice",
+          "live_rates": 298
+        }
+      ]
+    },
+    {
+      "country": "Ethiopia",
+      "cities": 1,
+      "live_rates": 287,
+      "top_cities": [
+        {
+          "city": "Addis Ababa",
+          "live_rates": 287
+        }
+      ]
+    },
+    {
+      "country": "South Africa",
+      "cities": 1,
+      "live_rates": 280,
+      "top_cities": [
+        {
+          "city": "Cape Town",
+          "live_rates": 280
+        }
+      ]
+    },
+    {
+      "country": "United States",
+      "cities": 3,
+      "live_rates": 193,
+      "top_cities": [
+        {
+          "city": "Denver",
+          "live_rates": 138
+        },
+        {
+          "city": "New Orleans",
+          "live_rates": 35
+        },
+        {
+          "city": "San Francisco (California)",
+          "live_rates": 20
+        }
+      ]
+    },
+    {
+      "country": "Japan",
+      "cities": 1,
+      "live_rates": 188,
+      "top_cities": [
+        {
+          "city": "Osaka",
+          "live_rates": 188
+        }
+      ]
+    },
+    {
+      "country": "Australia",
+      "cities": 1,
+      "live_rates": 176,
+      "top_cities": [
+        {
+          "city": "Brisbane",
+          "live_rates": 176
+        }
+      ]
+    },
+    {
+      "country": "Spain",
+      "cities": 1,
+      "live_rates": 168,
+      "top_cities": [
+        {
+          "city": "Barcelona",
+          "live_rates": 168
+        }
+      ]
+    },
+    {
+      "country": "Morocco",
+      "cities": 1,
+      "live_rates": 50,
+      "top_cities": [
+        {
+          "city": "Fès",
+          "live_rates": 50
+        }
+      ]
+    }
+  ]
+}
