@@ -1,3 +1,4 @@
+const { attachRealOnlyRoutes } = require("./real-only-live-index");
 ﻿require("dotenv").config();
 
 const express = require("express");
@@ -7,6 +8,7 @@ const path = require("path");
 const crypto = require("crypto");
 
 const app = express();
+attachRealOnlyRoutes(app);
 const PORT = Number(process.env.PORT || 5050);
 
 const PUBLIC_FRONTEND_URL = process.env.PUBLIC_FRONTEND_URL || "http://localhost:5173";
