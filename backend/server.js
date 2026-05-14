@@ -10,8 +10,16 @@ const crypto = require("crypto");
 const app = express();
 const PORT = Number(process.env.PORT || 5050);
 
-const PUBLIC_FRONTEND_URL = process.env.PUBLIC_FRONTEND_URL || process.env.FRONTEND_URL || "https://www.myspace-hotel.com";
-const PUBLIC_API_BASE = process.env.PUBLIC_API_BASE || process.env.BACKEND_BASE_URL || `http://127.0.0.1:${PORT}`;
+const PUBLIC_FRONTEND_URL =
+  process.env.PUBLIC_FRONTEND_URL ||
+  process.env.FRONTEND_URL ||
+  "https://www.myspace-hotel.com";
+
+const PUBLIC_API_BASE =
+  process.env.PUBLIC_API_BASE ||
+  process.env.BACKEND_BASE_URL ||
+  "https://myspace-hotel-backend.onrender.com";
+
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || "";
 
 let stripe = null;
@@ -22,25 +30,10 @@ try {
 }
 
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json({ limit: "30mb" }));
+app.use(express.json({ limit: "10mb" }));
 
 const DATA_DIR = path.join(__dirname, "data");
 const LEDGER_FILE = path.join(DATA_DIR, "booking_ledger.json");
-
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-
-const FX = {
-  GBP: 1,
-  USD: 1.27,
-  EUR: 1.17,
-  NGN: 1900,
-  AED: 4.66,
-  CAD: 1.72,
-  AUD: 1.92,
-  ZAR: 23.2,
-  CHF: 1.11,
-  JPY: 197,
-};
 
 function clean(v) {
   return String(v ?? "").trim();
@@ -78,99 +71,28 @@ function parseMaybeJson(v) {
   }
 }
 
-function readTextFile(filePath) {
+function readNdjsonGzRows(filePath, maxRows = 30000) {
+  if (!fs.existsSync(filePath)) return [];
+
   try {
-    let buffer = fs.readFileSync(filePath);
-    if (filePath.toLowerCase().endsWith(".gz")) buffer = zlib.gunzipSync(buffer);
-    return buffer.toString("utf8");
-  } catch (err) {
-    console.log("SKIPPED BAD DATA FILE:", filePath, err.message);
-    return "";
-  }
-}
-
-function extractArrayFromJson(parsed) {
-  if (!parsed) return [];
-  if (Array.isArray(parsed)) return parsed;
-
-  for (const key of ["hotels", "rates", "data", "results", "items", "rows", "records"]) {
-    const value = parseMaybeJson(parsed[key]);
-    if (Array.isArray(value)) return value;
-  }
-
-  return [];
-}
-
-function loadJsonLike(filePath) {
-  const text = readTextFile(filePath);
-  if (!text) return [];
-
-  if (filePath.toLowerCase().includes(".ndjson")) {
+    const text = zlib.gunzipSync(fs.readFileSync(filePath)).toString("utf8");
     const rows = [];
+
     for (const line of text.split(/\r?\n/)) {
+      if (rows.length >= maxRows) break;
       const s = line.trim();
       if (!s) continue;
+
       try {
         rows.push(JSON.parse(s));
       } catch {}
     }
-    return rows;
-  }
 
-  try {
-    return extractArrayFromJson(JSON.parse(text));
+    return rows;
   } catch (err) {
-    console.log("SKIPPED UNREADABLE JSON:", filePath, err.message);
+    console.log("Failed to load NDJSON cache:", err.message);
     return [];
   }
-}
-
-function loadPriorityRows() {
-  const priorityFiles = [
-    path.join(DATA_DIR, "live_rate_cache_joined_geo_images_SMART.json.gz"),
-    path.join(DATA_DIR, "live_rate_cache_joined_geo_images_SMART.json"),
-    path.join(DATA_DIR, "live_rate_cache_joined_geo_images_DEST_FIXED.json.gz"),
-    path.join(DATA_DIR, "live_rate_cache_joined_geo_images_DEST_FIXED.json"),
-    path.join(DATA_DIR, "live-rate-cache", "live-rates-000001.ndjson.gz"),
-    path.join(DATA_DIR, "REAL_ONLY_live_rates_with_geo_images.json.gz"),
-    path.join(DATA_DIR, "hotel_live_rates_seed.json"),
-    path.join(DATA_DIR, "hotel_live_rates_london_seed.json"),
-  ];
-
-  const rows = [];
-  const seenFiles = new Set();
-
-  for (const file of priorityFiles) {
-    if (!fs.existsSync(file)) continue;
-    if (seenFiles.has(file)) continue;
-    seenFiles.add(file);
-
-    const loaded = loadJsonLike(file);
-    console.log(`Loaded ${loaded.length} rows from ${path.relative(__dirname, file)}`);
-    rows.push(...loaded);
-  }
-
-  return rows;
-}
-
-function loadImageRows() {
-  const imageFiles = [
-    path.join(DATA_DIR, "hotel_images_live_backup.json"),
-    path.join(DATA_DIR, "hotel_image_backup_200k.json"),
-    path.join(DATA_DIR, "hotel_supplier_feed.json"),
-    path.join(DATA_DIR, "master_hotel_registry.json.gz"),
-  ];
-
-  const rows = [];
-
-  for (const file of imageFiles) {
-    if (!fs.existsSync(file)) continue;
-    const loaded = loadJsonLike(file);
-    console.log(`Loaded ${loaded.length} image/registry rows from ${path.relative(__dirname, file)}`);
-    rows.push(...loaded);
-  }
-
-  return rows;
 }
 
 function hotelbedsDirectUrl(value) {
@@ -195,13 +117,14 @@ function proxiedImageUrl(value) {
   return `${PUBLIC_API_BASE}/api/image?url=${encodeURIComponent(direct)}`;
 }
 
-function getHotelCode(raw) {
+function getHotelCode(raw, index) {
   const rawHotel = parseMaybeJson(raw?.raw_hotel_json);
   const hotelObj = rawHotel && typeof rawHotel === "object" ? rawHotel : raw;
 
   return clean(
     pick(raw, ["hotel_code", "hotelCode", "hotel_id", "hotelId", "supplier_hotel_id", "code", "id"]) ||
-      pick(hotelObj, ["code", "hotelCode", "hotel_code", "hotel_id", "hotelId", "id"])
+      pick(hotelObj, ["code", "hotelCode", "hotel_code", "hotel_id", "hotelId", "id"]) ||
+      `hotel-${index + 1}`
   );
 }
 
@@ -210,32 +133,8 @@ function findImagePath(raw) {
   const hotelObj = rawHotel && typeof rawHotel === "object" ? rawHotel : raw;
 
   const direct =
-    pick(raw, [
-      "image_url",
-      "imageUrl",
-      "direct_image_url",
-      "main_image",
-      "mainImage",
-      "thumbnail",
-      "photo",
-      "picture",
-      "path",
-      "high_res_image",
-      "image",
-    ]) ||
-    pick(hotelObj, [
-      "image_url",
-      "imageUrl",
-      "direct_image_url",
-      "main_image",
-      "mainImage",
-      "thumbnail",
-      "photo",
-      "picture",
-      "path",
-      "high_res_image",
-      "image",
-    ]);
+    pick(raw, ["image_url", "imageUrl", "direct_image_url", "main_image", "mainImage", "thumbnail", "photo", "picture", "path", "image"]) ||
+    pick(hotelObj, ["image_url", "imageUrl", "direct_image_url", "main_image", "mainImage", "thumbnail", "photo", "picture", "path", "image"]);
 
   if (direct) return direct;
 
@@ -247,28 +146,12 @@ function findImagePath(raw) {
       const imagePath =
         typeof item === "string"
           ? item
-          : pick(item, ["path", "url", "imageUrl", "image_url", "mainImage", "thumbnail", "high_res_image", "image"]);
+          : pick(item, ["path", "url", "imageUrl", "image_url", "mainImage", "thumbnail", "image"]);
       if (imagePath) return imagePath;
     }
   }
 
   return "";
-}
-
-function buildImageMap(rows) {
-  const map = new Map();
-
-  for (const row of rows) {
-    const code = getHotelCode(row);
-    const image = findImagePath(row);
-
-    if (code && image && !map.has(code)) map.set(code, image);
-
-    const name = norm(pick(row, ["hotel_name", "hotelName", "name"]));
-    if (name && image && !map.has(`name:${name}`)) map.set(`name:${name}`, image);
-  }
-
-  return map;
 }
 
 function firstRate(raw) {
@@ -284,12 +167,6 @@ function firstRate(raw) {
 
   const rawHotel = parseMaybeJson(raw?.raw_hotel_json);
   if (rawHotel?.rooms?.[0]?.rates?.[0]) return rawHotel.rooms[0].rates[0];
-
-  if (Array.isArray(raw?.rooms)) {
-    for (const room of raw.rooms) {
-      if (Array.isArray(room.rates) && room.rates[0]) return room.rates[0];
-    }
-  }
 
   return raw;
 }
@@ -339,34 +216,20 @@ function makeRate(raw) {
   if (!rate || typeof rate !== "object") return null;
 
   const amount = num(
-    pick(rate, [
-      "customer_total",
-      "selling_rate",
-      "sellingRate",
-      "net",
-      "amount",
-      "price",
-      "total",
-      "supplier_total",
-      "supplier_amount",
-      "gross",
-    ]) ||
-      pick(raw, [
-        "customer_total",
-        "selling_rate",
-        "sellingRate",
-        "net",
-        "amount",
-        "price",
-        "total",
-        "supplier_total",
-        "supplier_amount",
-        "gross",
-      ])
+    pick(rate, ["customer_total", "selling_rate", "sellingRate", "net", "amount", "price", "total", "supplier_total", "supplier_amount", "gross"]) ||
+      pick(raw, ["customer_total", "selling_rate", "sellingRate", "net", "amount", "price", "total", "supplier_total", "supplier_amount", "gross"])
   );
 
-  const currency = clean(pick(rate, ["currency", "currency_code", "currencyCode"]) || pick(raw, ["currency", "currency_code", "currencyCode"]) || "GBP").toUpperCase();
-  const rateKey = clean(pick(rate, ["rate_key", "rateKey", "key"]) || pick(raw, ["rate_key", "rateKey", "key"]));
+  const currency = clean(
+    pick(rate, ["currency", "currency_code", "currencyCode"]) ||
+      pick(raw, ["currency", "currency_code", "currencyCode"]) ||
+      "GBP"
+  ).toUpperCase();
+
+  const rateKey = clean(
+    pick(rate, ["rate_key", "rateKey", "key"]) ||
+      pick(raw, ["rate_key", "rateKey", "key"])
+  );
 
   if (!amount || amount <= 0 || !currency || !rateKey) return null;
 
@@ -374,7 +237,7 @@ function makeRate(raw) {
   const pricing = alreadyCustomer
     ? {
         supplier_total: money(pick(rate, ["supplier_total", "supplier_amount"]) || pick(raw, ["supplier_total", "supplier_amount"]) || amount),
-        platform_markup: money(amount - num(pick(rate, ["supplier_total", "supplier_amount"]) || pick(raw, ["supplier_total", "supplier_amount"]) || amount)),
+        platform_markup: 0,
         customer_total: money(amount),
       }
     : markupPrice(amount);
@@ -397,7 +260,7 @@ function makeRate(raw) {
   };
 }
 
-function normalizeHotel(raw, index, imageMap) {
+function normalizeHotel(raw, index) {
   const dest = destinationFromRow(raw);
   if (!dest) return null;
 
@@ -407,13 +270,9 @@ function normalizeHotel(raw, index, imageMap) {
   const rawHotel = parseMaybeJson(raw?.raw_hotel_json);
   const hotelObj = rawHotel && typeof rawHotel === "object" ? rawHotel : raw;
 
-  const hotelId = getHotelCode(raw) || `hotel-${index + 1}`;
+  const hotelId = getHotelCode(raw, index);
   const hotelName = clean(pick(raw, ["hotel_name", "hotelName", "name"]) || pick(hotelObj, ["name", "hotelName"])) || `Hotel ${index + 1}`;
-
-  const ownImage = findImagePath(raw);
-  const linkedByCode = imageMap.get(hotelId) || "";
-  const linkedByName = imageMap.get(`name:${norm(hotelName)}`) || "";
-  const finalImage = ownImage || linkedByCode || linkedByName;
+  const imagePath = findImagePath(raw);
 
   return {
     hotel_id: hotelId,
@@ -427,8 +286,8 @@ function normalizeHotel(raw, index, imageMap) {
     latitude: clean(pick(raw, ["latitude", "lat"]) || pick(hotelObj, ["latitude", "lat"])),
     longitude: clean(pick(raw, ["longitude", "lng", "lon"]) || pick(hotelObj, ["longitude", "lng", "lon"])),
     rating: clean(pick(raw, ["rating", "stars", "categoryName", "category_name"]) || pick(hotelObj, ["categoryName", "category_name"])) || "Available",
-    image_url: proxiedImageUrl(finalImage),
-    direct_image_url: hotelbedsDirectUrl(finalImage),
+    image_url: proxiedImageUrl(imagePath),
+    direct_image_url: hotelbedsDirectUrl(imagePath),
     first_rate: rate,
     live_rate_ready: true,
   };
@@ -510,7 +369,7 @@ function findHotels(country, city, area, keyword, limit = 120) {
       const text = norm([h.hotel_name, h.area, h.address, h.city, h.country].join(" "));
       return query.split(/\s+/).some((part) => text.includes(norm(part)));
     })
-    .slice(0, Math.max(1, Math.min(Number(limit || 120), 500)));
+    .slice(0, Math.max(1, Math.min(Number(limit || 120), 300)));
 }
 
 async function fetchImageBuffer(url) {
@@ -560,10 +419,9 @@ function findLiveHotelByReservationBody(body) {
   return LIVE_HOTELS.find((hotel) => clean(hotel.hotel_id) === hotelId && clean(hotel.first_rate?.rate_key) === rateKey) || null;
 }
 
-const RAW_RATE_ROWS = loadPriorityRows();
-const RAW_IMAGE_ROWS = loadImageRows();
-const IMAGE_BY_CODE = buildImageMap([...RAW_RATE_ROWS, ...RAW_IMAGE_ROWS]);
-const HOTEL_CACHE = dedupeHotels(RAW_RATE_ROWS.map((row, index) => normalizeHotel(row, index, IMAGE_BY_CODE)).filter(Boolean));
+const NDJSON_CACHE = path.join(DATA_DIR, "live-rate-cache", "live-rates-000001.ndjson.gz");
+const RAW_RATE_ROWS = readNdjsonGzRows(NDJSON_CACHE, 30000);
+const HOTEL_CACHE = dedupeHotels(RAW_RATE_ROWS.map((row, index) => normalizeHotel(row, index)).filter(Boolean));
 const LIVE_HOTELS = HOTEL_CACHE.filter((h) => h.first_rate?.rate_key && h.first_rate?.amount > 0);
 const CATALOG_CACHE = buildDestinations(LIVE_HOTELS);
 
@@ -571,8 +429,10 @@ app.get("/", (req, res) => {
   res.json({
     ok: true,
     service: "myspace-hotel-backend",
-    live_hotels: LIVE_HOTELS.length,
+    cache_file: "live-rate-cache/live-rates-000001.ndjson.gz",
+    raw_rate_rows_loaded: RAW_RATE_ROWS.length,
     live_rates: LIVE_HOTELS.length,
+    live_hotels: LIVE_HOTELS.length,
     hotels_with_images: LIVE_HOTELS.filter((h) => h.image_url).length,
     countries: CATALOG_CACHE.length,
     public_api_base: PUBLIC_API_BASE,
@@ -582,19 +442,6 @@ app.get("/", (req, res) => {
 
 app.get("/health", (req, res) => {
   res.json({ ok: true });
-});
-
-app.get("/api/bootstrap", (req, res) => {
-  const firstCountry = CATALOG_CACHE[0] || null;
-  const firstCity = firstCountry?.cities?.[0] || null;
-
-  res.json({
-    ok: true,
-    countries: CATALOG_CACHE,
-    default_country: firstCountry?.country || "",
-    default_city: firstCity?.city || "",
-    hotels: firstCountry && firstCity ? findHotels(firstCountry.country, firstCity.city, "", "", 80) : [],
-  });
 });
 
 app.get("/api/real-catalog/destinations", (req, res) => {
@@ -620,7 +467,7 @@ app.get("/api/hotels/search", (req, res) => {
     ok: true,
     hotels,
     count: hotels.length,
-    source: "current_live_rate_cache",
+    source: "ndjson_live_rate_cache",
   });
 });
 
@@ -632,11 +479,6 @@ app.get("/api/live-rates/count", (req, res) => {
     live_hotels: LIVE_HOTELS.length,
     hotels_with_images: LIVE_HOTELS.filter((h) => h.image_url).length,
     countries: CATALOG_CACHE.length,
-    top_countries: CATALOG_CACHE.slice(0, 20).map((c) => ({
-      country: c.country,
-      cities: c.city_count,
-      live_hotels: c.cities.reduce((s, x) => s + Number(x.live_hotels || 0), 0),
-    })),
   });
 });
 
@@ -651,61 +493,6 @@ app.get("/api/image", async (req, res) => {
   } catch {
     res.status(404).send("Image unavailable");
   }
-});
-
-app.get("/api/currency/convert", (req, res) => {
-  const amount = num(req.query.amount);
-  const from = clean(req.query.from || req.query.from_currency || "GBP").toUpperCase();
-  const to = clean(req.query.to || req.query.to_currency || "USD").toUpperCase();
-
-  if (!amount || !FX[from] || !FX[to]) return res.json({ ok: false });
-
-  res.json({
-    ok: true,
-    amount,
-    from_currency: from,
-    to_currency: to,
-    converted: money((amount / FX[from]) * FX[to]),
-  });
-});
-
-app.get("/api/travel-guide/live", (req, res) => {
-  const country = clean(req.query.country || "");
-  const city = clean(req.query.city || "");
-  const area = clean(req.query.area || "");
-  const destination = [area, city, country].filter(Boolean).join(", ");
-  const hotels = findHotels(country, city, area, "", 8);
-
-  const maps = (query) => `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
-  const place = (name, type, purpose) => ({ name, type, purpose, maps: maps(`${name} near ${destination}`) });
-
-  res.json({
-    ok: true,
-    guide: {
-      destination,
-      hotels: hotels.map((h) => ({
-        name: h.hotel_name,
-        type: "Stay nearby",
-        purpose: [h.area, h.address].filter(Boolean).join(", ") || `${h.city}, ${h.country}`,
-        address: [h.area, h.address].filter(Boolean).join(", "),
-        rating: h.rating,
-        maps: h.latitude && h.longitude ? `https://www.google.com/maps?q=${h.latitude},${h.longitude}` : maps(`${h.hotel_name} ${h.city} ${h.country}`),
-      })),
-      emergency: {
-        emergency: "112",
-        medical: "Use the emergency number for urgent medical support",
-        police: "Use the emergency number for immediate safety support",
-        fire: "Use the emergency number for fire or rescue",
-      },
-      hospitals: [place("Nearest emergency hospital", "Medical", "Urgent medical care close to your stay area")],
-      police: [place("Nearest police station", "Safety", "Support for safety concerns, theft reports or lost documents")],
-      pharmacies: [place("Nearby pharmacy", "Medicine", "Medicine, health essentials and prescriptions")],
-      restaurants: [place("Best restaurants nearby", "Food", "Good options for arrival night and local dining")],
-      transport: [place("Nearest train or metro station", "Transport", "Public transport access for moving around the city")],
-      attractions: [place("Top attractions nearby", "Explore", "Popular places close to your stay area")],
-      taxis: [place("Taxi ranks nearby", "Taxi", "Useful when you need a quick local pickup")],
-    },
-  });
 });
 
 app.post("/reservation-request", async (req, res) => {
@@ -816,12 +603,13 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("MYSPACE HOTEL BACKEND RUNNING");
   console.log("==============================================");
   console.log(`Port: ${PORT}`);
+  console.log("Cache file: live-rate-cache/live-rates-000001.ndjson.gz");
   console.log(`Raw rate rows loaded: ${RAW_RATE_ROWS.length}`);
   console.log(`Live rates loaded: ${LIVE_HOTELS.length}`);
   console.log(`Live hotels loaded: ${LIVE_HOTELS.length}`);
   console.log(`Live hotels with image URLs: ${LIVE_HOTELS.filter((h) => h.image_url).length}`);
   console.log(`Destination countries loaded: ${CATALOG_CACHE.length}`);
-  console.log("Current cache priority: SMART / DEST_FIXED / NDJSON");
+  console.log("Memory-safe NDJSON loader: READY");
   console.log("Image proxy: READY");
   console.log("==============================================");
   console.log("");
