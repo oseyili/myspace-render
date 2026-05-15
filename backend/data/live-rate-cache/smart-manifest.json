@@ -1,8 +1,9 @@
 {
   "source": "data\\live_rate_cache_joined_geo_images_DEST_FIXED.json.gz",
-  "total_rows": 175230,
-  "chunk_count": 18,
-  "chunk_size": 10000,
+  "source_rows": 175230,
+  "unique_hotels": 517,
   "countries": 13,
-  "generated_at": "2026-05-15T12:34:49.139Z"
+  "cities": 19,
+  "chunk_count": 1,
+  "generated_at": "2026-05-15T14:15:41.340Z"
 }
