@@ -1,0 +1,7 @@
+{
+  "source": "data\\live_rate_cache_joined_geo_images_SMART.json.gz",
+  "total_rows": 175230,
+  "chunk_count": 18,
+  "chunk_size": 10000,
+  "generated_at": "2026-05-15T12:18:03.435Z"
+}
