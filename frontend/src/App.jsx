@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
   import.meta.env.VITE_API_BASE_URL ||
-  "https://myspace-hotel-backend.onrender.com";
+  "http://127.0.0.1:5050";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -24,14 +24,9 @@ function money(v) {
     : "0.00";
 }
 
-function safeRooms(v) {
-  const n = Number(v || 1);
-  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 1;
-}
-
-function safeGuests(v) {
-  const n = Number(v || 1);
-  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 1;
+function safeNumber(v, fallback = 1) {
+  const n = Number(v || fallback);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
 }
 
 function nightsBetween(checkin, checkout) {
@@ -41,80 +36,43 @@ function nightsBetween(checkin, checkout) {
   return Number.isFinite(d) && d > 0 ? d : 1;
 }
 
-function isLivePayable(hotel) {
-  return Boolean(
-    hotel?.live_rate_ready &&
-      hotel?.first_rate?.rate_key &&
-      Number(hotel?.first_rate?.amount || hotel?.first_rate?.customer_total || 0) > 0
-  );
+function isLive(hotel) {
+  return Boolean(hotel?.live_rate_ready && hotel?.first_rate?.rate_key && Number(hotel?.first_rate?.amount || 0) > 0);
 }
 
 function rateAmount(hotel) {
-  return Number(
-    hotel?.first_rate?.amount ||
-      hotel?.first_rate?.customer_total ||
-      hotel?.first_rate?.selling_rate ||
-      hotel?.first_rate?.net ||
-      0
-  );
+  return Number(hotel?.first_rate?.amount || 0);
 }
 
-function totalForRooms(hotel, rooms) {
-  return Number((rateAmount(hotel) * safeRooms(rooms)).toFixed(2));
+function totalAmount(hotel, rooms) {
+  return Number((rateAmount(hotel) * safeNumber(rooms, 1)).toFixed(2));
 }
 
-function propertyType(hotel) {
-  const name = clean(hotel?.hotel_name).toLowerCase();
-
-  if (
-    name.includes("apartment") ||
-    name.includes("apart ") ||
-    name.includes("apart-") ||
-    name.includes("residence") ||
-    name.includes("residences") ||
-    name.includes("penthouse") ||
-    name.includes("villa") ||
-    name.includes("holiday home") ||
-    name.includes("home ") ||
-    name.includes("studio") ||
-    name.includes("suite") ||
-    name.includes("flat")
-  ) {
-    return "Apartment / Residence";
-  }
-
+function stayTypeLabel(hotel) {
+  const t = clean(hotel?.property_type).toLowerCase();
+  if (t.includes("apartment") || t.includes("residence")) return "Apartment / residence";
+  if (t.includes("villa")) return "Villa";
+  if (t.includes("resort")) return "Resort";
+  if (t.includes("guest")) return "Guest house";
   return "Hotel";
-}
-
-function isApartmentType(hotel) {
-  return propertyType(hotel) === "Apartment / Residence";
 }
 
 function go(path) {
   window.location.href = path;
 }
 
-function mapsQuery(query) {
-  return `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
-}
-
 function PropertyImage({ hotel, large = false }) {
   const [failed, setFailed] = useState(false);
-
   const url = clean(hotel?.direct_image_url || hotel?.image_url);
 
-  useEffect(() => {
-    setFailed(false);
-  }, [url, hotel?.hotel_id]);
+  useEffect(() => setFailed(false), [url, hotel?.hotel_id]);
 
   if (!url || failed) {
     return (
       <div className={large ? "imageFallback imageLarge" : "imageFallback"}>
         <div className="imageBrand">MYSPACE HOTEL</div>
-        <div className="imageFallbackTitle">Verified property image unavailable</div>
-        <div className="imageFallbackText">
-          Real images only. No fake property photos are displayed.
-        </div>
+        <div className="imageFallbackTitle">Verified image unavailable</div>
+        <div className="imageFallbackText">No fake property photo is displayed.</div>
       </div>
     );
   }
@@ -123,7 +81,7 @@ function PropertyImage({ hotel, large = false }) {
     <img
       src={url}
       alt={hotel?.hotel_name || "Property"}
-      className={large ? "hotelImage imageLarge" : "hotelImage"}
+      className={large ? "propertyImage imageLarge" : "propertyImage"}
       loading={large ? "eager" : "lazy"}
       decoding="async"
       referrerPolicy="no-referrer"
@@ -138,12 +96,10 @@ function InfoPage({ title, subtitle, children }) {
       <AppStyles />
       <div className="infoCard">
         <div className="brandSmall">MYSPACE HOTEL</div>
-        <h1 className="infoTitle">{title}</h1>
-        <p className="infoSubtitle">{subtitle}</p>
+        <h1>{title}</h1>
+        <p>{subtitle}</p>
         {children}
-        <button className="goldSmall" onClick={() => go("/")}>
-          Back to hotel search
-        </button>
+        <button className="goldButton" onClick={() => go("/")}>Back to search</button>
       </div>
     </div>
   );
@@ -151,103 +107,74 @@ function InfoPage({ title, subtitle, children }) {
 
 function DestinationGuidePage() {
   const params = new URLSearchParams(window.location.search);
-  const country = params.get("country") || "your destination";
+  const country = params.get("country") || "";
   const city = params.get("city") || "";
-  const destination = [city, country].filter(Boolean).join(", ");
+  const area = params.get("area") || "";
+  const [guide, setGuide] = useState(null);
 
-  const guideCards = [
-    {
-      title: "Emergency numbers",
-      body: "Use the local emergency number immediately for urgent police, ambulance or fire support.",
-      rows: [
-        "Europe and many destinations: 112",
-        "United Kingdom: 999 or 112",
-        "United States / Canada: 911",
-        "Australia: 000",
-        "Nigeria: 112",
-        "UAE: Police 999, Ambulance 998, Fire 997",
-      ],
-    },
-    {
-      title: "Hospitals and pharmacies",
-      body: "Before arrival, check the nearest hospital, urgent care centre and 24-hour pharmacy near your stay.",
-      rows: [
-        "Search: nearest hospital near your hotel",
-        "Search: 24 hour pharmacy near your hotel",
-        "Keep your travel insurance contact available",
-      ],
-    },
-    {
-      title: "Airport and arrival",
-      body: "Confirm your arrival airport, terminal, transfer time and late-night transport before travel.",
-      rows: [
-        "Check terminal before departure",
-        "Use official airport taxi or trusted transfer",
-        "Keep hotel address saved offline",
-      ],
-    },
-    {
-      title: "Local transport",
-      body: "Use official taxis, trusted ride-share, hotel-arranged transfers or main public transport stations.",
-      rows: [
-        "Confirm last train or bus time",
-        "Avoid unmarked taxis",
-        "Share your route with someone you trust",
-      ],
-    },
-    {
-      title: "Food and restaurants",
-      body: "Check nearby restaurants, opening hours and walking safety before going out late.",
-      rows: [
-        "Search restaurants near your stay",
-        "Check recent ratings",
-        "Book ahead during busy periods",
-      ],
-    },
-    {
-      title: "Things to do",
-      body: "Museums, parks, beaches, zoos, tour buses and landmarks are easier to enjoy when planned early.",
-      rows: [
-        "Check opening hours",
-        "Use official attraction websites",
-        "Book popular tours early",
-      ],
-    },
-  ];
+  useEffect(() => {
+    const p = new URLSearchParams();
+    if (country) p.set("country", country);
+    if (city) p.set("city", city);
+    if (area) p.set("area", area);
+
+    fetch(`${API_BASE}/api/guide?${p.toString()}`, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => setGuide(d.guide || null))
+      .catch(() => setGuide(null));
+  }, [country, city, area]);
+
+  const emergency = guide?.emergency || {};
+
+  function openMap(q) {
+    window.open(`https://www.google.com/maps/search/${encodeURIComponent(q)}`, "_blank", "noopener,noreferrer");
+  }
 
   return (
     <InfoPage
       title="Destination guide"
-      subtitle={`Practical arrival, safety and local planning for ${destination}.`}
+      subtitle={`Useful local information for ${guide?.destination || [city, country].filter(Boolean).join(", ") || "your stay"}.`}
     >
-      <div className="guideHero">
-        <div>
-          <h2>Arrive prepared</h2>
-          <p>
-            Use this page to plan safety, transport, nearby services, food and attractions before
-            you arrive. Save the hotel address, emergency number and transport plan before travel.
-          </p>
-        </div>
-        <button
-          className="mapOpen"
-          onClick={() => window.open(mapsQuery(destination), "_blank", "noopener,noreferrer")}
-        >
-          Open destination map
-        </button>
-      </div>
-
       <div className="guideGrid">
-        {guideCards.map((card) => (
-          <div className="guideCard" key={card.title}>
-            <h3>{card.title}</h3>
-            <p>{card.body}</p>
-            <ul>
-              {card.rows.map((row) => (
-                <li key={row}>{row}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        <div className="guideCard redGuide">
+          <h2>Emergency help</h2>
+          <p><b>Emergency:</b> {emergency.emergency || "112"}</p>
+          <p><b>Police:</b> {emergency.police || "112"}</p>
+          <p><b>Ambulance:</b> {emergency.ambulance || "112"}</p>
+          <p><b>Fire:</b> {emergency.fire || "112"}</p>
+        </div>
+
+        <div className="guideCard">
+          <h2>Medical support</h2>
+          <p>Find the closest hospital, urgent care centre and pharmacy near your stay.</p>
+          <button onClick={() => openMap(`hospital near ${guide?.destination || city}`)}>Hospitals</button>
+          <button onClick={() => openMap(`pharmacy near ${guide?.destination || city}`)}>Pharmacies</button>
+        </div>
+
+        <div className="guideCard">
+          <h2>Arrival and airport</h2>
+          <p>Check airport transfer time, terminal details and trusted transport before arrival.</p>
+          <button onClick={() => openMap(`airport near ${guide?.destination || city}`)}>Airport</button>
+        </div>
+
+        <div className="guideCard">
+          <h2>Restaurants nearby</h2>
+          <p>Review nearby restaurants, opening hours and walking distance before going out.</p>
+          <button onClick={() => openMap(`restaurants near ${guide?.destination || city}`)}>Restaurants</button>
+        </div>
+
+        <div className="guideCard">
+          <h2>Transport</h2>
+          <p>Use trusted taxis, public transport, rail stations or hotel-arranged transfers.</p>
+          <button onClick={() => openMap(`taxi near ${guide?.destination || city}`)}>Taxi</button>
+          <button onClick={() => openMap(`train station near ${guide?.destination || city}`)}>Train / metro</button>
+        </div>
+
+        <div className="guideCard">
+          <h2>Things to do</h2>
+          <p>Explore museums, parks, tours, family attractions and cultural places near your stay.</p>
+          <button onClick={() => openMap(`things to do near ${guide?.destination || city}`)}>Attractions</button>
+        </div>
       </div>
     </InfoPage>
   );
@@ -255,33 +182,12 @@ function DestinationGuidePage() {
 
 function FAQPage() {
   return (
-    <InfoPage
-      title="Frequently asked questions"
-      subtitle="Clear answers before you choose, reserve or pay."
-    >
+    <InfoPage title="Frequently asked questions" subtitle="Clear answers before you choose or reserve a stay.">
       <div className="simpleGrid">
-        <div className="simpleBox">
-          <b>Can I search hotels and apartments?</b>
-          <br />
-          Yes. MySpace Hotel shows different stay types including hotels, apartments, residences,
-          villas, studios and penthouses where available.
-        </div>
-        <div className="simpleBox">
-          <b>Is the total calculated for multiple rooms?</b>
-          <br />
-          Yes. The customer total updates by multiplying the selected room count by the room rate.
-        </div>
-        <div className="simpleBox">
-          <b>Why do some stays require confirmation?</b>
-          <br />
-          Some properties need current availability and final price confirmed before payment.
-        </div>
-        <div className="simpleBox">
-          <b>Are the photos real?</b>
-          <br />
-          We do not use fake hotel photos. If a verified image is unavailable, the app shows a trust
-          notice instead.
-        </div>
+        <div className="simpleBox"><b>Can I search hotels and apartments?</b><br />Yes. Use the stay type selector to view hotels separately from apartments, residences and other accommodation.</div>
+        <div className="simpleBox"><b>Why do some stays need confirmation?</b><br />Some properties need the latest price and availability confirmed before payment.</div>
+        <div className="simpleBox"><b>Does the total update for multiple rooms?</b><br />Yes. The total multiplies the room rate by the number of rooms selected.</div>
+        <div className="simpleBox"><b>Are photos fake?</b><br />No. If a verified image is unavailable, a trust notice is shown instead.</div>
       </div>
     </InfoPage>
   );
@@ -289,25 +195,12 @@ function FAQPage() {
 
 function TermsPage() {
   return (
-    <InfoPage
-      title="Booking terms"
-      subtitle="Important customer information before continuing."
-    >
+    <InfoPage title="Booking terms" subtitle="Important information before continuing.">
       <div className="simpleGrid">
-        <div className="simpleBox">
-          Review the property name, stay type, location, dates, guests, rooms and total before
-          continuing.
-        </div>
-        <div className="simpleBox">
-          Prices and availability may change until the reservation is confirmed.
-        </div>
-        <div className="simpleBox">
-          Payment is only enabled when a valid payable rate is available for the selected stay.
-        </div>
-        <div className="simpleBox">
-          For confirmation-required stays, no payment is taken until current availability and price
-          are confirmed.
-        </div>
+        <div className="simpleBox">Review property name, dates, guests, rooms, stay type and total before continuing.</div>
+        <div className="simpleBox">Prices and availability may change until the stay is confirmed.</div>
+        <div className="simpleBox">Payment is enabled only when a current payable rate is available.</div>
+        <div className="simpleBox">For confirmation-required stays, no payment is taken until price and availability are confirmed.</div>
       </div>
     </InfoPage>
   );
@@ -315,31 +208,12 @@ function TermsPage() {
 
 function ContactPage() {
   return (
-    <InfoPage
-      title="Customer support"
-      subtitle="Reservation support for safer booking decisions."
-    >
+    <InfoPage title="Customer support" subtitle="Reservation support for safer booking decisions.">
       <div className="simpleGrid">
-        <div className="simpleBox">
-          <b>Email</b>
-          <br />
-          reservations@myspace-hotel.com
-        </div>
-        <div className="simpleBox">
-          <b>Booking help</b>
-          <br />
-          Include destination, dates, property name and your booking email.
-        </div>
-        <div className="simpleBox">
-          <b>Arrival support</b>
-          <br />
-          Include your reservation code, guest name and arrival time.
-        </div>
-        <div className="simpleBox">
-          <b>Special requests</b>
-          <br />
-          Add accessibility, family, arrival or room requests before continuing.
-        </div>
+        <div className="simpleBox"><b>Email</b><br />reservations@myspace-hotel.com</div>
+        <div className="simpleBox"><b>Booking help</b><br />Include destination, dates, property name and booking email.</div>
+        <div className="simpleBox"><b>Arrival support</b><br />Include reservation code, guest name and arrival time.</div>
+        <div className="simpleBox"><b>Special requests</b><br />Add accessibility, family, room or arrival requests before continuing.</div>
       </div>
     </InfoPage>
   );
@@ -348,21 +222,8 @@ function ContactPage() {
 function ConfirmedPage() {
   const code = new URLSearchParams(window.location.search).get("code") || "";
   return (
-    <InfoPage
-      title="Reservation update received"
-      subtitle="Your reservation update is being processed securely."
-    >
-      <div className="simpleBox">
-        {code ? (
-          <>
-            <b>Reservation code</b>
-            <br />
-            {code}
-          </>
-        ) : (
-          "Thank you. Your reservation update has been received."
-        )}
-      </div>
+    <InfoPage title="Reservation update received" subtitle="Your reservation update is being processed securely.">
+      <div className="simpleBox">{code ? `Reservation code: ${code}` : "Thank you. Your reservation update has been received."}</div>
     </InfoPage>
   );
 }
@@ -380,7 +241,7 @@ export default function App() {
   const [catalog, setCatalog] = useState([]);
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
-  const [stayType, setStayType] = useState("all");
+  const [stayType, setStayType] = useState("hotel");
   const [area, setArea] = useState("");
   const [keyword, setKeyword] = useState("");
   const [checkin, setCheckin] = useState(todayISO());
@@ -393,71 +254,53 @@ export default function App() {
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [note, setNote] = useState("");
+  const [targetCurrency, setTargetCurrency] = useState("USD");
+  const [converted, setConverted] = useState("");
   const [loadingCatalog, setLoadingCatalog] = useState(true);
   const [loadingHotels, setLoadingHotels] = useState(false);
+  const [checkingPrice, setCheckingPrice] = useState(false);
   const [requesting, setRequesting] = useState(false);
   const [message, setMessage] = useState("");
 
-  const selectedCountry = useMemo(
-    () => catalog.find((x) => x.country === country) || null,
-    [catalog, country]
-  );
-
+  const selectedCountry = useMemo(() => catalog.find((c) => c.country === country) || null, [catalog, country]);
   const cities = selectedCountry?.cities || [];
-
-  const filteredHotels = useMemo(() => {
-    if (stayType === "hotel") return hotels.filter((h) => propertyType(h) === "Hotel");
-    if (stayType === "apartment") return hotels.filter((h) => isApartmentType(h));
-    return hotels;
-  }, [hotels, stayType]);
-
-  const stats = useMemo(() => {
-    const hotelCount = hotels.filter((h) => propertyType(h) === "Hotel").length;
-    const apartmentCount = hotels.filter((h) => isApartmentType(h)).length;
-    const instantCount = hotels.filter(isLivePayable).length;
-
-    return { hotelCount, apartmentCount, instantCount };
-  }, [hotels]);
+  const nights = nightsBetween(checkin, checkout);
+  const selectedLive = isLive(selectedHotel);
+  const selectedTotal = totalAmount(selectedHotel, rooms);
+  const selectedCurrency = selectedHotel?.first_rate?.currency || "";
 
   async function loadCatalog() {
     setLoadingCatalog(true);
-    setMessage("");
-
     try {
       const res = await fetch(`${API_BASE}/api/real-catalog/destinations`, { cache: "no-store" });
       const data = await res.json();
-      const countries = Array.isArray(data.countries) ? data.countries : [];
+      const list = Array.isArray(data.countries) ? data.countries : [];
+      setCatalog(list);
 
-      setCatalog(countries);
-
-      const firstCountry =
-        countries.find((c) => c.cities?.some((x) => Number(x.live_hotels || 0) > 0)) ||
-        countries[0];
-
-      const firstCity =
-        firstCountry?.cities?.find((x) => Number(x.live_hotels || 0) > 0) ||
-        firstCountry?.cities?.[0];
+      const firstCountry = list.find((c) => c.country === "United Kingdom") || list[0];
+      const firstCity = firstCountry?.cities?.find((c) => clean(c.city).toLowerCase() === "london") || firstCountry?.cities?.[0];
 
       setCountry(firstCountry?.country || "");
       setCity(firstCity?.city || "");
 
       if (firstCountry?.country && firstCity?.city) {
-        await searchHotels(firstCountry.country, firstCity.city);
+        await searchHotels(firstCountry.country, firstCity.city, "hotel");
       }
     } catch {
-      setMessage("Could not load destinations. Please refresh and try again.");
+      setMessage("Destinations could not be loaded. Please refresh.");
     } finally {
       setLoadingCatalog(false);
     }
   }
 
-  async function searchHotels(nextCountry = country, nextCity = city) {
+  async function searchHotels(nextCountry = country, nextCity = city, nextStayType = stayType) {
     if (!nextCountry || !nextCity) {
-      setMessage("Choose a country and city first.");
+      setMessage("Choose a country and destination first.");
       return;
     }
 
     setLoadingHotels(true);
+    setConverted("");
     setSelectedHotel(null);
     setMessage("");
 
@@ -465,8 +308,8 @@ export default function App() {
       const p = new URLSearchParams();
       p.set("country", nextCountry);
       p.set("city", nextCity);
+      p.set("property_type", nextStayType === "all" ? "all" : nextStayType);
       p.set("limit", "160");
-
       if (clean(area)) p.set("area", clean(area));
       if (clean(keyword)) p.set("keyword", clean(keyword));
 
@@ -474,34 +317,18 @@ export default function App() {
       const data = await res.json();
       const list = Array.isArray(data.hotels) ? data.hotels : [];
 
-      const unique = new Map();
+      setHotels(list);
+      setSelectedHotel(list[0] || null);
 
-      for (const hotel of list) {
-        const key = [
-          clean(hotel.hotel_id || hotel.hotel_code || hotel.hotel_name).toLowerCase(),
-          clean(hotel.hotel_name).toLowerCase(),
-          clean(hotel.city).toLowerCase(),
-          clean(hotel.country).toLowerCase(),
-        ].join("|");
-
-        if (!unique.has(key)) unique.set(key, hotel);
-      }
-
-      const deduped = Array.from(unique.values());
-
-      setHotels(deduped);
-      setSelectedHotel(deduped[0] || null);
-
-      const instant = deduped.filter(isLivePayable).length;
-
+      const payable = list.filter(isLive).length;
       setMessage(
-        deduped.length
-          ? `${deduped.length} stays found in ${nextCity}. ${instant} can continue to instant secure checkout.`
-          : "No matching stay found. Try another city or clear filters."
+        list.length
+          ? `${list.length} ${nextStayType === "apartment" ? "apartment and residence" : nextStayType === "hotel" ? "hotel" : "stay"} options found in ${nextCity}. ${payable} currently have instant checkout.`
+          : "No matching stay found. Try another destination or clear filters."
       );
     } catch {
       setHotels([]);
-      setMessage("Search service is temporarily unavailable. Please refresh and try again.");
+      setMessage("Search is temporarily unavailable. Please refresh.");
     } finally {
       setLoadingHotels(false);
     }
@@ -512,24 +339,94 @@ export default function App() {
   }, []);
 
   function changeCountry(nextCountry) {
-    const found = catalog.find((x) => x.country === nextCountry);
-    const firstCity =
-      found?.cities?.find((x) => Number(x.live_hotels || 0) > 0)?.city ||
-      found?.cities?.[0]?.city ||
-      "";
-
+    const found = catalog.find((c) => c.country === nextCountry);
+    const firstCity = found?.cities?.[0]?.city || "";
     setCountry(nextCountry);
     setCity(firstCity);
     setHotels([]);
     setSelectedHotel(null);
-    setMessage("City selected. Press Search stays to continue.");
+    setMessage("Destination selected. Press Search stays.");
   }
 
   function changeCity(nextCity) {
     setCity(nextCity);
     setHotels([]);
     setSelectedHotel(null);
-    setMessage("Press Search stays to continue.");
+    setMessage("Press Search stays.");
+  }
+
+  function changeStayType(nextType) {
+    setStayType(nextType);
+    setHotels([]);
+    setSelectedHotel(null);
+    setMessage("Stay type selected. Press Search stays.");
+  }
+
+  async function checkLivePrice(hotel = selectedHotel) {
+    if (!hotel) return;
+
+    setCheckingPrice(true);
+    setConverted("");
+    setMessage("Checking the latest price for this stay...");
+
+    try {
+      const p = new URLSearchParams();
+      p.set("hotel_id", hotel.hotel_id || "");
+      p.set("hotel_name", hotel.hotel_name || "");
+      p.set("country", hotel.country || country);
+      p.set("city", hotel.city || city);
+      p.set("checkin", checkin);
+      p.set("checkout", checkout);
+      p.set("guests", String(guests));
+      p.set("rooms", String(rooms));
+
+      const res = await fetch(`${API_BASE}/api/hotels/live-check?${p.toString()}`, { cache: "no-store" });
+      const data = await res.json();
+
+      if (data.ok && data.payment_ready && data.first_rate) {
+        const updated = {
+          ...hotel,
+          live_rate_ready: true,
+          first_rate: data.first_rate,
+          rooms: data.rooms || hotel.rooms || [],
+          room_count: Array.isArray(data.rooms) ? data.rooms.length : hotel.room_count || 1,
+        };
+        setSelectedHotel(updated);
+        setHotels((list) => list.map((h) => (h.hotel_id === hotel.hotel_id ? updated : h)));
+        setMessage("Current price is available for this stay.");
+      } else {
+        setMessage("Latest price will be confirmed before payment.");
+      }
+    } catch {
+      setMessage("Price check is temporarily unavailable.");
+    } finally {
+      setCheckingPrice(false);
+    }
+  }
+
+  async function convertCurrency() {
+    if (!selectedLive || !selectedCurrency || !selectedTotal) {
+      setConverted("Select a stay with a current price first.");
+      return;
+    }
+
+    try {
+      const p = new URLSearchParams();
+      p.set("amount", String(selectedTotal));
+      p.set("from_currency", selectedCurrency);
+      p.set("to_currency", targetCurrency);
+
+      const res = await fetch(`${API_BASE}/api/currency/convert?${p.toString()}`, { cache: "no-store" });
+      const data = await res.json();
+
+      if (data.ok) {
+        setConverted(`${targetCurrency} ${money(data.converted)}`);
+      } else {
+        setConverted("Conversion unavailable");
+      }
+    } catch {
+      setConverted("Conversion unavailable");
+    }
   }
 
   async function reserveOrPay(hotel = selectedHotel) {
@@ -544,7 +441,7 @@ export default function App() {
     }
 
     setRequesting(true);
-    setMessage(isLivePayable(hotel) ? "Preparing secure checkout..." : "Sending confirmation request...");
+    setMessage(selectedLive ? "Preparing your reservation..." : "Sending confirmation request...");
 
     try {
       const rate = hotel.first_rate || {};
@@ -554,18 +451,18 @@ export default function App() {
         destination: `${hotel.city}, ${hotel.country}`,
         checkin,
         checkout,
-        guests: safeGuests(guests),
-        rooms: safeRooms(rooms),
+        guests: safeNumber(guests, 1),
+        rooms: safeNumber(rooms, 1),
         customer_name: customerName.trim(),
         customer_email: customerEmail.trim(),
         customer_phone: customerPhone.trim(),
         note: note.trim(),
         rate_key: rate.rate_key || "",
-        amount: totalForRooms(hotel, rooms) || "",
+        amount: selectedLive ? selectedTotal : "",
         currency: rate.currency || "",
         room_name: rate.room_name || "",
         board_name: rate.board_name || "",
-        price_display: rate.currency ? `${rate.currency} ${money(totalForRooms(hotel, rooms))}` : "Confirmation required",
+        price_display: selectedLive ? `${rate.currency} ${money(selectedTotal)}` : "Confirmation required",
       };
 
       const res = await fetch(`${API_BASE}/reservation-request`, {
@@ -577,17 +474,14 @@ export default function App() {
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
-        setMessage(data.message || "Could not continue with this reservation.");
-        return;
-      }
-
-      if (data.payment_url) {
-        window.location.href = data.payment_url;
+        setMessage(data.message || "Reservation could not be created.");
         return;
       }
 
       setMessage(
-        `Request received: ${data.reservation_code}. We will confirm availability and price before payment.`
+        selectedLive
+          ? `Reservation prepared: ${data.reservation_code}.`
+          : `Request received: ${data.reservation_code}. We will confirm availability and price before payment.`
       );
     } catch {
       setMessage("Reservation service is temporarily unavailable.");
@@ -595,11 +489,6 @@ export default function App() {
       setRequesting(false);
     }
   }
-
-  const selectedLive = isLivePayable(selectedHotel);
-  const selectedTotal = totalForRooms(selectedHotel, rooms);
-  const selectedCurrency = selectedHotel?.first_rate?.currency || "";
-  const nights = nightsBetween(checkin, checkout);
 
   return (
     <div className="page">
@@ -609,16 +498,11 @@ export default function App() {
         <div>
           <div className="brand">MYSPACE HOTEL</div>
           <h1>Book with clarity before you arrive.</h1>
-          <p>
-            Compare hotels, apartments and residences, review your total for all selected rooms,
-            and continue with confidence.
-          </p>
+          <p>Choose hotels or apartments, review your full stay total, and continue with confidence.</p>
         </div>
 
         <div className="heroButtons">
-          <button onClick={() => go(`/?page=travel&country=${encodeURIComponent(country)}&city=${encodeURIComponent(city)}`)}>
-            Destination Guide
-          </button>
+          <button onClick={() => go(`/?page=travel&country=${encodeURIComponent(country)}&city=${encodeURIComponent(city)}&area=${encodeURIComponent(area)}`)}>Destination Guide</button>
           <button onClick={() => go("/?page=faq")}>FAQ</button>
           <button onClick={() => go("/?page=terms")}>Terms</button>
           <button onClick={() => go("/?page=support")}>Contact</button>
@@ -631,84 +515,57 @@ export default function App() {
 
           <div className="box scrollBox">
             <div className="statusBox">
-              {loadingCatalog
-                ? "Loading destinations..."
-                : `${catalog.length} countries loaded. Choose hotels, apartments or all stay types.`}
+              {loadingCatalog ? "Loading destinations..." : "Choose your destination and stay type."}
             </div>
 
             <label>Country</label>
             <select value={country} onChange={(e) => changeCountry(e.target.value)}>
               <option value="">Choose country</option>
               {catalog.map((c) => (
-                <option key={c.country} value={c.country}>
-                  {c.country} - {c.city_count} cities
-                </option>
+                <option key={c.country} value={c.country}>{c.country}</option>
               ))}
             </select>
 
-            <label>City</label>
+            <label>Destination</label>
             <select value={city} onChange={(e) => changeCity(e.target.value)} disabled={!country}>
-              <option value="">Choose city</option>
+              <option value="">Choose destination</option>
               {cities.map((c) => (
-                <option key={`${country}-${c.city}`} value={c.city}>
-                  {c.city} -{" "}
-                  {Number(c.live_hotels || 0) > 0
-                    ? `${c.live_hotels} instant stays`
-                    : `${c.catalog_hotels || 0} stays`}
-                </option>
+                <option key={`${country}-${c.city}`} value={c.city}>{c.city}</option>
               ))}
             </select>
 
             <label>Stay type</label>
-            <select value={stayType} onChange={(e) => setStayType(e.target.value)}>
-              <option value="all">Hotels and apartments</option>
+            <select value={stayType} onChange={(e) => changeStayType(e.target.value)}>
               <option value="hotel">Hotels only</option>
-              <option value="apartment">Apartments / residences only</option>
+              <option value="apartment">Apartments and residences only</option>
+              <option value="all">All stay types</option>
             </select>
 
             <label>Area</label>
-            <input
-              value={area}
-              onChange={(e) => setArea(e.target.value)}
-              placeholder="Neighbourhood or area"
-            />
+            <input value={area} onChange={(e) => setArea(e.target.value)} placeholder="Neighbourhood or area" />
 
             <label>Keyword</label>
-            <input
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              placeholder="Property name or landmark"
-            />
+            <input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Property name or landmark" />
 
             <div className="two">
               <div>
                 <label>Check-in</label>
-                <input type="date" value={checkin} onChange={(e) => setCheckin(e.target.value)} />
+                <input type="date" value={checkin} onChange={(e) => { setCheckin(e.target.value); setConverted(""); }} />
               </div>
               <div>
                 <label>Check-out</label>
-                <input type="date" value={checkout} onChange={(e) => setCheckout(e.target.value)} />
+                <input type="date" value={checkout} onChange={(e) => { setCheckout(e.target.value); setConverted(""); }} />
               </div>
             </div>
 
             <div className="two">
               <div>
                 <label>Guests</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={guests}
-                  onChange={(e) => setGuests(safeGuests(e.target.value))}
-                />
+                <input type="number" min="1" value={guests} onChange={(e) => setGuests(safeNumber(e.target.value, 1))} />
               </div>
               <div>
                 <label>Rooms</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={rooms}
-                  onChange={(e) => setRooms(safeRooms(e.target.value))}
-                />
+                <input type="number" min="1" value={rooms} onChange={(e) => { setRooms(safeNumber(e.target.value, 1)); setConverted(""); }} />
               </div>
             </div>
 
@@ -717,15 +574,6 @@ export default function App() {
             </button>
 
             {message && <div className="notice">{message}</div>}
-
-            {hotels.length > 0 && (
-              <div className="summaryBox">
-                <b>Results summary</b>
-                <span>Hotels: {stats.hotelCount}</span>
-                <span>Apartments / residences: {stats.apartmentCount}</span>
-                <span>Instant checkout: {stats.instantCount}</span>
-              </div>
-            )}
           </div>
         </div>
 
@@ -733,59 +581,40 @@ export default function App() {
           <div className="label">STAYS</div>
 
           <div className="results">
-            {filteredHotels.map((hotel, index) => {
-              const live = isLivePayable(hotel);
-              const type = propertyType(hotel);
-              const total = totalForRooms(hotel, rooms);
+            {hotels.map((hotel, index) => {
+              const live = isLive(hotel);
+              const total = totalAmount(hotel, rooms);
 
               return (
                 <div
                   key={`${hotel.hotel_id || hotel.hotel_name}-${index}`}
                   className={selectedHotel?.hotel_id === hotel.hotel_id ? "hotelCard selectedCard" : "hotelCard"}
-                  onClick={() => setSelectedHotel(hotel)}
+                  onClick={() => { setSelectedHotel(hotel); setConverted(""); }}
                 >
                   <PropertyImage hotel={hotel} />
 
                   <div className="hotelBody">
                     <div className="topLine">
-                      <span className="typeBadge">{type}</span>
+                      <span className="typeBadge">{stayTypeLabel(hotel)}</span>
                       <span className={live ? "liveBadge" : "confirmBadge"}>
-                        {live ? "Instant checkout" : "Confirm first"}
+                        {live ? "Current price available" : "Check latest price"}
                       </span>
                     </div>
 
                     <h2>{hotel.hotel_name}</h2>
-                    <p className="location">
-                      {hotel.area ? `${hotel.area}, ` : ""}
-                      {hotel.city}, {hotel.country}
-                    </p>
+                    <p className="location">{hotel.area ? `${hotel.area}, ` : ""}{hotel.city}, {hotel.country}</p>
 
                     {live ? (
                       <div className="pricePanel">
-                        <div className="priceRow">
-                          <span>Room rate</span>
-                          <b>
-                            {hotel.first_rate.currency} {money(rateAmount(hotel))}
-                          </b>
-                        </div>
-                        <div className="priceRow">
-                          <span>Rooms selected</span>
-                          <b>{safeRooms(rooms)}</b>
-                        </div>
-                        <div className="priceRow total">
-                          <span>Total</span>
-                          <b>
-                            {hotel.first_rate.currency} {money(total)}
-                          </b>
-                        </div>
+                        <div className="priceRow"><span>Rate per room</span><b>{hotel.first_rate.currency} {money(rateAmount(hotel))}</b></div>
+                        <div className="priceRow"><span>Rooms selected</span><b>{safeNumber(rooms, 1)}</b></div>
+                        <div className="priceRow total"><span>Total</span><b>{hotel.first_rate.currency} {money(total)}</b></div>
                       </div>
                     ) : (
-                      <div className="confirmPanel">
-                        We will confirm today&apos;s availability and final price before payment.
-                      </div>
+                      <div className="confirmPanel">We will confirm today&apos;s availability and final price before payment.</div>
                     )}
 
-                    <button className="darkButton" onClick={(e) => { e.stopPropagation(); setSelectedHotel(hotel); }}>
+                    <button className="darkButton" onClick={(e) => { e.stopPropagation(); setSelectedHotel(hotel); setConverted(""); }}>
                       View stay
                     </button>
                   </div>
@@ -793,8 +622,8 @@ export default function App() {
               );
             })}
 
-            {!loadingHotels && filteredHotels.length === 0 && (
-              <div className="emptyBox">Choose a destination, then press Search stays.</div>
+            {!loadingHotels && hotels.length === 0 && (
+              <div className="emptyBox">Choose your destination and press Search stays.</div>
             )}
           </div>
         </div>
@@ -809,49 +638,52 @@ export default function App() {
               <PropertyImage hotel={selectedHotel} large />
 
               <div className="topLine">
-                <span className="typeBadge">{propertyType(selectedHotel)}</span>
+                <span className="typeBadge">{stayTypeLabel(selectedHotel)}</span>
                 <span className={selectedLive ? "liveBadge" : "confirmBadge"}>
-                  {selectedLive ? "Instant checkout available" : "Confirmation required"}
+                  {selectedLive ? "Current price available" : "Confirmation required"}
                 </span>
               </div>
 
               <h2>{selectedHotel.hotel_name}</h2>
-              <p className="location">
-                {selectedHotel.area ? `${selectedHotel.area}, ` : ""}
-                {selectedHotel.city}, {selectedHotel.country}
-              </p>
+              <p className="location">{selectedHotel.area ? `${selectedHotel.area}, ` : ""}{selectedHotel.city}, {selectedHotel.country}</p>
 
               <div className="totalBox">
-                <div className="totalSmall">Your stay total</div>
+                <div className="totalSmall">Stay total</div>
                 <div className="totalBig">
-                  {selectedLive ? `${selectedCurrency} ${money(selectedTotal)}` : "Confirm before payment"}
+                  {selectedLive ? `${selectedCurrency} ${money(selectedTotal)}` : "Price to be confirmed"}
                 </div>
                 <div className="totalNote">
-                  {nights} night{nights === 1 ? "" : "s"} | {safeGuests(guests)} guest
-                  {safeGuests(guests) === 1 ? "" : "s"} | {safeRooms(rooms)} room
-                  {safeRooms(rooms) === 1 ? "" : "s"}
+                  {nights} night{nights === 1 ? "" : "s"} | {safeNumber(guests, 1)} guest{safeNumber(guests, 1) === 1 ? "" : "s"} | {safeNumber(rooms, 1)} room{safeNumber(rooms, 1) === 1 ? "" : "s"}
                 </div>
               </div>
 
+              {!selectedLive && (
+                <button className="darkButton" disabled={checkingPrice} onClick={() => checkLivePrice(selectedHotel)}>
+                  {checkingPrice ? "Checking..." : "Check latest price"}
+                </button>
+              )}
+
               {selectedLive && (
-                <div className="pricePanel">
-                  <div className="priceRow">
-                    <span>Rate per room</span>
-                    <b>
-                      {selectedCurrency} {money(rateAmount(selectedHotel))}
-                    </b>
+                <>
+                  <div className="pricePanel">
+                    <div className="priceRow"><span>Rate per room</span><b>{selectedCurrency} {money(rateAmount(selectedHotel))}</b></div>
+                    <div className="priceRow"><span>Rooms selected</span><b>{safeNumber(rooms, 1)}</b></div>
+                    <div className="priceRow total"><span>Total to pay</span><b>{selectedCurrency} {money(selectedTotal)}</b></div>
                   </div>
-                  <div className="priceRow">
-                    <span>Rooms selected</span>
-                    <b>{safeRooms(rooms)}</b>
+
+                  <div className="currencyBox">
+                    <b>Currency converter</b>
+                    <div className="currencyRow">
+                      <select value={targetCurrency} onChange={(e) => { setTargetCurrency(e.target.value); setConverted(""); }}>
+                        {["USD", "GBP", "EUR", "NGN", "AED", "CAD", "AUD", "ZAR", "CHF", "JPY", "KES", "GHS", "INR", "SGD"].map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                      <button onClick={convertCurrency}>Convert</button>
+                    </div>
+                    <div className="convertedText">{converted || "Convert your total to another currency."}</div>
                   </div>
-                  <div className="priceRow total">
-                    <span>Total to pay</span>
-                    <b>
-                      {selectedCurrency} {money(selectedTotal)}
-                    </b>
-                  </div>
-                </div>
+                </>
               )}
 
               <div className="mapBox">
@@ -860,54 +692,27 @@ export default function App() {
                   src={
                     selectedHotel.latitude && selectedHotel.longitude
                       ? `https://maps.google.com/maps?q=${selectedHotel.latitude},${selectedHotel.longitude}&z=14&output=embed`
-                      : `https://maps.google.com/maps?q=${encodeURIComponent(
-                          `${selectedHotel.hotel_name} ${selectedHotel.city} ${selectedHotel.country}`
-                        )}&z=14&output=embed`
+                      : `https://maps.google.com/maps?q=${encodeURIComponent(`${selectedHotel.hotel_name} ${selectedHotel.city} ${selectedHotel.country}`)}&z=14&output=embed`
                   }
                 />
               </div>
 
-              <input
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="Your full name"
-              />
-              <input
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                placeholder="Your email"
-              />
-              <input
-                value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
-                placeholder="Phone number"
-              />
-              <textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Special requests"
-              />
+              <input value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Your full name" />
+              <input value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="Your email" />
+              <input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="Phone number" />
+              <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Special requests" />
 
               <button className="goldButton" disabled={requesting} onClick={() => reserveOrPay(selectedHotel)}>
-                {requesting ? "Working..." : selectedLive ? "Pay exact total" : "Request confirmation"}
+                {requesting ? "Working..." : selectedLive ? "Continue securely" : "Request confirmation"}
               </button>
 
-              <button
-                className="guideButton"
-                onClick={() =>
-                  go(
-                    `/?page=travel&country=${encodeURIComponent(selectedHotel.country)}&city=${encodeURIComponent(
-                      selectedHotel.city
-                    )}`
-                  )
-                }
-              >
+              <button className="guideButton" onClick={() => go(`/?page=travel&country=${encodeURIComponent(selectedHotel.country)}&city=${encodeURIComponent(selectedHotel.city)}&area=${encodeURIComponent(selectedHotel.area || area)}`)}>
                 Open destination guide
               </button>
 
               <div className="safeBox">
                 {selectedLive
-                  ? "Your payment total reflects the selected number of rooms."
+                  ? "Your total reflects the selected number of rooms."
                   : "No payment is taken until availability and price are confirmed."}
               </div>
             </div>
@@ -925,7 +730,7 @@ function AppStyles() {
       body { margin: 0; background: #04101f; font-family: Arial, sans-serif; }
       button, input, select, textarea { font-family: inherit; }
       .page { min-height: 100vh; background: #04101f; color: white; padding: 18px; }
-      .hero { background: linear-gradient(135deg,#10306f,#1f5dca); border-radius: 24px; padding: 28px; display: grid; grid-template-columns: 1.2fr .8fr; gap: 20px; margin-bottom: 18px; align-items: center; }
+      .hero { background: linear-gradient(135deg,#10306f,#1f5dca); border-radius: 24px; padding: 28px; display: grid; grid-template-columns: 1.15fr .85fr; gap: 20px; margin-bottom: 18px; align-items: center; }
       .brand, .brandSmall { letter-spacing: 12px; font-weight: 900; color: #ffd34d; margin-bottom: 12px; }
       .hero h1 { font-size: 40px; line-height: 1.08; margin: 0; }
       .hero p { font-size: 20px; line-height: 1.45; margin: 14px 0 0; }
@@ -941,12 +746,11 @@ function AppStyles() {
       input, select, textarea { width: 100%; padding: 13px 14px; border-radius: 12px; border: 1px solid #cbd6e7; font-size: 16px; margin-bottom: 10px; background: white; color: #06101f; }
       textarea { min-height: 92px; resize: vertical; }
       .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-      .goldButton, .goldSmall { width: 100%; background: #ffd34d; color: #06101f; border: 2px solid #06101f; border-radius: 14px; padding: 15px 16px; font-weight: 900; font-size: 18px; cursor: pointer; margin-top: 12px; }
+      .goldButton { width: 100%; background: #ffd34d; color: #06101f; border: 2px solid #06101f; border-radius: 14px; padding: 15px 16px; font-weight: 900; font-size: 18px; cursor: pointer; margin-top: 12px; }
       .guideButton { width: 100%; background: #112a5f; color: white; border: 0; border-radius: 14px; padding: 15px 16px; font-weight: 900; font-size: 16px; cursor: pointer; margin-top: 10px; }
-      .summaryBox { background: #f5f8fd; border-radius: 14px; padding: 13px; margin-top: 14px; display: grid; gap: 7px; font-weight: 800; }
       .hotelCard { background: white; border-radius: 20px; overflow: hidden; margin-bottom: 18px; cursor: pointer; border: 2px solid transparent; }
       .selectedCard { border: 4px solid #ffd34d; }
-      .hotelImage, .imageFallback { width: 100%; height: 200px; object-fit: cover; display: block; background: #10254a; }
+      .propertyImage, .imageFallback { width: 100%; height: 200px; object-fit: cover; display: block; background: #10254a; }
       .imageLarge { height: 210px; border-radius: 16px; margin-bottom: 12px; }
       .imageFallback { background: linear-gradient(135deg,#10254a,#1d4da8); color: white; padding: 24px; display: flex; flex-direction: column; justify-content: center; }
       .imageBrand { letter-spacing: 7px; font-weight: 900; font-size: 11px; }
@@ -960,7 +764,7 @@ function AppStyles() {
       .confirmBadge { background: #fff1b8; color: #6b4d00; }
       h2 { margin: 0; font-size: 22px; font-weight: 900; }
       .location { margin-top: 8px; color: #62728c; font-weight: 700; line-height: 1.35; }
-      .pricePanel, .confirmPanel { background: #f5f8fd; border-radius: 14px; padding: 14px; margin-top: 14px; line-height: 1.6; }
+      .pricePanel, .confirmPanel, .currencyBox { background: #f5f8fd; border-radius: 14px; padding: 14px; margin-top: 14px; line-height: 1.6; }
       .confirmPanel { background: #fff1b8; color: #6b4d00; font-weight: 800; }
       .priceRow { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid #dbe5f2; padding: 7px 0; }
       .priceRow.total { border-bottom: 0; color: #0f4db3; font-size: 18px; font-weight: 900; }
@@ -969,25 +773,24 @@ function AppStyles() {
       .totalSmall { font-weight: 900; }
       .totalBig { font-size: 30px; font-weight: 900; margin-top: 8px; }
       .totalNote { margin-top: 8px; font-weight: 800; line-height: 1.35; }
+      .currencyRow { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 10px; }
+      .currencyRow button { background: #112a5f; color: white; border: 0; border-radius: 12px; padding: 0 18px; font-weight: 900; cursor: pointer; }
+      .convertedText { color: #0f4db3; font-weight: 900; margin-top: 8px; }
       .mapBox { background: #f5f8fd; border-radius: 16px; padding: 8px; margin: 14px 0; }
       iframe { width: 100%; height: 190px; border: 0; border-radius: 12px; }
       .safeBox { background: #dff7e6; border-radius: 14px; padding: 14px; margin-top: 14px; font-weight: 800; color: #0a5d27; line-height: 1.5; }
       .infoPage { min-height: 100vh; background: linear-gradient(135deg,#06101f,#123b7b); padding: 28px; color: white; }
       .infoCard { max-width: 1180px; margin: 0 auto; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); border-radius: 24px; padding: 34px; }
-      .infoTitle { font-size: 46px; margin: 0 0 12px; color: #ffd34d; }
-      .infoSubtitle { font-size: 20px; line-height: 1.5; font-weight: 800; margin-bottom: 24px; }
-      .guideHero { background: rgba(255,255,255,.12); border-radius: 20px; padding: 22px; display: flex; justify-content: space-between; gap: 20px; align-items: center; margin-bottom: 22px; }
-      .guideHero h2 { color: #ffd34d; margin-bottom: 10px; }
-      .mapOpen { background: #ffd34d; color: #06101f; border: 0; border-radius: 14px; padding: 15px 20px; font-weight: 900; cursor: pointer; min-width: 210px; }
+      .infoCard h1 { font-size: 46px; margin: 0 0 12px; color: #ffd34d; }
+      .infoCard p { font-size: 20px; line-height: 1.5; font-weight: 800; margin-bottom: 24px; }
       .guideGrid, .simpleGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
       .guideCard, .simpleBox { background: white; color: #06101f; border-radius: 18px; padding: 20px; font-size: 17px; line-height: 1.55; }
-      .guideCard h3 { margin-top: 0; color: #123b7b; }
-      .guideCard li { margin-bottom: 6px; }
+      .guideCard h2 { color: #123b7b; margin-bottom: 10px; }
+      .redGuide h2 { color: #9d1111; }
+      .guideCard button { background: #112a5f; color: white; border: 0; border-radius: 12px; padding: 12px 14px; font-weight: 900; margin: 6px 8px 0 0; cursor: pointer; }
       @media (max-width: 980px) {
         .hero, .mainGrid, .guideGrid, .simpleGrid { grid-template-columns: 1fr; }
         .column { height: auto; min-height: 420px; }
-        .guideHero { display: block; }
-        .mapOpen { width: 100%; margin-top: 16px; }
       }
     `}</style>
   );
