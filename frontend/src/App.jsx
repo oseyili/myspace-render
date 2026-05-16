@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:5050";
+const API_BASE = import.meta.env.VITE_API_BASE || "https://myspace-hotel-backend.onrender.com";
+
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -9,32 +10,57 @@ function tomorrowISO() {
   return new Date(Date.now() + 86400000).toISOString().slice(0, 10);
 }
 
+function safe(v) {
+  return String(v || "").trim();
+}
+
 function money(v) {
   const n = Number(v || 0);
   return Number.isFinite(n) ? n.toFixed(2) : "0.00";
 }
 
+function roomsSafe(v) {
+  const n = Number(v || 1);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 1;
+}
+
+function go(path) {
+  window.location.href = path;
+}
+
+function isLive(hotel) {
+  return Boolean(hotel?.live_rate_ready && hotel?.first_rate?.rate_key && Number(hotel?.first_rate?.amount || 0) > 0);
+}
+
+function totalPrice(hotel, rooms) {
+  if (!isLive(hotel)) return 0;
+  return Number((Number(hotel.first_rate.amount || 0) * roomsSafe(rooms)).toFixed(2));
+}
+
 function PropertyImage({ hotel }) {
   const [failed, setFailed] = useState(false);
+  const url = safe(hotel?.direct_image_url || hotel?.image_url);
 
-  if (!hotel?.image_url || failed) {
+  useEffect(() => setFailed(false), [url, hotel?.hotel_id]);
+
+  if (!url || failed) {
     return (
-      <div style={styles.realImageMissing}>
-        <div style={styles.imageBadge}>MYSPACE HOTEL</div>
-        <div style={styles.imageMissingTitle}>Verified property image coming soon</div>
-        <div style={styles.imageMissingText}>No fake hotel photos are displayed.</div>
+      <div className="imageMissing">
+        <div className="imageBadge">MYSPACE HOTEL</div>
+        <div className="imageMissingTitle">Verified image unavailable</div>
+        <div className="imageMissingText">No fake hotel photo is displayed.</div>
       </div>
     );
   }
 
   return (
     <img
+      src={url}
+      alt={hotel?.hotel_name || "Hotel"}
+      className="hotelImage"
       loading="lazy"
       decoding="async"
-      fetchPriority="low"
-      src={hotel.image_url}
-      alt={hotel.hotel_name}
-      style={styles.hotelImage}
+      referrerPolicy="no-referrer"
       onError={() => setFailed(true)}
     />
   );
@@ -42,34 +68,33 @@ function PropertyImage({ hotel }) {
 
 function InfoPage({ title, children }) {
   return (
-    <div style={styles.infoPage}>
-      <div style={styles.infoCard}>
-        <div style={styles.brandSmall}>MYSPACE HOTEL</div>
-        <h1 style={styles.infoTitle}>{title}</h1>
-        <div style={styles.infoBody}>{children}</div>
-        <button style={styles.goldSmall} onClick={() => (window.location.href = "/")}>
-          Back to hotel search
-        </button>
+    <div className="infoPage">
+      <AppStyles />
+      <div className="infoCard">
+        <div className="brandSmall">MYSPACE HOTEL</div>
+        <h1>{title}</h1>
+        <div className="infoBody">{children}</div>
+        <button className="goldSmall" onClick={() => go("/")}>Back to hotel search</button>
       </div>
     </div>
   );
 }
 
-function TravelGuides() {
+function Guide() {
   return (
-    <InfoPage title="Premium travel guides">
-      <p>Choose hotels by country, city, area, live rate, room type, and verified image availability.</p>
-      <p>Only live Hotelbeds rates can continue to reserve or payment.</p>
+    <InfoPage title="Destination guide">
+      <p>Choose a destination, compare real stays, check the area map, and continue with confidence.</p>
+      <p>For hotels without instant payment, a confirmation request can be sent before payment.</p>
     </InfoPage>
   );
 }
 
-function FAQs() {
+function FAQ() {
   return (
     <InfoPage title="Frequently asked questions">
-      <p><b>Why do some cities show no hotels?</b> The dropdown contains the full supplier catalogue, but payment is only enabled where Hotelbeds live rates exist.</p>
-      <p><b>Can customers pay without a live rate?</b> No. Reserve and payment controls only appear for live-rate hotels.</p>
-      <p><b>Are images fake?</b> No. Missing images show a trust message instead of fake photos.</p>
+      <p><b>Can I pay online?</b><br />Yes, when a current payable rate is available.</p>
+      <p><b>Why do some hotels need confirmation?</b><br />Some hotels need today’s availability and final price confirmed before payment.</p>
+      <p><b>Are photos fake?</b><br />No. If a real verified image is not available, no fake hotel image is shown.</p>
     </InfoPage>
   );
 }
@@ -77,61 +102,40 @@ function FAQs() {
 function Terms() {
   return (
     <InfoPage title="Booking terms">
-      <p>Customers must review hotel name, room, board, dates, guests, currency, amount, and cancellation details before payment.</p>
-      <p>Payment is allowed only for hotels with a valid live rate key and amount.</p>
+      <p>Review hotel name, location, dates, guests, rooms, currency, price and room details before continuing.</p>
+      <p>Prices and availability can change until booking confirmation is completed.</p>
     </InfoPage>
   );
 }
 
-function Support() {
+function Contact() {
   return (
-    <InfoPage title="Customer support">
-      <p>For reservation help, contact:</p>
-      <p><b>reservations@myspace-hotel.com</b></p>
-      <p>Include reservation code, hotel name, dates, and booking email.</p>
+    <InfoPage title="Contact">
+      <p><b>Email:</b> reservations@myspace-hotel.com</p>
+      <p>Include your destination, dates, hotel name, and booking email for faster help.</p>
     </InfoPage>
   );
 }
 
 function Confirmed() {
-  const params = new URLSearchParams(window.location.search);
-  const code = params.get("code") || "Your reservation";
-  const [status, setStatus] = useState("Confirming payment update...");
-
-  useEffect(() => {
-    if (!code || code === "Your reservation") return;
-    fetch(`${API_BASE}/reservation/${code}/mark-paid`, { method: "POST" })
-      .then(() => setStatus("Payment received. Reservation update is being processed securely."))
-      .catch(() => setStatus("Payment received. Reservation update is being processed securely."));
-  }, [code]);
-
+  const code = new URLSearchParams(window.location.search).get("code") || "";
   return (
-    <div style={styles.confirmPage}>
-      <div style={styles.confirmCard}>
-        <div style={styles.brandSmall}>MYSPACE HOTEL</div>
-        <h1 style={styles.confirmTitle}>Payment received</h1>
-        <p style={styles.confirmText}>{status}</p>
-        <div style={styles.codeBox}>
-          <b>Reservation code:</b>
-          <div style={styles.codeText}>{code}</div>
-        </div>
-        <button style={styles.goldSmall} onClick={() => (window.location.href = "/")}>
-          Back to hotel search
-        </button>
-      </div>
-    </div>
+    <InfoPage title="Reservation update received">
+      <p>Your reservation update is being processed securely.</p>
+      {code && <p><b>Reservation code:</b> {code}</p>}
+    </InfoPage>
   );
 }
 
 export default function App() {
   const path = window.location.pathname;
-  if (path === "/travel") return <TravelGuides />;
-  if (path === "/faq") return <FAQs />;
+  if (path === "/travel") return <Guide />;
+  if (path === "/faq") return <FAQ />;
   if (path === "/terms") return <Terms />;
-  if (path === "/support") return <Support />;
+  if (path === "/support") return <Contact />;
   if (path === "/reservation-confirmed") return <Confirmed />;
 
-  const [catalog, setCatalog] = useState([]);
+  const [countries, setCountries] = useState([]);
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
   const [area, setArea] = useState("");
@@ -140,127 +144,131 @@ export default function App() {
   const [checkout, setCheckout] = useState(tomorrowISO());
   const [guests, setGuests] = useState(2);
   const [rooms, setRooms] = useState(1);
-
   const [hotels, setHotels] = useState([]);
   const [selectedHotel, setSelectedHotel] = useState(null);
-
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [note, setNote] = useState("");
-
   const [loadingCatalog, setLoadingCatalog] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [loadingHotels, setLoadingHotels] = useState(false);
   const [requesting, setRequesting] = useState(false);
   const [message, setMessage] = useState("");
 
-  const selectedCountry = useMemo(() => {
-    return catalog.find((x) => x.country === country) || null;
-  }, [catalog, country]);
-
+  const selectedCountry = useMemo(() => countries.find((x) => x.country === country) || null, [countries, country]);
   const cities = selectedCountry?.cities || [];
 
-  async function runSearch(nextCountry = country, nextCity = city) {
-    if (!nextCountry || !nextCity) return;
+  async function loadCountries() {
+    setLoadingCatalog(true);
+    setMessage("");
 
-    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/real-catalog/destinations`, { cache: "no-store" });
+      const data = await res.json();
+      const list = Array.isArray(data.countries) ? data.countries : [];
+      setCountries(list);
+
+      const firstCountry =
+        list.find((c) => c.cities?.some((x) => Number(x.live_hotels || 0) > 0)) ||
+        list[0];
+
+      const firstCity =
+        firstCountry?.cities?.find((x) => Number(x.live_hotels || 0) > 0) ||
+        firstCountry?.cities?.[0];
+
+      setCountry(firstCountry?.country || "");
+      setCity(firstCity?.city || "");
+
+      if (firstCountry?.country && firstCity?.city) {
+        await searchHotels(firstCountry.country, firstCity.city);
+      }
+    } catch {
+      setMessage("Could not load destinations. Please refresh.");
+    } finally {
+      setLoadingCatalog(false);
+    }
+  }
+
+  async function searchHotels(nextCountry = country, nextCity = city) {
+    if (!nextCountry || !nextCity) {
+      setMessage("Choose a country and city first.");
+      return;
+    }
+
+    setLoadingHotels(true);
     setSelectedHotel(null);
     setMessage("");
 
     try {
-      const params = new URLSearchParams();
-      params.set("country", nextCountry);
-      params.set("city", nextCity);
-      params.set("checkin", checkin);
-      params.set("checkout", checkout);
-      params.set("guests", String(guests));
-      params.set("rooms", String(rooms));
-      params.set("limit", "120");
+      const p = new URLSearchParams();
+      p.set("country", nextCountry);
+      p.set("city", nextCity);
+      p.set("limit", "120");
+      if (area) p.set("area", area);
+      if (keyword) p.set("keyword", keyword);
 
-      if (area.trim()) params.set("area", area.trim());
-      if (keyword.trim()) params.set("keyword", keyword.trim());
-
-      const res = await fetch(`${API_BASE}/api/hotels/search?${params.toString()}`);
+      const res = await fetch(`${API_BASE}/api/hotels/search?${p.toString()}`, { cache: "no-store" });
       const data = await res.json();
-
       const list = Array.isArray(data.hotels) ? data.hotels : [];
-      setHotels(list);
 
-      if (list.length > 0) {
-        setSelectedHotel(list[0]);
-        setMessage(`${list.length} live-rate hotels found in ${nextCity}.`);
-      } else {
-        setMessage(`No Hotelbeds live-rate hotels found in ${nextCity}. Choose a city marked with live hotels.`);
-      }
+      setHotels(list);
+      setSelectedHotel(list[0] || null);
+
+      const liveCount = list.filter(isLive).length;
+      setMessage(
+        list.length
+          ? `${list.length} stays found in ${nextCity}. ${liveCount} can continue to instant payment.`
+          : "No matching stay found. Try another city or clear filters."
+      );
     } catch {
       setHotels([]);
-      setMessage("Backend unavailable. Restart backend and frontend.");
+      setMessage("Stay search is temporarily unavailable. Please refresh.");
     } finally {
-      setLoading(false);
+      setLoadingHotels(false);
     }
   }
 
   useEffect(() => {
-    async function loadCatalog() {
-      setLoadingCatalog(true);
-
-      try {
-        const res = await fetch(`${API_BASE}/api/real-catalog/destinations`);
-        const data = await res.json();
-        const countries = Array.isArray(data.countries) ? data.countries : [];
-        setCatalog(countries);
-
-        const firstLiveCountry =
-          countries.find((c) => c.cities?.some((x) => Number(x.live_hotels || 0) > 0)) ||
-          countries[0];
-
-        const firstLiveCity =
-          firstLiveCountry?.cities?.find((x) => Number(x.live_hotels || 0) > 0) ||
-          firstLiveCountry?.cities?.[0];
-
-        const nextCountry = firstLiveCountry?.country || "";
-        const nextCity = firstLiveCity?.city || "";
-
-        setCountry(nextCountry);
-        setCity(nextCity);
-
-        if (nextCountry && nextCity) {
-          setTimeout(() => runSearch(nextCountry, nextCity), 0);
-        }
-      } catch {
-        setMessage("Could not load country and city catalogue.");
-      } finally {
-        setLoadingCatalog(false);
-      }
-    }
-
-    loadCatalog();
+    loadCountries();
   }, []);
 
   function changeCountry(nextCountry) {
-    const found = catalog.find((x) => x.country === nextCountry);
-    const liveCity = found?.cities?.find((x) => Number(x.live_hotels || 0) > 0);
-    const firstCity = liveCity || found?.cities?.[0];
+    const found = countries.find((x) => x.country === nextCountry);
+    const firstCity =
+      found?.cities?.find((x) => Number(x.live_hotels || 0) > 0)?.city ||
+      found?.cities?.[0]?.city ||
+      "";
 
     setCountry(nextCountry);
-    setCity(firstCity?.city || "");
+    setCity(firstCity);
     setHotels([]);
     setSelectedHotel(null);
-    setMessage("");
+    setMessage("City selected. Press Search stays.");
   }
 
-  async function requestBooking(hotel = selectedHotel) {
-    if (!hotel) return setMessage("Select a live-rate hotel first.");
-    if (!hotel.live_rate_ready) return setMessage("Payment blocked because this hotel has no live rate.");
-    if (!customerName.trim() || !customerEmail.trim()) return setMessage("Enter your name and email before payment.");
+  function changeCity(nextCity) {
+    setCity(nextCity);
+    setHotels([]);
+    setSelectedHotel(null);
+    setMessage("Press Search stays.");
+  }
 
-    setSelectedHotel(hotel);
+  async function reserveOrPay(hotel = selectedHotel) {
+    if (!hotel) {
+      setMessage("Select a stay first.");
+      return;
+    }
+
+    if (!customerName.trim() || !customerEmail.trim()) {
+      setMessage("Enter your name and email before continuing.");
+      return;
+    }
+
     setRequesting(true);
-    setMessage("Preparing secure Stripe checkout...");
+    setMessage(isLive(hotel) ? "Preparing secure checkout..." : "Sending confirmation request...");
 
     try {
-      const rate = hotel.first_rate;
-
+      const rate = hotel.first_rate || {};
       const payload = {
         hotel_id: hotel.hotel_id,
         hotel_name: hotel.hotel_name,
@@ -268,18 +276,16 @@ export default function App() {
         checkin,
         checkout,
         guests: Number(guests),
-        rooms: Number(rooms),
+        rooms: roomsSafe(rooms),
         customer_name: customerName.trim(),
         customer_email: customerEmail.trim(),
         customer_phone: customerPhone.trim(),
         note: note.trim(),
-        rate_key: rate.rate_key,
-        amount: rate.amount,
-        currency: rate.currency,
-        room_name: rate.room_name,
-        board_name: rate.board_name,
-        payment_type: rate.payment_type,
-        cancellation_policies: rate.cancellation_policies || [],
+        rate_key: rate.rate_key || "",
+        amount: rate.amount || "",
+        currency: rate.currency || "",
+        room_name: rate.room_name || "",
+        board_name: rate.board_name || "",
       };
 
       const res = await fetch(`${API_BASE}/reservation-request`, {
@@ -291,7 +297,7 @@ export default function App() {
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
-        setMessage(data.message || "Could not prepare secure checkout.");
+        setMessage(data.message || "Could not continue with this reservation.");
         return;
       }
 
@@ -300,216 +306,171 @@ export default function App() {
         return;
       }
 
-      setMessage(`Reservation created: ${data.reservation_code}. Add Stripe key to open live checkout.`);
+      setMessage(`Request received: ${data.reservation_code}. We will confirm availability and price before payment.`);
     } catch {
-      setMessage("Secure booking service unavailable.");
+      setMessage("Reservation service is temporarily unavailable.");
     } finally {
       setRequesting(false);
     }
   }
 
-  function reserveHotel(hotel) {
-    setSelectedHotel(hotel);
-    setMessage(`Reserved for review: ${hotel.hotel_name}. Enter customer details, then press Pay.`);
-  }
+  const livePay = isLive(selectedHotel);
+  const selectedTotal = totalPrice(selectedHotel, rooms);
+  const selectedCurrency = selectedHotel?.first_rate?.currency || "";
 
   return (
-    <div style={styles.page}>
-      <section style={styles.hero}>
-        <div>
-          <div style={styles.brand}>MYSPACE HOTEL</div>
-          <h1 style={styles.heroTitle}>Hotelbeds live rates with secure reserve and pay.</h1>
-          <p style={styles.heroText}>
-            Full supplier catalogue loaded. Payment is only available for hotels with live Hotelbeds rates.
-          </p>
-        </div>
+    <div className="page">
+      <AppStyles />
 
-        <div style={styles.buttonRow}>
-          <button style={styles.whiteButton} onClick={() => (window.location.href = "/travel")}>Guide</button>
-          <button style={styles.whiteButton} onClick={() => (window.location.href = "/faq")}>FAQ</button>
-          <button style={styles.whiteButton} onClick={() => (window.location.href = "/terms")}>Terms</button>
-          <button style={styles.whiteButton} onClick={() => (window.location.href = "/support")}>Contact</button>
+      <section className="hero">
+        <div>
+          <div className="brand">MYSPACE HOTEL</div>
+          <h1>Book with clarity before you arrive.</h1>
+          <p>Choose your destination, compare real stays, review your total and continue securely.</p>
+        </div>
+        <div className="buttonGrid">
+          <button onClick={() => go("/travel")}>Destination Guide</button>
+          <button onClick={() => go("/faq")}>FAQ</button>
+          <button onClick={() => go("/terms")}>Terms</button>
+          <button onClick={() => go("/support")}>Contact</button>
         </div>
       </section>
 
-      <section style={styles.mainGrid}>
-        <div style={styles.column}>
-          <div style={styles.label}>SEARCH</div>
-
-          <div style={styles.searchBox}>
-            <p style={styles.muted}>
-              {loadingCatalog ? "Loading catalogue..." : `${catalog.length} countries loaded. Cities are separated by country.`}
+      <section className="mainGrid">
+        <div className="panel">
+          <div className="label">SEARCH</div>
+          <div className="box scrollBox">
+            <p className="muted">
+              {loadingCatalog ? "Loading destinations..." : `${countries.length} countries loaded. Cities are separated by country.`}
             </p>
 
-            <label style={styles.formLabel}>Country</label>
-            <select style={styles.input} value={country} onChange={(e) => changeCountry(e.target.value)}>
-              {catalog.map((c) => (
+            <label>Country</label>
+            <select value={country} onChange={(e) => changeCountry(e.target.value)}>
+              <option value="">Choose country</option>
+              {countries.map((c) => (
                 <option key={c.country} value={c.country}>
-                  {c.country} — {c.city_count} cities
+                  {c.country} - {c.city_count} cities
                 </option>
               ))}
             </select>
 
-            <label style={styles.formLabel}>City</label>
-            <select style={styles.input} value={city} onChange={(e) => setCity(e.target.value)}>
+            <label>City</label>
+            <select value={city} onChange={(e) => changeCity(e.target.value)} disabled={!country}>
+              <option value="">Choose city</option>
               {cities.map((c) => (
-                <option key={c.city} value={c.city}>
-                  {c.city} {Number(c.live_hotels || 0) > 0 ? `— ${c.live_hotels} live hotels` : "— catalogue only"}
+                <option key={`${country}-${c.city}`} value={c.city}>
+                  {c.city} - {Number(c.live_hotels || 0) > 0 ? `${c.live_hotels} instant stays` : `${c.catalog_hotels || 0} stays`}
                 </option>
               ))}
             </select>
 
-            <label style={styles.formLabel}>Area</label>
-            <input style={styles.input} value={area} onChange={(e) => setArea(e.target.value)} placeholder="Neighbourhood or area" />
+            <label>Area</label>
+            <input value={area} onChange={(e) => setArea(e.target.value)} placeholder="Neighbourhood or area" />
 
-            <label style={styles.formLabel}>Keyword</label>
-            <input style={styles.input} value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Hotel name or keyword" />
+            <label>Keyword</label>
+            <input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Hotel name or landmark" />
 
-            <div style={styles.twoInput}>
+            <div className="two">
               <div>
-                <label style={styles.formLabel}>Check-in</label>
-                <input style={styles.input} type="date" value={checkin} onChange={(e) => setCheckin(e.target.value)} />
+                <label>Check-in</label>
+                <input type="date" value={checkin} onChange={(e) => setCheckin(e.target.value)} />
               </div>
               <div>
-                <label style={styles.formLabel}>Check-out</label>
-                <input style={styles.input} type="date" value={checkout} onChange={(e) => setCheckout(e.target.value)} />
-              </div>
-            </div>
-
-            <div style={styles.twoInput}>
-              <div>
-                <label style={styles.formLabel}>Guests</label>
-                <input style={styles.input} type="number" min="1" value={guests} onChange={(e) => setGuests(Number(e.target.value))} />
-              </div>
-              <div>
-                <label style={styles.formLabel}>Rooms</label>
-                <input style={styles.input} type="number" min="1" value={rooms} onChange={(e) => setRooms(Number(e.target.value))} />
+                <label>Check-out</label>
+                <input type="date" value={checkout} onChange={(e) => setCheckout(e.target.value)} />
               </div>
             </div>
 
-            <button style={styles.goldButton} onClick={() => runSearch()} disabled={loading || loadingCatalog}>
-              {loading ? "Loading live rates..." : "Search Hotelbeds live rates"}
+            <div className="two">
+              <div>
+                <label>Guests</label>
+                <input type="number" min="1" value={guests} onChange={(e) => setGuests(Number(e.target.value))} />
+              </div>
+              <div>
+                <label>Rooms</label>
+                <input type="number" min="1" value={rooms} onChange={(e) => setRooms(roomsSafe(e.target.value))} />
+              </div>
+            </div>
+
+            <button className="gold" disabled={loadingHotels || loadingCatalog} onClick={() => searchHotels()}>
+              {loadingHotels ? "Searching..." : "Search stays"}
             </button>
 
-            {message && <div style={styles.notice}>{message}</div>}
+            {message && <div className="notice">{message}</div>}
           </div>
         </div>
 
-        <div style={styles.column}>
-          <div style={styles.label}>LIVE HOTELS</div>
-
-          <div style={styles.scroll}>
-            {hotels.map((hotel) => {
-              const rate = hotel.first_rate;
-              const canPay = hotel.live_rate_ready && rate?.rate_key && Number(rate?.amount || 0) > 0;
-
+        <div className="panel">
+          <div className="label">STAYS</div>
+          <div className="results">
+            {hotels.map((hotel, index) => {
+              const canPay = isLive(hotel);
               return (
-                <div
-                  key={hotel.hotel_id}
-                  style={selectedHotel?.hotel_id === hotel.hotel_id ? styles.hotelCardSelected : styles.hotelCard}
-                  onClick={() => setSelectedHotel(hotel)}
-                >
+                <div key={`${hotel.hotel_id}-${index}`} className={selectedHotel?.hotel_id === hotel.hotel_id ? "card selected" : "card"} onClick={() => setSelectedHotel(hotel)}>
                   <PropertyImage hotel={hotel} />
-
-                  <div style={styles.hotelBody}>
-                    <h2 style={styles.hotelName}>{hotel.hotel_name}</h2>
-                    <p style={styles.hotelLocation}>{hotel.area ? `${hotel.area}, ` : ""}{hotel.city}, {hotel.country}</p>
-
-                    <div style={canPay ? styles.rateGood : styles.rateBlocked}>
-                      {canPay ? "Live Hotelbeds payable rate" : "No payable live rate"}
-                    </div>
-
-                    <div style={styles.rateBox}>
-                      <p><b>Room:</b> {rate.room_name}</p>
-                      <p><b>Board:</b> {rate.board_name}</p>
-                      <p><b>Payment:</b> {rate.payment_type}</p>
-                      <p><b>Price:</b> {rate.currency} {money(rate.amount)}</p>
-                    </div>
-
-                    {canPay && (
-                      <div style={styles.buttonPair}>
-                        <button
-                          style={styles.reserveMini}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            reserveHotel(hotel);
-                          }}
-                        >
-                          Reserve
-                        </button>
-
-                        <button
-                          style={styles.payMini}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            requestBooking(hotel);
-                          }}
-                        >
-                          Pay
-                        </button>
+                  <div className="cardBody">
+                    <h2>{hotel.hotel_name}</h2>
+                    <p>{hotel.area ? `${hotel.area}, ` : ""}{hotel.city}, {hotel.country}</p>
+                    <div className={canPay ? "green" : "amber"}>{canPay ? "Instant secure checkout available" : "Confirmation before payment"}</div>
+                    {canPay ? (
+                      <div className="rate">
+                        <p><b>Room:</b> {hotel.first_rate.room_name || "Selected room"}</p>
+                        <p><b>Board:</b> {hotel.first_rate.board_name || "Room only"}</p>
+                        <p><b>Total:</b> {hotel.first_rate.currency} {money(totalPrice(hotel, rooms))}</p>
                       </div>
+                    ) : (
+                      <div className="rate">We will confirm today&apos;s availability and price before payment.</div>
                     )}
+                    <button className="darkMini" onClick={(e) => { e.stopPropagation(); setSelectedHotel(hotel); }}>View</button>
                   </div>
                 </div>
               );
             })}
 
-            {!loading && hotels.length === 0 && (
-              <div style={styles.emptyBox}>
-                No live-rate hotels loaded for this city. Select a city marked with live hotels, then search again.
-              </div>
+            {!loadingHotels && hotels.length === 0 && (
+              <div className="empty">Choose a destination, then press Search stays.</div>
             )}
           </div>
         </div>
 
-        <div style={styles.column}>
-          <div style={styles.label}>RESERVE / PAY</div>
-
+        <div className="panel">
+          <div className="label">RESERVE / PAY</div>
           {!selectedHotel ? (
-            <div style={styles.emptyBox}>
-              Select a live-rate hotel to reserve or pay.
-            </div>
+            <div className="empty">Select a stay to continue.</div>
           ) : (
-            <div style={styles.reservePanel}>
-              <h2 style={styles.hotelName}>{selectedHotel.hotel_name}</h2>
-              <div style={styles.selectedPrice}>
-                {selectedHotel.first_rate.currency} {money(selectedHotel.first_rate.amount)}
-              </div>
+            <div className="box scrollBox">
+              <PropertyImage hotel={selectedHotel} />
+              <h2>{selectedHotel.hotel_name}</h2>
+              <p className="muted">{selectedHotel.city}, {selectedHotel.country}</p>
 
-              <div style={styles.mapBox}>
+              {livePay ? (
+                <div className="price">{selectedCurrency} {money(selectedTotal)}</div>
+              ) : (
+                <div className="amber">Confirmation required before payment.</div>
+              )}
+
+              <div className="mapBox">
                 <iframe
                   title="Hotel map"
-                  style={styles.map}
-                  loading="lazy"
                   src={
                     selectedHotel.latitude && selectedHotel.longitude
                       ? `https://maps.google.com/maps?q=${selectedHotel.latitude},${selectedHotel.longitude}&z=14&output=embed`
-                      : `https://maps.google.com/maps?q=${encodeURIComponent(selectedHotel.hotel_name + " " + selectedHotel.city)}&z=14&output=embed`
+                      : `https://maps.google.com/maps?q=${encodeURIComponent(`${selectedHotel.hotel_name} ${selectedHotel.city} ${selectedHotel.country}`)}&z=14&output=embed`
                   }
                 />
               </div>
 
-              <input style={styles.input} value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Your full name" />
-              <input style={styles.input} value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="Your email" />
-              <input style={styles.input} value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="Phone number" />
-              <textarea style={styles.textarea} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Special requests" />
+              <input value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Your full name" />
+              <input value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="Your email" />
+              <input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="Phone number" />
+              <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Special requests" />
 
-              {selectedHotel.live_rate_ready ? (
-                <div style={styles.buttonPairLarge}>
-                  <button style={styles.reserveLarge} disabled={requesting} onClick={() => reserveHotel(selectedHotel)}>
-                    Reserve
-                  </button>
+              <button className="gold" disabled={requesting} onClick={() => reserveOrPay(selectedHotel)}>
+                {requesting ? "Working..." : livePay ? "Pay exact total" : "Request confirmation"}
+              </button>
 
-                  <button style={styles.payLarge} disabled={requesting} onClick={() => requestBooking(selectedHotel)}>
-                    {requesting ? "Preparing Stripe..." : "Pay"}
-                  </button>
-                </div>
-              ) : (
-                <div style={styles.notice}>Payment blocked. This hotel has no live Hotelbeds rate.</div>
-              )}
-
-              <div style={styles.safeNote}>
-                Payment is only enabled for valid live Hotelbeds rate keys.
+              <div className="safeNote">
+                {livePay ? "Secure checkout is available for this stay." : "No payment is taken until the stay is confirmed."}
               </div>
             </div>
           )}
@@ -519,61 +480,55 @@ export default function App() {
   );
 }
 
-const styles = {
-  page: { minHeight: "100vh", background: "#06101f", color: "white", padding: 18, fontFamily: "Arial, sans-serif", overflow: "hidden" },
-  hero: { background: "linear-gradient(135deg,#0f2f69,#1e5cc7)", borderRadius: 24, padding: 24, display: "grid", gridTemplateColumns: "1.2fr .8fr", gap: 20, alignItems: "center", marginBottom: 16 },
-  brand: { letterSpacing: 14, fontWeight: 900, color: "#ffd34d", marginBottom: 12 },
-  brandSmall: { letterSpacing: 10, fontWeight: 900, marginBottom: 20 },
-  heroTitle: { fontSize: 38, lineHeight: 1.1, margin: 0 },
-  heroText: { fontSize: 18, lineHeight: 1.5, marginTop: 12 },
-  buttonRow: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 },
-  whiteButton: { background: "white", color: "#07111f", border: 0, borderRadius: 14, padding: "14px 18px", fontWeight: 900, fontSize: 16, cursor: "pointer" },
-  mainGrid: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18 },
-  column: { height: "73vh", background: "#eaf2fb", color: "#07111f", borderRadius: 24, padding: 18, overflow: "hidden", display: "flex", flexDirection: "column" },
-  label: { letterSpacing: 4, color: "#63738e", fontWeight: 900, marginBottom: 12 },
-  searchBox: { background: "white", borderRadius: 18, padding: 16, overflow: "auto" },
-  muted: { color: "#63738e", fontWeight: 800 },
-  formLabel: { display: "block", fontWeight: 900, marginTop: 10, marginBottom: 5 },
-  input: { width: "100%", boxSizing: "border-box", padding: "12px 13px", margin: "4px 0", borderRadius: 12, border: "1px solid #c6d5e8", fontSize: 15 },
-  textarea: { width: "100%", boxSizing: "border-box", minHeight: 100, padding: "12px 13px", margin: "7px 0", borderRadius: 12, border: "1px solid #c6d5e8", fontSize: 15 },
-  twoInput: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 },
-  goldButton: { width: "100%", background: "#ffd34d", color: "#07111f", border: "2px solid #07111f", borderRadius: 14, padding: "15px 18px", fontSize: 18, fontWeight: 900, cursor: "pointer", marginTop: 14 },
-  goldSmall: { background: "#ffd34d", color: "#07111f", border: 0, borderRadius: 14, padding: "15px 22px", fontSize: 18, fontWeight: 900, cursor: "pointer", marginTop: 22 },
-  notice: { background: "#fff2be", padding: 13, borderRadius: 14, marginTop: 14, fontWeight: 900 },
-  scroll: { overflowY: "auto", paddingRight: 6 },
-  hotelCard: { background: "white", borderRadius: 20, marginBottom: 16, overflow: "hidden", cursor: "pointer", border: "2px solid transparent" },
-  hotelCardSelected: { background: "white", borderRadius: 20, marginBottom: 16, overflow: "hidden", cursor: "pointer", border: "4px solid #ffd34d" },
-  hotelImage: { width: "100%", height: 190, objectFit: "cover", display: "block", background: "#10254a" },
-  realImageMissing: { height: 190, background: "linear-gradient(135deg,#10254a,#1d4da8)", color: "white", display: "flex", flexDirection: "column", justifyContent: "center", padding: 22, boxSizing: "border-box" },
-  imageBadge: { letterSpacing: 7, fontWeight: 900, fontSize: 11, opacity: 0.8 },
-  imageMissingTitle: { fontSize: 22, fontWeight: 900, marginTop: 12 },
-  imageMissingText: { fontSize: 14, lineHeight: 1.4, marginTop: 8 },
-  hotelBody: { padding: 16 },
-  hotelName: { fontSize: 22, margin: "0 0 8px", fontWeight: 900 },
-  hotelLocation: { color: "#52627c", margin: 0 },
-  rateGood: { background: "#dff7e6", borderRadius: 12, padding: 10, margin: "12px 0", fontWeight: 900, color: "#075b24" },
-  rateBlocked: { background: "#ffe1e1", borderRadius: 12, padding: 10, margin: "12px 0", fontWeight: 900, color: "#8a1111" },
-  rateBox: { background: "#f6f8fc", borderRadius: 14, padding: 13, margin: "12px 0", fontSize: 14, lineHeight: 1.25 },
-  buttonPair: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 },
-  buttonPairLarge: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 14 },
-  reserveMini: { width: "100%", background: "#10254a", color: "white", border: 0, borderRadius: 12, padding: 12, fontWeight: 900, cursor: "pointer" },
-  payMini: { width: "100%", background: "#ffd34d", color: "#07111f", border: "2px solid #07111f", borderRadius: 12, padding: 12, fontWeight: 900, cursor: "pointer" },
-  reserveLarge: { width: "100%", background: "#10254a", color: "white", border: 0, borderRadius: 14, padding: "15px 18px", fontSize: 18, fontWeight: 900, cursor: "pointer" },
-  payLarge: { width: "100%", background: "#ffd34d", color: "#07111f", border: "2px solid #07111f", borderRadius: 14, padding: "15px 18px", fontSize: 18, fontWeight: 900, cursor: "pointer" },
-  emptyBox: { background: "white", borderRadius: 18, padding: 22, fontWeight: 900, lineHeight: 1.5 },
-  reservePanel: { background: "white", borderRadius: 18, padding: 16, overflow: "auto" },
-  selectedPrice: { color: "#0f4db3", fontSize: 26, fontWeight: 900, marginBottom: 14 },
-  mapBox: { background: "#f6f8fc", padding: 8, borderRadius: 16, marginBottom: 12 },
-  map: { width: "100%", height: 190, border: 0, borderRadius: 12 },
-  safeNote: { background: "#dff7e6", borderRadius: 14, padding: 13, marginTop: 14, fontWeight: 900, color: "#075b24" },
-  confirmPage: { minHeight: "100vh", background: "linear-gradient(90deg,#06101f 0%,#123a7a 52%,#06101f 52%)", color: "white", display: "flex", alignItems: "center", padding: 34, fontFamily: "Arial, sans-serif" },
-  confirmCard: { maxWidth: 780, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 28, padding: 40 },
-  confirmTitle: { fontSize: 48, color: "#ffd34d", margin: "0 0 20px" },
-  confirmText: { fontSize: 20, lineHeight: 1.55 },
-  codeBox: { background: "rgba(255,255,255,0.14)", borderRadius: 18, padding: 22, margin: "24px 0", fontSize: 18 },
-  codeText: { fontSize: 28, marginTop: 10, fontWeight: 900, color: "#ffd34d" },
-  infoPage: { minHeight: "100vh", background: "linear-gradient(135deg,#06101f,#123a7a)", color: "white", padding: 34, fontFamily: "Arial, sans-serif" },
-  infoCard: { maxWidth: 900, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 28, padding: 40 },
-  infoTitle: { fontSize: 46, color: "#ffd34d" },
-  infoBody: { fontSize: 20, lineHeight: 1.7 },
-};
+function AppStyles() {
+  return (
+    <style>{`
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #06101f; font-family: Arial, sans-serif; }
+      .page { min-height: 100vh; background: #06101f; color: white; padding: 18px; }
+      .hero { background: linear-gradient(135deg,#0f2f69,#1e5cc7); border-radius: 24px; padding: 26px; display: grid; grid-template-columns: 1.35fr .65fr; gap: 22px; align-items: center; margin-bottom: 18px; }
+      .brand, .brandSmall { letter-spacing: 12px; font-weight: 900; color: #ffd34d; margin-bottom: 12px; }
+      .hero h1 { font-size: 40px; line-height: 1.08; margin: 0; }
+      .hero p { font-size: 19px; line-height: 1.45; }
+      .buttonGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .buttonGrid button, .goldSmall { background: white; color: #07111f; border: 0; border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 900; cursor: pointer; }
+      .mainGrid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+      .panel { height: 73vh; background: #eaf2fb; color: #07111f; border-radius: 24px; padding: 18px; display: flex; flex-direction: column; overflow: hidden; }
+      .label { letter-spacing: 5px; color: #63738e; font-weight: 900; margin-bottom: 12px; }
+      .box, .empty { background: white; border-radius: 18px; padding: 16px; }
+      .scrollBox, .results { overflow-y: auto; padding-right: 6px; }
+      .muted { color: #63738e; font-weight: 800; line-height: 1.4; }
+      label { display: block; font-weight: 900; margin: 12px 0 6px; }
+      input, select, textarea { width: 100%; padding: 13px; border: 1px solid #c6d5e8; border-radius: 13px; font-size: 16px; margin-bottom: 6px; }
+      textarea { min-height: 96px; resize: vertical; }
+      .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .gold { width: 100%; background: #ffd34d; color: #07111f; border: 2px solid #07111f; border-radius: 14px; padding: 16px; font-size: 18px; font-weight: 900; cursor: pointer; margin-top: 12px; }
+      .notice { background: #fff2be; border-radius: 14px; padding: 13px; font-weight: 900; margin-top: 13px; line-height: 1.35; }
+      .card { background: white; border: 2px solid transparent; border-radius: 20px; margin-bottom: 16px; overflow: hidden; cursor: pointer; }
+      .selected { border: 4px solid #ffd34d; }
+      .hotelImage, .imageMissing { width: 100%; height: 190px; object-fit: cover; display: block; }
+      .imageMissing { background: linear-gradient(135deg,#10254a,#1d4da8); color: white; padding: 22px; display: flex; flex-direction: column; justify-content: center; }
+      .imageBadge { letter-spacing: 7px; font-weight: 900; font-size: 11px; opacity: .85; }
+      .imageMissingTitle { font-size: 22px; font-weight: 900; margin-top: 12px; }
+      .imageMissingText { font-size: 14px; margin-top: 8px; }
+      .cardBody { padding: 15px; }
+      h2 { font-size: 22px; margin: 0 0 8px; }
+      .green, .amber, .safeNote { border-radius: 13px; padding: 12px; font-weight: 900; margin: 12px 0; line-height: 1.35; }
+      .green, .safeNote { background: #dff7e6; color: #075b24; }
+      .amber { background: #fff2be; color: #6b4d00; }
+      .rate { background: #f6f8fc; border-radius: 14px; padding: 13px; line-height: 1.35; }
+      .darkMini { width: 100%; margin-top: 12px; background: #10254a; color: white; border: 0; border-radius: 12px; padding: 12px; font-weight: 900; cursor: pointer; }
+      .price { color: #0f4db3; font-size: 30px; font-weight: 900; margin: 12px 0; }
+      .mapBox { background: #f6f8fc; padding: 8px; border-radius: 16px; margin: 12px 0; }
+      iframe { width: 100%; height: 180px; border: 0; border-radius: 12px; }
+      .infoPage { min-height: 100vh; background: linear-gradient(135deg,#06101f,#123a7a); color: white; padding: 32px; }
+      .infoCard { max-width: 980px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22); border-radius: 28px; padding: 36px; }
+      .infoCard h1 { color: #ffd34d; font-size: 44px; }
+      .infoBody { font-size: 20px; line-height: 1.65; }
+      @media (max-width: 980px) {
+        .hero, .mainGrid { grid-template-columns: 1fr; }
+        .panel { height: auto; min-height: 420px; }
+      }
+    `}</style>
+  );
+}
