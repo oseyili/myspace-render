@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
@@ -475,6 +475,11 @@ export default function App() {
 
       if (!res.ok || !data.ok) {
         setMessage(data.message || "Reservation could not be created.");
+        return;
+      }
+
+      if (data.payment_url) {
+        window.location.href = data.payment_url;
         return;
       }
 

@@ -7,6 +7,7 @@ const path = require("path");
 const zlib = require("zlib");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
+const Stripe = require("stripe");
 
 const app = express();
 
@@ -202,6 +203,10 @@ const SMTP_PASS = clean(process.env.SMTP_PASS || process.env.SMTP_PASSWORD);
 const SMTP_FROM = clean(process.env.SMTP_FROM) || `MySpace Hotel <${SMTP_USER}>`;
 const RESERVATION_EMAIL = clean(process.env.RESERVATION_EMAIL || process.env.SUPPORT_EMAIL || SMTP_USER);
 const SUPPORT_EMAIL = clean(process.env.SUPPORT_EMAIL || RESERVATION_EMAIL);
+
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY)
+  : null;
 
 function smtpSecureValue() {
   if (process.env.SMTP_SECURE !== undefined) return String(process.env.SMTP_SECURE).toLowerCase() === "true";
@@ -926,16 +931,59 @@ app.post("/reservation-request", async (req, res) => {
     bookings.unshift(booking);
     writeJson(BOOKINGS_FILE, bookings);
 
+    let paymentUrl = null;
+
+    if (stripe && booking.status === "PAYMENT_READY" && booking.amount > 0) {
+      try {
+        const session = await stripe.checkout.sessions.create({
+          mode: "payment",
+          payment_method_types: ["card"],
+          customer_email: booking.customer_email || undefined,
+          line_items: [
+            {
+              quantity: 1,
+              price_data: {
+                currency: (booking.currency || "GBP").toLowerCase(),
+                unit_amount: Math.round(Number(booking.amount) * 100),
+                product_data: {
+                  name: booking.hotel_name || "MySpace Hotel stay",
+                  description: `${booking.destination || ""} | ${booking.checkin || ""} to ${booking.checkout || ""}`,
+                },
+              },
+            },
+          ],
+          metadata: {
+            reservation_code: booking.reservation_code,
+            hotel_id: booking.hotel_id,
+            hotel_name: booking.hotel_name,
+            customer_email: booking.customer_email,
+          },
+          success_url: `${PUBLIC_FRONTEND_URL}/reservation-confirmed?code=${encodeURIComponent(booking.reservation_code)}`,
+          cancel_url: `${PUBLIC_FRONTEND_URL}/?payment=cancelled&code=${encodeURIComponent(booking.reservation_code)}`,
+        });
+
+        paymentUrl = session.url;
+        booking.stripe_session_id = session.id;
+        booking.payment_url_created_at = new Date().toISOString();
+        writeJson(BOOKINGS_FILE, bookings);
+      } catch (err) {
+        console.log("STRIPE CHECKOUT FAILED:", err.message);
+      }
+    }
+
     const emailResult = await sendReservationEmails(booking);
 
     res.json({
       ok: true,
       reservation_code: code,
       status: booking.status,
+      payment_url: paymentUrl,
       email: emailResult,
       message:
-        booking.status === "PAYMENT_READY"
-          ? "Reservation is ready for secure checkout."
+        paymentUrl
+          ? "Secure checkout is ready."
+          : booking.status === "PAYMENT_READY"
+          ? "Reservation saved. Secure checkout could not be opened automatically."
           : "Your request has been received. We will confirm availability and price before payment.",
     });
   } catch (err) {
@@ -984,3 +1032,5 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("Reservation email:", RESERVATION_EMAIL ? "configured" : "missing");
   console.log("");
 });
+
+
