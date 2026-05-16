@@ -971,14 +971,16 @@ app.post("/reservation-request", async (req, res) => {
       }
     }
 
-    const emailResult = await sendReservationEmails(booking);
+    sendReservationEmails(booking)
+      .then((result) => console.log("EMAIL RESULT:", JSON.stringify(result)))
+      .catch((err) => console.log("EMAIL BACKGROUND FAILED:", err.message));
 
     res.json({
       ok: true,
       reservation_code: code,
       status: booking.status,
       payment_url: paymentUrl,
-      email: emailResult,
+      email: { queued: true },
       message:
         paymentUrl
           ? "Secure checkout is ready."
@@ -1032,5 +1034,6 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("Reservation email:", RESERVATION_EMAIL ? "configured" : "missing");
   console.log("");
 });
+
 
 
