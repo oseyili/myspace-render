@@ -1,9 +1,21 @@
 {
-  "source": "data\\live_rate_cache_joined_geo_images_DEST_FIXED.json.gz",
-  "source_rows": 175230,
-  "unique_hotels": 517,
-  "countries": 13,
-  "cities": 19,
-  "chunk_count": 1,
-  "generated_at": "2026-05-15T14:15:41.340Z"
+  "source_files": [
+    "live_rate_cache_joined_geo_images_DEST_FIXED.json.gz",
+    "live_rate_cache_joined_geo_images_SMART.json.gz",
+    "live_rate_cache_joined_geo_images.json.gz",
+    "REAL_ONLY_live_rates_with_geo_images.json.gz",
+    "hotel_live_rates_seed.json",
+    "hotel_live_rates_london_seed.json",
+    "live-rate-cache\\live-rates-000001.ndjson.gz",
+    "live-rate-cache\\live-rates-000002.ndjson.gz"
+  ],
+  "source_rows": 382976,
+  "usable_rows": 11806,
+  "final_live_rate_rows": 11806,
+  "unique_live_hotels": 143,
+  "countries": 20,
+  "cities": 57,
+  "repaired_geo_rows": 12163,
+  "chunk_count": 2,
+  "generated_at": "2026-05-16T18:58:28.884Z"
 }
