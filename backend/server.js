@@ -9,10 +9,115 @@ const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const Stripe = require("stripe");
 
+
+const LIVE_RATE_MEMORY_CACHE = new Map();
+
+function buildLiveCacheKey(payload) {
+  return [
+    payload.hotel_code || payload.hotel_id || "",
+    payload.checkin || "",
+    payload.checkout || "",
+    payload.guests || "",
+    payload.rooms || ""
+  ].join("|");
+}
+
+function getCachedLiveRate(payload) {
+  const key = buildLiveCacheKey(payload);
+
+  if (!LIVE_RATE_MEMORY_CACHE.has(key)) {
+    return null;
+  }
+
+  const item = LIVE_RATE_MEMORY_CACHE.get(key);
+
+  const age = Date.now() - item.created;
+
+  if (age > 1000 * 60 * 15) {
+    LIVE_RATE_MEMORY_CACHE.delete(key);
+    return null;
+  }
+
+  return item.data;
+}
+
+function setCachedLiveRate(payload, data) {
+  const key = buildLiveCacheKey(payload);
+
+  LIVE_RATE_MEMORY_CACHE.set(key, {
+    created: Date.now(),
+    data
+  });
+}
+
+
+
+
 const app = express();
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "25mb" }));
+
+const COUNTRY_EMERGENCY = {
+  "United States": { emergency: "911", police: "911", ambulance: "911", fire: "911" },
+  "U.S. Virgin Islands": { emergency: "911", police: "911", ambulance: "911", fire: "911" },
+  "United Kingdom": { emergency: "999 or 112", police: "999", ambulance: "999", fire: "999" },
+  "Nigeria": { emergency: "112", police: "112", ambulance: "112", fire: "112" },
+  "France": { emergency: "112", police: "17", ambulance: "15", fire: "18" },
+  "Spain": { emergency: "112", police: "091", ambulance: "061", fire: "080" },
+  "Thailand": { emergency: "191", police: "191", ambulance: "1669", fire: "199" },
+  "Tunisia": { emergency: "197", police: "197", ambulance: "190", fire: "198" },
+  "United Arab Emirates": { emergency: "999", police: "999", ambulance: "998", fire: "997" },
+  "Japan": { emergency: "110 / 119", police: "110", ambulance: "119", fire: "119" },
+  "Italy": { emergency: "112", police: "113", ambulance: "118", fire: "115" },
+  "Germany": { emergency: "112", police: "110", ambulance: "112", fire: "112" }
+};
+
+function getEmergency(country) {
+  return COUNTRY_EMERGENCY[country] || {
+    emergency: "Source not yet verified",
+    police: "Source not yet verified",
+    ambulance: "Source not yet verified",
+    fire: "Source not yet verified"
+  };
+}
+
+app.get("/api/destination-guide", async (req, res) => {
+  const country = clean(req.query.country);
+  const city = clean(req.query.city);
+  const hotel = clean(req.query.hotel_name || req.query.hotel);
+  const address = clean(req.query.address);
+  const lat = clean(req.query.lat);
+  const lng = clean(req.query.lng);
+
+  const exactPlace = [hotel, address, city, country].filter(Boolean).join(", ");
+  const mapPlace = lat && lng ? `${lat},${lng}` : exactPlace;
+  const q = encodeURIComponent(mapPlace || `${city} ${country}`);
+
+  res.json({
+    ok: true,
+    country,
+    city,
+    hotel,
+    address,
+    coordinates: { lat, lng },
+    emergency: getEmergency(country),
+    sources_note: "Emergency numbers are country-specific where verified. Travellers should also confirm locally with the hotel or official local services.",
+    airport_search: `https://www.google.com/maps/search/airport+near+${q}`,
+    hospitals_search: `https://www.google.com/maps/search/hospital+near+${q}`,
+    restaurants_search: `https://www.google.com/maps/search/restaurants+near+${q}`,
+    transport_search: `https://www.google.com/maps/search/transport+near+${q}`,
+    pharmacy_search: `https://www.google.com/maps/search/pharmacy+near+${q}`,
+    tourist_search: `https://www.google.com/maps/search/things+to+do+near+${q}`,
+    safety_search: `https://www.google.com/search?q=${q}+official+travel+safety`,
+    weather_search: `https://www.google.com/search?q=${q}+weather`,
+    embassy_search: `https://www.google.com/search?q=${q}+embassy+or+consulate`
+  });
+});
+
+
+
+
 
 const PORT = Number(process.env.PORT || 5050);
 const PUBLIC_FRONTEND_URL =
@@ -116,24 +221,36 @@ function makeReservationCode() {
   return `MSH-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
 }
 
+
+function propertyRank(hotel) {
+  const type = lower(hotel.property_type || "");
+
+  if (type === "hotel") return 1;
+  if (type === "resort") return 2;
+  if (type === "guest house") return 3;
+  if (type === "villa") return 4;
+  if (type === "apartment") return 5;
+
+  return 9;
+}
 function propertyTypeFromNameAndText(name, text = "") {
   const value = lower(`${name} ${text}`);
 
-  if (
-    value.includes("apartment") ||
-    value.includes("residence") ||
-    value.includes("studio") ||
-    value.includes("flat") ||
-    value.includes("penthouse") ||
-    value.includes("holiday home") ||
-    value.includes("serviced")
-  ) {
+  const apartmentWords = [
+    "apartment", "apartments", " apt ", " apt", "apt ",
+    "residence", "residences", "studio", "flat", "penthouse",
+    "holiday home", "serviced", "villa", "short let", "short-let",
+    "bedroom", "1-bedroom", "2-bedroom", "3-bedroom", "4-bedroom",
+    "sleeps", "home", "house", "condo", "cottage"
+  ];
+
+  if (apartmentWords.some((word) => value.includes(word))) {
+    if (value.includes("villa")) return "Villa";
     return "Apartment";
   }
 
-  if (value.includes("villa")) return "Villa";
-  if (value.includes("resort")) return "Resort";
   if (value.includes("guest house") || value.includes("guesthouse")) return "Guest house";
+  if (value.includes("resort")) return "Resort";
   return "Hotel";
 }
 
@@ -402,7 +519,7 @@ for (const raw of GLOBAL_HOTELS_RAW) {
 
   const hotel = {
     hotel_id: hotelId,
-    hotel_code: hotelId,
+    hotel_code: clean(raw.supplier_hotel_id || raw.hotel_code || raw.hotel_id || hotelId),
     hotel_name: hotelName,
     country,
     city,
@@ -468,7 +585,7 @@ function addLiveRateRow(row) {
 
     cityMap.set(hotelId, {
       hotel_id: hotelId,
-      hotel_code: hotelId,
+      hotel_code: clean(row.supplier_hotel_id || row.hotel_code || row.hotel_id || hotelId),
       hotel_name: hotelName,
       country,
       city,
@@ -738,60 +855,230 @@ app.get("/api/hotels/search", (req, res) => {
   });
 });
 
-app.get("/api/hotels/live-check", (req, res) => {
-  const hotelId = lower(req.query.hotel_id);
+function hotelbedsSignature() {
+  const apiKey = clean(process.env.HOTELBEDS_API_KEY || process.env.HOTELBEDS_KEY);
+  const secret = clean(process.env.HOTELBEDS_SECRET || process.env.HOTELBEDS_API_SECRET);
+  const timestamp = Math.floor(Date.now() / 1000);
+
+  if (!apiKey || !secret) return null;
+
+  return crypto
+    .createHash("sha256")
+    .update(apiKey + secret + timestamp)
+    .digest("hex");
+}
+
+function hotelbedsBaseUrl() {
+  return clean(process.env.HOTELBEDS_BASE_URL) || "https://api.test.hotelbeds.com";
+}
+
+let HOTELBEDS_QUOTA_BLOCK_UNTIL = 0;
+
+async function fetchFreshHotelbedsRate({ hotelId, checkin, checkout, guests, rooms }) {
+  if (Date.now() < HOTELBEDS_QUOTA_BLOCK_UNTIL) {
+    return {
+      ok: false,
+      quota_blocked: true,
+      message: "Live supplier quota is temporarily unavailable. Request confirmation instead."
+    };
+  }
+  const apiKey = clean(process.env.HOTELBEDS_API_KEY || process.env.HOTELBEDS_KEY);
+  const signature = hotelbedsSignature();
+
+  if (!apiKey || !signature || !hotelId) {
+    return { ok: false, message: "Live price check is not configured for this stay." };
+  }
+
+  const adults = Math.max(1, Number(guests || 1));
+  const roomCount = Math.max(1, Number(rooms || 1));
+
+  const body = {
+    stay: {
+      checkIn: checkin,
+      checkOut: checkout
+    },
+    occupancies: [
+      {
+        rooms: roomCount,
+        adults,
+        children: 0
+      }
+    ],
+    hotels: {
+      hotel: [Number.isFinite(Number(hotelId)) ? Number(hotelId) : hotelId]
+    }
+  };
+
+  const response = await fetch(`${hotelbedsBaseUrl()}/hotel-api/1.0/hotels`, {
+    method: "POST",
+    headers: {
+      "Api-key": apiKey,
+      "X-Signature": signature,
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    console.log("HOTELBEDS STATUS:", response.status);
+    console.log("HOTELBEDS BODY:", JSON.stringify(data).slice(0, 900));
+
+    const msg = data?.error?.message || data?.message || `Live price check failed: ${response.status}`;
+
+    if (response.status === 403 && String(msg).toLowerCase().includes("quota")) {
+      HOTELBEDS_QUOTA_BLOCK_UNTIL = Date.now() + 1000 * 60 * 30;
+      console.log("HOTELBEDS QUOTA COOLDOWN: 30 minutes");
+    }
+
+    return {
+      ok: false,
+      quota_blocked: response.status === 403 && String(msg).toLowerCase().includes("quota"),
+      message: msg
+    };
+  }
+
+  const hotel = data?.hotels?.hotels?.[0];
+  const room = hotel?.rooms?.[0];
+  const rate = room?.rates?.[0];
+
+  if (!hotel || !room || !rate) {
+    return { ok: false, message: "No current live price was returned for this stay." };
+  }
+
+  const amount = money(rate.sellingRate || rate.net || rate.hotelSellingRate);
+  const currency = clean(rate.currency || data?.hotels?.currency || "GBP").toUpperCase();
+  const rateKey = clean(rate.rateKey);
+
+  if (!amount || !rateKey) {
+    return { ok: false, message: "Live price returned incomplete rate details." };
+  }
+
+  return {
+    ok: true,
+    hotel_name: clean(hotel.name),
+    amount,
+    currency,
+    room_name: clean(room.name || room.code || "Selected room"),
+    board_name: clean(rate.boardName || rate.boardCode || "Room only"),
+    payment_type: clean(rate.paymentType || "Secure checkout"),
+    rate_key: rateKey,
+    cancellation_policies: Array.isArray(rate.cancellationPolicies) ? rate.cancellationPolicies : []
+  };
+}
+
+app.get("/api/hotels/live-check", async (req, res) => {
+  const hotelId = clean(req.query.hotel_code || req.query.hotel_id);
   const hotelName = lower(req.query.hotel_name);
   const country = clean(req.query.country);
   const city = clean(req.query.city);
+  const checkin = clean(req.query.checkin);
+  const checkout = clean(req.query.checkout);
+  const guests = number(req.query.guests || 1);
+  const rooms = number(req.query.rooms || 1);
+
+  if (!hotelId || !checkin || !checkout) {
+    return res.json({
+      ok: true,
+      live_payment_ready: false,
+      payment_ready: false,
+      price_status: "Choose dates and a stay to check the latest price."
+    });
+  }
+
+  try {
+    const fresh = await fetchFreshHotelbedsRate({
+      hotelId,
+      checkin,
+      checkout,
+      guests,
+      rooms
+    });
+
+    if (fresh.ok) {
+      return res.json({
+        ok: true,
+        live_payment_ready: true,
+        payment_ready: true,
+        price_status: "Current price is available for secure checkout.",
+        hotel_id: hotelId,
+        hotel_name: fresh.hotel_name || req.query.hotel_name || "",
+        country,
+        city,
+        amount: fresh.amount,
+        currency: fresh.currency,
+        room_name: fresh.room_name,
+        board_name: fresh.board_name,
+        payment_type: fresh.payment_type,
+        rate_key: fresh.rate_key,
+        cancellation_policies: fresh.cancellation_policies,
+        rooms: [
+          {
+            room_name: fresh.room_name,
+            board_name: fresh.board_name,
+            payment_type: fresh.payment_type,
+            currency: fresh.currency,
+            amount: fresh.amount,
+            rate_key: fresh.rate_key,
+            cancellation_policies: fresh.cancellation_policies
+          }
+        ],
+        first_rate: {
+          room_name: fresh.room_name,
+          board_name: fresh.board_name,
+          payment_type: fresh.payment_type,
+          currency: fresh.currency,
+          amount: fresh.amount,
+          rate_key: fresh.rate_key,
+          cancellation_policies: fresh.cancellation_policies
+        }
+      });
+    }
+
+    console.log("LIVE HOTELBEDS CHECK:", fresh.message);
+  } catch (err) {
+    console.log("LIVE HOTELBEDS ERROR:", err.message);
+  }
+
   const key = `${country}|||${city}`;
   const cityMap = LIVE_RATE_INDEX.get(key);
 
-  if (!cityMap) {
-    return res.json({
-      ok: true,
-      live_payment_ready: false,
-      payment_ready: false,
-      price_status: "We will confirm the latest availability and price before payment.",
-    });
-  }
+  if (cityMap) {
+    for (const hotel of cityMap.values()) {
+      if (lower(hotel.hotel_id) === lower(hotelId) || lower(hotel.hotel_name) === hotelName) {
+        const cheapest = hotel.rooms?.[0];
 
-  let found = null;
-
-  for (const hotel of cityMap.values()) {
-    if (lower(hotel.hotel_id) === hotelId || lower(hotel.hotel_name) === hotelName) {
-      found = hotel;
-      break;
+        if (cheapest?.rate_key) {
+          return res.json({
+            ok: true,
+            live_payment_ready: true,
+            payment_ready: true,
+            price_status: "Current cached price is available for secure checkout.",
+            hotel_id: hotel.hotel_id,
+            hotel_name: hotel.hotel_name,
+            country: hotel.country,
+            city: hotel.city,
+            amount: cheapest.amount,
+            currency: cheapest.currency,
+            room_name: cheapest.room_name,
+            board_name: cheapest.board_name,
+            payment_type: cheapest.payment_type,
+            rate_key: cheapest.rate_key,
+            rooms: hotel.rooms.slice(0, 20),
+            first_rate: cheapest
+          });
+        }
+      }
     }
   }
 
-  if (!found || !found.rooms.length) {
-    return res.json({
-      ok: true,
-      live_payment_ready: false,
-      payment_ready: false,
-      price_status: "We will confirm the latest availability and price before payment.",
-    });
-  }
-
-  const cheapest = found.rooms[0];
-
-  res.json({
+  return res.json({
     ok: true,
-    live_payment_ready: true,
-    payment_ready: true,
-    price_status: "Current total is available for secure checkout.",
-    hotel_id: found.hotel_id,
-    hotel_name: found.hotel_name,
-    country: found.country,
-    city: found.city,
-    amount: cheapest.amount,
-    currency: cheapest.currency,
-    room_name: cheapest.room_name,
-    board_name: cheapest.board_name,
-    payment_type: cheapest.payment_type,
-    rate_key: cheapest.rate_key,
-    rooms: found.rooms.slice(0, 20),
-    first_rate: cheapest,
+    live_payment_ready: false,
+    payment_ready: false,
+    price_status: "We will confirm the latest availability and price before payment."
   });
 });
 
@@ -847,34 +1134,71 @@ app.get("/api/currency/convert", async (req, res) => {
 });
 
 app.get("/api/guide", (req, res) => {
-  const country = clean(req.query.country || "your destination");
+  const country = clean(req.query.country || "");
   const city = clean(req.query.city || "");
   const area = clean(req.query.area || "");
-  const destination = [area, city, country].filter(Boolean).join(", ");
+  const hotel = clean(req.query.hotel || "");
+  const address = clean(req.query.address || "");
+  const lat = clean(req.query.lat || "");
+  const lng = clean(req.query.lng || "");
+
+  const exactPlace = [hotel, address, area, city, country].filter(Boolean).join(", ");
+  const mapBase = lat && lng ? `${lat},${lng}` : exactPlace;
 
   const emergencyByCountry = {
-    "United Kingdom": { emergency: "999 or 112", police: "999", ambulance: "999", fire: "999" },
-    "United States": { emergency: "911", police: "911", ambulance: "911", fire: "911" },
-    Canada: { emergency: "911", police: "911", ambulance: "911", fire: "911" },
-    Nigeria: { emergency: "112", police: "112", ambulance: "112", fire: "112" },
-    France: { emergency: "112", police: "17", ambulance: "15", fire: "18" },
-    Spain: { emergency: "112", police: "112", ambulance: "112", fire: "112" },
-    Italy: { emergency: "112", police: "112", ambulance: "118", fire: "115" },
-    Germany: { emergency: "112", police: "110", ambulance: "112", fire: "112" },
-    "United Arab Emirates": { emergency: "999", police: "999", ambulance: "998", fire: "997" },
-    Australia: { emergency: "000", police: "000", ambulance: "000", fire: "000" },
-    Japan: { emergency: "110 / 119", police: "110", ambulance: "119", fire: "119" },
-    "South Africa": { emergency: "112 / 10111", police: "10111", ambulance: "112", fire: "112" },
+    "United Kingdom": { emergency: "999 or 112", police: "999", ambulance: "999", fire: "999", source: "UK national emergency service" },
+    "United States": { emergency: "911", police: "911", ambulance: "911", fire: "911", source: "U.S. National 911 Program / FCC" },
+    "Canada": { emergency: "911", police: "911", ambulance: "911", fire: "911", source: "Canadian emergency services" },
+    "France": { emergency: "112", police: "17", ambulance: "15", fire: "18", source: "EU 112 and French emergency services" },
+    "Spain": { emergency: "112", police: "112", ambulance: "112", fire: "112", source: "EU 112" },
+    "Italy": { emergency: "112", police: "112", ambulance: "118", fire: "115", source: "EU 112 and Italian emergency services" },
+    "Germany": { emergency: "112", police: "110", ambulance: "112", fire: "112", source: "EU 112 and German emergency services" },
+    "Netherlands": { emergency: "112", police: "112", ambulance: "112", fire: "112", source: "EU 112" },
+    "Ireland": { emergency: "112 or 999", police: "112 or 999", ambulance: "112 or 999", fire: "112 or 999", source: "EU 112 / Irish emergency services" },
+    "Portugal": { emergency: "112", police: "112", ambulance: "112", fire: "112", source: "EU 112" },
+    "Austria": { emergency: "112", police: "133", ambulance: "144", fire: "122", source: "EU 112 and Austrian emergency services" },
+    "Czech Republic": { emergency: "112", police: "158", ambulance: "155", fire: "150", source: "EU 112 and Czech emergency services" },
+    "United Arab Emirates": { emergency: "999", police: "999", ambulance: "998", fire: "997", source: "UAE emergency services" },
+    "Australia": { emergency: "000", police: "000", ambulance: "000", fire: "000", source: "Australian emergency services" },
+    "Japan": { emergency: "110 / 119", police: "110", ambulance: "119", fire: "119", source: "Japanese emergency services" },
+    "South Africa": { emergency: "112 / 10111", police: "10111", ambulance: "112", fire: "112", source: "South African emergency services" },
+    "Nigeria": { emergency: "112", police: "112", ambulance: "112", fire: "112", source: "Nigeria national emergency service" },
+    "Morocco": { emergency: "19 / 15", police: "19", ambulance: "15", fire: "15", source: "Moroccan emergency services" },
+    "Brazil": { emergency: "190 / 192 / 193", police: "190", ambulance: "192", fire: "193", source: "Brazilian emergency services" },
+    "Argentina": { emergency: "911 / 107 / 100", police: "911", ambulance: "107", fire: "100", source: "Argentine emergency services" },
+    "Ethiopia": { emergency: "991 / 907", police: "991", ambulance: "907", fire: "939", source: "Local emergency services" }
   };
 
-  const emergency = emergencyByCountry[country] || { emergency: "112", police: "112", ambulance: "112", fire: "112" };
+  const emergency = emergencyByCountry[country] || {
+    emergency: "Check locally",
+    police: "Check locally",
+    ambulance: "Check locally",
+    fire: "Check locally",
+    source: "Not yet verified in MySpace Hotel emergency dataset",
+    note: "Please confirm emergency numbers with your hotel, airport information desk, or official local emergency service."
+  };
+
+  const map = (q) => `https://www.google.com/maps/search/${encodeURIComponent(q + " near " + mapBase)}`;
 
   res.json({
     ok: true,
     guide: {
-      destination,
+      destination: exactPlace || [city, country].filter(Boolean).join(", "),
+      selected_stay: hotel,
+      selected_address: address,
+      coordinates: { lat, lng },
       emergency,
-    },
+      links: {
+        hospital: map("hospital"),
+        pharmacy: map("pharmacy"),
+        police: map("police station"),
+        airport: map("airport"),
+        restaurants: map("restaurants"),
+        taxi: map("taxi"),
+        train_or_metro: map("train station metro station"),
+        attractions: map("tourist attractions museums parks")
+      }
+    }
   });
 });
 
@@ -1034,6 +1358,21 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("Reservation email:", RESERVATION_EMAIL ? "configured" : "missing");
   console.log("");
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
