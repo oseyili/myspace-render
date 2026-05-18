@@ -7,6 +7,7 @@ const path = require("path");
 const zlib = require("zlib");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
+const { checkFallbackSuppliers } = require("./supplier-fallback");
 const Stripe = require("stripe");
 
 
@@ -1074,11 +1075,24 @@ app.get("/api/hotels/live-check", async (req, res) => {
     }
   }
 
+  const fallback = await checkFallbackSuppliers({
+    hotel_id: hotelId,
+    hotel_code: hotelId,
+    hotel_name: req.query.hotel_name,
+    country,
+    city,
+    checkin,
+    checkout,
+    guests,
+    rooms
+  });
+
   return res.json({
     ok: true,
     live_payment_ready: false,
     payment_ready: false,
-    price_status: "We will confirm the latest availability and price before payment."
+    price_status: fallback.message || "No live supplier rate was returned. Request confirmation before payment.",
+    supplier_attempts: fallback.attempts || []
   });
 });
 
@@ -1358,6 +1372,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("Reservation email:", RESERVATION_EMAIL ? "configured" : "missing");
   console.log("");
 });
+
 
 
 
