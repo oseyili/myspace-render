@@ -7,210 +7,40 @@
 <title>MySpace Hotel Partner Dashboard</title>
 
 <style>
-*{
-  box-sizing:border-box;
-}
-
-body{
-  margin:0;
-  background:#00112b;
-  font-family:Arial,Helvetica,sans-serif;
-  color:#0d2f7a;
-}
-
-.wrapper{
-  max-width:1400px;
-  margin:0 auto;
-  padding:32px;
-}
-
-.panel{
-  background:#f5f7fc;
-  border-radius:34px;
-  padding:36px;
-}
-
-.brand{
-  color:#d7a300;
-  font-size:16px;
-  font-weight:900;
-  letter-spacing:10px;
-  margin-bottom:18px;
-}
-
-h1{
-  margin:0;
-  font-size:58px;
-  line-height:1;
-  color:#0d3f9b;
-}
-
-.subtitle{
-  margin-top:14px;
-  font-size:18px;
-  font-weight:700;
-  color:#55627f;
-}
-
-.auth{
-  margin-top:30px;
-  display:grid;
-  grid-template-columns:1fr 1fr 160px;
-  gap:14px;
-}
-
-.auth input{
-  height:68px;
-  border-radius:18px;
-  border:2px solid #d7ddea;
-  padding:0 18px;
-  font-size:18px;
-  font-weight:700;
-}
-
-.auth button{
-  border:none;
-  border-radius:18px;
-  background:#f6cc47;
-  color:#000;
-  font-size:22px;
-  font-weight:900;
-  cursor:pointer;
-}
-
-.message{
-  margin-top:22px;
-  padding:20px;
-  border-radius:18px;
-  font-size:20px;
-  font-weight:900;
-}
-
-.ok{
-  background:#cdeed5;
-  color:#00612b;
-}
-
-.error{
-  background:#f3d2d2;
-  color:#9a1111;
-}
-
-.grid{
-  margin-top:28px;
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:18px;
-}
-
-.card{
-  background:#e9edf6;
-  border-radius:26px;
-  padding:26px;
-  min-height:170px;
-}
-
-.card-title{
-  font-size:14px;
-  letter-spacing:4px;
-  font-weight:900;
-  color:#4d5f84;
-}
-
-.card-value{
-  margin-top:28px;
-  font-size:58px;
-  font-weight:900;
-  color:#1140a0;
-}
-
-.table-box{
-  margin-top:26px;
-  background:#e9edf6;
-  border-radius:26px;
-  padding:24px;
-}
-
-.table-title{
-  font-size:22px;
-  font-weight:900;
-  margin-bottom:20px;
-}
-
-.load-btn{
-  background:#133f9f;
-  color:#fff;
-  border:none;
-  border-radius:16px;
-  padding:18px 28px;
-  font-size:18px;
-  font-weight:900;
-  cursor:pointer;
-  margin-bottom:20px;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th{
-  text-align:left;
-  padding:14px;
-  border-bottom:2px solid #d5dcea;
-  font-size:18px;
-}
-
-td{
-  padding:14px;
-  border-bottom:1px solid #d5dcea;
-  font-size:16px;
-  color:#1b2f54;
-}
-
-.links{
-  display:flex;
-  flex-wrap:wrap;
-  gap:14px;
-  margin-top:26px;
-}
-
-.links a{
-  text-decoration:none;
-  background:#041738;
-  color:#fff;
-  padding:16px 22px;
-  border-radius:16px;
-  font-weight:900;
-  font-size:18px;
-}
-
-@media(max-width:1200px){
-  .grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .auth{
-    grid-template-columns:1fr;
-  }
-}
-
-@media(max-width:700px){
-  .grid{
-    grid-template-columns:1fr;
-  }
-
-  h1{
-    font-size:40px;
-  }
-}
+*{box-sizing:border-box}
+body{margin:0;background:#00112b;font-family:Arial,Helvetica,sans-serif;color:#0d2f7a}
+.wrapper{max-width:1400px;margin:0 auto;padding:32px}
+.panel{background:#f5f7fc;border-radius:34px;padding:36px}
+.brand{color:#d7a300;font-size:16px;font-weight:900;letter-spacing:10px;margin-bottom:18px}
+h1{margin:0;font-size:56px;line-height:1;color:#0d3f9b}
+.subtitle{margin-top:14px;font-size:18px;font-weight:700;color:#55627f}
+.auth{margin-top:30px;display:grid;grid-template-columns:1fr 1fr 160px;gap:14px}
+.auth input{height:64px;border-radius:18px;border:2px solid #d7ddea;padding:0 18px;font-size:18px;font-weight:700}
+.auth button{border:none;border-radius:18px;background:#f6cc47;color:#000;font-size:22px;font-weight:900;cursor:pointer}
+.message{margin-top:22px;padding:20px;border-radius:18px;font-size:18px;font-weight:900}
+.ok{background:#cdeed5;color:#00612b}
+.error{background:#f3d2d2;color:#9a1111}
+.info{background:#dce8ff;color:#0d3f9b}
+.grid{margin-top:28px;display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.card{background:#e9edf6;border-radius:26px;padding:26px;min-height:150px}
+.card-title{font-size:14px;letter-spacing:4px;font-weight:900;color:#4d5f84}
+.card-value{margin-top:24px;font-size:46px;font-weight:900;color:#1140a0}
+.table-box{margin-top:26px;background:#e9edf6;border-radius:26px;padding:24px}
+.table-title{font-size:24px;font-weight:900;margin-bottom:20px;color:#0d3f9b}
+.load-btn{background:#133f9f;color:#fff;border:none;border-radius:16px;padding:18px 28px;font-size:18px;font-weight:900;cursor:pointer;margin-bottom:20px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:14px;border-bottom:2px solid #d5dcea;font-size:17px;color:#0d3f9b}
+td{padding:14px;border-bottom:1px solid #d5dcea;font-size:15px;color:#1b2f54}
+.links{display:flex;flex-wrap:wrap;gap:14px;margin-top:26px}
+.links a{text-decoration:none;background:#041738;color:#fff;padding:16px 22px;border-radius:16px;font-weight:900;font-size:17px}
+@media(max-width:1200px){.grid{grid-template-columns:repeat(2,1fr)}.auth{grid-template-columns:1fr}}
+@media(max-width:700px){.grid{grid-template-columns:1fr}h1{font-size:38px}}
 </style>
 </head>
 
 <body>
 
 <div class="wrapper">
-
 <div class="panel">
 
 <div class="brand">MYSPACE HOTEL</div>
@@ -227,59 +57,23 @@ Enterprise overview for PMS, channel-manager, distribution and integration partn
 <button onclick="connectPartner()">Connect</button>
 </div>
 
-<div id="message" class="message error">
-Connect first.
+<div id="message" class="message info">
+Checking backend connection...
 </div>
 
 <div class="grid">
-
-<div class="card">
-<div class="card-title">HOTELS LOADED</div>
-<div class="card-value" id="hotelsLoaded">-</div>
-</div>
-
-<div class="card">
-<div class="card-title">RESERVATIONS</div>
-<div class="card-value" id="reservations">-</div>
-</div>
-
-<div class="card">
-<div class="card-title">WEBHOOK EVENTS</div>
-<div class="card-value" id="webhooks">-</div>
-</div>
-
-<div class="card">
-<div class="card-title">RETRY QUEUE</div>
-<div class="card-value" id="retryQueue">-</div>
-</div>
-
-<div class="card">
-<div class="card-title">FAILOVERS</div>
-<div class="card-value" id="failovers">-</div>
-</div>
-
-<div class="card">
-<div class="card-title">RECOVERIES</div>
-<div class="card-value" id="recoveries">-</div>
-</div>
-
-<div class="card">
-<div class="card-title">PMS MAPPINGS</div>
-<div class="card-value" id="mappings">-</div>
-</div>
-
-<div class="card">
-<div class="card-title">SYSTEM</div>
-<div class="card-value">V3.1</div>
-</div>
-
+<div class="card"><div class="card-title">HOTELS LOADED</div><div class="card-value" id="hotelsLoaded">-</div></div>
+<div class="card"><div class="card-title">RESERVATIONS</div><div class="card-value" id="reservations">-</div></div>
+<div class="card"><div class="card-title">WEBHOOK EVENTS</div><div class="card-value" id="webhooks">-</div></div>
+<div class="card"><div class="card-title">RETRY QUEUE</div><div class="card-value" id="retryQueue">-</div></div>
+<div class="card"><div class="card-title">FAILOVERS</div><div class="card-value" id="failovers">-</div></div>
+<div class="card"><div class="card-title">RECOVERIES</div><div class="card-value" id="recoveries">-</div></div>
+<div class="card"><div class="card-title">PMS MAPPINGS</div><div class="card-value" id="mappings">-</div></div>
+<div class="card"><div class="card-title">SYSTEM</div><div class="card-value">V3.1</div></div>
 </div>
 
 <div class="table-box">
-
-<div class="table-title">
-Live API test
-</div>
+<div class="table-title">Live API test</div>
 
 <button class="load-btn" onclick="loadHotels()">
 Load first authenticated hotel records
@@ -294,14 +88,10 @@ Load first authenticated hotel records
 <th>Country</th>
 </tr>
 </thead>
-
 <tbody id="hotelRows">
-<tr>
-<td colspan="4">Connect first.</td>
-</tr>
+<tr><td colspan="4">Connect first.</td></tr>
 </tbody>
 </table>
-
 </div>
 
 <div class="links">
@@ -317,143 +107,149 @@ Load first authenticated hotel records
 </div>
 
 <script>
-
 const API_BASE = "https://myspace-hotel-backend.onrender.com";
-
 let JWT_TOKEN = "";
 
+function setMessage(text, type){
+  const message = document.getElementById("message");
+  message.className = "message " + type;
+  message.innerHTML = text;
+}
+
+async function checkBackend(){
+  try{
+    const response = await fetch(API_BASE + "/status", { cache:"no-store" });
+    const data = await response.json();
+
+    document.getElementById("hotelsLoaded").innerHTML =
+      data.hotels_loaded || data.hotels || "-";
+
+    document.getElementById("reservations").innerHTML =
+      data.reservations || 0;
+
+    document.getElementById("webhooks").innerHTML =
+      data.webhooks || data.webhook_events || 0;
+
+    document.getElementById("retryQueue").innerHTML =
+      data.retry_queue || 0;
+
+    document.getElementById("failovers").innerHTML =
+      data.failovers || 0;
+
+    document.getElementById("recoveries").innerHTML =
+      data.recoveries || 0;
+
+    document.getElementById("mappings").innerHTML =
+      data.mappings || 0;
+
+    setMessage("Backend connected. Click Connect for authenticated partner access.", "info");
+  }catch(error){
+    setMessage("Backend status check failed. Check Render backend URL.", "error");
+  }
+}
+
 async function connectPartner(){
+  const partnerId = document.getElementById("partnerId").value.trim();
+  const token = document.getElementById("partnerToken").value.trim();
 
-  const partnerId =
-    document.getElementById("partnerId").value.trim();
-
-  const token =
-    document.getElementById("partnerToken").value.trim();
-
-  const message =
-    document.getElementById("message");
+  setMessage("Connecting partner account...", "info");
 
   try{
-
-    const response = await fetch(
-      API_BASE + "/api/auth/login",
-      {
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-          partner_id:partnerId,
-          token:token
-        })
-      }
-    );
+    const response = await fetch(API_BASE + "/api/auth/login", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ partner_id:partnerId, token:token })
+    });
 
     const data = await response.json();
 
-    if(!data.ok){
-      throw new Error("Authentication failed");
+    if(!response.ok || !data.ok || !data.jwt){
+      throw new Error(data.error || "Authentication failed");
     }
 
     JWT_TOKEN = data.jwt;
 
-    message.className = "message ok";
-    message.innerHTML =
-      "Partner authentication successful.";
+    setMessage("Partner authentication successful.", "ok");
 
-    const dashboardResponse = await fetch(
-      API_BASE + "/api/admin/dashboard",
-      {
-        headers:{
-          Authorization:"Bearer " + JWT_TOKEN
-        }
-      }
-    );
-
-    const dashboard =
-      await dashboardResponse.json();
-
-    document.getElementById("hotelsLoaded").innerHTML =
-      dashboard.hotels_loaded || 0;
-
-    document.getElementById("reservations").innerHTML =
-      dashboard.reservations || 0;
-
-    document.getElementById("webhooks").innerHTML =
-      dashboard.webhook_events || 0;
-
-    document.getElementById("retryQueue").innerHTML =
-      dashboard.retry_queue || 0;
-
-    document.getElementById("failovers").innerHTML =
-      dashboard.failovers || 0;
-
-    document.getElementById("recoveries").innerHTML =
-      dashboard.recoveries || 0;
-
-    document.getElementById("mappings").innerHTML =
-      dashboard.mappings || 0;
+    await loadDashboard();
+    await loadHotels();
 
   }catch(error){
-
-    message.className = "message error";
-
-    message.innerHTML =
-      "Could not connect to backend API. Check Render deploy and backend URL.";
-
+    setMessage("Partner login failed. Backend may not have V3.1 auth endpoint live yet.", "error");
     console.log(error);
   }
+}
+
+async function loadDashboard(){
+  const dashboardResponse = await fetch(API_BASE + "/api/admin/dashboard", {
+    cache:"no-store",
+    headers:{ Authorization:"Bearer " + JWT_TOKEN }
+  });
+
+  const dashboard = await dashboardResponse.json();
+
+  if(!dashboardResponse.ok || !dashboard.ok){
+    throw new Error(dashboard.error || "Dashboard failed");
+  }
+
+  document.getElementById("hotelsLoaded").innerHTML = dashboard.hotels_loaded || 0;
+  document.getElementById("reservations").innerHTML = dashboard.reservations || 0;
+  document.getElementById("webhooks").innerHTML = dashboard.webhook_events || 0;
+  document.getElementById("retryQueue").innerHTML = dashboard.retry_queue || 0;
+  document.getElementById("failovers").innerHTML = dashboard.failovers || 0;
+  document.getElementById("recoveries").innerHTML = dashboard.recoveries || 0;
+  document.getElementById("mappings").innerHTML = dashboard.mappings || 0;
 }
 
 async function loadHotels(){
-
   if(!JWT_TOKEN){
-
-    alert("Connect first.");
-
+    setMessage("Connect first.", "error");
     return;
   }
 
-  try{
+  const rows = document.getElementById("hotelRows");
+  rows.innerHTML = "<tr><td colspan='4'>Loading authenticated hotel records...</td></tr>";
 
-    const response = await fetch(
-      API_BASE + "/api/hotels",
-      {
-        headers:{
-          Authorization:"Bearer " + JWT_TOKEN
-        }
-      }
-    );
+  try{
+    const response = await fetch(API_BASE + "/api/hotels", {
+      cache:"no-store",
+      headers:{ Authorization:"Bearer " + JWT_TOKEN }
+    });
 
     const data = await response.json();
 
-    const rows =
-      document.getElementById("hotelRows");
+    if(!response.ok || !data.ok){
+      throw new Error(data.error || "Hotel API failed");
+    }
 
     rows.innerHTML = "";
 
-    (data.hotels || [])
-      .slice(0,10)
-      .forEach((hotel)=>{
+    const hotels = (data.hotels || []).slice(0,10);
 
-        rows.innerHTML += `
-          <tr>
-            <td>${hotel.hotel_id || ""}</td>
-            <td>${hotel.name || ""}</td>
-            <td>${hotel.city || ""}</td>
-            <td>${hotel.country || ""}</td>
-          </tr>
-        `;
-      });
+    if(!hotels.length){
+      rows.innerHTML = "<tr><td colspan='4'>No hotel records returned.</td></tr>";
+      return;
+    }
+
+    hotels.forEach((hotel)=>{
+      rows.innerHTML += `
+        <tr>
+          <td>${hotel.hotel_id || ""}</td>
+          <td>${hotel.name || hotel.hotel_name || ""}</td>
+          <td>${hotel.city || ""}</td>
+          <td>${hotel.country || ""}</td>
+        </tr>
+      `;
+    });
 
   }catch(error){
-
-    alert("Hotel API failed.");
-
+    rows.innerHTML = "<tr><td colspan='4'>Hotel API failed.</td></tr>";
+    setMessage("Hotel API failed after login. Check /api/hotels backend route.", "error");
     console.log(error);
   }
 }
 
+checkBackend();
 </script>
 
 </body>
