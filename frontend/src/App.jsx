@@ -1,4 +1,7 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+cd C:\frontend\hotel-booking-app\frontend
+
+@'
+import React, { useEffect, useMemo, useState } from "react";
 
 const API =
   import.meta.env.VITE_API_BASE ||
@@ -1109,3 +1112,14 @@ const styles = {
   footer: { background: "#fff", borderTop: "1px solid #e2e8f0", padding: "22px 42px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14 },
   footerLinks: { display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }
 };
+'@ | Set-Content .\src\App.jsx -Encoding UTF8
+
+npm run build
+
+cd C:\frontend\hotel-booking-app
+
+git add frontend/src/App.jsx
+
+git commit -m "Restore complete customer portal destination guide Stripe and all pages"
+
+git push
