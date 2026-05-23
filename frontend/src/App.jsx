@@ -1,1125 +1,1371 @@
-cd C:\frontend\hotel-booking-app\frontend
-
-@'
 import React, { useEffect, useMemo, useState } from "react";
 
-const API =
+const API_BASE =
   import.meta.env.VITE_API_BASE ||
-  import.meta.env.VITE_API_BASE_URL ||
-  "https://myspace-hotel-backend.onrender.com";
+  import.meta.env.NEXT_PUBLIC_API_BASE ||
+  "";
 
-const CURRENCIES = ["GBP", "USD", "EUR", "NGN", "AED", "CAD", "AUD", "JPY", "ZAR", "CHF", "INR"];
-
-const FALLBACK_FX = {
-  GBP: 1,
-  USD: 1.27,
-  EUR: 1.17,
-  NGN: 1900,
-  AED: 4.66,
-  CAD: 1.72,
-  AUD: 1.92,
-  JPY: 197,
-  ZAR: 23.2,
-  CHF: 1.11,
-  INR: 106
+const DEFAULT_FORM = {
+  name: "",
+  email: "",
+  message: "",
 };
 
-function todayISO() {
-  return new Date().toISOString().slice(0, 10);
+const DEFAULT_FILTERS = {
+  city: "",
+  page: 1,
+};
+
+const GUIDE_LINKS = [
+  {
+    title: "Why location matters more than the lowest rate",
+    body:
+      "Customers often lose more through poor location than they save on headline price. The right district can reduce transport stress, improve safety, and make the whole trip feel more successful.",
+  },
+  {
+    title: "Business travel needs a different hotel decision",
+    body:
+      "A serious business stay should support timing, access, quiet working conditions, internet quality, and confidence on arrival. My Space Hotel helps customers look for those signals instead of only chasing a cheap room.",
+  },
+  {
+    title: "Family travel requires smarter filtering",
+    body:
+      "Family bookings need space, convenience, calm, and practical facilities. A cleaner guided search reduces wasted time and makes the shortlist easier to trust.",
+  },
+  {
+    title: "Short city breaks need stronger area guidance",
+    body:
+      "When the trip is short, the customer cannot afford a weak location decision. Better area guidance helps travellers stay closer to the experience they actually came for.",
+  },
+];
+
+const INFO_PAGES = {
+  guides: {
+    title: "Travel Guides",
+    hero: "Travel intelligence that helps customers choose better stays",
+    intro:
+      "Travel Guides are not filler content. They are one of the strongest selling points of My Space Hotel because they help customers make better location and hotel decisions before they reserve. That improves confidence, supports trust, and gives the platform a more serious competitive position.",
+    sections: [
+      {
+        heading: "Why this matters for a global audience",
+        body:
+          "Travellers booking across cities and countries want more than a price tag. They want guidance on which areas work best, what kind of stay fits the trip, and how to shortlist options without wasting time. Strong travel guidance makes the whole app feel more premium and more useful.",
+      },
+      {
+        heading: "A better guide creates a better booking decision",
+        body:
+          "My Space Hotel should help customers understand the difference between central convenience, luxury positioning, family practicality, nightlife access, beach access, airport convenience, and business suitability. When that guidance is clear, the customer is more likely to continue inside the app instead of leaving to search elsewhere.",
+      },
+      {
+        heading: "Return directly to the app and complete the search",
+        body:
+          "Each guide is designed to support the search journey, not distract from it. Customers should be able to learn something important, return immediately to the portal, and continue their hotel comparison with more confidence.",
+      },
+    ],
+    links: GUIDE_LINKS,
+  },
+  faqs: {
+    title: "FAQs",
+    hero: "Clear answers that reduce hesitation",
+    intro:
+      "Customers should never feel uncertain about how the platform works. Strong FAQs help serious travellers move forward faster and trust the reservation flow more easily.",
+    sections: [
+      {
+        heading: "Does My Space Hotel keep customers inside the app?",
+        body:
+          "Yes. The aim is to make the search and reservation request journey feel direct, controlled, and branded inside My Space Hotel.",
+      },
+      {
+        heading: "Can customers compare multiple hotels before requesting availability?",
+        body:
+          "Yes. The platform is designed to let customers review a broader hotel list, refine results, and then select the stay that best fits the trip.",
+      },
+      {
+        heading: "Is this designed only for one city?",
+        body:
+          "No. The app is built to scale into a wider international hotel platform with clearer guidance, stronger filtering, and a more serious customer journey.",
+      },
+    ],
+  },
+  terms: {
+    title: "Booking Terms",
+    hero: "A cleaner reservation-first approach",
+    intro:
+      "My Space Hotel uses a request-first reservation flow that gives customers more clarity before the next step. This helps the platform feel less rushed and more trustworthy.",
+    sections: [
+      {
+        heading: "Reservation requests come first",
+        body:
+          "The customer first chooses a hotel and sends a request. That keeps the platform in control of the experience and avoids pushing the traveller too quickly into the wrong commitment.",
+      },
+      {
+        heading: "Displayed rates support comparison",
+        body:
+          "Displayed rates are used to help customers compare, shortlist, and move toward the best-fit stay. They support the decision process inside the app.",
+      },
+      {
+        heading: "The customer journey stays focused",
+        body:
+          "The platform is designed to keep the customer on a clear path from search to hotel selection to reservation request.",
+      },
+    ],
+  },
+  support: {
+    title: "Customer Support",
+    hero: "Support that helps the customer continue with confidence",
+    intro:
+      "Support is not just for solving problems. It is part of the trust structure of the app. Clear support helps customers continue the reservation journey with less uncertainty and more confidence.",
+    sections: [
+      {
+        heading: "Search support",
+        body:
+          "Customers may need help understanding areas, hotel differences, or which stay is the stronger fit for the trip.",
+      },
+      {
+        heading: "Reservation support",
+        body:
+          "Once a request is submitted, support helps maintain confidence and gives the traveller a stronger feeling of being looked after by the platform.",
+      },
+      {
+        heading: "Built for repeat use",
+        body:
+          "A serious support layer increases trust, improves return usage, and helps the platform compete more strongly.",
+      },
+    ],
+  },
+};
+
+function formatMoney(value, currency) {
+  const amount = Number(value || 0);
+  const code = (currency || "USD").toUpperCase();
+
+  try {
+    return new Intl.NumberFormat("en-GB", {
+      style: "currency",
+      currency: code,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    return `${code} ${amount}`;
+  }
 }
 
-function tomorrowISO() {
-  return new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+function getPageFromHash() {
+  const raw = window.location.hash.replace(/^#\/?/, "").trim();
+  if (!raw) return "home";
+  return INFO_PAGES[raw] ? raw : "home";
 }
 
-function money(v) {
-  const n = Number(v || 0);
-  return Number.isFinite(n) ? n.toFixed(2) : "0.00";
+function setHash(page) {
+  window.location.hash = page === "home" ? "#/" : `#/${page}`;
 }
 
-function nightsBetween(a, b) {
-  const start = new Date(a);
-  const end = new Date(b);
-  const diff = Math.ceil((end - start) / 86400000);
-  return diff > 0 ? diff : 1;
+function NavPill({ label, page }) {
+  return (
+    <button
+      type="button"
+      onClick={() => setHash(page)}
+      style={{
+        padding: "16px 24px",
+        borderRadius: 999,
+        border: "1px solid rgba(255,255,255,0.14)",
+        background: "rgba(255,255,255,0.10)",
+        color: "#ffffff",
+        fontWeight: 900,
+        fontSize: 17,
+        cursor: "pointer",
+      }}
+    >
+      {label}
+    </button>
+  );
 }
 
-function safe(v) {
-  return String(v || "").trim();
+function InfoPage({ page }) {
+  const content = INFO_PAGES[page];
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#f2f5fb",
+        fontFamily:
+          'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      }}
+    >
+      <div style={{ maxWidth: 1440, margin: "0 auto", padding: 28 }}>
+        <button
+          type="button"
+          onClick={() => setHash("home")}
+          style={{
+            border: "none",
+            borderRadius: 16,
+            background: "#12367c",
+            color: "#ffffff",
+            fontWeight: 900,
+            fontSize: 16,
+            padding: "14px 18px",
+            cursor: "pointer",
+            marginBottom: 24,
+          }}
+        >
+          Return to app
+        </button>
+
+        <section
+          style={{
+            background: "linear-gradient(135deg, #1a3e92 0%, #2f58b6 50%, #69a3e3 100%)",
+            borderRadius: 36,
+            padding: 36,
+            color: "#ffffff",
+            marginBottom: 24,
+            boxShadow: "0 24px 44px rgba(18,54,124,0.16)",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 14,
+              letterSpacing: 3,
+              fontWeight: 900,
+              textTransform: "uppercase",
+              marginBottom: 14,
+              color: "#dfeaff",
+            }}
+          >
+            {content.title}
+          </div>
+
+          <div
+            style={{
+              fontSize: 54,
+              lineHeight: 1.05,
+              fontWeight: 900,
+              marginBottom: 16,
+            }}
+          >
+            {content.hero}
+          </div>
+
+          <div
+            style={{
+              fontSize: 20,
+              lineHeight: 1.75,
+              color: "#eef5ff",
+              maxWidth: 1100,
+            }}
+          >
+            {content.intro}
+          </div>
+        </section>
+
+        <section style={{ display: "grid", gap: 20, marginBottom: 24 }}>
+          {content.sections.map((section, index) => (
+            <div
+              key={`${page}-${index}`}
+              style={{
+                background: "#ffffff",
+                borderRadius: 28,
+                padding: 28,
+                border: "1px solid #dce6f5",
+                boxShadow: "0 14px 30px rgba(12,38,96,0.08)",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 30,
+                  lineHeight: 1.15,
+                  fontWeight: 900,
+                  color: "#12367c",
+                  marginBottom: 12,
+                }}
+              >
+                {section.heading}
+              </div>
+
+              <div
+                style={{
+                  fontSize: 18,
+                  lineHeight: 1.8,
+                  color: "#4f6487",
+                }}
+              >
+                {section.body}
+              </div>
+            </div>
+          ))}
+        </section>
+
+        {page === "guides" ? (
+          <section
+            style={{
+              background: "#ffffff",
+              borderRadius: 28,
+              padding: 28,
+              border: "1px solid #dce6f5",
+              boxShadow: "0 14px 30px rgba(12,38,96,0.08)",
+            }}
+          >
+            <div
+              style={{
+                fontSize: 34,
+                lineHeight: 1.1,
+                fontWeight: 900,
+                color: "#12367c",
+                marginBottom: 16,
+              }}
+            >
+              Important travel guide themes
+            </div>
+
+            <div style={{ display: "grid", gap: 16 }}>
+              {content.links.map((item, index) => (
+                <div
+                  key={`guide-link-${index}`}
+                  style={{
+                    border: "1px solid #dce6f5",
+                    background: "#f7faff",
+                    borderRadius: 22,
+                    padding: 20,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 23,
+                      lineHeight: 1.2,
+                      fontWeight: 900,
+                      color: "#12367c",
+                      marginBottom: 8,
+                    }}
+                  >
+                    {item.title}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 17,
+                      lineHeight: 1.7,
+                      color: "#5d7090",
+                    }}
+                  >
+                    {item.body}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setHash("home")}
+              style={{
+                marginTop: 22,
+                border: "none",
+                borderRadius: 18,
+                background: "#f0c53b",
+                color: "#08204f",
+                fontWeight: 900,
+                fontSize: 18,
+                padding: "16px 20px",
+                cursor: "pointer",
+              }}
+            >
+              Return to app and continue search
+            </button>
+          </section>
+        ) : null}
+      </div>
+    </div>
+  );
 }
 
-function fallbackConvert(amount, from, to) {
-  if (!amount || from === to) return Number(amount || 0);
-  if (!FALLBACK_FX[from] || !FALLBACK_FX[to]) return Number(amount || 0);
-  return (Number(amount) / FALLBACK_FX[from]) * FALLBACK_FX[to];
+function FacilityCheckbox({ label, checked, onChange }) {
+  return (
+    <label
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "12px 14px",
+        borderRadius: 16,
+        background: checked ? "#eef5ff" : "#ffffff",
+        border: checked ? "1px solid #bcd6ff" : "1px solid #dce6f5",
+        cursor: "pointer",
+        fontWeight: 700,
+        color: "#12367c",
+      }}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={onChange}
+        style={{ width: 18, height: 18 }}
+      />
+      {label}
+    </label>
+  );
 }
 
-function mapsSearchUrl(query) {
-  return `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
-}
+function HotelCard({ hotel, onReserve }) {
+  return (
+    <div
+      style={{
+        background: "#ffffff",
+        borderRadius: 28,
+        overflow: "hidden",
+        border: "1px solid #dbe6f5",
+        boxShadow: "0 18px 38px rgba(7,28,83,0.08)",
+      }}
+    >
+      <img
+        src={hotel.image}
+        alt={hotel.name}
+        style={{
+          width: "100%",
+          height: 240,
+          objectFit: "cover",
+          display: "block",
+        }}
+      />
 
-function mapsDirectionsUrl(query) {
-  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
+      <div style={{ padding: 24 }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 12,
+            alignItems: "flex-start",
+            marginBottom: 10,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 24,
+              lineHeight: 1.2,
+              fontWeight: 900,
+              color: "#0d2a66",
+            }}
+          >
+            {hotel.name}
+          </div>
+
+          <div
+            style={{
+              background: "#eef5ff",
+              color: "#17407b",
+              border: "1px solid #d7e7ff",
+              borderRadius: 999,
+              padding: "10px 14px",
+              fontWeight: 800,
+              fontSize: 14,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Guest score {hotel.rating}
+          </div>
+        </div>
+
+        <div style={{ color: "#5d7090", fontSize: 15, marginBottom: 12 }}>
+          {hotel.area}, {hotel.city}, {hotel.country}
+        </div>
+
+        <div
+          style={{
+            color: "#4f6487",
+            fontSize: 17,
+            lineHeight: 1.55,
+            marginBottom: 14,
+          }}
+        >
+          Facilities: {(hotel.facilities || []).join(", ")}
+        </div>
+
+        <div
+          style={{
+            fontSize: 26,
+            fontWeight: 900,
+            color: "#0d2a66",
+            marginBottom: 18,
+          }}
+        >
+          {formatMoney(hotel.price, hotel.currency)}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => onReserve(hotel)}
+          style={{
+            width: "100%",
+            background: "#f0c53b",
+            color: "#08204f",
+            border: "none",
+            borderRadius: 18,
+            padding: "16px 18px",
+            fontWeight: 900,
+            fontSize: 18,
+            cursor: "pointer",
+            boxShadow: "0 14px 28px rgba(240,197,59,0.34)",
+          }}
+        >
+          Reserve in app
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export default function App() {
-  const [page, setPage] = useState("home");
-  const [status, setStatus] = useState(null);
-
-  const [destinations, setDestinations] = useState([]);
-  const [country, setCountry] = useState("");
-  const [city, setCity] = useState("");
-  const [checkin, setCheckin] = useState(todayISO());
-  const [checkout, setCheckout] = useState(tomorrowISO());
-  const [guests, setGuests] = useState(2);
-  const [rooms, setRooms] = useState(1);
-
+  const [page, setPage] = useState(getPageFromHash());
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [facilityOptions, setFacilityOptions] = useState([]);
+  const [selectedFacilities, setSelectedFacilities] = useState([]);
+  const [reserveForm, setReserveForm] = useState(DEFAULT_FORM);
   const [hotels, setHotels] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [selectedHotel, setSelectedHotel] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [paying, setPaying] = useState(false);
-
-  const [displayCurrency, setDisplayCurrency] = useState("GBP");
-  const [convertedTotal, setConvertedTotal] = useState(0);
-  const [conversionNote, setConversionNote] = useState("");
-
-  const [guideHotel, setGuideHotel] = useState(null);
-  const [reservation, setReservation] = useState({
-    customer_name: "",
-    customer_email: "",
-    customer_phone: "",
-    note: ""
-  });
-
-  const [partnerId, setPartnerId] = useState("oracle-ohip");
-  const [partnerToken, setPartnerToken] = useState("");
-  const [partnerJwt, setPartnerJwt] = useState("");
-  const [partnerDashboard, setPartnerDashboard] = useState(null);
-  const [syncStatus, setSyncStatus] = useState(null);
-  const [partnerMessage, setPartnerMessage] = useState("");
-
-  const [hotelRegister, setHotelRegister] = useState({
-    hotel_name: "",
-    contact_name: "",
-    email: "",
-    phone: "",
-    country: "",
-    city: "",
-    pms_provider: "oracle-ohip"
-  });
-  const [hotelOnboarded, setHotelOnboarded] = useState(null);
-
-  const selectedCountry = useMemo(
-    () => destinations.find((x) => x.country === country),
-    [country, destinations]
-  );
-
-  const nights = nightsBetween(checkin, checkout);
-  const selectedRate = selectedHotel?.first_rate || null;
-  const baseCurrency = selectedRate?.currency || "GBP";
-  const nightly = Number(selectedRate?.amount || 0);
-  const stayTotal = nightly * Number(rooms || 1) * nights;
-
-  const guideDestination = [
-    safe(guideHotel?.hotel_name || guideHotel?.name),
-    safe(guideHotel?.address || guideHotel?.area),
-    safe(city),
-    safe(country)
-  ].filter(Boolean).join(", ");
-
-  async function loadStatus() {
-    try {
-      const r = await fetch(`${API}/status`, { cache: "no-store" });
-      const j = await r.json();
-      setStatus(j);
-    } catch {}
-  }
-
-  async function loadDestinations() {
-    try {
-      const r = await fetch(`${API}/api/real-catalog/destinations`, { cache: "no-store" });
-      const j = await r.json();
-      setDestinations(j.countries || []);
-    } catch {}
-  }
-
-  async function searchHotels(customCountry = country, customCity = city) {
-    if (!customCountry || !customCity) {
-      alert("Please choose a country and city.");
-      return;
-    }
-
-    setLoading(true);
-    setHotels([]);
-    setSelectedHotel(null);
-    setGuideHotel(null);
-
-    try {
-      const q = new URLSearchParams({
-        country: customCountry,
-        city: customCity,
-        checkin,
-        checkout,
-        guests: String(guests),
-        rooms: String(rooms),
-        limit: "100"
-      });
-
-      const r = await fetch(`${API}/api/hotels/search?${q.toString()}`, { cache: "no-store" });
-      const j = await r.json();
-
-      setHotels(j.hotels || []);
-      setPage("results");
-    } catch {
-      alert("Hotel search failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function convertCurrency() {
-    if (!stayTotal) {
-      setConvertedTotal(0);
-      setConversionNote("");
-      return;
-    }
-
-    try {
-      const q = new URLSearchParams({
-        amount: String(stayTotal),
-        from: baseCurrency,
-        to: displayCurrency,
-        from_currency: baseCurrency,
-        to_currency: displayCurrency
-      });
-
-      const r = await fetch(`${API}/api/currency/convert?${q.toString()}`, { cache: "no-store" });
-      const j = await r.json();
-
-      if (j.ok && Number(j.converted)) {
-        setConvertedTotal(Number(j.converted));
-        setConversionNote(j.source ? `Conversion source: ${j.source}` : "Estimated live conversion.");
-        return;
-      }
-    } catch {}
-
-    const converted = fallbackConvert(stayTotal, baseCurrency, displayCurrency);
-    setConvertedTotal(converted);
-    setConversionNote("Estimated conversion shown for guidance. Final payment currency may depend on the hotel or payment provider.");
-  }
-
-  async function reserveAndPay() {
-    if (!selectedHotel) {
-      alert("Select a hotel first.");
-      return;
-    }
-
-    if (!reservation.customer_name || !reservation.customer_email || !reservation.customer_phone) {
-      alert("Please enter your name, email and phone number.");
-      return;
-    }
-
-    setPaying(true);
-
-    const body = {
-      ...reservation,
-      hotel_id: selectedHotel.hotel_id,
-      hotel_name: selectedHotel.hotel_name || selectedHotel.name,
-      destination: `${city}, ${country}`,
-      checkin,
-      checkout,
-      guests: Number(guests),
-      rooms: Number(rooms),
-      nights,
-      rate_key: selectedRate?.rate_key || "",
-      amount: stayTotal,
-      currency: baseCurrency,
-      converted_amount: convertedTotal,
-      converted_currency: displayCurrency
-    };
-
-    try {
-      const stripeRoutes = [
-        "/api/create-checkout-session",
-        "/create-checkout-session",
-        "/api/stripe/create-checkout-session",
-        "/api/payments/create-checkout-session"
-      ];
-
-      for (const route of stripeRoutes) {
-        try {
-          const stripe = await fetch(`${API}${route}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body)
-          });
-
-          const stripeJson = await stripe.json().catch(() => ({}));
-
-          if (stripeJson?.url && String(stripeJson.url).startsWith("http")) {
-            window.location.href = stripeJson.url;
-            return;
-          }
-        } catch {}
-      }
-
-      const r = await fetch(`${API}/reservation-request`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
-
-      const j = await r.json();
-
-      alert(
-        `${j.message || "Reservation request received. We will confirm the stay before payment."}\n\nReference: ${
-          j.reservation_code || j.booking_reference || "Created"
-        }`
-      );
-    } catch {
-      alert("Payment or reservation could not be started. Please try again.");
-    } finally {
-      setPaying(false);
-    }
-  }
-
-  async function loginPartner() {
-    setPartnerMessage("");
-
-    if (!partnerToken.trim()) {
-      setPartnerMessage("Enter your partner token.");
-      return;
-    }
-
-    try {
-      const r = await fetch(`${API}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ partner_id: partnerId, token: partnerToken })
-      });
-
-      const j = await r.json();
-
-      if (!j.ok || !j.jwt) throw new Error("Login failed");
-
-      setPartnerJwt(j.jwt);
-      setPartnerMessage("Partner connected successfully.");
-      await loadPartnerDashboard(j.jwt);
-      await loadSync(j.jwt);
-    } catch {
-      setPartnerMessage("Partner login failed. Check partner ID and token.");
-    }
-  }
-
-  async function loadPartnerDashboard(jwt = partnerJwt) {
-    if (!jwt) return;
-    const r = await fetch(`${API}/api/admin/dashboard`, {
-      headers: { Authorization: `Bearer ${jwt}` },
-      cache: "no-store"
-    });
-    const j = await r.json();
-    setPartnerDashboard(j);
-  }
-
-  async function loadSync(jwt = partnerJwt) {
-    if (!jwt) return;
-    const r = await fetch(`${API}/api/sync/status`, {
-      headers: { Authorization: `Bearer ${jwt}` },
-      cache: "no-store"
-    });
-    const j = await r.json();
-    setSyncStatus(j);
-  }
-
-  async function runSync() {
-    if (!partnerJwt) return;
-    await fetch(`${API}/api/sync/run`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${partnerJwt}` }
-    });
-    await loadSync();
-    await loadPartnerDashboard();
-  }
-
-  async function registerHotel() {
-    try {
-      const r = await fetch(`${API}/api/extranet/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(hotelRegister)
-      });
-
-      const j = await r.json();
-      setHotelOnboarded(j);
-    } catch {
-      setHotelOnboarded({ ok: false, message: "Hotel onboarding request could not be completed." });
-    }
-  }
-
-  function openGuideForHotel(hotel) {
-    setGuideHotel(hotel || selectedHotel);
-    setPage("guide");
-  }
-
-  function choosePopular(destinationCountry, destinationCity) {
-    setCountry(destinationCountry);
-    setCity(destinationCity);
-    searchHotels(destinationCountry, destinationCity);
-  }
+  const [submitting, setSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    loadStatus();
-    loadDestinations();
-    const t = setInterval(loadStatus, 30000);
-    return () => clearInterval(t);
+    const onHash = () => setPage(getPageFromHash());
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
   useEffect(() => {
-    if (selectedCountry && !city) {
-      setCity(selectedCountry.cities?.[0]?.city || "");
+    async function loadFacilities() {
+      try {
+        const response = await fetch(`${API_BASE}/api/facilities`);
+        const data = await response.json();
+        setFacilityOptions(Array.isArray(data.facilities) ? data.facilities : []);
+      } catch {
+        setFacilityOptions([
+          "wifi",
+          "spa",
+          "gym",
+          "restaurant",
+          "pool",
+          "parking",
+          "airport shuttle",
+          "family rooms",
+          "beach access",
+          "business lounge",
+        ]);
+      }
     }
-  }, [selectedCountry, city]);
 
-  useEffect(() => {
-    convertCurrency();
-  }, [stayTotal, baseCurrency, displayCurrency]);
+    loadFacilities();
+  }, []);
+
+  const shownCount = useMemo(() => hotels.length, [hotels]);
+
+  async function runSearch(pageNumber = 1) {
+    if (!filters.city.trim()) {
+      setStatusMessage("Please enter a city before searching.");
+      return;
+    }
+
+    setSearchLoading(true);
+    setStatusMessage("");
+    setHasSearched(true);
+    setHotels([]);
+    setSelectedHotel(null);
+
+    try {
+      const params = new URLSearchParams();
+      params.set("city", filters.city.trim());
+      params.set("page", String(pageNumber));
+      params.set("page_size", "12");
+
+      if (selectedFacilities.length > 0) {
+        params.set("facilities", selectedFacilities.join(","));
+      }
+
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 15000);
+
+      const response = await fetch(`${API_BASE}/api/hotels?${params.toString()}`, {
+        signal: controller.signal,
+      });
+
+      clearTimeout(timer);
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error("Hotel search could not be completed.");
+      }
+
+      const list = Array.isArray(data.hotels) ? data.hotels : [];
+
+      setHotels(list);
+      setTotalCount(Number(data.count || 0));
+      setTotalPages(Number(data.total_pages || 1));
+      setFilters((s) => ({ ...s, page: Number(data.page || pageNumber) }));
+
+      if (list.length > 0) {
+        setSelectedHotel(list[0]);
+      } else {
+        setStatusMessage("No hotels matched that search.");
+      }
+    } catch (error) {
+      setStatusMessage(
+        error.name === "AbortError"
+          ? "Search is taking longer than expected. Please try again."
+          : "Hotel search is temporarily unavailable."
+      );
+    } finally {
+      setSearchLoading(false);
+    }
+  }
+
+  function handleSearch() {
+    runSearch(1);
+  }
+
+  function handlePageChange(nextPage) {
+    runSearch(nextPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function handleRefresh() {
+    setFilters(DEFAULT_FILTERS);
+    setSelectedFacilities([]);
+    setReserveForm(DEFAULT_FORM);
+    setHotels([]);
+    setSelectedHotel(null);
+    setStatusMessage("");
+    setHasSearched(false);
+    setTotalCount(0);
+    setTotalPages(1);
+    setHash("home");
+  }
+
+  function toggleFacility(facility) {
+    setSelectedFacilities((prev) =>
+      prev.includes(facility)
+        ? prev.filter((item) => item !== facility)
+        : [...prev, facility]
+    );
+  }
+
+  function handleReserveSelect(hotel) {
+    setSelectedHotel(hotel);
+    setStatusMessage("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function handleReservationSubmit() {
+    if (!selectedHotel) {
+      setStatusMessage("Please choose a hotel first.");
+      return;
+    }
+
+    if (!reserveForm.name.trim()) {
+      setStatusMessage("Please enter the customer name.");
+      return;
+    }
+
+    if (!reserveForm.email.trim()) {
+      setStatusMessage("Please enter the customer email.");
+      return;
+    }
+
+    setSubmitting(true);
+    setStatusMessage("Sending request...");
+
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 15000);
+
+      const response = await fetch(`${API_BASE}/api/request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({
+          hotel_id: selectedHotel.id,
+          name: reserveForm.name.trim(),
+          email: reserveForm.email.trim(),
+          message: reserveForm.message.trim(),
+        }),
+      });
+
+      clearTimeout(timer);
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Request could not be submitted.");
+      }
+
+      setStatusMessage(
+        data?.message || "Your request has been submitted. We will contact you shortly."
+      );
+    } catch (error) {
+      setStatusMessage(
+        error.name === "AbortError"
+          ? "The request took too long to complete. Please try again."
+          : "Reservation request failed."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (page !== "home") {
+    return <InfoPage page={page} />;
+  }
 
   return (
-    <div style={styles.page}>
-      <Header setPage={setPage} />
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#f2f5fb",
+        fontFamily:
+          'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        color: "#0d2a66",
+      }}
+    >
+      <div style={{ maxWidth: 1860, margin: "0 auto", padding: 28 }}>
+        <section
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1.18fr 1fr",
+            gap: 24,
+            background:
+              "linear-gradient(135deg, #1a3e92 0%, #2f58b6 50%, #69a3e3 100%)",
+            borderRadius: 42,
+            padding: 32,
+            boxShadow: "0 24px 46px rgba(22,57,133,0.18)",
+            overflow: "hidden",
+          }}
+        >
+          <div style={{ minHeight: 640, paddingRight: 12 }}>
+            <div
+              style={{
+                color: "#dfeaff",
+                fontWeight: 900,
+                letterSpacing: 3,
+                fontSize: 16,
+                textTransform: "uppercase",
+                marginBottom: 20,
+              }}
+            >
+              Worldwide hotel bookings
+            </div>
 
-      {page === "home" && (
-        <>
-          <Hero
-            country={country}
-            city={city}
-            setCountry={setCountry}
-            setCity={setCity}
-            destinations={destinations}
-            selectedCountry={selectedCountry}
-            checkin={checkin}
-            checkout={checkout}
-            setCheckin={setCheckin}
-            setCheckout={setCheckout}
-            guests={guests}
-            rooms={rooms}
-            setGuests={setGuests}
-            setRooms={setRooms}
-            searchHotels={() => searchHotels()}
-            loading={loading}
-          />
+            <div
+              style={{
+                color: "#ffffff",
+                fontSize: 78,
+                lineHeight: 0.98,
+                fontWeight: 900,
+                marginBottom: 24,
+              }}
+            >
+              My Space Hotel
+            </div>
 
-          <TrustBar />
+            <div
+              style={{
+                color: "#f4f8ff",
+                fontSize: 28,
+                lineHeight: 1.45,
+                fontWeight: 700,
+                maxWidth: 920,
+                marginBottom: 26,
+              }}
+            >
+              Search a stronger hotel database, compare more seriously, and move customers into a direct reservation request inside your own platform.
+            </div>
 
-          <section style={styles.homeSection}>
-            <div style={styles.sectionTop}>
-              <div>
-                <h2 style={styles.sectionTitle}>Popular destinations</h2>
-                <p style={styles.muted}>Start with trusted destinations and search the live hotel catalogue.</p>
+            <div
+              style={{
+                width: 500,
+                maxWidth: "100%",
+                background: "rgba(255,255,255,0.10)",
+                border: "1px solid rgba(255,255,255,0.14)",
+                borderRadius: 30,
+                padding: 24,
+                marginBottom: 24,
+              }}
+            >
+              <div style={{ color: "#e4eeff", fontSize: 18, marginBottom: 14 }}>
+                Live choices shown
+              </div>
+              <div
+                style={{
+                  color: "#ffffff",
+                  fontSize: 74,
+                  fontWeight: 900,
+                  lineHeight: 1,
+                  marginBottom: 8,
+                }}
+              >
+                {totalCount}
+              </div>
+              <div style={{ color: "#eef5ff", fontSize: 18, lineHeight: 1.45 }}>
+                {hasSearched
+                  ? "visible hotels ready for review in your current search"
+                  : "search by city, refine with facilities, and browse through multiple pages of results"}
               </div>
             </div>
 
-            <div style={styles.destinationGrid}>
-              {[
-                ["United Kingdom", "London", "London", "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=900&q=80"],
-                ["France", "Paris", "Paris", "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=900&q=80"],
-                ["United Arab Emirates", "Dubai", "Dubai", "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=900&q=80"],
-                ["United States", "New York", "New York", "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?auto=format&fit=crop&w=900&q=80"],
-                ["Spain", "Barcelona", "Barcelona", "https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=900&q=80"]
-              ].map(([c, ct, title, image]) => (
-                <button
-                  key={`${c}-${ct}`}
-                  style={{ ...styles.destCard, backgroundImage: `linear-gradient(180deg, rgba(0,0,0,.04), rgba(0,0,0,.62)), url(${image})` }}
-                  onClick={() => choosePopular(c, ct)}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginBottom: 18 }}>
+              <NavPill label="Travel Guides" page="guides" />
+              <NavPill label="FAQs" page="faqs" />
+              <NavPill label="Booking Terms" page="terms" />
+              <NavPill label="Customer Support" page="support" />
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                gap: 16,
+                color: "#ffffff",
+                fontSize: 19,
+                fontWeight: 800,
+                maxWidth: 860,
+              }}
+            >
+              <div>Search larger internal hotel inventory</div>
+              <div>Refine results clearly with tick boxes</div>
+              <div>Keep customers inside your platform</div>
+              <div>Browse multiple result pages smoothly</div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "#e8eef8",
+              borderRadius: 36,
+              padding: 24,
+              boxShadow: "0 10px 24px rgba(13,42,102,0.08)",
+              alignSelf: "stretch",
+            }}
+          >
+            <div
+              style={{
+                fontSize: 15,
+                fontWeight: 900,
+                letterSpacing: 3,
+                color: "#657ca4",
+                textTransform: "uppercase",
+                marginBottom: 10,
+              }}
+            >
+              Search
+            </div>
+
+            <div
+              style={{
+                fontSize: 58,
+                lineHeight: 1.05,
+                fontWeight: 900,
+                color: "#12367c",
+                marginBottom: 12,
+              }}
+            >
+              Search hotels with speed and clarity
+            </div>
+
+            <div
+              style={{
+                color: "#62779d",
+                fontSize: 18,
+                lineHeight: 1.6,
+                marginBottom: 18,
+              }}
+            >
+              Search by city, refine with facility tick boxes, and move directly toward a reservation request without unnecessary friction.
+            </div>
+
+            <div style={{ display: "grid", gap: 14 }}>
+              <input
+                value={filters.city}
+                onChange={(e) => setFilters((s) => ({ ...s, city: e.target.value }))}
+                style={fieldStyle}
+                placeholder="City"
+              />
+
+              <div
+                style={{
+                  background: "#ffffff",
+                  border: "1px solid #d8e3f1",
+                  borderRadius: 24,
+                  padding: 16,
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: 900,
+                    color: "#12367c",
+                    fontSize: 16,
+                    marginBottom: 12,
+                  }}
                 >
-                  <strong>{title}</strong>
-                  <span>{c}</span>
-                </button>
-              ))}
-            </div>
-          </section>
+                  Facilities
+                </div>
 
-          <section style={styles.homeSection}>
-            <h2 style={styles.sectionTitle}>Plan your stay with confidence</h2>
-            <div style={styles.featureGrid}>
-              <button style={styles.featureCard} onClick={() => setPage("guide")}>
-                <h3>Destination Guide</h3>
-                <p>Open maps, directions, hospitals, airports, police, restaurants, attractions, tour buses and local travel support.</p>
-              </button>
-              <button style={styles.featureCard} onClick={() => setPage("faq")}>
-                <h3>FAQ</h3>
-                <p>Clear answers for bookings, payments, cancellations, refunds, arrival support and reservation changes.</p>
-              </button>
-              <button style={styles.featureCard} onClick={() => setPage("contact")}>
-                <h3>Contact Support</h3>
-                <p>Reach reservation support for booking issues, arrival questions, hotel help and partner enquiries.</p>
-              </button>
-              <button style={styles.featureCard} onClick={() => setPage("partner")}>
-                <h3>Hotel / Partner Access</h3>
-                <p>Secure login for hotel extranet, PMS sync, onboarding, mappings and partner operations.</p>
-              </button>
-            </div>
-          </section>
-
-          <Footer setPage={setPage} status={status} />
-        </>
-      )}
-
-      {page === "results" && (
-        <main style={styles.main}>
-          <button style={styles.backBtn} onClick={() => setPage("home")}>← Back to search</button>
-
-          <div style={styles.resultsLayout}>
-            <section>
-              <h2 style={styles.sectionTitle}>Available stays in {city}, {country}</h2>
-              <p style={styles.muted}>Choose a verified stay, review the total and continue securely.</p>
-
-              <div style={styles.hotelGrid}>
-                {hotels.map((h) => {
-                  const rate = h.first_rate;
-                  return (
-                    <div key={h.hotel_id} style={{ ...styles.hotelCard, borderColor: selectedHotel?.hotel_id === h.hotel_id ? "#1857df" : "#e5e7eb" }}>
-                      {h.image_url ? <img src={h.image_url} style={styles.hotelImg} /> : <div style={styles.imageFallback}>MYSPACE HOTEL</div>}
-
-                      <div style={styles.hotelBody}>
-                        <div style={styles.badgeRow}>
-                          <span style={styles.badge}>Verified stay</span>
-                          <span style={styles.greenBadge}>{rate ? "Current price" : "Confirm price"}</span>
-                        </div>
-
-                        <h3 style={styles.hotelName}>{h.hotel_name || h.name}</h3>
-                        <p style={styles.hotelMeta}>{h.address || h.area || city}, {country}</p>
-
-                        <div style={styles.priceBox}>
-                          {rate ? (
-                            <>
-                              <span>From</span>
-                              <strong>{rate.currency || "GBP"} {money(rate.amount)}</strong>
-                              <small>per room / night</small>
-                            </>
-                          ) : (
-                            <strong>Price confirmation required</strong>
-                          )}
-                        </div>
-
-                        <div style={styles.cardButtons}>
-                          <button style={styles.selectBtn} onClick={() => setSelectedHotel(h)}>Select Hotel</button>
-                          <button style={styles.lightBtn} onClick={() => openGuideForHotel(h)}>Guide / Map</button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                    gap: 10,
+                    maxHeight: 220,
+                    overflowY: "auto",
+                    paddingRight: 4,
+                  }}
+                >
+                  {facilityOptions.map((facility) => (
+                    <FacilityCheckbox
+                      key={facility}
+                      label={facility}
+                      checked={selectedFacilities.includes(facility)}
+                      onChange={() => toggleFacility(facility)}
+                    />
+                  ))}
+                </div>
               </div>
-            </section>
 
-            <aside style={styles.reservePanel}>
-              <h2>Reserve / Pay</h2>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                <button type="button" onClick={handleSearch} style={yellowButtonStyle}>
+                  {searchLoading ? "Searching..." : "Search"}
+                </button>
+                <button type="button" onClick={handleRefresh} style={navyButtonStyle}>
+                  Refresh
+                </button>
+              </div>
 
-              {selectedHotel ? (
+              <div
+                style={{
+                  background: "#f4f7fc",
+                  border: "1px solid #d9e5f4",
+                  color: "#6a7fa2",
+                  borderRadius: 18,
+                  padding: "18px 20px",
+                  fontSize: 18,
+                }}
+              >
+                {searchLoading
+                  ? "Loading matching hotel options..."
+                  : hasSearched
+                  ? `Showing ${shownCount} of ${totalCount} hotel options for the current search.`
+                  : "Start with a city search to load matching hotels into the portal."}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          style={{
+            marginTop: 26,
+            display: "grid",
+            gridTemplateColumns: "1.05fr 0.95fr",
+            gap: 22,
+          }}
+        >
+          <div
+            style={{
+              background: "#ffffff",
+              borderRadius: 34,
+              padding: 28,
+              border: "1px solid #dce6f5",
+              boxShadow: "0 16px 34px rgba(12,38,96,0.08)",
+            }}
+          >
+            <div
+              style={{
+                color: "#7b8dab",
+                fontSize: 15,
+                fontWeight: 900,
+                letterSpacing: 3,
+                textTransform: "uppercase",
+                marginBottom: 10,
+              }}
+            >
+              Precision filters
+            </div>
+
+            <div
+              style={{
+                fontSize: 58,
+                lineHeight: 1.05,
+                fontWeight: 900,
+                color: "#12367c",
+                marginBottom: 14,
+              }}
+            >
+              Refine your search with precision filters
+            </div>
+
+            <div
+              style={{
+                color: "#657ca4",
+                fontSize: 19,
+                lineHeight: 1.65,
+              }}
+            >
+              Customers should be able to narrow choices quickly with clear facility tick boxes and then move through a broader list without losing confidence.
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "linear-gradient(135deg, #2b4fa3 0%, #4f78d3 100%)",
+              borderRadius: 34,
+              padding: 28,
+              color: "#ffffff",
+              boxShadow: "0 18px 34px rgba(19,52,126,0.14)",
+            }}
+          >
+            <div
+              style={{
+                color: "#d9e7ff",
+                fontSize: 15,
+                fontWeight: 900,
+                letterSpacing: 3,
+                textTransform: "uppercase",
+                marginBottom: 10,
+              }}
+            >
+              Professional portal
+            </div>
+
+            <div
+              style={{
+                fontSize: 58,
+                lineHeight: 1.05,
+                fontWeight: 900,
+                marginBottom: 14,
+              }}
+            >
+              Build trust before the customer reserves
+            </div>
+
+            <div
+              style={{
+                color: "#eef5ff",
+                fontSize: 19,
+                lineHeight: 1.65,
+              }}
+            >
+              The portal should feel direct, useful, competitive, and informative enough to keep customers inside your own experience.
+            </div>
+          </div>
+        </section>
+
+        <section style={{ marginTop: 28 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1.15fr 0.85fr", gap: 24, alignItems: "start" }}>
+            <div>
+              <div
+                style={{
+                  fontSize: 18,
+                  color: "#7387a8",
+                  fontWeight: 900,
+                  letterSpacing: 3,
+                  textTransform: "uppercase",
+                  marginBottom: 8,
+                }}
+              >
+                Available hotels
+              </div>
+
+              <div
+                style={{
+                  fontSize: 54,
+                  lineHeight: 1.05,
+                  fontWeight: 900,
+                  color: "#12367c",
+                  marginBottom: 18,
+                }}
+              >
+                Choose the hotel that fits the trip
+              </div>
+
+              {!hasSearched ? (
+                <div
+                  style={{
+                    background: "#ffffff",
+                    borderRadius: 28,
+                    padding: 28,
+                    border: "1px solid #dce6f5",
+                    boxShadow: "0 16px 34px rgba(12,38,96,0.08)",
+                    color: "#5f769b",
+                    fontSize: 18,
+                    lineHeight: 1.7,
+                  }}
+                >
+                  Begin with a city search. Once results load, customers can compare a broader list of hotels, move through pages of results, and select the stay that best fits the trip.
+                </div>
+              ) : hotels.length > 0 ? (
                 <>
-                  <h3>{selectedHotel.hotel_name || selectedHotel.name}</h3>
-                  <p style={styles.muted}>{selectedHotel.address || selectedHotel.area || city}, {country}</p>
-
-                  <div style={styles.totalBox}>
-                    <span>Stay total</span>
-                    <strong>{baseCurrency} {money(stayTotal)}</strong>
-                    <small>{nights} night{nights > 1 ? "s" : ""} | {guests} guests | {rooms} room{rooms > 1 ? "s" : ""}</small>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 20 }}>
+                    {hotels.map((hotel) => (
+                      <HotelCard key={hotel.id} hotel={hotel} onReserve={handleReserveSelect} />
+                    ))}
                   </div>
 
-                  <div style={styles.converterBox}>
-                    <label>Currency converter</label>
-                    <select style={styles.input} value={displayCurrency} onChange={(e) => setDisplayCurrency(e.target.value)}>
-                      {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                    <strong>{displayCurrency} {money(convertedTotal)}</strong>
-                    <small>{conversionNote}</small>
+                  <div
+                    style={{
+                      marginTop: 22,
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 12,
+                      alignItems: "center",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      disabled={filters.page <= 1 || searchLoading}
+                      onClick={() => handlePageChange(filters.page - 1)}
+                      style={{
+                        ...navyButtonStyle,
+                        padding: "14px 18px",
+                        fontSize: 16,
+                        opacity: filters.page <= 1 ? 0.5 : 1,
+                      }}
+                    >
+                      Previous
+                    </button>
+
+                    <div
+                      style={{
+                        background: "#ffffff",
+                        border: "1px solid #dce6f5",
+                        borderRadius: 16,
+                        padding: "14px 18px",
+                        color: "#12367c",
+                        fontWeight: 800,
+                        fontSize: 16,
+                      }}
+                    >
+                      Page {filters.page} of {totalPages}
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={filters.page >= totalPages || searchLoading}
+                      onClick={() => handlePageChange(filters.page + 1)}
+                      style={{
+                        ...yellowButtonStyle,
+                        padding: "14px 18px",
+                        fontSize: 16,
+                        opacity: filters.page >= totalPages ? 0.5 : 1,
+                      }}
+                    >
+                      Next
+                    </button>
                   </div>
-
-                  <input style={styles.input} placeholder="Full name" value={reservation.customer_name} onChange={(e) => setReservation({ ...reservation, customer_name: e.target.value })} />
-                  <input style={styles.input} placeholder="Email address" value={reservation.customer_email} onChange={(e) => setReservation({ ...reservation, customer_email: e.target.value })} />
-                  <input style={styles.input} placeholder="Phone number" value={reservation.customer_phone} onChange={(e) => setReservation({ ...reservation, customer_phone: e.target.value })} />
-                  <textarea style={styles.textarea} placeholder="Special request" value={reservation.note} onChange={(e) => setReservation({ ...reservation, note: e.target.value })} />
-
-                  <button style={styles.payBtn} onClick={reserveAndPay}>
-                    {paying ? "Starting secure checkout..." : selectedRate ? "Reserve / Pay Securely" : "Request price confirmation"}
-                  </button>
-
-                  <button style={styles.secondaryFull} onClick={() => openGuideForHotel(selectedHotel)}>Open destination guide</button>
                 </>
               ) : (
-                <div style={styles.notice}>Select a hotel to continue.</div>
+                <div
+                  style={{
+                    background: "#ffffff",
+                    borderRadius: 28,
+                    padding: 28,
+                    border: "1px solid #dce6f5",
+                    boxShadow: "0 16px 34px rgba(12,38,96,0.08)",
+                    color: "#9f2d2d",
+                    fontSize: 18,
+                    lineHeight: 1.7,
+                  }}
+                >
+                  {statusMessage || "No hotels matched that search."}
+                </div>
               )}
-            </aside>
-          </div>
-        </main>
-      )}
-
-      {page === "guide" && (
-        <DestinationGuide
-          setPage={setPage}
-          destination={guideDestination || [city, country].filter(Boolean).join(", ")}
-          country={country}
-          city={city}
-          hotel={guideHotel || selectedHotel}
-        />
-      )}
-
-      {page === "faq" && <FAQPage setPage={setPage} />}
-      {page === "terms" && <TermsPage setPage={setPage} />}
-      {page === "privacy" && <PrivacyPage setPage={setPage} />}
-      {page === "contact" && <ContactPage setPage={setPage} />}
-      {page === "developers" && <DevelopersPage setPage={setPage} />}
-      {page === "api" && <APIPage setPage={setPage} />}
-      {page === "publicStatus" && <PublicStatusPage setPage={setPage} status={status} />}
-      {page === "partner" && (
-        <PartnerPage
-          setPage={setPage}
-          partnerId={partnerId}
-          setPartnerId={setPartnerId}
-          partnerToken={partnerToken}
-          setPartnerToken={setPartnerToken}
-          partnerMessage={partnerMessage}
-          partnerJwt={partnerJwt}
-          loginPartner={loginPartner}
-          partnerDashboard={partnerDashboard}
-          syncStatus={syncStatus}
-          runSync={runSync}
-          loadSync={loadSync}
-          hotelRegister={hotelRegister}
-          setHotelRegister={setHotelRegister}
-          registerHotel={registerHotel}
-          hotelOnboarded={hotelOnboarded}
-        />
-      )}
-    </div>
-  );
-}
-
-function Header({ setPage }) {
-  return (
-    <header style={styles.header}>
-      <button style={styles.logoWrap} onClick={() => setPage("home")}>
-        <div style={styles.logoIcon}>✦</div>
-        <div>
-          <div style={styles.logo}>MYSPACE HOTEL</div>
-          <div style={styles.tagline}>Stay with clarity</div>
-        </div>
-      </button>
-
-      <nav style={styles.topNav}>
-        <button onClick={() => setPage("home")} style={styles.topLink}>Stays</button>
-        <button onClick={() => setPage("guide")} style={styles.topLink}>Destination Guide</button>
-        <button onClick={() => setPage("faq")} style={styles.topLink}>FAQ</button>
-        <button onClick={() => setPage("contact")} style={styles.topLink}>Contact</button>
-        <button onClick={() => setPage("partner")} style={styles.loginBtn}>Hotel / Partner Login</button>
-      </nav>
-    </header>
-  );
-}
-
-function Hero(props) {
-  const { country, city, setCountry, setCity, destinations, selectedCountry, checkin, checkout, setCheckin, setCheckout, guests, rooms, setGuests, setRooms, searchHotels, loading } = props;
-
-  return (
-    <section style={styles.hero}>
-      <div style={styles.heroContent}>
-        <h1 style={styles.heroTitle}>Find your perfect stay</h1>
-        <p style={styles.heroText}>Search verified hotels and apartments worldwide with clear reservation support.</p>
-
-        <div style={styles.searchBar}>
-          <div style={styles.searchCell}>
-            <label>Country</label>
-            <select value={country} onChange={(e) => { setCountry(e.target.value); setCity(""); }}>
-              <option value="">Choose country</option>
-              {destinations.map((c) => <option key={c.country} value={c.country}>{c.country}</option>)}
-            </select>
-          </div>
-
-          <div style={styles.searchCell}>
-            <label>Destination</label>
-            <select value={city} onChange={(e) => setCity(e.target.value)}>
-              <option value="">Choose city</option>
-              {(selectedCountry?.cities || []).map((c) => <option key={c.city} value={c.city}>{c.city}</option>)}
-            </select>
-          </div>
-
-          <div style={styles.searchCell}>
-            <label>Check-in</label>
-            <input type="date" value={checkin} onChange={(e) => setCheckin(e.target.value)} />
-          </div>
-
-          <div style={styles.searchCell}>
-            <label>Check-out</label>
-            <input type="date" value={checkout} onChange={(e) => setCheckout(e.target.value)} />
-          </div>
-
-          <div style={styles.searchCell}>
-            <label>Guests / Rooms</label>
-            <div style={styles.inlineSmall}>
-              <input type="number" min="1" value={guests} onChange={(e) => setGuests(e.target.value)} />
-              <input type="number" min="1" value={rooms} onChange={(e) => setRooms(e.target.value)} />
-            </div>
-          </div>
-
-          <button style={styles.searchBtn} onClick={searchHotels}>{loading ? "Searching..." : "Search Hotels"}</button>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function TrustBar() {
-  return (
-    <section style={styles.trustBar}>
-      <div><strong>Verified stays</strong><span>Real hotels and apartments.</span></div>
-      <div><strong>Secure reservation</strong><span>Clear stay details before payment.</span></div>
-      <div><strong>Destination support</strong><span>Maps, safety, dining and travel links.</span></div>
-    </section>
-  );
-}
-
-function DestinationGuide({ setPage, destination, country, city, hotel }) {
-  const place = destination || [city, country].filter(Boolean).join(", ") || "your destination";
-
-  const guideSections = [
-    {
-      title: "Emergency numbers",
-      text: "Use local emergency numbers for urgent help. In many destinations, 112 connects to emergency services. In the UK, 999 is also used.",
-      links: [
-        ["Police near me", mapsSearchUrl(`police station near ${place}`)],
-        ["Hospital near me", mapsSearchUrl(`hospital near ${place}`)],
-        ["Pharmacy near me", mapsSearchUrl(`pharmacy near ${place}`)]
-      ]
-    },
-    {
-      title: "Airport and transfers",
-      text: "Find the nearest airport, taxi options, train connections and travel routes before arrival.",
-      links: [
-        ["Airport near destination", mapsSearchUrl(`airport near ${place}`)],
-        ["Taxi near destination", mapsSearchUrl(`taxi near ${place}`)],
-        ["Directions to stay", mapsDirectionsUrl(place)]
-      ]
-    },
-    {
-      title: "Restaurants and local food",
-      text: "Explore nearby restaurants, cafes, late-night food, family dining and local favourites.",
-      links: [
-        ["Restaurants nearby", mapsSearchUrl(`restaurants near ${place}`)],
-        ["Cafes nearby", mapsSearchUrl(`cafes near ${place}`)],
-        ["Supermarkets nearby", mapsSearchUrl(`supermarket near ${place}`)]
-      ]
-    },
-    {
-      title: "Attractions and tours",
-      text: "Find museums, tourist attractions, zoos, sightseeing buses, shopping areas and family activities.",
-      links: [
-        ["Things to do", mapsSearchUrl(`things to do near ${place}`)],
-        ["Museums nearby", mapsSearchUrl(`museum near ${place}`)],
-        ["Tour bus nearby", mapsSearchUrl(`tour bus near ${place}`)]
-      ]
-    },
-    {
-      title: "Transport and navigation",
-      text: "Check train stations, metro routes, bus stops, car hire and walking directions.",
-      links: [
-        ["Train station nearby", mapsSearchUrl(`train station near ${place}`)],
-        ["Bus station nearby", mapsSearchUrl(`bus station near ${place}`)],
-        ["Car rental nearby", mapsSearchUrl(`car rental near ${place}`)]
-      ]
-    },
-    {
-      title: "Stay location",
-      text: "Open the property area in Google Maps and check route options before travelling.",
-      links: [
-        ["Open map", mapsSearchUrl(place)],
-        ["Get directions", mapsDirectionsUrl(place)],
-        ["Satellite map", `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place)}&basemap=satellite`]
-      ]
-    }
-  ];
-
-  return (
-    <main style={styles.contentPage}>
-      <button style={styles.backBtn} onClick={() => setPage("home")}>← Back</button>
-
-      <div style={styles.pageHero}>
-        <h1>Destination Guide</h1>
-        <p>{place}</p>
-        {hotel && <strong>{hotel.hotel_name || hotel.name}</strong>}
-      </div>
-
-      <div style={styles.guideGrid}>
-        {guideSections.map((s) => (
-          <div key={s.title} style={styles.guideCard}>
-            <h2>{s.title}</h2>
-            <p>{s.text}</p>
-            <div style={styles.linkGrid}>
-              {s.links.map(([label, url]) => (
-                <a key={label} href={url} target="_blank" rel="noreferrer" style={styles.mapLink}>{label}</a>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div style={styles.largeMapBox}>
-        <h2>Map and directions</h2>
-        <p>Use these links to open a live map, plan directions, find local transport and check the surrounding area.</p>
-        <div style={styles.mapActions}>
-          <a href={mapsSearchUrl(place)} target="_blank" rel="noreferrer" style={styles.primaryLink}>Open Google Map</a>
-          <a href={mapsDirectionsUrl(place)} target="_blank" rel="noreferrer" style={styles.primaryLink}>Get Directions</a>
-          <a href={mapsSearchUrl(`restaurants hospitals airport attractions near ${place}`)} target="_blank" rel="noreferrer" style={styles.primaryLink}>Explore Nearby</a>
-        </div>
-      </div>
-    </main>
-  );
-}
-
-function FAQPage({ setPage }) {
-  return (
-    <InfoPage
-      setPage={setPage}
-      title="Frequently Asked Questions"
-      sections={[
-        ["How booking works", "Search a destination, choose a stay, review the rate and submit your reservation details. Where secure checkout is available, the Reserve / Pay button will open payment. If the hotel requires confirmation, we collect your request and confirm availability before payment."],
-        ["Payment", "MySpace Hotel uses a secure payment flow where available. You should always review your hotel, dates, room count, guest count and total before completing payment."],
-        ["Cancellation", "Cancellation rules depend on the hotel and selected rate. Flexible rates may allow cancellation, while non-refundable rates may not."],
-        ["Support", "For booking help, use the Contact page or email reservations@myspace-hotel.com."]
-      ]}
-    />
-  );
-}
-
-function TermsPage({ setPage }) {
-  return (
-    <InfoPage
-      setPage={setPage}
-      title="Terms & Conditions"
-      sections={[
-        ["Reservations", "All reservations depend on hotel availability, rate conditions and final confirmation. Some prices may require confirmation before payment."],
-        ["Guest responsibility", "Guests must provide accurate names, dates, contact details and arrival information."],
-        ["Hotel policies", "Check-in times, deposits, cancellation rules, city taxes and identification requirements vary by destination and property."],
-        ["Payments", "Payment processing is handled through secure payment providers where enabled. MySpace Hotel does not ask customers to share card details through chat."]
-      ]}
-    />
-  );
-}
-
-function PrivacyPage({ setPage }) {
-  return (
-    <InfoPage
-      setPage={setPage}
-      title="Privacy Policy"
-      sections={[
-        ["Customer data", "We use customer details to support reservation requests, booking confirmation, customer service and travel assistance."],
-        ["Payment security", "Payment details are handled through secure payment processors. We do not display or request sensitive card data in the public app."],
-        ["Hotel partners", "Partner access is protected behind authentication and used for hotel onboarding, PMS connectivity and operational support."],
-        ["Support", "For privacy questions, contact reservations@myspace-hotel.com."]
-      ]}
-    />
-  );
-}
-
-function ContactPage({ setPage }) {
-  return (
-    <InfoPage
-      setPage={setPage}
-      title="Contact MySpace Hotel"
-      sections={[
-        ["Reservations", "Email: reservations@myspace-hotel.com. Use this for booking assistance, reservation changes and arrival support."],
-        ["Customers", "We can help with destination guidance, hotel questions, payment support and booking requests."],
-        ["Hotels and partners", "Hotels, PMS providers and channel managers can use Hotel / Partner Login for onboarding and connectivity tools."],
-        ["Emergency travel help", "For urgent safety matters, contact local emergency services first, then contact MySpace Hotel support for reservation assistance."]
-      ]}
-    />
-  );
-}
-
-function DevelopersPage({ setPage }) {
-  return (
-    <InfoPage
-      setPage={setPage}
-      title="Developers"
-      sections={[
-        ["Partner API", "MySpace Hotel supports partner authentication, hotel inventory, PMS sync monitoring, mappings and webhook ingestion."],
-        ["Use cases", "PMS integrations, channel manager connectivity, hotel onboarding, reservation dispatch, rate sync and inventory sync."],
-        ["Access", "Developer and partner tools are available after secure partner login."],
-        ["Security", "Use signed webhooks, token authentication, audit logs and approved partner credentials."]
-      ]}
-    />
-  );
-}
-
-function APIPage({ setPage }) {
-  return (
-    <InfoPage
-      setPage={setPage}
-      title="API"
-      sections={[
-        ["Authentication", "Partner systems authenticate with partner ID and token to receive a secure session."],
-        ["Hotel search", "Customer hotel search uses country and city selection from the live destination catalogue."],
-        ["PMS sync", "Authenticated partners can view sync status, run sync actions and monitor PMS connectivity."],
-        ["Webhooks", "Webhook endpoints support reservation, inventory and rate events for connected PMS and channel managers."]
-      ]}
-    />
-  );
-}
-
-function PublicStatusPage({ setPage, status }) {
-  return (
-    <main style={styles.contentPage}>
-      <button style={styles.backBtn} onClick={() => setPage("home")}>← Back</button>
-      <div style={styles.pageHero}>
-        <h1>System Status</h1>
-        <p>Current customer booking platform status.</p>
-      </div>
-      <div style={styles.statusGrid}>
-        <Metric label="API" value={status?.api || status?.status || "checking"} />
-        <Metric label="Hotels" value={status?.hotels_loaded || status?.hotels || "-"} />
-        <Metric label="Countries" value={status?.countries || "-"} />
-        <Metric label="Cities" value={status?.cities || "-"} />
-      </div>
-    </main>
-  );
-}
-
-function PartnerPage(props) {
-  const {
-    setPage,
-    partnerId,
-    setPartnerId,
-    partnerToken,
-    setPartnerToken,
-    partnerMessage,
-    partnerJwt,
-    loginPartner,
-    partnerDashboard,
-    syncStatus,
-    runSync,
-    loadSync,
-    hotelRegister,
-    setHotelRegister,
-    registerHotel,
-    hotelOnboarded
-  } = props;
-
-  const loggedIn = Boolean(partnerJwt);
-
-  return (
-    <main style={styles.contentPage}>
-      <button style={styles.backBtn} onClick={() => setPage("home")}>← Back</button>
-
-      <div style={styles.pageHero}>
-        <h1>Hotel & Partner Access</h1>
-        <p>Secure access for hotel extranet, PMS sync, onboarding and partner operations.</p>
-      </div>
-
-      {!loggedIn && (
-        <div style={styles.loginCard}>
-          <h2>Secure login</h2>
-          <p>Enterprise tools are hidden from customers and only appear after authenticated login.</p>
-          <input style={styles.input} value={partnerId} onChange={(e) => setPartnerId(e.target.value)} placeholder="Partner ID" />
-          <input style={styles.input} value={partnerToken} onChange={(e) => setPartnerToken(e.target.value)} placeholder="Partner token" type="password" />
-          {partnerMessage && <div style={styles.messageBox}>{partnerMessage}</div>}
-          <button style={styles.primaryButton} onClick={loginPartner}>Login securely</button>
-        </div>
-      )}
-
-      {loggedIn && (
-        <>
-          <div style={styles.partnerGrid}>
-            <div style={styles.partnerCard}>
-              <h2>Partner Dashboard</h2>
-              <MetricGrid data={{
-                Hotels: partnerDashboard?.hotels_loaded,
-                Reservations: partnerDashboard?.reservations,
-                Webhooks: partnerDashboard?.webhook_events,
-                Mappings: partnerDashboard?.mappings,
-                Inventory: partnerDashboard?.inventory_syncs,
-                Rates: partnerDashboard?.rate_syncs,
-                Failures: partnerDashboard?.sync_failures || 0
-              }} />
             </div>
 
-            <div style={styles.partnerCard}>
-              <h2>PMS Sync Status</h2>
-              <MetricGrid data={{
-                Partners: syncStatus?.partners?.length || 0,
-                Inventory: syncStatus?.inventory_syncs || 0,
-                Rates: syncStatus?.rate_syncs || 0,
-                Reservations: syncStatus?.reservation_syncs || 0,
-                Failures: syncStatus?.failures || 0
-              }} />
-              <button style={styles.primaryButton} onClick={runSync}>Run sync now</button>
-              <button style={styles.secondaryFull} onClick={() => loadSync()}>Refresh sync</button>
-            </div>
+            <div
+              style={{
+                position: "sticky",
+                top: 22,
+                background: "#ffffff",
+                borderRadius: 34,
+                padding: 26,
+                border: "1px solid #dce6f5",
+                boxShadow: "0 16px 34px rgba(12,38,96,0.08)",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 15,
+                  color: "#7387a8",
+                  fontWeight: 900,
+                  letterSpacing: 3,
+                  textTransform: "uppercase",
+                  marginBottom: 10,
+                }}
+              >
+                Request availability
+              </div>
 
-            <div style={styles.partnerCard}>
-              <h2>Hotel Onboarding</h2>
-              {Object.keys(hotelRegister).map((k) => (
+              <div
+                style={{
+                  fontSize: 42,
+                  lineHeight: 1.08,
+                  fontWeight: 900,
+                  color: "#12367c",
+                  marginBottom: 14,
+                }}
+              >
+                Complete your reservation request
+              </div>
+
+              <div
+                style={{
+                  color: "#64799d",
+                  fontSize: 17,
+                  lineHeight: 1.6,
+                  marginBottom: 18,
+                }}
+              >
+                Customers stay inside My Space Hotel. Search, compare, select, and request the stay directly from your own platform.
+              </div>
+
+              {selectedHotel ? (
+                <div
+                  style={{
+                    background: "#f7faff",
+                    border: "1px solid #dce8f8",
+                    borderRadius: 22,
+                    padding: 18,
+                    marginBottom: 18,
+                  }}
+                >
+                  <div style={{ fontSize: 24, fontWeight: 900, color: "#12367c", marginBottom: 8 }}>
+                    {selectedHotel.name}
+                  </div>
+                  <div style={{ color: "#5f769b", fontSize: 16, marginBottom: 8 }}>
+                    {selectedHotel.area}, {selectedHotel.city}, {selectedHotel.country}
+                  </div>
+                  <div style={{ color: "#12367c", fontSize: 26, fontWeight: 900 }}>
+                    {formatMoney(selectedHotel.price, selectedHotel.currency)}
+                  </div>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    background: "#f7faff",
+                    border: "1px solid #dce8f8",
+                    borderRadius: 22,
+                    padding: 18,
+                    marginBottom: 18,
+                    color: "#5f769b",
+                    fontSize: 16,
+                    lineHeight: 1.6,
+                  }}
+                >
+                  Select a hotel card first so the chosen stay appears here.
+                </div>
+              )}
+
+              <div style={{ display: "grid", gap: 12 }}>
                 <input
-                  key={k}
-                  style={styles.input}
-                  placeholder={k}
-                  value={hotelRegister[k]}
-                  onChange={(e) => setHotelRegister({ ...hotelRegister, [k]: e.target.value })}
+                  value={reserveForm.name}
+                  onChange={(e) => setReserveForm((s) => ({ ...s, name: e.target.value }))}
+                  style={fieldStyle}
+                  placeholder="Customer name"
                 />
-              ))}
-              <button style={styles.primaryButton} onClick={registerHotel}>Activate hotel</button>
-            </div>
+                <input
+                  value={reserveForm.email}
+                  onChange={(e) => setReserveForm((s) => ({ ...s, email: e.target.value }))}
+                  style={fieldStyle}
+                  placeholder="Customer email"
+                />
+                <textarea
+                  value={reserveForm.message}
+                  onChange={(e) => setReserveForm((s) => ({ ...s, message: e.target.value }))}
+                  style={{ ...fieldStyle, minHeight: 120, resize: "vertical" }}
+                  placeholder="Special requests"
+                />
 
-            <div style={styles.partnerCard}>
-              <h2>Onboarding Result</h2>
-              <pre style={styles.pre}>{JSON.stringify(hotelOnboarded || {}, null, 2)}</pre>
+                <button
+                  type="button"
+                  onClick={handleReservationSubmit}
+                  disabled={submitting}
+                  style={{
+                    ...yellowButtonStyle,
+                    width: "100%",
+                    opacity: submitting ? 0.7 : 1,
+                  }}
+                >
+                  {submitting ? "Sending request..." : "Request availability"}
+                </button>
+
+                {statusMessage ? (
+                  <div
+                    style={{
+                      background:
+                        statusMessage.toLowerCase().includes("failed") ||
+                        statusMessage.toLowerCase().includes("unavailable") ||
+                        statusMessage.toLowerCase().includes("please")
+                          ? "#fff0f0"
+                          : "#eef8ff",
+                      border:
+                        statusMessage.toLowerCase().includes("failed") ||
+                        statusMessage.toLowerCase().includes("unavailable") ||
+                        statusMessage.toLowerCase().includes("please")
+                          ? "1px solid #f1caca"
+                          : "1px solid #cfe6ff",
+                      color:
+                        statusMessage.toLowerCase().includes("failed") ||
+                        statusMessage.toLowerCase().includes("unavailable") ||
+                        statusMessage.toLowerCase().includes("please")
+                          ? "#9f2d2d"
+                          : "#1b4f7d",
+                      borderRadius: 20,
+                      padding: "16px 18px",
+                      fontSize: 16,
+                      lineHeight: 1.6,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {statusMessage}
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
-        </>
-      )}
-    </main>
-  );
-}
-
-function InfoPage({ title, sections, setPage }) {
-  return (
-    <main style={styles.contentPage}>
-      <button style={styles.backBtn} onClick={() => setPage("home")}>← Back</button>
-      <div style={styles.pageHero}>
-        <h1>{title}</h1>
+        </section>
       </div>
-
-      <div style={styles.infoStack}>
-        {sections.map(([heading, text]) => (
-          <div key={heading} style={styles.infoPanel}>
-            <h2>{heading}</h2>
-            <p>{text}</p>
-          </div>
-        ))}
-      </div>
-    </main>
-  );
-}
-
-function Metric({ label, value }) {
-  return (
-    <div style={styles.metricBox}>
-      <span>{label}</span>
-      <strong>{value ?? "-"}</strong>
     </div>
   );
 }
 
-function MetricGrid({ data }) {
-  return (
-    <div style={styles.metricGrid}>
-      {Object.entries(data).map(([k, v]) => <Metric key={k} label={k} value={v} />)}
-    </div>
-  );
-}
-
-function Footer({ setPage, status }) {
-  return (
-    <footer style={styles.footer}>
-      <div>
-        <strong>MySpace Hotel</strong>
-        <span> Book with clarity before you arrive.</span>
-      </div>
-      <div style={styles.footerLinks}>
-        <button onClick={() => setPage("contact")}>Contact</button>
-        <button onClick={() => setPage("privacy")}>Privacy</button>
-        <button onClick={() => setPage("terms")}>Terms</button>
-        <button onClick={() => setPage("developers")}>Developers</button>
-        <button onClick={() => setPage("api")}>API</button>
-        <button onClick={() => setPage("publicStatus")}>Status</button>
-        <span>{status?.api === "online" || status?.ok ? "Online" : "Checking"}</span>
-      </div>
-    </footer>
-  );
-}
-
-const styles = {
-  page: { minHeight: "100vh", background: "#f6f8fc", color: "#07142f", fontFamily: "Inter, Arial, sans-serif" },
-  header: { minHeight: 88, background: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 44px", boxShadow: "0 2px 18px rgba(15,23,42,.08)", position: "sticky", top: 0, zIndex: 10, gap: 20 },
-  logoWrap: { display: "flex", alignItems: "center", gap: 12, border: 0, background: "transparent", cursor: "pointer", textAlign: "left" },
-  logoIcon: { width: 42, height: 42, borderRadius: 14, display: "grid", placeItems: "center", background: "#fff3c4", color: "#b77900", fontSize: 24, fontWeight: 900 },
-  logo: { fontSize: 26, fontWeight: 900, letterSpacing: 1 },
-  tagline: { fontSize: 13, color: "#64748b", fontWeight: 700 },
-  topNav: { display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap", justifyContent: "flex-end" },
-  topLink: { border: 0, background: "transparent", fontWeight: 800, fontSize: 15, cursor: "pointer", color: "#0f172a" },
-  loginBtn: { border: "1px solid #cbd5e1", background: "#fff", color: "#1747b8", borderRadius: 14, padding: "12px 18px", fontWeight: 900, cursor: "pointer" },
-  hero: { minHeight: 520, backgroundImage: "linear-gradient(90deg, rgba(255,255,255,.98), rgba(255,255,255,.75), rgba(255,255,255,.2)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2000&q=80')", backgroundSize: "cover", backgroundPosition: "center" },
-  heroContent: { maxWidth: 1420, margin: "0 auto", padding: "70px 52px 40px" },
-  heroTitle: { fontSize: 58, lineHeight: 1.02, margin: 0, letterSpacing: -2, color: "#07142f" },
-  heroText: { fontSize: 22, color: "#334155", marginTop: 14, fontWeight: 700 },
-  searchBar: { marginTop: 34, background: "#fff", borderRadius: 24, display: "grid", gridTemplateColumns: "1.1fr 1.1fr .9fr .9fr .9fr 1fr", boxShadow: "0 26px 60px rgba(15,23,42,.18)", overflow: "hidden" },
-  searchCell: { padding: 18, borderRight: "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: 8 },
-  inlineSmall: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 },
-  searchBtn: { border: 0, background: "#1857df", color: "#fff", fontSize: 16, fontWeight: 900, cursor: "pointer" },
-  trustBar: { maxWidth: 1320, margin: "-22px auto 24px", background: "#fff", borderRadius: 20, padding: 22, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, boxShadow: "0 15px 45px rgba(15,23,42,.08)", position: "relative", zIndex: 2 },
-  homeSection: { maxWidth: 1420, margin: "0 auto", padding: "28px 52px" },
-  sectionTop: { display: "flex", justifyContent: "space-between", alignItems: "center" },
-  sectionTitle: { fontSize: 30, margin: "0 0 18px" },
-  muted: { color: "#64748b", fontWeight: 700 },
-  destinationGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 },
-  destCard: { height: 220, border: 0, borderRadius: 18, backgroundSize: "cover", backgroundPosition: "center", color: "#fff", textAlign: "left", padding: 22, display: "flex", flexDirection: "column", justifyContent: "flex-end", cursor: "pointer", boxShadow: "0 14px 35px rgba(15,23,42,.18)", fontSize: 18 },
-  featureGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 18 },
-  featureCard: { background: "#fff", border: 0, borderRadius: 22, padding: 24, textAlign: "left", cursor: "pointer", boxShadow: "0 16px 40px rgba(15,23,42,.08)" },
-  main: { maxWidth: 1420, margin: "0 auto", padding: "28px 42px" },
-  backBtn: { border: 0, background: "#e0ecff", color: "#1747b8", padding: "12px 16px", borderRadius: 14, fontWeight: 900, cursor: "pointer", marginBottom: 18 },
-  resultsLayout: { display: "grid", gridTemplateColumns: "1fr 390px", gap: 24 },
-  hotelGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(295px, 1fr))", gap: 18 },
-  hotelCard: { background: "#fff", border: "2px solid #e5e7eb", borderRadius: 22, overflow: "hidden", boxShadow: "0 16px 40px rgba(15,23,42,.08)" },
-  hotelImg: { width: "100%", height: 190, objectFit: "cover" },
-  imageFallback: { height: 190, display: "grid", placeItems: "center", background: "#dbeafe", color: "#1747b8", fontWeight: 900 },
-  hotelBody: { padding: 18 },
-  badgeRow: { display: "flex", justifyContent: "space-between", gap: 8 },
-  badge: { background: "#dbeafe", color: "#1747b8", borderRadius: 999, padding: "7px 10px", fontWeight: 900, fontSize: 12 },
-  greenBadge: { background: "#dcfce7", color: "#166534", borderRadius: 999, padding: "7px 10px", fontWeight: 900, fontSize: 12 },
-  hotelName: { fontSize: 22, marginBottom: 8 },
-  hotelMeta: { color: "#64748b", fontWeight: 700 },
-  priceBox: { background: "#f8fafc", borderRadius: 14, padding: 14, display: "flex", flexDirection: "column", gap: 4, marginBottom: 12 },
-  cardButtons: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 },
-  selectBtn: { width: "100%", border: 0, borderRadius: 14, background: "#f6c744", padding: 14, fontWeight: 900, cursor: "pointer" },
-  lightBtn: { width: "100%", border: "1px solid #cbd5e1", borderRadius: 14, background: "#fff", color: "#1747b8", padding: 14, fontWeight: 900, cursor: "pointer" },
-  reservePanel: { position: "sticky", top: 110, alignSelf: "start", background: "#fff", borderRadius: 24, padding: 24, boxShadow: "0 18px 50px rgba(15,23,42,.12)" },
-  totalBox: { background: "#dcfce7", borderRadius: 18, padding: 18, display: "flex", flexDirection: "column", gap: 6, margin: "18px 0" },
-  converterBox: { background: "#eff6ff", borderRadius: 18, padding: 16, display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 },
-  input: { width: "100%", padding: 13, borderRadius: 13, border: "1px solid #cbd5e1", marginBottom: 12, fontWeight: 700 },
-  textarea: { width: "100%", minHeight: 88, padding: 13, borderRadius: 13, border: "1px solid #cbd5e1", marginBottom: 12 },
-  payBtn: { width: "100%", border: 0, background: "#10b981", color: "#052e1c", padding: 15, borderRadius: 14, fontWeight: 950, cursor: "pointer", marginBottom: 10 },
-  secondaryFull: { width: "100%", border: "1px solid #cbd5e1", background: "#fff", color: "#1747b8", padding: 14, borderRadius: 14, fontWeight: 900, cursor: "pointer", marginBottom: 10 },
-  notice: { background: "#f8fafc", borderRadius: 14, padding: 14 },
-  contentPage: { maxWidth: 1320, margin: "0 auto", padding: 42 },
-  pageHero: { background: "#fff", borderRadius: 24, padding: 30, marginBottom: 24, boxShadow: "0 15px 45px rgba(15,23,42,.08)" },
-  guideGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 18 },
-  guideCard: { background: "#fff", borderRadius: 22, padding: 22, boxShadow: "0 15px 45px rgba(15,23,42,.08)" },
-  linkGrid: { display: "grid", gap: 10, marginTop: 15 },
-  mapLink: { background: "#e0ecff", color: "#1747b8", padding: "12px 14px", borderRadius: 12, fontWeight: 900, textDecoration: "none" },
-  largeMapBox: { marginTop: 24, background: "#fff", borderRadius: 24, padding: 28, boxShadow: "0 15px 45px rgba(15,23,42,.08)" },
-  mapActions: { display: "flex", gap: 12, flexWrap: "wrap" },
-  primaryLink: { background: "#1857df", color: "#fff", padding: "13px 16px", borderRadius: 13, textDecoration: "none", fontWeight: 900 },
-  infoStack: { display: "grid", gap: 18 },
-  infoPanel: { background: "#fff", borderRadius: 22, padding: 24, boxShadow: "0 15px 45px rgba(15,23,42,.08)" },
-  statusGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 },
-  loginCard: { background: "#fff", maxWidth: 560, borderRadius: 24, padding: 28, boxShadow: "0 18px 50px rgba(15,23,42,.12)" },
-  messageBox: { background: "#eff6ff", color: "#1747b8", borderRadius: 12, padding: 12, marginBottom: 12, fontWeight: 900 },
-  primaryButton: { width: "100%", border: 0, background: "#1857df", color: "#fff", padding: 14, borderRadius: 14, fontWeight: 900, cursor: "pointer", marginBottom: 10 },
-  partnerGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(330px, 1fr))", gap: 18 },
-  partnerCard: { background: "#fff", borderRadius: 24, padding: 22, boxShadow: "0 15px 45px rgba(15,23,42,.08)" },
-  metricGrid: { display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 },
-  metricBox: { background: "#f1f5f9", borderRadius: 14, padding: 14, display: "flex", flexDirection: "column", gap: 6 },
-  pre: { background: "#0f172a", color: "#dbeafe", padding: 16, borderRadius: 16, overflow: "auto", maxHeight: 360 },
-  footer: { background: "#fff", borderTop: "1px solid #e2e8f0", padding: "22px 42px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14 },
-  footerLinks: { display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }
+const fieldStyle = {
+  width: "100%",
+  boxSizing: "border-box",
+  borderRadius: 22,
+  border: "1px solid #d8e3f1",
+  background: "#ffffff",
+  color: "#12367c",
+  fontSize: 18,
+  padding: "20px 20px",
+  outline: "none",
 };
-'@ | Set-Content .\src\App.jsx -Encoding UTF8
 
-npm run build
+const yellowButtonStyle = {
+  border: "none",
+  borderRadius: 22,
+  background: "#f0c53b",
+  color: "#08204f",
+  fontSize: 20,
+  fontWeight: 900,
+  cursor: "pointer",
+  padding: "18px 22px",
+  boxShadow: "0 14px 30px rgba(240,197,59,0.30)",
+};
 
-cd C:\frontend\hotel-booking-app
-
-git add frontend/src/App.jsx
-
-git commit -m "Restore complete customer portal destination guide Stripe and all pages"
-
-git push
+const navyButtonStyle = {
+  border: "none",
+  borderRadius: 22,
+  background: "#12367c",
+  color: "#ffffff",
+  fontSize: 20,
+  fontWeight: 900,
+  cursor: "pointer",
+  padding: "18px 22px",
+  boxShadow: "0 14px 30px rgba(18,54,124,0.18)",
+};
