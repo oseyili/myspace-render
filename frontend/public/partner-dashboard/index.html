@@ -52,7 +52,7 @@
     <div class="card"><div class="label">FAILOVERS</div><div class="num" id="failovers">-</div></div>
     <div class="card"><div class="label">RECOVERIES</div><div class="num" id="recoveries">-</div></div>
     <div class="card"><div class="label">PMS MAPPINGS</div><div class="num" id="mappings">-</div></div>
-    <div class="card"><div class="label">SYSTEM</div><div class="num" id="system">V3</div></div>
+    <div class="card"><div class="label">SYSTEM</div><div class="num" id="system">V3.1</div></div>
   </div>
 
   <div class="card">
@@ -79,15 +79,12 @@
     <a href="/webhooks">Webhooks</a>
     <a href="/partners">Partners</a>
     <a href="/status">Status</a>
-    <a href="/docs">Swagger Docs</a>
+    <a href="https://myspace-hotel-backend.onrender.com/docs" target="_blank">Swagger Docs</a>
   </div>
 </main>
 
 <script>
-  const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-    ? "http://127.0.0.1:5050"
-    : "https://hotel-backend-1-ee5z.onrender.com";
-
+  const API_BASE = "https://myspace-hotel-backend.onrender.com";
   let jwt = "";
 
   function show(msg, type = "status") {
@@ -108,7 +105,7 @@
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
-        show(data.error || "Login failed", "error");
+        show(data.error || "Login failed. Backend may still be redeploying.", "error");
         return;
       }
 
@@ -116,7 +113,7 @@
       show("Partner authentication successful.");
       await loadDashboard();
     } catch (err) {
-      show("Could not connect to backend API.", "error");
+      show("Could not connect to backend API. Check Render deploy and backend URL.", "error");
     }
   }
 
@@ -161,7 +158,7 @@
     const rows = (data.hotels || []).slice(0, 12).map(h => `
       <tr>
         <td>${h.hotel_id || ""}</td>
-        <td>${h.name || ""}</td>
+        <td>${h.name || h.hotel_name || ""}</td>
         <td>${h.city || ""}</td>
         <td>${h.country || ""}</td>
       </tr>
