@@ -1,0 +1,174 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Partner Dashboard | MySpace Hotel</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,sans-serif;background:#06101f;color:#06101f}
+    main{max-width:1280px;margin:28px auto;background:#fff;border-radius:28px;padding:34px}
+    .brand{letter-spacing:10px;color:#d4a500;font-weight:900;margin-bottom:12px}
+    h1{color:#0b3b8f;font-size:42px;margin:0 0 8px}
+    h2{color:#0b3b8f;margin:0 0 12px}
+    .lead{font-size:18px;color:#52627c;font-weight:700}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0}
+    .card{background:#f2f6fd;border-radius:20px;padding:20px}
+    .num{font-size:34px;font-weight:900;color:#0b3b8f;margin-top:10px}
+    .label{font-weight:900;color:#52627c;letter-spacing:2px;font-size:12px}
+    .login{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;background:#eef4ff;border-radius:18px;padding:16px;margin:22px 0}
+    input{padding:14px;border-radius:12px;border:1px solid #cbd6e7;font-size:16px}
+    button{background:#0b3b8f;color:#fff;border:0;border-radius:12px;padding:14px 18px;font-weight:900;cursor:pointer}
+    .gold{background:#ffd34d;color:#06101f}
+    .status{background:#dcfce7;color:#075b24;padding:12px 14px;border-radius:14px;font-weight:900;margin-top:14px}
+    .error{background:#fee2e2;color:#991b1b;padding:12px 14px;border-radius:14px;font-weight:900;margin-top:14px}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{text-align:left;border-bottom:1px solid #dbe5f2;padding:12px;font-size:14px}
+    th{color:#0b3b8f}
+    .links{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    .links a{background:#06101f;color:#fff;text-decoration:none;border-radius:12px;padding:11px 14px;font-weight:900}
+    @media(max-width:900px){main{margin:0;border-radius:0}.grid,.login{grid-template-columns:1fr}h1{font-size:34px}}
+  </style>
+</head>
+<body>
+<main>
+  <div class="brand">MYSPACE HOTEL</div>
+  <h1>Partner Dashboard</h1>
+  <div class="lead">Enterprise overview for PMS, channel-manager, distribution and integration partners.</div>
+
+  <div class="login">
+    <input id="partnerId" value="oracle-ohip" placeholder="Partner ID" />
+    <input id="partnerToken" value="MSH_ENTERPRISE_TOKEN_001" placeholder="Partner token" />
+    <button class="gold" onclick="login()">Connect</button>
+  </div>
+
+  <div id="message"></div>
+
+  <div class="grid">
+    <div class="card"><div class="label">HOTELS LOADED</div><div class="num" id="hotels">-</div></div>
+    <div class="card"><div class="label">RESERVATIONS</div><div class="num" id="reservations">-</div></div>
+    <div class="card"><div class="label">WEBHOOK EVENTS</div><div class="num" id="webhooks">-</div></div>
+    <div class="card"><div class="label">RETRY QUEUE</div><div class="num" id="retry">-</div></div>
+    <div class="card"><div class="label">FAILOVERS</div><div class="num" id="failovers">-</div></div>
+    <div class="card"><div class="label">RECOVERIES</div><div class="num" id="recoveries">-</div></div>
+    <div class="card"><div class="label">PMS MAPPINGS</div><div class="num" id="mappings">-</div></div>
+    <div class="card"><div class="label">SYSTEM</div><div class="num" id="system">V3</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Live API test</h2>
+    <button onclick="loadHotels()">Load first authenticated hotel records</button>
+    <table>
+      <thead>
+        <tr>
+          <th>Hotel ID</th>
+          <th>Name</th>
+          <th>City</th>
+          <th>Country</th>
+        </tr>
+      </thead>
+      <tbody id="hotelRows">
+        <tr><td colspan="4">Connect first.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="links">
+    <a href="/developers">Developers</a>
+    <a href="/api">API</a>
+    <a href="/webhooks">Webhooks</a>
+    <a href="/partners">Partners</a>
+    <a href="/status">Status</a>
+    <a href="/docs">Swagger Docs</a>
+  </div>
+</main>
+
+<script>
+  const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://127.0.0.1:5050"
+    : "https://hotel-backend-1-ee5z.onrender.com";
+
+  let jwt = "";
+
+  function show(msg, type = "status") {
+    document.getElementById("message").innerHTML = `<div class="${type}">${msg}</div>`;
+  }
+
+  async function login() {
+    const partner_id = document.getElementById("partnerId").value.trim();
+    const token = document.getElementById("partnerToken").value.trim();
+
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ partner_id, token })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        show(data.error || "Login failed", "error");
+        return;
+      }
+
+      jwt = data.jwt;
+      show("Partner authentication successful.");
+      await loadDashboard();
+    } catch (err) {
+      show("Could not connect to backend API.", "error");
+    }
+  }
+
+  async function loadDashboard() {
+    const res = await fetch(`${API_BASE}/api/admin/dashboard`, {
+      headers: { Authorization: `Bearer ${jwt}` }
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      show(data.error || "Dashboard failed", "error");
+      return;
+    }
+
+    document.getElementById("hotels").textContent = data.hotels_loaded ?? "-";
+    document.getElementById("reservations").textContent = data.reservations ?? "-";
+    document.getElementById("webhooks").textContent = data.webhook_events ?? "-";
+    document.getElementById("retry").textContent = data.retry_queue ?? "-";
+    document.getElementById("failovers").textContent = data.failovers ?? "-";
+    document.getElementById("recoveries").textContent = data.recoveries ?? "-";
+    document.getElementById("mappings").textContent = data.mappings ?? "-";
+  }
+
+  async function loadHotels() {
+    if (!jwt) {
+      show("Connect first.", "error");
+      return;
+    }
+
+    const res = await fetch(`${API_BASE}/api/hotels`, {
+      headers: { Authorization: `Bearer ${jwt}` }
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      show(data.error || "Hotel loading failed", "error");
+      return;
+    }
+
+    const rows = (data.hotels || []).slice(0, 12).map(h => `
+      <tr>
+        <td>${h.hotel_id || ""}</td>
+        <td>${h.name || ""}</td>
+        <td>${h.city || ""}</td>
+        <td>${h.country || ""}</td>
+      </tr>
+    `).join("");
+
+    document.getElementById("hotelRows").innerHTML = rows || `<tr><td colspan="4">No hotel records returned.</td></tr>`;
+  }
+</script>
+</body>
+</html>
