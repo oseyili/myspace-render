@@ -56,29 +56,68 @@ function mapDirections(query) {
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
 }
 
-function normalizeDestinations(rawCountries) {
+const FALLBACK_DESTINATIONS = [
+  { country: "United Kingdom", cities: [{ city: "London" }, { city: "Manchester" }, { city: "Birmingham" }] },
+  { country: "France", cities: [{ city: "Paris" }, { city: "Nice" }, { city: "Lyon" }] },
+  { country: "Spain", cities: [{ city: "Barcelona" }, { city: "Madrid" }, { city: "Valencia" }] },
+  { country: "United Arab Emirates", cities: [{ city: "Dubai" }, { city: "Abu Dhabi" }] },
+  { country: "United States", cities: [{ city: "New York" }, { city: "Miami" }, { city: "Los Angeles" }] },
+  { country: "Nigeria", cities: [{ city: "Lagos" }, { city: "Abuja" }, { city: "Benin City" }] }
+];
+
+function normalizeDestinations(payload) {
+  const raw =
+    Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.countries)
+        ? payload.countries
+        : Array.isArray(payload?.destinations)
+          ? payload.destinations
+          : Array.isArray(payload?.data)
+            ? payload.data
+            : [];
+
   const countryMap = new Map();
 
-  for (const row of rawCountries || []) {
-    const countryName = cleanText(row.country || row.name || row.country_name);
+  for (const row of raw) {
+    const countryName = cleanText(
+      row?.country ||
+      row?.country_name ||
+      row?.name ||
+      row?.label
+    ).replace(/\s*\(\d+\)\s*$/g, "");
+
     if (!countryName) continue;
 
-    const rawCities = Array.isArray(row.cities) ? row.cities : [];
-    const current = countryMap.get(countryName) || new Set();
+    const citiesRaw = Array.isArray(row?.cities)
+      ? row.cities
+      : Array.isArray(row?.destinations)
+        ? row.destinations
+        : Array.isArray(row?.locations)
+          ? row.locations
+          : [];
 
-    for (const cityRow of rawCities) {
-      const cityName =
+    const citySet = countryMap.get(countryName) || new Set();
+
+    for (const cityRow of citiesRaw) {
+      const cityName = cleanText(
         typeof cityRow === "string"
-          ? cleanText(cityRow)
-          : cleanText(cityRow.city || cityRow.name || cityRow.destination || cityRow.label);
+          ? cityRow
+          : cityRow?.city ||
+            cityRow?.city_name ||
+            cityRow?.name ||
+            cityRow?.destination ||
+            cityRow?.label
+      ).replace(/\s*\(\d+\)\s*$/g, "");
 
-      if (cityName) current.add(cityName);
+      if (cityName) citySet.add(cityName);
     }
 
-    countryMap.set(countryName, current);
+    countryMap.set(countryName, citySet);
   }
 
   return Array.from(countryMap.entries())
+    .filter(([country, cities]) => country && cities.size > 0)
     .map(([country, cities]) => ({
       country,
       cities: Array.from(cities)
@@ -144,15 +183,15 @@ export default function App() {
   const selectedRate = selectedHotel?.first_rate || null;
   const baseCurrency = selectedRate?.currency || "GBP";
   const stayTotal = Number(selectedRate?.amount || 0) * Number(rooms || 1) * nights;
-  const convertedTotal = convert(stayTotal, baseCurrency, displayCurrency);
-
-  async function loadDestinations() {
+  const convertedTotal = convert(stayTotal, baseCurrency, displayCurrency);  async function loadDestinations() {
     try {
       const response = await fetch(`${API}/api/real-catalog/destinations`, { cache: "no-store" });
       const data = await response.json();
-      setDestinations(normalizeDestinations(data.countries || []));
+
+      const clean = normalizeDestinations(data);
+      setDestinations(clean.length ? clean : FALLBACK_DESTINATIONS);
     } catch {
-      setDestinations([]);
+      setDestinations(FALLBACK_DESTINATIONS);
     }
   }
 
@@ -756,3 +795,4 @@ const styles = {
   footer: { background: "#fff", borderTop: "1px solid #e2e8f0", padding: "22px 52px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14 },
   footerLinks: { display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }
 };
+
