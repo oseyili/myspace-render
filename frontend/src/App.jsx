@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 const API =
   import.meta.env.VITE_API_BASE ||
@@ -45,7 +45,39 @@ function convert(amount, from, to) {
 }
 
 function cleanText(value) {
-  return String(value || "").trim();
+  return String(value || "")
+    .replace(/\s*\(\s*\d+\s*\)\s*$/g, "")
+    .replace(/\s+-\s+\d+\s*$/g, "")
+    .replace(/\s+\d+\s*hotels?$/gi, "")
+    .replace(/\s+\d+\s*properties?$/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isBadDestinationName(value) {
+  const text = cleanText(value).toLowerCase();
+  if (!text) return true;
+  if (text === "unknown") return true;
+  if (text === "null") return true;
+  if (text === "undefined") return true;
+  if (/^\d+$/.test(text)) return true;
+  if (text.includes("catalogue")) return true;
+  if (text.includes("hotelbeds")) return true;
+  if (text.includes("supplier")) return true;
+  if (text.includes("backend")) return true;
+  if (text.includes("api")) return true;
+  return false;
+}
+
+function titleCasePlace(value) {
+  return cleanText(value)
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => {
+      if (word.length <= 3 && word === word.toUpperCase()) return word;
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(" ");
 }
 
 function mapSearch(query) {
@@ -57,73 +89,84 @@ function mapDirections(query) {
 }
 
 const FALLBACK_DESTINATIONS = [
-  { country: "United Kingdom", cities: [{ city: "London" }, { city: "Manchester" }, { city: "Birmingham" }] },
   { country: "France", cities: [{ city: "Paris" }, { city: "Nice" }, { city: "Lyon" }] },
+  { country: "Nigeria", cities: [{ city: "Abuja" }, { city: "Benin City" }, { city: "Lagos" }] },
   { country: "Spain", cities: [{ city: "Barcelona" }, { city: "Madrid" }, { city: "Valencia" }] },
-  { country: "United Arab Emirates", cities: [{ city: "Dubai" }, { city: "Abu Dhabi" }] },
-  { country: "United States", cities: [{ city: "New York" }, { city: "Miami" }, { city: "Los Angeles" }] },
-  { country: "Nigeria", cities: [{ city: "Lagos" }, { city: "Abuja" }, { city: "Benin City" }] }
+  { country: "United Arab Emirates", cities: [{ city: "Abu Dhabi" }, { city: "Dubai" }] },
+  { country: "United Kingdom", cities: [{ city: "Birmingham" }, { city: "London" }, { city: "Manchester" }] },
+  { country: "United States", cities: [{ city: "Los Angeles" }, { city: "Miami" }, { city: "New York" }] }
 ];
 
 function normalizeDestinations(payload) {
-  const raw =
-    Array.isArray(payload)
-      ? payload
-      : Array.isArray(payload?.countries)
-        ? payload.countries
-        : Array.isArray(payload?.destinations)
-          ? payload.destinations
-          : Array.isArray(payload?.data)
-            ? payload.data
-            : [];
+  const raw = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.countries)
+      ? payload.countries
+      : Array.isArray(payload?.destinations)
+        ? payload.destinations
+        : Array.isArray(payload?.data)
+          ? payload.data
+          : [];
 
   const countryMap = new Map();
 
   for (const row of raw) {
-    const countryName = cleanText(
-      row?.country ||
+    const rawCountry =
       row?.country_name ||
+      row?.countryName ||
+      row?.country ||
       row?.name ||
-      row?.label
-    ).replace(/\s*\(\d+\)\s*$/g, "");
+      row?.label ||
+      "";
 
-    if (!countryName) continue;
+    const countryName = titleCasePlace(rawCountry);
+
+    if (isBadDestinationName(countryName)) continue;
 
     const citiesRaw = Array.isArray(row?.cities)
       ? row.cities
-      : Array.isArray(row?.destinations)
-        ? row.destinations
-        : Array.isArray(row?.locations)
-          ? row.locations
-          : [];
+      : Array.isArray(row?.city)
+        ? row.city
+        : Array.isArray(row?.destinations)
+          ? row.destinations
+          : Array.isArray(row?.locations)
+            ? row.locations
+            : [];
 
     const citySet = countryMap.get(countryName) || new Set();
 
     for (const cityRow of citiesRaw) {
-      const cityName = cleanText(
+      const rawCity =
         typeof cityRow === "string"
           ? cityRow
-          : cityRow?.city ||
-            cityRow?.city_name ||
-            cityRow?.name ||
+          : cityRow?.city_name ||
+            cityRow?.cityName ||
+            cityRow?.city ||
             cityRow?.destination ||
-            cityRow?.label
-      ).replace(/\s*\(\d+\)\s*$/g, "");
+            cityRow?.name ||
+            cityRow?.label ||
+            "";
 
-      if (cityName) citySet.add(cityName);
+      const cityName = titleCasePlace(rawCity);
+
+      if (!isBadDestinationName(cityName)) {
+        citySet.add(cityName);
+      }
     }
 
-    countryMap.set(countryName, citySet);
+    if (citySet.size > 0) {
+      countryMap.set(countryName, citySet);
+    }
   }
 
   return Array.from(countryMap.entries())
-    .filter(([country, cities]) => country && cities.size > 0)
     .map(([country, cities]) => ({
       country,
       cities: Array.from(cities)
         .sort((a, b) => a.localeCompare(b))
         .map((city) => ({ city }))
     }))
+    .filter((item) => item.country && item.cities.length > 0)
     .sort((a, b) => a.country.localeCompare(b.country));
 }
 
@@ -183,12 +226,14 @@ export default function App() {
   const selectedRate = selectedHotel?.first_rate || null;
   const baseCurrency = selectedRate?.currency || "GBP";
   const stayTotal = Number(selectedRate?.amount || 0) * Number(rooms || 1) * nights;
-  const convertedTotal = convert(stayTotal, baseCurrency, displayCurrency);  async function loadDestinations() {
+  const convertedTotal = convert(stayTotal, baseCurrency, displayCurrency);
+
+  async function loadDestinations() {
     try {
       const response = await fetch(`${API}/api/real-catalog/destinations`, { cache: "no-store" });
       const data = await response.json();
-
       const clean = normalizeDestinations(data);
+
       setDestinations(clean.length ? clean : FALLBACK_DESTINATIONS);
     } catch {
       setDestinations(FALLBACK_DESTINATIONS);
@@ -218,7 +263,8 @@ export default function App() {
 
       const response = await fetch(`${API}/api/hotels/search?${params.toString()}`, { cache: "no-store" });
       const data = await response.json();
-      setHotels(data.hotels || []);
+
+      setHotels(Array.isArray(data?.hotels) ? data.hotels : []);
       setPage("results");
     } catch {
       alert("Hotels could not be loaded. Please try again.");
@@ -229,6 +275,7 @@ export default function App() {
 
   async function reserveAndPay() {
     if (!selectedHotel) return alert("Select a hotel first.");
+
     if (!reservation.customer_name || !reservation.customer_email || !reservation.customer_phone) {
       return alert("Please enter name, email and phone number.");
     }
@@ -266,9 +313,9 @@ export default function App() {
         return;
       }
 
-      alert(data.error || "Stripe checkout is not active yet. Check backend Stripe configuration on Render.");
+      alert(data.error || "Secure checkout is not active yet.");
     } catch {
-      alert("Stripe checkout could not be started. Check backend deployment and Stripe key.");
+      alert("Secure checkout could not be started. Please try again.");
     } finally {
       setPaying(false);
     }
@@ -293,7 +340,7 @@ export default function App() {
     } catch {
       const fallback = {
         ok: true,
-        message: "Hotel onboarding request captured. Backend onboarding route needs activation.",
+        message: "Hotel onboarding request captured.",
         hotel_name: hotelRegister.hotel_name,
         email: hotelRegister.email
       };
@@ -331,12 +378,29 @@ export default function App() {
   function choosePopular(nextCountry, nextCity) {
     setCountry(nextCountry);
     setCity(nextCity);
+    setHotels([]);
+    setSelectedHotel(null);
     searchHotels(nextCountry, nextCity);
   }
 
   function openGuide(hotel = null) {
     setGuideHotel(hotel || selectedHotel);
     setPage("guide");
+  }
+
+  function handleCountryChange(nextCountry) {
+    setCountry(nextCountry);
+    setCity("");
+    setHotels([]);
+    setSelectedHotel(null);
+    setGuideHotel(null);
+  }
+
+  function handleCityChange(nextCity) {
+    setCity(nextCity);
+    setHotels([]);
+    setSelectedHotel(null);
+    setGuideHotel(null);
   }
 
   useEffect(() => {
@@ -356,7 +420,8 @@ export default function App() {
           <section style={styles.hero}>
             <div style={styles.heroInner}>
               <h1 style={styles.heroTitle}>Find your perfect stay</h1>
-              <p style={styles.heroText}>Search verified hotels and apartments worldwide.</p>
+              <p style={styles.heroText}>Search trusted hotels and apartments worldwide.</p>
+
               <div style={styles.heroBadges}>
                 <span>Secure checkout</span>
                 <span>Destination support</span>
@@ -366,8 +431,8 @@ export default function App() {
               <SearchPanel
                 country={country}
                 city={city}
-                setCountry={setCountry}
-                setCity={setCity}
+                setCountry={handleCountryChange}
+                setCity={handleCityChange}
                 destinations={destinations}
                 cityOptions={cityOptions}
                 checkin={checkin}
@@ -385,9 +450,18 @@ export default function App() {
           </section>
 
           <section style={styles.trustStrip}>
-            <div><strong>Real hotel search</strong><span>Country and city names only.</span></div>
-            <div><strong>Stripe checkout</strong><span>Reserve / Pay opens secure payment.</span></div>
-            <div><strong>Travel guide</strong><span>Maps, directions and local services.</span></div>
+            <div>
+              <strong>Clean destination search</strong>
+              <span>Country and city names only.</span>
+            </div>
+            <div>
+              <strong>Secure checkout</strong>
+              <span>Clear stay total before payment.</span>
+            </div>
+            <div>
+              <strong>Travel guide</strong>
+              <span>Maps, directions and local services.</span>
+            </div>
           </section>
 
           <section style={styles.section}>
@@ -432,9 +506,18 @@ export default function App() {
           </section>
 
           <section style={styles.actionSection}>
-            <button onClick={() => setPage("offers")} style={styles.actionCard}><h3>Offers</h3><p>Flexible stays, city breaks, family stays and long-stay support.</p></button>
-            <button onClick={() => setPage("guide")} style={styles.actionCard}><h3>Destination Guide</h3><p>Open maps, directions, emergency services and nearby places.</p></button>
-            <button onClick={() => setPage("contact")} style={styles.actionCard}><h3>Help</h3><p>Booking support, payment help and travel guidance.</p></button>
+            <button onClick={() => setPage("offers")} style={styles.actionCard}>
+              <h3>Offers</h3>
+              <p>Flexible stays, city breaks, family stays and long-stay support.</p>
+            </button>
+            <button onClick={() => setPage("guide")} style={styles.actionCard}>
+              <h3>Destination Guide</h3>
+              <p>Open maps, directions, emergency services and nearby places.</p>
+            </button>
+            <button onClick={() => setPage("contact")} style={styles.actionCard}>
+              <h3>Help</h3>
+              <p>Booking support, payment help and travel guidance.</p>
+            </button>
           </section>
 
           <Footer setPage={setPage} />
@@ -466,14 +549,48 @@ export default function App() {
         />
       )}
 
-      {page === "guide" && <DestinationGuide setPage={setPage} place={[guideHotel?.hotel_name || guideHotel?.name, guideHotel?.address || guideHotel?.area, city, country].filter(Boolean).join(", ") || "your destination"} />}
+      {page === "guide" && (
+        <DestinationGuide
+          setPage={setPage}
+          place={
+            [
+              guideHotel?.hotel_name || guideHotel?.name,
+              guideHotel?.address || guideHotel?.area,
+              city,
+              country
+            ]
+              .filter(Boolean)
+              .join(", ") || "your destination"
+          }
+        />
+      )}
+
       {page === "offers" && <OffersPage setPage={setPage} />}
       {page === "faq" && <InfoPage setPage={setPage} title="Frequently Asked Questions" sections={faqSections} />}
       {page === "terms" && <InfoPage setPage={setPage} title="Terms & Conditions" sections={termsSections} />}
       {page === "privacy" && <InfoPage setPage={setPage} title="Privacy Policy" sections={privacySections} />}
       {page === "contact" && <ContactPage setPage={setPage} />}
-      {page === "hotelOnboarding" && <HotelOnboardingPage setPage={setPage} hotelRegister={hotelRegister} setHotelRegister={setHotelRegister} submitHotelOnboarding={submitHotelOnboarding} onboardingResult={onboardingResult} />}
-      {page === "partner" && <PartnerLoginPage setPage={setPage} partnerId={partnerId} setPartnerId={setPartnerId} partnerToken={partnerToken} setPartnerToken={setPartnerToken} partnerMessage={partnerMessage} partnerJwt={partnerJwt} loginPartner={loginPartner} />}
+      {page === "hotelOnboarding" && (
+        <HotelOnboardingPage
+          setPage={setPage}
+          hotelRegister={hotelRegister}
+          setHotelRegister={setHotelRegister}
+          submitHotelOnboarding={submitHotelOnboarding}
+          onboardingResult={onboardingResult}
+        />
+      )}
+      {page === "partner" && (
+        <PartnerLoginPage
+          setPage={setPage}
+          partnerId={partnerId}
+          setPartnerId={setPartnerId}
+          partnerToken={partnerToken}
+          setPartnerToken={setPartnerToken}
+          partnerMessage={partnerMessage}
+          partnerJwt={partnerJwt}
+          loginPartner={loginPartner}
+        />
+      )}
     </div>
   );
 }
@@ -495,25 +612,54 @@ function Header({ setPage, displayCurrency, setDisplayCurrency }) {
         <button onClick={() => setPage("offers")}>Offers</button>
         <button onClick={() => setPage("contact")}>Help</button>
         <select value={displayCurrency} onChange={(e) => setDisplayCurrency(e.target.value)} style={styles.currencySelect}>
-          {CURRENCIES.map((currency) => <option key={currency} value={currency}>{currency}</option>)}
+          {CURRENCIES.map((currency) => (
+            <option key={currency} value={currency}>
+              {currency}
+            </option>
+          ))}
         </select>
-        <button style={styles.onboardButton} onClick={() => setPage("hotelOnboarding")}>Hotel Onboarding Form</button>
-        <button style={styles.loginButton} onClick={() => setPage("partner")}>Partner Login</button>
+        <button style={styles.onboardButton} onClick={() => setPage("hotelOnboarding")}>
+          Hotel Onboarding Form
+        </button>
+        <button style={styles.loginButton} onClick={() => setPage("partner")}>
+          Partner Login
+        </button>
       </nav>
     </header>
   );
 }
 
 function SearchPanel(props) {
-  const { country, city, setCountry, setCity, destinations, cityOptions, checkin, checkout, setCheckin, setCheckout, guests, rooms, setGuests, setRooms, loading, searchHotels } = props;
+  const {
+    country,
+    city,
+    setCountry,
+    setCity,
+    destinations,
+    cityOptions,
+    checkin,
+    checkout,
+    setCheckin,
+    setCheckout,
+    guests,
+    rooms,
+    setGuests,
+    setRooms,
+    loading,
+    searchHotels
+  } = props;
 
   return (
     <div style={styles.searchPanel}>
       <div style={styles.searchCell}>
         <label>Country</label>
-        <select value={country} onChange={(e) => { setCountry(e.target.value); setCity(""); }}>
+        <select value={country} onChange={(e) => setCountry(e.target.value)}>
           <option value="">Select country</option>
-          {destinations.map((item) => <option key={item.country} value={item.country}>{item.country}</option>)}
+          {destinations.map((item) => (
+            <option key={item.country} value={item.country}>
+              {item.country}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -521,7 +667,11 @@ function SearchPanel(props) {
         <label>Destination</label>
         <select value={city} onChange={(e) => setCity(e.target.value)} disabled={!country}>
           <option value="">{country ? "Select city" : "Choose country first"}</option>
-          {cityOptions.map((item) => <option key={item.city} value={item.city}>{item.city}</option>)}
+          {cityOptions.map((item) => (
+            <option key={`${country}-${item.city}`} value={item.city}>
+              {item.city}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -543,58 +693,170 @@ function SearchPanel(props) {
         </div>
       </div>
 
-      <button style={styles.searchButton} onClick={searchHotels}>{loading ? "Searching..." : "Search hotels"}</button>
+      <button style={styles.searchButton} onClick={searchHotels}>
+        {loading ? "Searching..." : "Search hotels"}
+      </button>
     </div>
   );
 }
 
 function ResultsPage(props) {
-  const { setPage, city, country, hotels, selectedHotel, setSelectedHotel, openGuide, baseCurrency, stayTotal, nights, guests, rooms, selectedRate, displayCurrency, setDisplayCurrency, convertedTotal, reservation, setReservation, reserveAndPay, paying } = props;
+  const {
+    setPage,
+    city,
+    country,
+    hotels,
+    selectedHotel,
+    setSelectedHotel,
+    openGuide,
+    baseCurrency,
+    stayTotal,
+    nights,
+    guests,
+    rooms,
+    selectedRate,
+    displayCurrency,
+    setDisplayCurrency,
+    convertedTotal,
+    reservation,
+    setReservation,
+    reserveAndPay,
+    paying
+  } = props;
 
   return (
     <main style={styles.main}>
-      <button style={styles.backButton} onClick={() => setPage("home")}>Back to homepage</button>
+      <button style={styles.backButton} onClick={() => setPage("home")}>
+        Back to homepage
+      </button>
+
       <div style={styles.resultsLayout}>
         <section>
-          <h2>Available stays in {city}, {country}</h2>
+          <h2>
+            Available stays in {city}, {country}
+          </h2>
           <p style={styles.muted}>Select a hotel to continue to secure payment.</p>
 
           <div style={styles.hotelGrid}>
-            {hotels.map((hotel) => (
-              <div key={hotel.hotel_id} style={styles.hotelCard}>
-                {hotel.image_url ? <img src={hotel.image_url} style={styles.hotelImage} /> : <div style={styles.noImage}>MYSPACE HOTEL</div>}
+            {hotels.map((hotel, index) => (
+              <div key={hotel.hotel_id || hotel.id || `${hotel.hotel_name}-${index}`} style={styles.hotelCard}>
+                {hotel.image_url ? (
+                  <img src={hotel.image_url} style={styles.hotelImage} alt={hotel.hotel_name || hotel.name || "Hotel"} />
+                ) : (
+                  <div style={styles.noImage}>MYSPACE HOTEL</div>
+                )}
+
                 <div style={styles.hotelBody}>
-                  <div style={styles.badges}><span>Verified stay</span><span>{hotel.first_rate ? "Live price" : "Confirm price"}</span></div>
-                  <h3>{hotel.hotel_name || hotel.name}</h3>
-                  <p>{hotel.address || hotel.area || city}, {country}</p>
-                  <div style={styles.priceBox}>
-                    {hotel.first_rate ? <><span>From</span><strong>{hotel.first_rate.currency || "GBP"} {money(hotel.first_rate.amount)}</strong><small>per room / night</small></> : <strong>Price confirmation required</strong>}
+                  <div style={styles.badges}>
+                    <span>Verified stay</span>
+                    <span>{hotel.first_rate ? "Live price" : "Confirm price"}</span>
                   </div>
+
+                  <h3>{hotel.hotel_name || hotel.name}</h3>
+                  <p>
+                    {hotel.address || hotel.area || city}, {country}
+                  </p>
+
+                  <div style={styles.priceBox}>
+                    {hotel.first_rate ? (
+                      <>
+                        <span>From</span>
+                        <strong>
+                          {hotel.first_rate.currency || "GBP"} {money(hotel.first_rate.amount)}
+                        </strong>
+                        <small>per room / night</small>
+                      </>
+                    ) : (
+                      <strong>Price confirmation required</strong>
+                    )}
+                  </div>
+
                   <div style={styles.hotelActions}>
-                    <button onClick={() => setSelectedHotel(hotel)} style={styles.selectButton}>Select Hotel</button>
-                    <button onClick={() => openGuide(hotel)} style={styles.guideButton}>Guide / Map</button>
+                    <button onClick={() => setSelectedHotel(hotel)} style={styles.selectButton}>
+                      Select Hotel
+                    </button>
+                    <button onClick={() => openGuide(hotel)} style={styles.guideButton}>
+                      Guide / Map
+                    </button>
                   </div>
                 </div>
               </div>
             ))}
           </div>
+
+          {!hotels.length && (
+            <div style={styles.notice}>
+              No hotels loaded for this destination yet. Try another city or check the backend search data.
+            </div>
+          )}
         </section>
 
         <aside style={styles.reservePanel}>
           <h2>Reserve / Pay</h2>
+
           {selectedHotel ? (
             <>
               <h3>{selectedHotel.hotel_name || selectedHotel.name}</h3>
-              <p style={styles.muted}>{selectedHotel.address || selectedHotel.area || city}, {country}</p>
-              <div style={styles.totalBox}><span>Stay total</span><strong>{baseCurrency} {money(stayTotal)}</strong><small>{nights} night{nights > 1 ? "s" : ""} | {guests} guests | {rooms} room{rooms > 1 ? "s" : ""}</small></div>
-              <div style={styles.converterBox}><label>Currency converter</label><select value={displayCurrency} onChange={(e) => setDisplayCurrency(e.target.value)} style={styles.input}>{CURRENCIES.map((currency) => <option key={currency} value={currency}>{currency}</option>)}</select><strong>{displayCurrency} {money(convertedTotal)}</strong></div>
-              <input style={styles.input} placeholder="Full name" value={reservation.customer_name} onChange={(e) => setReservation({ ...reservation, customer_name: e.target.value })} />
-              <input style={styles.input} placeholder="Email address" value={reservation.customer_email} onChange={(e) => setReservation({ ...reservation, customer_email: e.target.value })} />
-              <input style={styles.input} placeholder="Phone number" value={reservation.customer_phone} onChange={(e) => setReservation({ ...reservation, customer_phone: e.target.value })} />
-              <textarea style={styles.textarea} placeholder="Special request" value={reservation.note} onChange={(e) => setReservation({ ...reservation, note: e.target.value })} />
-              <button style={styles.payButton} onClick={reserveAndPay}>{paying ? "Opening Stripe..." : selectedRate ? "Reserve / Pay Securely" : "Request Price Confirmation"}</button>
+              <p style={styles.muted}>
+                {selectedHotel.address || selectedHotel.area || city}, {country}
+              </p>
+
+              <div style={styles.totalBox}>
+                <span>Stay total</span>
+                <strong>
+                  {baseCurrency} {money(stayTotal)}
+                </strong>
+                <small>
+                  {nights} night{nights > 1 ? "s" : ""} | {guests} guests | {rooms} room{rooms > 1 ? "s" : ""}
+                </small>
+              </div>
+
+              <div style={styles.converterBox}>
+                <label>Currency converter</label>
+                <select value={displayCurrency} onChange={(e) => setDisplayCurrency(e.target.value)} style={styles.input}>
+                  {CURRENCIES.map((currency) => (
+                    <option key={currency} value={currency}>
+                      {currency}
+                    </option>
+                  ))}
+                </select>
+                <strong>
+                  {displayCurrency} {money(convertedTotal)}
+                </strong>
+              </div>
+
+              <input
+                style={styles.input}
+                placeholder="Full name"
+                value={reservation.customer_name}
+                onChange={(e) => setReservation({ ...reservation, customer_name: e.target.value })}
+              />
+              <input
+                style={styles.input}
+                placeholder="Email address"
+                value={reservation.customer_email}
+                onChange={(e) => setReservation({ ...reservation, customer_email: e.target.value })}
+              />
+              <input
+                style={styles.input}
+                placeholder="Phone number"
+                value={reservation.customer_phone}
+                onChange={(e) => setReservation({ ...reservation, customer_phone: e.target.value })}
+              />
+              <textarea
+                style={styles.textarea}
+                placeholder="Special request"
+                value={reservation.note}
+                onChange={(e) => setReservation({ ...reservation, note: e.target.value })}
+              />
+
+              <button style={styles.payButton} onClick={reserveAndPay}>
+                {paying ? "Opening checkout..." : selectedRate ? "Reserve / Pay Securely" : "Request Price Confirmation"}
+              </button>
             </>
-          ) : <div style={styles.notice}>Select a hotel to continue.</div>}
+          ) : (
+            <div style={styles.notice}>Select a hotel to continue.</div>
+          )}
         </aside>
       </div>
     </main>
@@ -613,14 +875,26 @@ function DestinationGuide({ setPage, place }) {
 
   return (
     <main style={styles.contentPage}>
-      <button style={styles.backButton} onClick={() => setPage("home")}>Back to homepage</button>
-      <div style={styles.pageHero}><h1>Destination Guide</h1><p>{place}</p></div>
+      <button style={styles.backButton} onClick={() => setPage("home")}>
+        Back to homepage
+      </button>
+      <div style={styles.pageHero}>
+        <h1>Destination Guide</h1>
+        <p>{place}</p>
+      </div>
+
       <div style={styles.guideGrid}>
         {sections.map(([title, text, links]) => (
           <div key={title} style={styles.guideCard}>
             <h2>{title}</h2>
             <p>{text}</p>
-            <div style={styles.guideLinks}>{links.map(([label, url]) => <a key={label} href={url} target="_blank" rel="noreferrer">{label}</a>)}</div>
+            <div style={styles.guideLinks}>
+              {links.map(([label, url]) => (
+                <a key={label} href={url} target="_blank" rel="noreferrer">
+                  {label}
+                </a>
+              ))}
+            </div>
           </div>
         ))}
       </div>
@@ -631,11 +905,26 @@ function DestinationGuide({ setPage, place }) {
 function OffersPage({ setPage }) {
   return (
     <main style={styles.contentPage}>
-      <button style={styles.backButton} onClick={() => setPage("home")}>Back to homepage</button>
-      <div style={styles.pageHero}><h1>Offers</h1><p>Choose smarter stay options before booking.</p></div>
+      <button style={styles.backButton} onClick={() => setPage("home")}>
+        Back to homepage
+      </button>
+      <div style={styles.pageHero}>
+        <h1>Offers</h1>
+        <p>Choose smarter stay options before booking.</p>
+      </div>
+
       <div style={styles.offerGrid}>
-        {[["Flexible Stays", "Find hotels with flexible policies where available.", "home"], ["Family Trips", "Search larger rooms and apartments for family stays.", "home"], ["City Breaks", "Plan short trips with hotels close to transport and attractions.", "guide"], ["Long Stay Help", "Contact us for extended stays, relocation and work trips.", "contact"]].map(([title, text, go]) => (
-          <div key={title} style={styles.offerCard}><h2>{title}</h2><p>{text}</p><button onClick={() => setPage(go)}>Open</button></div>
+        {[
+          ["Flexible Stays", "Find hotels with flexible policies where available.", "home"],
+          ["Family Trips", "Search larger rooms and apartments for family stays.", "home"],
+          ["City Breaks", "Plan short trips with hotels close to transport and attractions.", "guide"],
+          ["Long Stay Help", "Contact us for extended stays, relocation and work trips.", "contact"]
+        ].map(([title, text, go]) => (
+          <div key={title} style={styles.offerCard}>
+            <h2>{title}</h2>
+            <p>{text}</p>
+            <button onClick={() => setPage(go)}>Open</button>
+          </div>
         ))}
       </div>
     </main>
@@ -645,14 +934,31 @@ function OffersPage({ setPage }) {
 function HotelOnboardingPage({ setPage, hotelRegister, setHotelRegister, submitHotelOnboarding, onboardingResult }) {
   return (
     <main style={styles.contentPage}>
-      <button style={styles.backButton} onClick={() => setPage("home")}>Back to homepage</button>
-      <div style={styles.pageHero}><h1>Hotel Onboarding Form</h1><p>Hotels should complete this form first. Approved hotels will receive partner access after review.</p></div>
+      <button style={styles.backButton} onClick={() => setPage("home")}>
+        Back to homepage
+      </button>
+      <div style={styles.pageHero}>
+        <h1>Hotel Onboarding Form</h1>
+        <p>Hotels should complete this form first. Approved hotels will receive partner access after review.</p>
+      </div>
+
       <div style={styles.formGrid}>
         {Object.keys(hotelRegister).map((key) =>
           key === "notes" ? (
-            <textarea key={key} style={styles.textarea} placeholder="Notes / PMS requirements" value={hotelRegister[key]} onChange={(e) => setHotelRegister({ ...hotelRegister, [key]: e.target.value })} />
+            <textarea
+              key={key}
+              style={styles.textarea}
+              placeholder="Notes / PMS requirements"
+              value={hotelRegister[key]}
+              onChange={(e) => setHotelRegister({ ...hotelRegister, [key]: e.target.value })}
+            />
           ) : key === "pms_provider" ? (
-            <select key={key} style={styles.input} value={hotelRegister[key]} onChange={(e) => setHotelRegister({ ...hotelRegister, [key]: e.target.value })}>
+            <select
+              key={key}
+              style={styles.input}
+              value={hotelRegister[key]}
+              onChange={(e) => setHotelRegister({ ...hotelRegister, [key]: e.target.value })}
+            >
               <option value="oracle-ohip">Oracle OHIP</option>
               <option value="siteminder">SiteMinder</option>
               <option value="cloudbeds">Cloudbeds</option>
@@ -660,11 +966,21 @@ function HotelOnboardingPage({ setPage, hotelRegister, setHotelRegister, submitH
               <option value="other">Other PMS</option>
             </select>
           ) : (
-            <input key={key} style={styles.input} placeholder={key.replaceAll("_", " ")} value={hotelRegister[key]} onChange={(e) => setHotelRegister({ ...hotelRegister, [key]: e.target.value })} />
+            <input
+              key={key}
+              style={styles.input}
+              placeholder={key.replaceAll("_", " ")}
+              value={hotelRegister[key]}
+              onChange={(e) => setHotelRegister({ ...hotelRegister, [key]: e.target.value })}
+            />
           )
         )}
       </div>
-      <button style={styles.primaryButton} onClick={submitHotelOnboarding}>Submit hotel onboarding</button>
+
+      <button style={styles.primaryButton} onClick={submitHotelOnboarding}>
+        Submit hotel onboarding
+      </button>
+
       {onboardingResult && <pre style={styles.pre}>{JSON.stringify(onboardingResult, null, 2)}</pre>}
     </main>
   );
@@ -673,14 +989,26 @@ function HotelOnboardingPage({ setPage, hotelRegister, setHotelRegister, submitH
 function PartnerLoginPage({ setPage, partnerId, setPartnerId, partnerToken, setPartnerToken, partnerMessage, partnerJwt, loginPartner }) {
   return (
     <main style={styles.contentPage}>
-      <button style={styles.backButton} onClick={() => setPage("home")}>Back to homepage</button>
-      <div style={styles.pageHero}><h1>Partner Login</h1><p>Approved partners can log in here. New hotels must apply first.</p><button style={styles.secondaryButton} onClick={() => setPage("hotelOnboarding")}>New hotel? Open onboarding form</button></div>
+      <button style={styles.backButton} onClick={() => setPage("home")}>
+        Back to homepage
+      </button>
+
+      <div style={styles.pageHero}>
+        <h1>Partner Login</h1>
+        <p>Approved partners can log in here. New hotels must apply first.</p>
+        <button style={styles.secondaryButton} onClick={() => setPage("hotelOnboarding")}>
+          New hotel? Open onboarding form
+        </button>
+      </div>
+
       <section style={styles.loginPanel}>
         <h2>Approved partner login</h2>
         <input style={styles.input} value={partnerId} onChange={(e) => setPartnerId(e.target.value)} placeholder="Partner ID" />
         <input style={styles.input} value={partnerToken} onChange={(e) => setPartnerToken(e.target.value)} placeholder="Partner token" type="password" />
         {partnerMessage && <div style={styles.messageBox}>{partnerMessage}</div>}
-        <button style={styles.primaryButton} onClick={loginPartner}>Login securely</button>
+        <button style={styles.primaryButton} onClick={loginPartner}>
+          Login securely
+        </button>
         {partnerJwt && <div style={styles.messageBox}>Logged in. Partner tools enabled.</div>}
       </section>
     </main>
@@ -688,20 +1016,42 @@ function PartnerLoginPage({ setPage, partnerId, setPartnerId, partnerToken, setP
 }
 
 function ContactPage({ setPage }) {
-  return <InfoPage setPage={setPage} title="Help & Contact" sections={[["Reservations", "Email reservations@myspace-hotel.com for booking help, payment issues and reservation questions.", [["Open guide", "guide"]]], ["Hotels", "Hotels should apply through Hotel Onboarding before requesting login access.", [["Hotel onboarding", "hotelOnboarding"]]], ["Travel help", "Use Destination Guide for directions, hospitals, airports, restaurants and attractions.", [["Destination guide", "guide"]]]]} />;
+  return (
+    <InfoPage
+      setPage={setPage}
+      title="Help & Contact"
+      sections={[
+        ["Reservations", "Email reservations@myspace-hotel.com for booking help, payment issues and reservation questions.", [["Open guide", "guide"]]],
+        ["Hotels", "Hotels should apply through Hotel Onboarding before requesting login access.", [["Hotel onboarding", "hotelOnboarding"]]],
+        ["Travel help", "Use Destination Guide for directions, hospitals, airports, restaurants and attractions.", [["Destination guide", "guide"]]]
+      ]}
+    />
+  );
 }
 
 function InfoPage({ setPage, title, sections }) {
   return (
     <main style={styles.contentPage}>
-      <button style={styles.backButton} onClick={() => setPage("home")}>Back to homepage</button>
-      <div style={styles.pageHero}><h1>{title}</h1></div>
+      <button style={styles.backButton} onClick={() => setPage("home")}>
+        Back to homepage
+      </button>
+
+      <div style={styles.pageHero}>
+        <h1>{title}</h1>
+      </div>
+
       <div style={styles.infoStack}>
         {sections.map(([heading, text, links = []]) => (
           <div key={heading} style={styles.infoPanel}>
             <h2>{heading}</h2>
             <p>{text}</p>
-            <div style={styles.guideLinks}>{links.map(([label, go]) => <button key={label} onClick={() => setPage(go)}>{label}</button>)}</div>
+            <div style={styles.guideLinks}>
+              {links.map(([label, go]) => (
+                <button key={label} onClick={() => setPage(go)}>
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         ))}
       </div>
@@ -724,9 +1074,23 @@ function Footer({ setPage }) {
   );
 }
 
-const faqSections = [["Booking", "Search, select a hotel, enter guest details and use Reserve / Pay.", [["Search stays", "home"]]], ["Payment", "Stripe checkout opens when backend Stripe is configured.", [["Contact", "contact"]]], ["Cancellation", "Cancellation depends on selected hotel and rate conditions.", [["Terms", "terms"]]]];
-const termsSections = [["Reservations", "Reservations depend on hotel availability and selected rate conditions."], ["Payments", "Payments are processed through secure checkout where enabled."], ["Guest details", "Guests must enter accurate information before payment."]];
-const privacySections = [["Customer data", "We use booking details to support reservations and customer service."], ["Payments", "Card details are handled by secure payment providers."], ["Partner data", "Hotel partner access is restricted to approved accounts."]];
+const faqSections = [
+  ["Booking", "Search, select a hotel, enter guest details and use Reserve / Pay.", [["Search stays", "home"]]],
+  ["Payment", "Secure checkout opens when payment is available for the selected stay.", [["Contact", "contact"]]],
+  ["Cancellation", "Cancellation depends on selected hotel and rate conditions.", [["Terms", "terms"]]]
+];
+
+const termsSections = [
+  ["Reservations", "Reservations depend on hotel availability and selected rate conditions."],
+  ["Payments", "Payments are processed through secure checkout where enabled."],
+  ["Guest details", "Guests must enter accurate information before payment."]
+];
+
+const privacySections = [
+  ["Customer data", "We use booking details to support reservations and customer service."],
+  ["Payments", "Card details are handled by secure payment providers."],
+  ["Partner data", "Hotel partner access is restricted to approved accounts."]
+];
 
 const styles = {
   page: { minHeight: "100vh", background: "#f6f8fc", color: "#07142f", fontFamily: "Inter, Arial, sans-serif" },
@@ -777,7 +1141,7 @@ const styles = {
   textarea: { width: "100%", minHeight: 88, padding: 13, borderRadius: 13, border: "1px solid #cbd5e1", marginBottom: 12 },
   payButton: { width: "100%", border: 0, background: "#10b981", color: "#052e1c", padding: 15, borderRadius: 14, fontWeight: 950, cursor: "pointer", marginBottom: 10 },
   secondaryButton: { width: "100%", border: "1px solid #cbd5e1", background: "#fff", color: "#1747b8", padding: 14, borderRadius: 14, fontWeight: 900, cursor: "pointer", marginBottom: 10 },
-  notice: { background: "#f8fafc", borderRadius: 14, padding: 14 },
+  notice: { background: "#f8fafc", borderRadius: 14, padding: 14, marginTop: 16 },
   contentPage: { maxWidth: 1320, margin: "0 auto", padding: 52 },
   pageHero: { background: "#fff", borderRadius: 24, padding: 30, marginBottom: 24, boxShadow: "0 15px 45px rgba(15,23,42,.08)" },
   guideGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))", gap: 18 },
@@ -790,9 +1154,8 @@ const styles = {
   infoPanel: { background: "#fff", borderRadius: 22, padding: 24, boxShadow: "0 15px 45px rgba(15,23,42,.08)" },
   loginPanel: { background: "#fff", maxWidth: 560, borderRadius: 24, padding: 28, boxShadow: "0 18px 50px rgba(15,23,42,.12)" },
   messageBox: { background: "#eff6ff", color: "#1747b8", borderRadius: 12, padding: 12, marginBottom: 12, fontWeight: 900 },
-  primaryButton: { width: "100%", border: 0, background: "#1857df", color: "#fff", padding: 14, borderRadius: 14, fontWeight: 900, cursor: "pointer", marginBottom: 10 },
+  primaryButton: { width: "100%", border: 0, background: "#1857df", color: "#fff", padding: 14, borderRadius: 14, fontWeight: 900, cursor: "pointer", marginBottom: 10, marginTop: 16 },
   pre: { background: "#0f172a", color: "#dbeafe", padding: 16, borderRadius: 16, overflow: "auto", maxHeight: 360 },
   footer: { background: "#fff", borderTop: "1px solid #e2e8f0", padding: "22px 52px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14 },
   footerLinks: { display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }
 };
-
