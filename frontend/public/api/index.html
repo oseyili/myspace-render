@@ -1,3 +1,35 @@
 ﻿<!doctype html>
-<html><head><meta charset="utf-8"><title>API | MySpace Hotel</title><style>body{font-family:Arial;margin:40px;line-height:1.6;max-width:1000px}h1,h2{color:#0b3b8f}code{background:#eef3ff;padding:3px 6px;border-radius:6px}</style></head>
-<body><h1>MySpace Hotel API Overview</h1><p>MySpace Hotel provides API-ready workflows for hotel distribution, live availability, rates, reservations, cancellations, and booking synchronization.</p><h2>Core Endpoints</h2><ul><li><code>GET /api/hotels</code></li><li><code>GET /api/rooms</code></li><li><code>GET /api/rates</code></li><li><code>GET /api/availability</code></li><li><code>POST /api/reservations</code></li><li><code>POST /api/cancellations</code></li><li><code>POST /api/modifications</code></li></ul><p>Partner access is reviewed before production use. Contact: reservations@myspace-hotel.com</p></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>API | MySpace Hotel</title>
+  <style>
+    body{margin:0;font-family:Arial,sans-serif;background:#06101f;color:#07111f}
+    main{max-width:1100px;margin:40px auto;background:#fff;border-radius:24px;padding:38px;line-height:1.65}
+    h1,h2{color:#0b3b8f}.brand{letter-spacing:9px;color:#d6a900;font-weight:900}
+    code{background:#eef4ff;padding:5px 8px;border-radius:7px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.box{background:#f5f8fd;border-radius:18px;padding:18px}
+  </style>
+</head>
+<body>
+<main>
+  <div class="brand">MYSPACE HOTEL</div>
+  <h1>MySpace Hotel API Overview</h1>
+  <p>MySpace Hotel supports hospitality distribution workflows for live availability, rates, reservations, cancellations, modifications, and partner connectivity.</p>
+  <div class="grid">
+    <div class="box"><h2>Availability</h2><p><code>GET /api/availability</code></p></div>
+    <div class="box"><h2>Rates</h2><p><code>GET /api/rates</code></p></div>
+    <div class="box"><h2>Hotels</h2><p><code>GET /api/hotels</code></p></div>
+    <div class="box"><h2>Rooms</h2><p><code>GET /api/rooms</code></p></div>
+    <div class="box"><h2>Reservations</h2><p><code>POST /api/reservations</code></p></div>
+    <div class="box"><h2>Cancellations</h2><p><code>POST /api/cancellations</code></p></div>
+    <div class="box"><h2>Modifications</h2><p><code>POST /api/modifications</code></p></div>
+    <div class="box"><h2>Webhooks</h2><p><code>POST /api/webhooks/:partner</code></p></div>
+  </div>
+  <h2>Authentication</h2>
+  <p>Partner API access is reviewed and uses secure token-based authentication for approved integration partners.</p>
+  <h2>Support</h2>
+  <p>reservations@myspace-hotel.com</p>
+</main>
+</body>
+</html>

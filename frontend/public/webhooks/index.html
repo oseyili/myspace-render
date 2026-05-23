@@ -1,0 +1,37 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Webhooks | MySpace Hotel</title>
+  <style>
+    body{margin:0;font-family:Arial,sans-serif;background:#06101f;color:#07111f}
+    main{max-width:1100px;margin:40px auto;background:#fff;border-radius:24px;padding:38px;line-height:1.65}
+    h1,h2{color:#0b3b8f}.brand{letter-spacing:9px;color:#d6a900;font-weight:900}pre{background:#06101f;color:#dff7e6;border-radius:18px;padding:20px;overflow:auto}
+  </style>
+</head>
+<body>
+<main>
+  <div class="brand">MYSPACE HOTEL</div>
+  <h1>Webhook Events</h1>
+  <p>MySpace Hotel supports webhook-style event workflows for reservation and partner synchronization.</p>
+  <h2>Core Events</h2>
+  <ul>
+    <li>reservation.created</li>
+    <li>reservation.modified</li>
+    <li>reservation.cancelled</li>
+    <li>availability.updated</li>
+    <li>rate.updated</li>
+  </ul>
+  <h2>Example Event</h2>
+  <pre>{
+  "event": "reservation.created",
+  "booking_reference": "MSH-EXAMPLE",
+  "hotel_id": "998021",
+  "status": "created"
+}</pre>
+  <h2>Support</h2>
+  <p>reservations@myspace-hotel.com</p>
+</main>
+</body>
+</html>
