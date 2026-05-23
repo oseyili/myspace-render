@@ -1,0 +1,355 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Partner Dashboard | MySpace Hotel</title>
+
+  <style>
+    *{
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      background:#07111f;
+      font-family:Arial,sans-serif;
+      color:#07111f;
+    }
+
+    main{
+      max-width:1400px;
+      margin:28px auto;
+      background:#ffffff;
+      border-radius:28px;
+      padding:32px;
+    }
+
+    .brand{
+      color:#d4a017;
+      letter-spacing:10px;
+      font-weight:900;
+      margin-bottom:12px;
+    }
+
+    h1{
+      margin:0;
+      font-size:44px;
+      color:#0a3c90;
+    }
+
+    .lead{
+      margin-top:10px;
+      color:#4f607c;
+      font-size:18px;
+      font-weight:700;
+    }
+
+    .statusbar{
+      margin-top:22px;
+      padding:18px;
+      border-radius:18px;
+      background:#e8f2ff;
+      color:#0a3c90;
+      font-weight:900;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:18px;
+      margin-top:24px;
+    }
+
+    .card{
+      background:#f4f8ff;
+      border-radius:20px;
+      padding:20px;
+    }
+
+    .label{
+      font-size:12px;
+      letter-spacing:2px;
+      font-weight:900;
+      color:#60718d;
+    }
+
+    .num{
+      margin-top:12px;
+      font-size:34px;
+      font-weight:900;
+      color:#0a3c90;
+    }
+
+    .section{
+      margin-top:28px;
+      background:#f8fbff;
+      border-radius:22px;
+      padding:22px;
+    }
+
+    button{
+      border:0;
+      border-radius:12px;
+      padding:14px 18px;
+      font-weight:900;
+      cursor:pointer;
+      background:#0a3c90;
+      color:#fff;
+    }
+
+    button.gold{
+      background:#d4a017;
+      color:#07111f;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:18px;
+    }
+
+    th,td{
+      text-align:left;
+      padding:12px;
+      border-bottom:1px solid #dce6f2;
+      font-size:14px;
+    }
+
+    th{
+      color:#0a3c90;
+    }
+
+    .links{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:24px;
+    }
+
+    .links a{
+      text-decoration:none;
+      background:#07111f;
+      color:#fff;
+      padding:12px 16px;
+      border-radius:12px;
+      font-weight:900;
+    }
+
+    @media(max-width:900px){
+
+      main{
+        margin:0;
+        border-radius:0;
+      }
+
+      .grid{
+        grid-template-columns:1fr;
+      }
+
+      h1{
+        font-size:34px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<main>
+
+  <div class="brand">
+    MYSPACE HOTEL
+  </div>
+
+  <h1>
+    Enterprise Partner Dashboard
+  </h1>
+
+  <div class="lead">
+    PMS • Channel Manager • Hospitality Connectivity • Distribution Infrastructure
+  </div>
+
+  <div class="statusbar" id="status">
+    Connecting to enterprise backend...
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <div class="label">HOTELS</div>
+      <div class="num" id="hotels">-</div>
+    </div>
+
+    <div class="card">
+      <div class="label">COUNTRIES</div>
+      <div class="num" id="countries">-</div>
+    </div>
+
+    <div class="card">
+      <div class="label">CITIES</div>
+      <div class="num" id="cities">-</div>
+    </div>
+
+    <div class="card">
+      <div class="label">STRIPE</div>
+      <div class="num" id="stripe">-</div>
+    </div>
+
+    <div class="card">
+      <div class="label">SMTP</div>
+      <div class="num" id="smtp">-</div>
+    </div>
+
+    <div class="card">
+      <div class="label">SEARCH</div>
+      <div class="num" id="search">-</div>
+    </div>
+
+    <div class="card">
+      <div class="label">RESERVATIONS</div>
+      <div class="num" id="reservation">-</div>
+    </div>
+
+    <div class="card">
+      <div class="label">SYSTEM</div>
+      <div class="num">LIVE</div>
+    </div>
+
+  </div>
+
+  <div class="section">
+
+    <h2>
+      Live Enterprise Backend Status
+    </h2>
+
+    <button class="gold" onclick="loadBackend()">
+      Refresh Enterprise Metrics
+    </button>
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Service</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody id="services">
+        <tr>
+          <td colspan="2">
+            Loading...
+          </td>
+        </tr>
+      </tbody>
+
+    </table>
+
+  </div>
+
+  <div class="links">
+
+    <a href="/developers">
+      Developers
+    </a>
+
+    <a href="/api">
+      API
+    </a>
+
+    <a href="/status">
+      Status
+    </a>
+
+    <a href="https://myspace-hotel-backend.onrender.com/docs" target="_blank">
+      Swagger Docs
+    </a>
+
+    <a href="/partner-dashboard">
+      Dashboard
+    </a>
+
+  </div>
+
+</main>
+
+<script>
+
+const API_BASE =
+  "https://myspace-hotel-backend.onrender.com";
+
+async function loadBackend(){
+
+  try{
+
+    const res = await fetch(API_BASE);
+
+    const data = await res.json();
+
+    document.getElementById("status").innerHTML =
+      "Connected to MySpace Hotel Enterprise Backend";
+
+    document.getElementById("hotels").innerHTML =
+      data.hotels || "-";
+
+    document.getElementById("countries").innerHTML =
+      data.countries || "-";
+
+    document.getElementById("cities").innerHTML =
+      data.cities || "-";
+
+    document.getElementById("stripe").innerHTML =
+      data.stripe ? "ON" : "OFF";
+
+    document.getElementById("smtp").innerHTML =
+      data.smtp ? "ON" : "OFF";
+
+    document.getElementById("search").innerHTML =
+      data.search || "-";
+
+    document.getElementById("reservation").innerHTML =
+      data.reservation || "-";
+
+    const services = [
+      ["Backend Status", data.status],
+      ["Hotel Search", data.search],
+      ["Reservations", data.reservation],
+      ["Stripe Payments", data.stripe ? "enabled" : "disabled"],
+      ["SMTP Email", data.smtp ? "enabled" : "disabled"],
+      ["Countries", data.countries],
+      ["Cities", data.cities],
+      ["Hotels", data.hotels]
+    ];
+
+    document.getElementById("services").innerHTML =
+      services.map(x => `
+        <tr>
+          <td>${x[0]}</td>
+          <td>${x[1]}</td>
+        </tr>
+      `).join("");
+
+  }catch(err){
+
+    document.getElementById("status").innerHTML =
+      "Backend connection failed";
+
+    document.getElementById("services").innerHTML =
+      `
+      <tr>
+        <td colspan="2">
+          Could not connect to backend.
+        </td>
+      </tr>
+      `;
+  }
+}
+
+loadBackend();
+
+</script>
+
+</body>
+</html>
