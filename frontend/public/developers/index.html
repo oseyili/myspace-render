@@ -5,37 +5,70 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Developers | MySpace Hotel</title>
   <style>
-    body{margin:0;font-family:Arial,sans-serif;background:#06101f;color:#07111f}
-    main{max-width:1100px;margin:40px auto;background:#fff;border-radius:24px;padding:38px;line-height:1.65}
-    h1,h2{color:#0b3b8f}.brand{letter-spacing:9px;color:#d6a900;font-weight:900}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.box{background:#f5f8fd;border-radius:18px;padding:18px}
-    code{background:#eef4ff;padding:5px 8px;border-radius:7px}
+    *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#06101f;color:#06101f}a{text-decoration:none}
+    main{max-width:1180px;margin:34px auto;background:#fff;border-radius:26px;padding:40px;line-height:1.6}
+    .brand{letter-spacing:10px;color:#d4a500;font-weight:900;margin-bottom:18px}.top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+    h1{font-size:42px;color:#0b3b8f;margin:0 0 12px}h2{color:#0b3b8f;margin-top:0}.lead{font-size:19px;max-width:900px}
+    .nav{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0}.nav a,.btn{background:#0b3b8f;color:white;padding:12px 16px;border-radius:12px;font-weight:900;display:inline-block}
+    .btn.gold{background:#ffd34d;color:#06101f}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+    .box{background:#f2f6fd;border-radius:18px;padding:20px}.box p{margin-bottom:0}
+    code{background:#e9f0ff;padding:5px 8px;border-radius:8px}.status{background:#dcfce7;color:#075b24;padding:10px 14px;border-radius:999px;font-weight:900;display:inline-block}
+    pre{background:#06101f;color:#dff7e6;border-radius:18px;padding:18px;overflow:auto}
+    .footer{margin-top:30px;padding-top:20px;border-top:1px solid #dbe5f2;color:#52627c}
+    @media(max-width:800px){main{margin:0;border-radius:0}.grid,.top{grid-template-columns:1fr;display:block}h1{font-size:34px}}
   </style>
 </head>
 <body>
 <main>
   <div class="brand">MYSPACE HOTEL</div>
-  <h1>MySpace Hotel Developers</h1>
-  <p>MySpace Hotel is a hospitality distribution and booking technology platform supporting hotel search, availability, rates, reservation workflows, and partner connectivity.</p>
-  <div class="grid">
-    <div class="box"><h2>System Status</h2><p>Operational</p></div>
-    <div class="box"><h2>API Version</h2><p>v1</p></div>
-    <div class="box"><h2>Environment</h2><p>Production and integration readiness</p></div>
-    <div class="box"><h2>Webhook Support</h2><p>Reservation and availability events</p></div>
+  <div class="top">
+    <div>
+      <h1>Developer & Integration Centre</h1>
+      <p class="lead">MySpace Hotel provides hospitality distribution workflows for live availability, rates, room mapping, reservation delivery, cancellations, modifications, webhooks, and partner connectivity.</p>
+    </div>
+    <div class="status">Operational</div>
   </div>
-  <h2>Integration Capabilities</h2>
-  <ul>
-    <li>Live hotel availability</li>
-    <li>Rate and room mapping</li>
-    <li>Reservation creation</li>
-    <li>Cancellation and modification workflows</li>
-    <li>Webhook/event support</li>
-    <li>Partner audit logging</li>
-  </ul>
-  <h2>Sample Endpoints</h2>
-  <p><code>GET /api/hotels</code> <code>GET /api/availability</code> <code>POST /api/reservations</code></p>
-  <h2>Integration Support</h2>
-  <p>reservations@myspace-hotel.com</p>
+
+  <div class="nav">
+    <a href="/api">API overview</a>
+    <a href="/webhooks">Webhooks</a>
+    <a href="/partners">Partner onboarding</a>
+    <a href="/status">System status</a>
+    <a href="/contact">Contact integration support</a>
+  </div>
+
+  <div class="grid">
+    <div class="box"><h2>API version</h2><p>v1 partner-ready structure</p></div>
+    <div class="box"><h2>Environment</h2><p>Production site with integration onboarding pages</p></div>
+    <div class="box"><h2>Authentication</h2><p>Approved partners use secure token-based API access.</p></div>
+    <div class="box"><h2>Webhook support</h2><p>Reservation, rate, availability, cancellation, and modification events.</p></div>
+  </div>
+
+  <h2>Core partner endpoints</h2>
+  <div class="grid">
+    <div class="box"><code>GET /api/hotels</code><p>Hotel and property access for approved partners.</p></div>
+    <div class="box"><code>GET /api/availability</code><p>Availability lookup by stay dates, rooms, guests, and mapped property.</p></div>
+    <div class="box"><code>GET /api/rates</code><p>Rate plan and room price structure.</p></div>
+    <div class="box"><code>POST /api/reservations</code><p>Create reservation workflow and booking reference.</p></div>
+    <div class="box"><code>POST /api/cancellations</code><p>Cancellation workflow for supported bookings.</p></div>
+    <div class="box"><code>POST /api/modifications</code><p>Reservation amendment workflow.</p></div>
+  </div>
+
+  <h2>Example reservation event</h2>
+  <pre>{
+  "event": "reservation.created",
+  "booking_reference": "MSH-EXAMPLE",
+  "hotel_id": "998021",
+  "status": "created"
+}</pre>
+
+  <h2>Start integration discussion</h2>
+  <p>
+    <a class="btn gold" href="mailto:reservations@myspace-hotel.com?subject=MySpace%20Hotel%20Integration%20Request&body=Hello%20MySpace%20Hotel%2C%0A%0AWe%20would%20like%20to%20discuss%20a%20partner%20integration.%0A%0ACompany%3A%0AIntegration%20type%3A%0APMS%20or%20channel%20manager%3A%0AContact%20name%3A%0AWebsite%3A%0A">Request integration access</a>
+    <a class="btn" href="/partners">View partner options</a>
+  </p>
+
+  <div class="footer">Integration support: reservations@myspace-hotel.com</div>
 </main>
 </body>
 </html>

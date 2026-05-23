@@ -5,24 +5,62 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Partners | MySpace Hotel</title>
   <style>
-    body{margin:0;font-family:Arial,sans-serif;background:#06101f;color:#07111f}
-    main{max-width:1100px;margin:40px auto;background:#fff;border-radius:24px;padding:38px;line-height:1.65}
-    h1,h2{color:#0b3b8f}.brand{letter-spacing:9px;color:#d6a900;font-weight:900}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.box{background:#f5f8fd;border-radius:18px;padding:18px}
+    *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#06101f;color:#06101f}a{text-decoration:none}
+    main{max-width:1180px;margin:34px auto;background:#fff;border-radius:26px;padding:40px;line-height:1.6}
+    .brand{letter-spacing:10px;color:#d4a500;font-weight:900;margin-bottom:18px}h1{font-size:42px;color:#0b3b8f;margin:0 0 12px}h2{color:#0b3b8f}
+    .lead{font-size:19px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}.box{background:#f2f6fd;border-radius:18px;padding:22px}
+    .btn{background:#0b3b8f;color:white;padding:12px 16px;border-radius:12px;font-weight:900;display:inline-block;margin-top:12px}.gold{background:#ffd34d;color:#06101f}
+    .steps{counter-reset:s}.step{background:#fff;border:1px solid #dbe5f2;border-radius:16px;padding:18px;margin:10px 0}.step:before{counter-increment:s;content:counter(s);background:#0b3b8f;color:#fff;border-radius:999px;padding:7px 12px;margin-right:10px;font-weight:900}
+    .nav{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0}.nav a{background:#06101f;color:white;padding:11px 14px;border-radius:12px;font-weight:900}
+    @media(max-width:800px){main{margin:0;border-radius:0}.grid{grid-template-columns:1fr}h1{font-size:34px}}
   </style>
 </head>
 <body>
 <main>
   <div class="brand">MYSPACE HOTEL</div>
-  <h1>Hotel & Technology Partners</h1>
-  <p>MySpace Hotel works toward live hotel distribution, reservation delivery, availability synchronization, and channel connectivity with hospitality technology partners.</p>
-  <div class="grid">
-    <div class="box"><h2>Hotels</h2><p>Connect rooms, rates, policies, and availability to MySpace Hotel.</p></div>
-    <div class="box"><h2>PMS providers</h2><p>Support reservation creation, modification, cancellation, and inventory synchronization.</p></div>
-    <div class="box"><h2>Channel managers</h2><p>Enable scalable distribution and live inventory workflows.</p></div>
-    <div class="box"><h2>Distribution partners</h2><p>Coordinate API access, webhook events, mapping, and operational monitoring.</p></div>
+  <h1>Partner With MySpace Hotel</h1>
+  <p class="lead">MySpace Hotel connects hotels, PMS providers, channel managers, and distribution partners through live availability, rates, reservations, room mapping, and booking workflow connectivity.</p>
+
+  <div class="nav">
+    <a href="/developers">Developers</a>
+    <a href="/api">API</a>
+    <a href="/webhooks">Webhooks</a>
+    <a href="/status">Status</a>
+    <a href="/contact">Contact</a>
   </div>
-  <h2>Partner Contact</h2>
-  <p>reservations@myspace-hotel.com</p>
+
+  <div class="grid">
+    <div class="box">
+      <h2>Hotels</h2>
+      <p>Connect rooms, rates, cancellation rules, policies, availability, images, and reservations.</p>
+      <a class="btn gold" href="mailto:reservations@myspace-hotel.com?subject=Hotel%20Partner%20Request">Apply as hotel partner</a>
+    </div>
+    <div class="box">
+      <h2>PMS providers</h2>
+      <p>Support reservation creation, modification, cancellation, inventory sync, room mapping, and availability updates.</p>
+      <a class="btn gold" href="mailto:reservations@myspace-hotel.com?subject=PMS%20Integration%20Request">Discuss PMS integration</a>
+    </div>
+    <div class="box">
+      <h2>Channel managers</h2>
+      <p>Enable scalable distribution, live inventory, mapped rates, booking notifications, and partner audit tracking.</p>
+      <a class="btn gold" href="mailto:reservations@myspace-hotel.com?subject=Channel%20Manager%20Integration%20Request">Connect channel manager</a>
+    </div>
+    <div class="box">
+      <h2>Distribution partners</h2>
+      <p>Coordinate API access, webhook events, mapping, operational monitoring, and booking delivery workflows.</p>
+      <a class="btn gold" href="mailto:reservations@myspace-hotel.com?subject=Distribution%20Partner%20Request">Start distribution partnership</a>
+    </div>
+  </div>
+
+  <h2>Partner onboarding process</h2>
+  <div class="step">Submit partnership request with company, website, contact, and integration type.</div>
+  <div class="step">Review API requirements, webhook events, reservation lifecycle, and mapping needs.</div>
+  <div class="step">Confirm hotel, room, rate, policy, occupancy, and currency mapping.</div>
+  <div class="step">Run test reservations, cancellations, modifications, and availability updates.</div>
+  <div class="step">Move approved integration to monitored production operation.</div>
+
+  <h2>Integration support</h2>
+  <p><a class="btn" href="mailto:reservations@myspace-hotel.com?subject=MySpace%20Hotel%20Partner%20Support">reservations@myspace-hotel.com</a></p>
 </main>
 </body>
 </html>
