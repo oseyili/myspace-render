@@ -5,58 +5,178 @@ const API =
   import.meta.env.VITE_API_BASE_URL ||
   "https://myspace-hotel-backend.onrender.com";
 
+const CURRENCIES = [
+  "GBP",
+  "USD",
+  "EUR",
+  "NGN",
+  "AED",
+  "CAD",
+  "AUD",
+  "JPY",
+  "ZAR",
+  "CHF"
+];
+
+const GUIDE_DATA = {
+  emergency: [
+    "Police Emergency: 112 / 999",
+    "Ambulance Emergency: 112 / 999",
+    "Fire Brigade Emergency: 112 / 999",
+    "24/7 Travel Assistance Available"
+  ],
+
+  airports: [
+    "International Airport Transfers",
+    "Airport Taxi Guidance",
+    "Airport Train Connections",
+    "VIP Chauffeur Support"
+  ],
+
+  hospitals: [
+    "Nearby Emergency Hospitals",
+    "Private Medical Clinics",
+    "24 Hour Pharmacies",
+    "Tourist Medical Assistance"
+  ],
+
+  restaurants: [
+    "Local Restaurants",
+    "Luxury Dining",
+    "Family Friendly Dining",
+    "Late Night Food Locations"
+  ],
+
+  tourism: [
+    "Museums and Art Galleries",
+    "Zoos and Attractions",
+    "Sightseeing Tours",
+    "Historic Landmarks"
+  ],
+
+  transport: [
+    "Metro and Train Guidance",
+    "Taxi and Uber Support",
+    "Bus Stations",
+    "Car Rental Services"
+  ]
+};
+
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
 function tomorrowISO() {
-  return new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  return new Date(Date.now() + 86400000)
+    .toISOString()
+    .slice(0, 10);
 }
 
 function money(v) {
   const n = Number(v || 0);
-  return Number.isFinite(n) ? n.toFixed(2) : "0.00";
+  return Number.isFinite(n)
+    ? n.toFixed(2)
+    : "0.00";
+}
+
+function nightsBetween(a, b) {
+  const start = new Date(a);
+  const end = new Date(b);
+
+  const diff = Math.ceil(
+    (end - start) / 86400000
+  );
+
+  return diff > 0 ? diff : 1;
 }
 
 export default function App() {
   const [page, setPage] = useState("home");
 
-  const [destinations, setDestinations] = useState([]);
-  const [country, setCountry] = useState("");
-  const [city, setCity] = useState("");
+  const [destinations, setDestinations] =
+    useState([]);
 
-  const [checkin, setCheckin] = useState(todayISO());
-  const [checkout, setCheckout] = useState(tomorrowISO());
+  const [country, setCountry] =
+    useState("");
 
-  const [guests, setGuests] = useState(2);
-  const [rooms, setRooms] = useState(1);
+  const [city, setCity] =
+    useState("");
 
-  const [hotels, setHotels] = useState([]);
-  const [selectedHotel, setSelectedHotel] = useState(null);
+  const [checkin, setCheckin] =
+    useState(todayISO());
 
-  const [loading, setLoading] = useState(false);
+  const [checkout, setCheckout] =
+    useState(tomorrowISO());
 
-  const [reservation, setReservation] = useState({
-    customer_name: "",
-    customer_email: "",
-    customer_phone: "",
-    note: ""
-  });
+  const [guests, setGuests] =
+    useState(2);
+
+  const [rooms, setRooms] =
+    useState(1);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [hotels, setHotels] =
+    useState([]);
+
+  const [selectedHotel, setSelectedHotel] =
+    useState(null);
+
+  const [displayCurrency, setDisplayCurrency] =
+    useState("GBP");
+
+  const [convertedTotal, setConvertedTotal] =
+    useState(0);
+
+  const [reservation, setReservation] =
+    useState({
+      customer_name: "",
+      customer_email: "",
+      customer_phone: "",
+      note: ""
+    });
 
   const selectedCountry = useMemo(
-    () => destinations.find((x) => x.country === country),
+    () =>
+      destinations.find(
+        (x) => x.country === country
+      ),
     [country, destinations]
   );
 
+  const nights = nightsBetween(
+    checkin,
+    checkout
+  );
+
+  const selectedRate =
+    selectedHotel?.first_rate || null;
+
+  const baseCurrency =
+    selectedRate?.currency || "GBP";
+
+  const total =
+    Number(selectedRate?.amount || 0) *
+    Number(rooms || 1) *
+    nights;
+
   async function loadDestinations() {
     try {
-      const r = await fetch(`${API}/api/real-catalog/destinations`);
+      const r = await fetch(
+        `${API}/api/real-catalog/destinations`
+      );
+
       const j = await r.json();
+
       setDestinations(j.countries || []);
     } catch {}
   }
 
-  async function searchHotels(customCountry = country, customCity = city) {
+  async function searchHotels(
+    customCountry = country,
+    customCity = city
+  ) {
     if (!customCountry || !customCity) {
       alert("Choose destination first.");
       return;
@@ -72,13 +192,17 @@ export default function App() {
         checkout,
         guests,
         rooms,
-        limit: 50
+        limit: 80
       });
 
-      const r = await fetch(`${API}/api/hotels/search?${q.toString()}`);
+      const r = await fetch(
+        `${API}/api/hotels/search?${q.toString()}`
+      );
+
       const j = await r.json();
 
       setHotels(j.hotels || []);
+
       setPage("results");
     } catch {
       alert("Search failed.");
@@ -89,32 +213,54 @@ export default function App() {
 
   async function reserveHotel() {
     if (!selectedHotel) {
-      alert("Select a hotel first.");
+      alert("Select hotel first.");
       return;
     }
 
     try {
-      const r = await fetch(`${API}/reservation-request`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          ...reservation,
-          hotel_name:
-            selectedHotel.hotel_name || selectedHotel.name,
-          hotel_id: selectedHotel.hotel_id,
-          destination: `${city}, ${country}`,
-          checkin,
-          checkout,
-          guests,
-          rooms,
-          rate_key:
-            selectedHotel?.first_rate?.rate_key || ""
-        })
-      });
+      const r = await fetch(
+        `${API}/reservation-request`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            ...reservation,
+
+            hotel_id:
+              selectedHotel.hotel_id,
+
+            hotel_name:
+              selectedHotel.hotel_name ||
+              selectedHotel.name,
+
+            destination: `${city}, ${country}`,
+
+            checkin,
+            checkout,
+            guests,
+            rooms,
+
+            rate_key:
+              selectedRate?.rate_key || "",
+
+            amount: total,
+            currency: baseCurrency
+          })
+        }
+      );
 
       const j = await r.json();
+
+      if (j.payment_url) {
+        window.location.href =
+          j.payment_url;
+
+        return;
+      }
 
       alert(
         j.message ||
@@ -125,9 +271,44 @@ export default function App() {
     }
   }
 
+  async function convertCurrency() {
+    if (!total) {
+      setConvertedTotal(0);
+      return;
+    }
+
+    try {
+      const q = new URLSearchParams({
+        amount: String(total),
+        from: baseCurrency,
+        to: displayCurrency
+      });
+
+      const r = await fetch(
+        `${API}/api/currency/convert?${q.toString()}`
+      );
+
+      const j = await r.json();
+
+      if (j.ok) {
+        setConvertedTotal(
+          Number(j.converted || 0)
+        );
+      } else {
+        setConvertedTotal(total);
+      }
+    } catch {
+      setConvertedTotal(total);
+    }
+  }
+
   useEffect(() => {
     loadDestinations();
   }, []);
+
+  useEffect(() => {
+    convertCurrency();
+  }, [total, displayCurrency]);
 
   return (
     <div style={styles.page}>
@@ -142,30 +323,23 @@ export default function App() {
           </div>
         </div>
 
-        <div style={styles.headerButtons}>
+        <div style={styles.nav}>
           <button
-            style={styles.topBtn}
+            style={styles.navBtn}
             onClick={() => setPage("guide")}
           >
             Destination Guide
           </button>
 
           <button
-            style={styles.topBtn}
+            style={styles.navBtn}
             onClick={() => setPage("faq")}
           >
             FAQ
           </button>
 
           <button
-            style={styles.topBtn}
-            onClick={() => setPage("terms")}
-          >
-            Terms
-          </button>
-
-          <button
-            style={styles.topBtn}
+            style={styles.navBtn}
             onClick={() => setPage("contact")}
           >
             Contact
@@ -175,7 +349,7 @@ export default function App() {
             style={styles.partnerBtn}
             onClick={() => setPage("partner")}
           >
-            Hotel / Partner Login
+            Partner Login
           </button>
         </div>
       </header>
@@ -184,173 +358,218 @@ export default function App() {
         <>
           <section style={styles.hero}>
             <div style={styles.heroOverlay}>
-              <h1 style={styles.heroTitle}>
-                Search hotels worldwide
-              </h1>
+              <div style={styles.heroContent}>
+                <h1 style={styles.heroTitle}>
+                  Search hotels worldwide
+                </h1>
 
-              <p style={styles.heroText}>
-                Verified stays • Real hotels •
-                Secure booking
-              </p>
+                <p style={styles.heroText}>
+                  Verified hotels • Secure
+                  booking • Trusted stays
+                </p>
 
-              <div style={styles.searchBox}>
-                <div style={styles.field}>
-                  <label>Country</label>
+                <div style={styles.searchBox}>
+                  <div style={styles.field}>
+                    <label>Country</label>
 
-                  <select
-                    value={country}
-                    onChange={(e) => {
-                      setCountry(e.target.value);
-                      setCity("");
-                    }}
-                  >
-                    <option value="">
-                      Select country
-                    </option>
+                    <select
+                      value={country}
+                      onChange={(e) => {
+                        setCountry(
+                          e.target.value
+                        );
 
-                    {destinations.map((c) => (
-                      <option
-                        key={c.country}
-                        value={c.country}
-                      >
-                        {c.country}
+                        setCity("");
+                      }}
+                    >
+                      <option value="">
+                        Select country
                       </option>
-                    ))}
-                  </select>
-                </div>
 
-                <div style={styles.field}>
-                  <label>City</label>
+                      {destinations.map((c) => (
+                        <option
+                          key={c.country}
+                          value={c.country}
+                        >
+                          {c.country}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                  <select
-                    value={city}
-                    onChange={(e) =>
-                      setCity(e.target.value)
+                  <div style={styles.field}>
+                    <label>City</label>
+
+                    <select
+                      value={city}
+                      onChange={(e) =>
+                        setCity(
+                          e.target.value
+                        )
+                      }
+                    >
+                      <option value="">
+                        Select city
+                      </option>
+
+                      {(selectedCountry?.cities ||
+                        []).map((c) => (
+                        <option
+                          key={c.city}
+                          value={c.city}
+                        >
+                          {c.city}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div style={styles.field}>
+                    <label>Check-in</label>
+
+                    <input
+                      type="date"
+                      value={checkin}
+                      onChange={(e) =>
+                        setCheckin(
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+
+                  <div style={styles.field}>
+                    <label>Check-out</label>
+
+                    <input
+                      type="date"
+                      value={checkout}
+                      onChange={(e) =>
+                        setCheckout(
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+
+                  <div style={styles.field}>
+                    <label>Guests</label>
+
+                    <input
+                      type="number"
+                      min="1"
+                      value={guests}
+                      onChange={(e) =>
+                        setGuests(
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+
+                  <div style={styles.field}>
+                    <label>Rooms</label>
+
+                    <input
+                      type="number"
+                      min="1"
+                      value={rooms}
+                      onChange={(e) =>
+                        setRooms(
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+
+                  <button
+                    style={styles.searchBtn}
+                    onClick={() =>
+                      searchHotels()
                     }
                   >
-                    <option value="">
-                      Select city
-                    </option>
-
-                    {(selectedCountry?.cities ||
-                      []).map((c) => (
-                      <option
-                        key={c.city}
-                        value={c.city}
-                      >
-                        {c.city}
-                      </option>
-                    ))}
-                  </select>
+                    {loading
+                      ? "Searching..."
+                      : "Search Hotels"}
+                  </button>
                 </div>
-
-                <div style={styles.field}>
-                  <label>Check-in</label>
-
-                  <input
-                    type="date"
-                    value={checkin}
-                    onChange={(e) =>
-                      setCheckin(e.target.value)
-                    }
-                  />
-                </div>
-
-                <div style={styles.field}>
-                  <label>Check-out</label>
-
-                  <input
-                    type="date"
-                    value={checkout}
-                    onChange={(e) =>
-                      setCheckout(e.target.value)
-                    }
-                  />
-                </div>
-
-                <div style={styles.field}>
-                  <label>Guests</label>
-
-                  <input
-                    type="number"
-                    min="1"
-                    value={guests}
-                    onChange={(e) =>
-                      setGuests(e.target.value)
-                    }
-                  />
-                </div>
-
-                <div style={styles.field}>
-                  <label>Rooms</label>
-
-                  <input
-                    type="number"
-                    min="1"
-                    value={rooms}
-                    onChange={(e) =>
-                      setRooms(e.target.value)
-                    }
-                  />
-                </div>
-
-                <button
-                  style={styles.searchBtn}
-                  onClick={() => searchHotels()}
-                >
-                  {loading
-                    ? "Searching..."
-                    : "Search Hotels"}
-                </button>
               </div>
             </div>
           </section>
 
-          <section style={styles.quickLinks}>
-            <button
-              style={styles.quickCard}
-              onClick={() => setPage("guide")}
-            >
-              <h3>Destination Guide</h3>
-              <p>
-                Airports, emergency numbers,
-                hospitals, restaurants and
-                attractions.
-              </p>
-            </button>
+          <section style={styles.infoGrid}>
+            <div style={styles.infoCard}>
+              <h3>
+                Global Hotel Inventory
+              </h3>
 
-            <button
-              style={styles.quickCard}
-              onClick={() => setPage("faq")}
-            >
-              <h3>FAQ</h3>
               <p>
-                Booking help, payment support,
-                cancellations and refunds.
+                Access verified stays across
+                113 countries and 12,000+
+                destinations.
               </p>
-            </button>
+            </div>
 
-            <button
-              style={styles.quickCard}
-              onClick={() => setPage("contact")}
-            >
-              <h3>Contact Us</h3>
-              <p>
-                Reach our booking support team
-                anytime.
-              </p>
-            </button>
+            <div style={styles.infoCard}>
+              <h3>
+                Secure Reservation System
+              </h3>
 
-            <button
-              style={styles.quickCard}
-              onClick={() => setPage("partner")}
-            >
-              <h3>Hotel Extranet</h3>
               <p>
-                PMS sync, onboarding and partner
-                connectivity.
+                Safe booking flow with payment
+                protection and live rate
+                updates.
               </p>
-            </button>
+            </div>
+
+            <div style={styles.infoCard}>
+              <h3>
+                Enterprise Connectivity
+              </h3>
+
+              <p>
+                Real PMS integrations and OTA
+                distribution connectivity.
+              </p>
+            </div>
+          </section>
+
+          <section style={styles.guideSection}>
+            <h2 style={styles.sectionTitle}>
+              Destination Guide
+            </h2>
+
+            <div style={styles.guideGrid}>
+              <GuideCard
+                title="Emergency Services"
+                items={GUIDE_DATA.emergency}
+              />
+
+              <GuideCard
+                title="Airports & Transfers"
+                items={GUIDE_DATA.airports}
+              />
+
+              <GuideCard
+                title="Hospitals & Clinics"
+                items={GUIDE_DATA.hospitals}
+              />
+
+              <GuideCard
+                title="Restaurants & Dining"
+                items={GUIDE_DATA.restaurants}
+              />
+
+              <GuideCard
+                title="Tourism & Attractions"
+                items={GUIDE_DATA.tourism}
+              />
+
+              <GuideCard
+                title="Transport & Navigation"
+                items={GUIDE_DATA.transport}
+              />
+            </div>
           </section>
         </>
       )}
@@ -358,7 +577,7 @@ export default function App() {
       {page === "results" && (
         <main style={styles.results}>
           <button
-            style={styles.back}
+            style={styles.backBtn}
             onClick={() => setPage("home")}
           >
             ← Back
@@ -367,7 +586,8 @@ export default function App() {
           <div style={styles.resultsGrid}>
             <div>
               <h2>
-                Hotels in {city}, {country}
+                Hotels in {city},{" "}
+                {country}
               </h2>
 
               <div style={styles.hotelGrid}>
@@ -382,14 +602,17 @@ export default function App() {
                         style={styles.hotelImage}
                       />
                     ) : (
-                      <div style={styles.noImage}>
+                      <div
+                        style={styles.noImage}
+                      >
                         MYSPACE HOTEL
                       </div>
                     )}
 
                     <div style={styles.hotelBody}>
                       <h3>
-                        {h.hotel_name || h.name}
+                        {h.hotel_name ||
+                          h.name}
                       </h3>
 
                       <p>
@@ -398,7 +621,9 @@ export default function App() {
                           city}
                       </p>
 
-                      <div style={styles.price}>
+                      <div
+                        style={styles.priceBox}
+                      >
                         {h.first_rate ? (
                           <>
                             <strong>
@@ -425,9 +650,13 @@ export default function App() {
                       </div>
 
                       <button
-                        style={styles.selectBtn}
+                        style={
+                          styles.selectBtn
+                        }
                         onClick={() =>
-                          setSelectedHotel(h)
+                          setSelectedHotel(
+                            h
+                          )
                         }
                       >
                         Select Hotel
@@ -448,9 +677,57 @@ export default function App() {
                       selectedHotel.name}
                   </h3>
 
-                  <p>
-                    {city}, {country}
-                  </p>
+                  <div
+                    style={styles.totalBox}
+                  >
+                    <strong>
+                      {baseCurrency}{" "}
+                      {money(total)}
+                    </strong>
+
+                    <small>
+                      {nights} nights •{" "}
+                      {rooms} room(s)
+                    </small>
+                  </div>
+
+                  <div
+                    style={styles.converterBox}
+                  >
+                    <label>
+                      Currency Converter
+                    </label>
+
+                    <select
+                      style={styles.input}
+                      value={
+                        displayCurrency
+                      }
+                      onChange={(e) =>
+                        setDisplayCurrency(
+                          e.target.value
+                        )
+                      }
+                    >
+                      {CURRENCIES.map(
+                        (c) => (
+                          <option
+                            key={c}
+                            value={c}
+                          >
+                            {c}
+                          </option>
+                        )
+                      )}
+                    </select>
+
+                    <strong>
+                      {displayCurrency}{" "}
+                      {money(
+                        convertedTotal
+                      )}
+                    </strong>
+                  </div>
 
                   <input
                     style={styles.input}
@@ -527,54 +804,33 @@ export default function App() {
       )}
 
       {page === "guide" && (
-        <InfoPage
-          title="Destination Guide"
-          setPage={setPage}
-          content={[
-            "Emergency Services: 112 / 999",
-            "Airport transfers available in major cities",
-            "Popular attractions and museums nearby",
-            "Local restaurants and shopping guidance",
-            "24/7 booking assistance available"
-          ]}
-        />
+        <GuidePage setPage={setPage} />
       )}
 
       {page === "faq" && (
         <InfoPage
           title="Frequently Asked Questions"
           setPage={setPage}
-          content={[
-            "Most bookings include instant confirmation.",
-            "Some properties support free cancellation.",
-            "Refund timelines depend on the property policy.",
-            "Support is available for booking issues."
-          ]}
-        />
-      )}
-
-      {page === "terms" && (
-        <InfoPage
-          title="Terms & Conditions"
-          setPage={setPage}
-          content={[
-            "Prices depend on live hotel availability.",
-            "Hotels may request identity verification.",
-            "Booking conditions vary by property.",
-            "Guests must comply with local regulations."
+          items={[
+            "Booking confirmations",
+            "Cancellation policies",
+            "Refund guidance",
+            "Reservation changes",
+            "Secure payment support",
+            "Live availability updates"
           ]}
         />
       )}
 
       {page === "contact" && (
         <InfoPage
-          title="Contact Us"
+          title="Contact"
           setPage={setPage}
-          content={[
-            "Email: reservations@myspace-hotel.com",
-            "Global booking support available.",
-            "Enterprise partnership onboarding supported.",
-            "Emergency reservation assistance available."
+          items={[
+            "reservations@myspace-hotel.com",
+            "24/7 booking support",
+            "Enterprise onboarding support",
+            "Travel assistance services"
           ]}
         />
       )}
@@ -586,15 +842,79 @@ export default function App() {
   );
 }
 
+function GuideCard({ title, items }) {
+  return (
+    <div style={styles.guideCard}>
+      <h3>{title}</h3>
+
+      {items.map((x) => (
+        <div
+          key={x}
+          style={styles.guideItem}
+        >
+          {x}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function GuidePage({ setPage }) {
+  return (
+    <main style={styles.infoPage}>
+      <button
+        style={styles.backBtn}
+        onClick={() => setPage("home")}
+      >
+        ← Back
+      </button>
+
+      <h1>Destination Guide</h1>
+
+      <div style={styles.guideGrid}>
+        <GuideCard
+          title="Emergency Services"
+          items={GUIDE_DATA.emergency}
+        />
+
+        <GuideCard
+          title="Airports & Transfers"
+          items={GUIDE_DATA.airports}
+        />
+
+        <GuideCard
+          title="Hospitals & Clinics"
+          items={GUIDE_DATA.hospitals}
+        />
+
+        <GuideCard
+          title="Restaurants & Dining"
+          items={GUIDE_DATA.restaurants}
+        />
+
+        <GuideCard
+          title="Tourism & Attractions"
+          items={GUIDE_DATA.tourism}
+        />
+
+        <GuideCard
+          title="Transport & Navigation"
+          items={GUIDE_DATA.transport}
+        />
+      </div>
+    </main>
+  );
+}
+
 function InfoPage({
   title,
-  content,
+  items,
   setPage
 }) {
   return (
     <main style={styles.infoPage}>
       <button
-        style={styles.back}
+        style={styles.backBtn}
         onClick={() => setPage("home")}
       >
         ← Back
@@ -603,8 +923,11 @@ function InfoPage({
       <h1>{title}</h1>
 
       <div style={styles.infoCard}>
-        {content.map((x) => (
-          <div key={x} style={styles.infoItem}>
+        {items.map((x) => (
+          <div
+            key={x}
+            style={styles.infoItem}
+          >
             {x}
           </div>
         ))}
@@ -617,44 +940,48 @@ function PartnerPage({ setPage }) {
   return (
     <main style={styles.infoPage}>
       <button
-        style={styles.back}
+        style={styles.backBtn}
         onClick={() => setPage("home")}
       >
         ← Back
       </button>
 
-      <h1>Hotel / Partner Login</h1>
+      <h1>Partner Access</h1>
 
       <div style={styles.partnerGrid}>
         <div style={styles.partnerCard}>
           <h3>Hotel Extranet</h3>
+
           <p>
-            Manage inventory, reservations and
-            pricing.
+            Inventory management and
+            reservation control.
           </p>
         </div>
 
         <div style={styles.partnerCard}>
-          <h3>PMS Sync Monitor</h3>
+          <h3>PMS Connectivity</h3>
+
           <p>
-            Live PMS connectivity and sync
-            monitoring.
+            Real PMS synchronization and live
+            inventory updates.
           </p>
         </div>
 
         <div style={styles.partnerCard}>
           <h3>Hotel Onboarding</h3>
+
           <p>
-            Connect hotels, PMS providers and
-            channel managers.
+            Enterprise hotel onboarding and
+            OTA connectivity.
           </p>
         </div>
 
         <div style={styles.partnerCard}>
           <h3>Enterprise Analytics</h3>
+
           <p>
-            Reservation analytics and OTA
-            reconciliation.
+            OTA reconciliation and reporting
+            systems.
           </p>
         </div>
       </div>
@@ -665,7 +992,7 @@ function PartnerPage({ setPage }) {
 const styles = {
   page: {
     fontFamily: "Arial",
-    background: "#f6f9ff",
+    background: "#f5f8ff",
     minHeight: "100vh"
   },
 
@@ -679,7 +1006,7 @@ const styles = {
   },
 
   logo: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: 900
   },
 
@@ -687,13 +1014,13 @@ const styles = {
     opacity: 0.8
   },
 
-  headerButtons: {
+  nav: {
     display: "flex",
     gap: 10,
     flexWrap: "wrap"
   },
 
-  topBtn: {
+  navBtn: {
     border: 0,
     background: "#fff",
     padding: "10px 14px",
@@ -714,26 +1041,33 @@ const styles = {
   hero: {
     backgroundImage:
       "url(https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=80)",
+
     backgroundSize: "cover",
     backgroundPosition: "center",
-    minHeight: 520
+    minHeight: 550
   },
 
   heroOverlay: {
     background:
-      "rgba(7,20,47,.65)",
-    minHeight: 520,
+      "rgba(7,20,47,.62)",
+
+    minHeight: 550
+  },
+
+  heroContent: {
+    maxWidth: 1400,
+    margin: "0 auto",
     padding: 50,
     color: "#fff"
   },
 
   heroTitle: {
-    fontSize: 56,
+    fontSize: 60,
     marginBottom: 10
   },
 
   heroText: {
-    fontSize: 22,
+    fontSize: 24,
     marginBottom: 30
   },
 
@@ -744,6 +1078,7 @@ const styles = {
     display: "grid",
     gridTemplateColumns:
       "repeat(auto-fit,minmax(180px,1fr))",
+
     gap: 15,
     color: "#000"
   },
@@ -763,30 +1098,58 @@ const styles = {
     cursor: "pointer"
   },
 
-  quickLinks: {
+  infoGrid: {
     padding: 30,
     display: "grid",
     gridTemplateColumns:
-      "repeat(auto-fit,minmax(240px,1fr))",
+      "repeat(auto-fit,minmax(260px,1fr))",
+
     gap: 20
   },
 
-  quickCard: {
-    border: 0,
+  infoCard: {
     background: "#fff",
     borderRadius: 20,
     padding: 25,
-    textAlign: "left",
-    cursor: "pointer",
     boxShadow:
       "0 10px 30px rgba(0,0,0,.08)"
+  },
+
+  sectionTitle: {
+    fontSize: 34,
+    marginBottom: 20
+  },
+
+  guideSection: {
+    padding: 30
+  },
+
+  guideGrid: {
+    display: "grid",
+    gridTemplateColumns:
+      "repeat(auto-fit,minmax(280px,1fr))",
+
+    gap: 20
+  },
+
+  guideCard: {
+    background: "#fff",
+    borderRadius: 20,
+    padding: 25,
+    boxShadow:
+      "0 10px 30px rgba(0,0,0,.08)"
+  },
+
+  guideItem: {
+    padding: 12,
+    borderBottom: "1px solid #eee"
   },
 
   results: {
     padding: 30
   },
 
-  back: {
+  backBtn: {
     border: 0,
     padding: "10px 16px",
     borderRadius: 10,
@@ -798,6 +1161,7 @@ const styles = {
     display: "grid",
     gridTemplateColumns:
       "1fr 360px",
+
     gap: 30
   },
 
@@ -805,6 +1169,7 @@ const styles = {
     display: "grid",
     gridTemplateColumns:
       "repeat(auto-fit,minmax(280px,1fr))",
+
     gap: 20
   },
 
@@ -834,7 +1199,7 @@ const styles = {
     padding: 20
   },
 
-  price: {
+  priceBox: {
     margin: "15px 0"
   },
 
@@ -856,6 +1221,20 @@ const styles = {
     height: "fit-content",
     position: "sticky",
     top: 20
+  },
+
+  totalBox: {
+    background: "#dcfce7",
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 14
+  },
+
+  converterBox: {
+    background: "#eff6ff",
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 14
   },
 
   input: {
@@ -886,25 +1265,11 @@ const styles = {
     cursor: "pointer"
   },
 
-  infoPage: {
-    padding: 40
-  },
-
-  infoCard: {
-    background: "#fff",
-    borderRadius: 20,
-    padding: 30
-  },
-
-  infoItem: {
-    padding: 15,
-    borderBottom: "1px solid #eee"
-  },
-
   partnerGrid: {
     display: "grid",
     gridTemplateColumns:
       "repeat(auto-fit,minmax(260px,1fr))",
+
     gap: 20
   },
 
@@ -912,5 +1277,9 @@ const styles = {
     background: "#fff",
     borderRadius: 20,
     padding: 25
+  },
+
+  infoPage: {
+    padding: 40
   }
 };
