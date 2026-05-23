@@ -6,7 +6,7 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "axios": "^1.16.0",
+    "axios": "^1.16.1",
     "bcryptjs": "^2.4.3",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
@@ -16,6 +16,7 @@
     "express-rate-limit": "^8.5.2",
     "ioredis": "^5.10.1",
     "jsonwebtoken": "^9.0.3",
+    "node-cron": "^4.2.1",
     "node-fetch": "^2.7.0",
     "nodemailer": "^8.0.7",
     "pdfkit": "^0.18.0",
@@ -23,6 +24,7 @@
     "stripe": "^22.1.1",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^14.0.0",
+    "ws": "^8.21.0",
     "yamljs": "^0.3.0"
   }
 }
