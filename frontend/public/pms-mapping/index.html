@@ -1,0 +1,353 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>PMS Mapping UI | MySpace Hotel</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#00112b;font-family:Arial,Helvetica,sans-serif;color:#0d2f7a}
+.wrapper{max-width:1400px;margin:0 auto;padding:32px}
+.panel{background:#f5f7fc;border-radius:34px;padding:36px}
+.brand{color:#d7a300;font-size:16px;font-weight:900;letter-spacing:10px;margin-bottom:18px}
+h1{margin:0;font-size:52px;line-height:1;color:#0d3f9b}
+.subtitle{margin-top:14px;font-size:18px;font-weight:700;color:#55627f}
+.auth,.form-grid{margin-top:26px;display:grid;grid-template-columns:1fr 1fr 180px;gap:14px}
+input,select,textarea{width:100%;border-radius:16px;border:2px solid #d7ddea;padding:16px;font-size:16px;font-weight:700;background:#fff}
+textarea{min-height:90px;resize:vertical}
+button{border:none;border-radius:16px;background:#133f9f;color:#fff;padding:16px 22px;font-size:17px;font-weight:900;cursor:pointer}
+button.gold{background:#f6cc47;color:#000}
+.message{margin-top:22px;padding:18px;border-radius:18px;font-size:18px;font-weight:900}
+.ok{background:#cdeed5;color:#00612b}
+.error{background:#f3d2d2;color:#9a1111}
+.info{background:#dce8ff;color:#0d3f9b}
+.section{margin-top:28px;background:#e9edf6;border-radius:26px;padding:26px}
+.section-title{font-size:26px;font-weight:900;color:#0d3f9b;margin-bottom:18px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+label{font-size:13px;letter-spacing:2px;font-weight:900;color:#4d5f84;margin-bottom:6px;display:block}
+.field{margin-bottom:16px}
+table{width:100%;border-collapse:collapse;margin-top:18px}
+th{text-align:left;padding:14px;border-bottom:2px solid #d5dcea;font-size:15px;color:#0d3f9b}
+td{padding:14px;border-bottom:1px solid #d5dcea;font-size:14px;color:#1b2f54;vertical-align:top}
+.links{display:flex;flex-wrap:wrap;gap:14px;margin-top:26px}
+.links a{text-decoration:none;background:#041738;color:#fff;padding:16px 22px;border-radius:16px;font-weight:900;font-size:17px}
+.small{font-size:13px;color:#55627f;font-weight:700;line-height:1.5}
+@media(max-width:1000px){.auth,.form-grid,.grid-2,.grid-3{grid-template-columns:1fr}h1{font-size:38px}}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+<div class="panel">
+
+<div class="brand">MYSPACE HOTEL</div>
+
+<h1>PMS Mapping UI</h1>
+
+<div class="subtitle">
+Map Oracle OHIP, SiteMinder, Cloudbeds, Mews, and other PMS/channel-manager room and rate codes to MySpace Hotel IDs.
+</div>
+
+<div class="auth">
+<input id="partnerId" value="oracle-ohip" />
+<input id="partnerToken" value="MSH_ENTERPRISE_TOKEN_001" />
+<button class="gold" onclick="connectPartner()">Connect</button>
+</div>
+
+<div id="message" class="message info">
+Connect first to load and create PMS mappings.
+</div>
+
+<div class="section">
+<div class="section-title">Create New Mapping</div>
+
+<div class="grid-3">
+
+<div class="field">
+<label>PARTNER / PMS</label>
+<select id="partnerName">
+<option value="oracle-ohip">Oracle OHIP</option>
+<option value="siteminder">SiteMinder</option>
+<option value="cloudbeds">Cloudbeds</option>
+<option value="mews">Mews</option>
+<option value="opera-cloud">OPERA Cloud</option>
+<option value="little-hotelier">Little Hotelier</option>
+<option value="hotelrunner">HotelRunner</option>
+<option value="guesty">Guesty</option>
+<option value="other">Other</option>
+</select>
+</div>
+
+<div class="field">
+<label>MAPPING TYPE</label>
+<select id="mappingType">
+<option value="hotel">Hotel mapping</option>
+<option value="room">Room mapping</option>
+<option value="rate">Rate plan mapping</option>
+<option value="availability">Availability mapping</option>
+<option value="policy">Cancellation policy mapping</option>
+<option value="currency">Currency mapping</option>
+</select>
+</div>
+
+<div class="field">
+<label>STATUS</label>
+<select id="mappingStatus">
+<option value="active">Active</option>
+<option value="testing">Testing</option>
+<option value="pending">Pending</option>
+<option value="disabled">Disabled</option>
+</select>
+</div>
+
+</div>
+
+<div class="grid-2">
+
+<div class="field">
+<label>EXTERNAL HOTEL ID</label>
+<input id="externalHotelId" placeholder="Example: OPERA-998021 or SM-12345" />
+</div>
+
+<div class="field">
+<label>MYSPACE HOTEL ID</label>
+<input id="myspaceHotelId" placeholder="Example: MSH-MTE4OTczODN8c2t5bG" />
+</div>
+
+<div class="field">
+<label>EXTERNAL ROOM CODE</label>
+<input id="externalRoomCode" placeholder="Example: DLX-KING / DBL.ST / ROOM_104" />
+</div>
+
+<div class="field">
+<label>MYSPACE ROOM ID</label>
+<input id="myspaceRoomId" placeholder="Example: ROOM / DLX-KING" />
+</div>
+
+<div class="field">
+<label>EXTERNAL RATE CODE</label>
+<input id="externalRateCode" placeholder="Example: BAR-RO / NRF-BB" />
+</div>
+
+<div class="field">
+<label>MYSPACE RATE ID</label>
+<input id="myspaceRateId" placeholder="Example: BAR-RO / CONFIRM" />
+</div>
+
+</div>
+
+<div class="field">
+<label>NOTES</label>
+<textarea id="notes" placeholder="Add mapping notes, restrictions, occupancy rules, board basis, policy details, or integration comments."></textarea>
+</div>
+
+<button onclick="saveMapping()">Save Mapping</button>
+<button class="gold" onclick="loadMappings()">Refresh Mappings</button>
+
+<div class="small">
+Use this page to create the mapping bridge between hotel partner PMS codes and MySpace Hotel internal inventory IDs. This supports Oracle OHIP, SiteMinder, Cloudbeds, Mews, and channel-manager integrations.
+</div>
+
+</div>
+
+<div class="section">
+<div class="section-title">Current PMS Mappings</div>
+
+<table>
+<thead>
+<tr>
+<th>Created</th>
+<th>Partner</th>
+<th>Type</th>
+<th>External Hotel</th>
+<th>MySpace Hotel</th>
+<th>External Room</th>
+<th>MySpace Room</th>
+<th>External Rate</th>
+<th>MySpace Rate</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody id="mappingRows">
+<tr><td colspan="10">Connect first.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="links">
+<a href="/partner-dashboard">Partner Dashboard</a>
+<a href="/developers">Developers</a>
+<a href="/api">API</a>
+<a href="/webhooks">Webhooks</a>
+<a href="/partners">Partners</a>
+<a href="/status">Status</a>
+<a href="https://myspace-hotel-backend.onrender.com/docs" target="_blank">Swagger Docs</a>
+</div>
+
+</div>
+</div>
+
+<script>
+const API_BASE = "https://myspace-hotel-backend.onrender.com";
+let JWT_TOKEN = "";
+
+function setMessage(text,type){
+  const message = document.getElementById("message");
+  message.className = "message " + type;
+  message.innerHTML = text;
+}
+
+async function connectPartner(){
+  const partnerId = document.getElementById("partnerId").value.trim();
+  const token = document.getElementById("partnerToken").value.trim();
+
+  setMessage("Connecting partner account...","info");
+
+  try{
+    const response = await fetch(API_BASE + "/api/auth/login", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ partner_id:partnerId, token:token })
+    });
+
+    const data = await response.json();
+
+    if(!response.ok || !data.ok || !data.jwt){
+      throw new Error(data.error || "Authentication failed");
+    }
+
+    JWT_TOKEN = data.jwt;
+    setMessage("Partner authentication successful. PMS mapping access enabled.","ok");
+
+    await loadMappings();
+
+  }catch(error){
+    setMessage("Partner login failed. Confirm backend deployment and partner token.","error");
+    console.log(error);
+  }
+}
+
+function mappingPayload(){
+  return {
+    partner_name: document.getElementById("partnerName").value,
+    mapping_type: document.getElementById("mappingType").value,
+    status: document.getElementById("mappingStatus").value,
+    external_hotel_id: document.getElementById("externalHotelId").value.trim(),
+    myspace_hotel_id: document.getElementById("myspaceHotelId").value.trim(),
+    external_room_code: document.getElementById("externalRoomCode").value.trim(),
+    myspace_room_id: document.getElementById("myspaceRoomId").value.trim(),
+    external_rate_code: document.getElementById("externalRateCode").value.trim(),
+    myspace_rate_id: document.getElementById("myspaceRateId").value.trim(),
+    notes: document.getElementById("notes").value.trim()
+  };
+}
+
+async function saveMapping(){
+  if(!JWT_TOKEN){
+    setMessage("Connect first before saving mappings.","error");
+    return;
+  }
+
+  const payload = mappingPayload();
+
+  if(!payload.external_hotel_id && !payload.external_room_code && !payload.external_rate_code){
+    setMessage("Enter at least one external hotel, room, or rate code.","error");
+    return;
+  }
+
+  try{
+    const response = await fetch(API_BASE + "/api/mappings", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        Authorization:"Bearer " + JWT_TOKEN
+      },
+      body:JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if(!response.ok || !data.ok){
+      throw new Error(data.error || "Mapping save failed");
+    }
+
+    setMessage("PMS mapping saved successfully.","ok");
+
+    document.getElementById("externalHotelId").value = "";
+    document.getElementById("myspaceHotelId").value = "";
+    document.getElementById("externalRoomCode").value = "";
+    document.getElementById("myspaceRoomId").value = "";
+    document.getElementById("externalRateCode").value = "";
+    document.getElementById("myspaceRateId").value = "";
+    document.getElementById("notes").value = "";
+
+    await loadMappings();
+
+  }catch(error){
+    setMessage("Could not save PMS mapping. Check backend /api/mappings route.","error");
+    console.log(error);
+  }
+}
+
+async function loadMappings(){
+  if(!JWT_TOKEN){
+    setMessage("Connect first before loading mappings.","error");
+    return;
+  }
+
+  const rows = document.getElementById("mappingRows");
+  rows.innerHTML = "<tr><td colspan='10'>Loading mappings...</td></tr>";
+
+  try{
+    const response = await fetch(API_BASE + "/api/mappings", {
+      cache:"no-store",
+      headers:{ Authorization:"Bearer " + JWT_TOKEN }
+    });
+
+    const data = await response.json();
+
+    if(!response.ok || !data.ok){
+      throw new Error(data.error || "Mapping load failed");
+    }
+
+    const mappings = data.mappings || [];
+
+    if(!mappings.length){
+      rows.innerHTML = "<tr><td colspan='10'>No mappings saved yet.</td></tr>";
+      return;
+    }
+
+    rows.innerHTML = "";
+
+    mappings.slice(0,100).forEach((m)=>{
+      rows.innerHTML += `
+        <tr>
+          <td>${m.created_at || ""}</td>
+          <td>${m.partner_name || ""}</td>
+          <td>${m.mapping_type || ""}</td>
+          <td>${m.external_hotel_id || ""}</td>
+          <td>${m.myspace_hotel_id || ""}</td>
+          <td>${m.external_room_code || ""}</td>
+          <td>${m.myspace_room_id || ""}</td>
+          <td>${m.external_rate_code || ""}</td>
+          <td>${m.myspace_rate_id || ""}</td>
+          <td>${m.status || ""}</td>
+        </tr>
+      `;
+    });
+
+  }catch(error){
+    rows.innerHTML = "<tr><td colspan='10'>Could not load mappings.</td></tr>";
+    setMessage("Could not load PMS mappings.","error");
+    console.log(error);
+  }
+}
+</script>
+
+</body>
+</html>
