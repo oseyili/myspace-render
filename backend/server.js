@@ -35,6 +35,7 @@ const DEST_FILES = [
 ];
 
 const RATE_FILES = [
+  path.join(DATA, "live-rate-index.json"),
   path.join(DATA, "REAL_ONLY_live_rates.json.gz"),
   path.join(DATA, "live-rates-000001.ndjson.gz"),
   path.join(DATA, "live-rates-000002.ndjson.gz"),
@@ -72,7 +73,7 @@ function writeJson(file, data) {
 
 function pick(o, keys) {
   for (const k of keys) {
-    const v = o?.[k];
+    const v = o && o[k];
     if (v !== undefined && v !== null && String(v).trim()) return v;
   }
   return "";
@@ -116,14 +117,8 @@ function normalizeHotel(row, index) {
   const hotelName = clean(pick(row, ["hotel_name", "hotelName", "name", "title"]));
   if (!hotelName) return null;
 
-  const country = normalizeCountry(
-    pick(row, ["country", "country_name", "countryName", "country_code", "countryCode"])
-  );
-
-  const city = normalizeCity(
-    pick(row, ["city", "city_name", "cityName", "destination", "destination_name", "destinationName"])
-  );
-
+  const country = normalizeCountry(pick(row, ["country", "country_name", "countryName", "country_code", "countryCode"]));
+  const city = normalizeCity(pick(row, ["city", "city_name", "cityName", "destination", "destination_name", "destinationName"]));
   if (!country || !city) return null;
 
   const id =
@@ -154,7 +149,6 @@ function normalizeHotel(row, index) {
 
 function hotelStayType(name) {
   const text = key(name);
-
   const otherWords = [
     "apartment", "apartments", "flat", "flats", "villa", "villas",
     "suite", "suites", "guesthouse", "guest house", "home", "homes",
@@ -197,6 +191,7 @@ function getDestinations() {
         .sort((a, b) => a.country.localeCompare(b.country));
     }
   }
+
   return [];
 }
 
@@ -217,7 +212,6 @@ async function streamHotels({ country, city, stay_type, limit }) {
     try {
       const hotel = normalizeHotel(JSON.parse(line), index++);
       if (!hotel) continue;
-
       if (key(hotel.country) !== key(normalizeCountry(country))) continue;
       if (key(hotel.city) !== key(normalizeCity(city))) continue;
       if (!stayMatch(stay_type, hotel.hotel_name)) continue;
@@ -284,12 +278,20 @@ function hotelbedsSignature() {
 
 async function searchHotelbeds({ hotel, checkin, checkout, guests, rooms }) {
   if (!hotelbedsReady()) {
-    return { ok: false, customer_message: "Today’s price could not be checked at the moment.", internal_reason: "missing_keys" };
+    return {
+      ok: false,
+      customer_message: "Today’s price could not be checked at the moment.",
+      internal_reason: "missing_keys"
+    };
   }
 
   const code = Number(hotel.hotelbeds_code);
   if (!Number.isFinite(code)) {
-    return { ok: false, customer_message: "Today’s price could not be checked for this stay.", internal_reason: "invalid_code" };
+    return {
+      ok: false,
+      customer_message: "Today’s price could not be checked for this stay.",
+      internal_reason: "invalid_code"
+    };
   }
 
   const body = {
@@ -318,12 +320,14 @@ async function searchHotelbeds({ hotel, checkin, checkout, guests, rooms }) {
 
     const text = await response.text();
     let json = null;
+
     try {
       json = JSON.parse(text);
     } catch {}
 
     if (!response.ok) {
       const quota = response.status === 403 && String(text).toLowerCase().includes("quota");
+
       return {
         ok: false,
         customer_message: quota
@@ -335,7 +339,7 @@ async function searchHotelbeds({ hotel, checkin, checkout, guests, rooms }) {
       };
     }
 
-    const hbHotel = json?.hotels?.hotels?.[0];
+    const hbHotel = json && json.hotels && json.hotels.hotels && json.hotels.hotels[0];
     if (!hbHotel) {
       return {
         ok: false,
@@ -353,7 +357,7 @@ async function searchHotelbeds({ hotel, checkin, checkout, guests, rooms }) {
 
         const candidate = {
           amount,
-          currency: rate.currency || json?.hotels?.currency || "GBP",
+          currency: rate.currency || (json.hotels && json.hotels.currency) || "GBP",
           rate_key: rate.rateKey || "",
           room_name: room.name || room.code || "",
           board_name: rate.boardName || rate.boardCode || "",
@@ -451,6 +455,7 @@ async function savedRateFromIndex(hotel) {
 
   for (const id of ids) {
     const row = index[id];
+
     if (row && Number(row.amount) > 0) {
       return {
         amount: Number(row.amount),
@@ -471,6 +476,27 @@ async function savedRateFromHarvestFiles(hotel) {
     if (!fs.existsSync(file)) continue;
 
     try {
+      if (file.toLowerCase().endsWith(".json")) {
+        const index = safeJson(file, {});
+        const ids = [hotel.hotelbeds_code, hotel.hotel_id, hotel.id].map(clean).filter(Boolean);
+
+        for (const id of ids) {
+          const row = index[id];
+          if (row && Number(row.amount) > 0) {
+            const candidate = {
+              amount: Number(row.amount),
+              currency: clean(row.currency || "GBP"),
+              rate_key: clean(row.rate_key || `RECENT-${id}`),
+              source: "recent_verified_price"
+            };
+
+            if (!best || candidate.amount < best.amount) best = candidate;
+          }
+        }
+
+        continue;
+      }
+
       if (file.toLowerCase().endsWith(".ndjson.gz")) {
         const stream = fs.createReadStream(file).pipe(zlib.createGunzip());
         const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
