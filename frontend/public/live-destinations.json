@@ -1,9 +1,9 @@
 {
   "ok": true,
   "source": "D drive restored destination catalogue",
-  "generated_at": "2026-05-24T00:06:21.269Z",
+  "generated_at": "2026-05-24T00:08:54.527Z",
   "total_countries": 113,
-  "total_cities": 12821,
+  "total_cities": 12824,
   "countries": [
     {
       "country": "Albania",
@@ -8306,6 +8306,9 @@
           "city": "AVIGNON"
         },
         {
+          "city": "Avignon (84)"
+        },
+        {
           "city": "Avignon Sud"
         },
         {
@@ -8475,6 +8478,9 @@
         },
         {
           "city": "Bourdeilles"
+        },
+        {
+          "city": "Bourdeilles (24)"
         },
         {
           "city": "Bourg d'Oisans"
@@ -8855,7 +8861,7 @@
           "city": "CRUX LA VILLE"
         },
         {
-          "city": "Crux-la-Ville"
+          "city": "Crux-la-Ville (58330)"
         },
         {
           "city": "Cucq"
@@ -11724,6 +11730,9 @@
         },
         {
           "city": "Ludwigsburg"
+        },
+        {
+          "city": "M"
         },
         {
           "city": "MÃ¼nchen"
@@ -23305,6 +23314,9 @@
           "city": "부산시"
         },
         {
+          "city": "서"
+        },
+        {
           "city": "서귀포시"
         },
         {
@@ -27946,6 +27958,9 @@
         },
         {
           "city": "Thongsala"
+        },
+        {
+          "city": "Thongsala (900050769)"
         },
         {
           "city": "Tonsai Beach"
@@ -34119,9 +34134,6 @@
           "city": "Crown Point"
         },
         {
-          "city": "Crownview Homes"
-        },
-        {
           "city": "Crystal Lake"
         },
         {
@@ -38089,9 +38101,6 @@
         },
         {
           "city": "Texas City"
-        },
-        {
-          "city": "The Crest Motel"
         },
         {
           "city": "Thomasville"
