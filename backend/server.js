@@ -815,6 +815,72 @@ setTimeout(() => {
   });
 }, 3000);
 
+
+// MYSPACE HOTEL STRIPE CHECKOUT ROUTE
+app.post("/api/create-checkout-session", async (req, res) => {
+  try {
+    const Stripe = require("stripe");
+
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return res.status(500).json({
+        ok: false,
+        error: "Stripe secret key is not configured on backend."
+      });
+    }
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+    const body = req.body || {};
+    const amountNumber = Number(body.amount || body.total || body.total_amount || body.price || 0);
+
+    if (!Number.isFinite(amountNumber) || amountNumber <= 0) {
+      return res.status(400).json({
+        ok: false,
+        error: "Valid full booking amount is required before Stripe checkout."
+      });
+    }
+
+    const currency = String(body.currency || "GBP").toLowerCase();
+    const amount = Math.round(amountNumber * 100);
+    const hotelName = String(body.hotel_name || "MySpace Hotel Reservation");
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      success_url: `${process.env.FRONTEND_URL || "https://www.myspace-hotel.com"}?payment=success`,
+      cancel_url: `${process.env.FRONTEND_URL || "https://www.myspace-hotel.com"}?payment=cancelled`,
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency,
+            unit_amount: amount,
+            product_data: {
+              name: hotelName,
+              description: `${body.checkin || ""} to ${body.checkout || ""} | ${body.guests || 1} guest(s) | ${body.rooms || 1} room(s)`
+            }
+          }
+        }
+      ],
+      metadata: {
+        hotel_id: String(body.hotel_id || ""),
+        hotel_name: hotelName,
+        checkin: String(body.checkin || ""),
+        checkout: String(body.checkout || ""),
+        guests: String(body.guests || ""),
+        rooms: String(body.rooms || ""),
+        rate_key: String(body.rate_key || "").slice(0, 450)
+      }
+    });
+
+    return res.json({ ok: true, url: session.url, id: session.id });
+  } catch (err) {
+    return res.status(500).json({
+      ok: false,
+      error: err.message || "Stripe checkout failed."
+    });
+  }
+});
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log("");
   console.log("====================================");
@@ -829,5 +895,6 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("Swagger:", `http://127.0.0.1:${PORT}/docs`);
   console.log("====================================");
 });
+
 
 
