@@ -6,11 +6,14 @@ const zlib = require("zlib");
 const readline = require("readline");
 
 let stripe = null;
+
 try {
   if (process.env.STRIPE_SECRET_KEY) {
     stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
   }
-} catch {}
+} catch {
+  console.log("Stripe not configured");
+}
 
 const app = express();
 const PORT = process.env.PORT || 5050;
@@ -19,128 +22,143 @@ app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 
 const ROOT = path.resolve(__dirname, "..");
-const BACKEND_DATA = path.join(__dirname, "data");
+const DATA = path.join(__dirname, "data");
 const PUBLIC = path.join(ROOT, "frontend", "public");
 
-const DESTINATION_FILE_BACKEND = path.join(BACKEND_DATA, "live-destinations.json");
-const DESTINATION_FILE_PUBLIC = path.join(PUBLIC, "live-destinations.json");
-const HOTEL_GZ_FILE = path.join(BACKEND_DATA, "live-hotels.ndjson.gz");
-const HOTEL_META_FILE = path.join(BACKEND_DATA, "live-hotels-meta.json");
+const DEST_FILE_BACKEND = path.join(DATA, "live-destinations.json");
+const DEST_FILE_PUBLIC = path.join(PUBLIC, "live-destinations.json");
 
-const COUNTRY_NAMES = {
-  gb: "United Kingdom",
-  gbr: "United Kingdom",
-  uk: "United Kingdom",
-  "united kingdom": "United Kingdom",
-  england: "United Kingdom",
-  us: "United States",
-  usa: "United States",
-  "united states": "United States",
-  fr: "France",
-  fra: "France",
-  france: "France",
-  es: "Spain",
-  esp: "Spain",
-  spain: "Spain",
-  ng: "Nigeria",
-  nga: "Nigeria",
-  nigeria: "Nigeria",
-  ae: "United Arab Emirates",
-  are: "United Arab Emirates",
-  uae: "United Arab Emirates",
-  "united arab emirates": "United Arab Emirates"
-};
+const HOTEL_FILE = path.join(DATA, "live-hotels.ndjson.gz");
+const HOTEL_META = path.join(DATA, "live-hotels-meta.json");
 
-const CITY_NAMES = {
-  lon: "London",
-  london: "London",
-  par: "Paris",
-  paris: "Paris",
-  dxb: "Dubai",
-  dubai: "Dubai",
-  nyc: "New York",
-  "new york": "New York",
-  bcn: "Barcelona",
-  barcelona: "Barcelona",
-  mad: "Madrid",
-  madrid: "Madrid",
-  los: "Lagos",
-  lagos: "Lagos",
-  abv: "Abuja",
-  abuja: "Abuja",
-  bni: "Benin City",
-  "benin city": "Benin City",
-  man: "Manchester",
-  manchester: "Manchester",
-  bhx: "Birmingham",
-  birmingham: "Birmingham",
-  mia: "Miami",
-  miami: "Miami",
-  lax: "Los Angeles",
-  "los angeles": "Los Angeles",
-  nce: "Nice",
-  nice: "Nice",
-  lys: "Lyon",
-  lyon: "Lyon",
-  auh: "Abu Dhabi",
-  "abu dhabi": "Abu Dhabi"
-};
+const RATE_INDEX = path.join(DATA, "live-rate-index.json");
 
-function cleanText(value) {
-  return String(value || "")
-    .replace(/\s*\(\s*\d+\s*\)\s*$/g, "")
+function clean(v) {
+  return String(v || "")
     .replace(/\s+/g, " ")
     .trim();
 }
 
-function keyText(value) {
-  return cleanText(value).toLowerCase();
+function key(v) {
+  return clean(v).toLowerCase();
 }
 
-function normalizeCountry(value) {
-  const key = keyText(value);
-  return COUNTRY_NAMES[key] || cleanText(value);
+function pick(o, keys) {
+  for (const k of keys) {
+    const v = o?.[k];
+    if (v !== undefined && v !== null && String(v).trim()) {
+      return v;
+    }
+  }
+  return "";
 }
 
-function normalizeCity(value) {
-  const key = keyText(value);
-  return CITY_NAMES[key] || cleanText(value);
-}
-
-function readJson(filePath, fallback) {
+function readJson(file, fallback) {
   try {
-    if (!fs.existsSync(filePath)) return fallback;
-    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+    if (!fs.existsSync(file)) return fallback;
+    return JSON.parse(fs.readFileSync(file, "utf8"));
   } catch {
     return fallback;
   }
 }
 
-function pick(obj, keys) {
-  for (const key of keys) {
-    const value = obj?.[key];
-    if (value !== undefined && value !== null && String(value).trim()) return value;
-  }
-  return "";
+const COUNTRY_MAP = {
+  uk: "United Kingdom",
+  gb: "United Kingdom",
+  gbr: "United Kingdom",
+  england: "United Kingdom",
+  usa: "United States",
+  us: "United States",
+  ae: "United Arab Emirates",
+  uae: "United Arab Emirates",
+  ng: "Nigeria",
+  fr: "France",
+  es: "Spain"
+};
+
+const CITY_MAP = {
+  lon: "London",
+  par: "Paris",
+  dxb: "Dubai",
+  nyc: "New York",
+  mad: "Madrid",
+  bcn: "Barcelona",
+  los: "Lagos",
+  abv: "Abuja",
+  bni: "Benin City",
+  man: "Manchester",
+  bhx: "Birmingham",
+  lax: "Los Angeles",
+  mia: "Miami"
+};
+
+function normalizeCountry(v) {
+  const k = key(v);
+  return COUNTRY_MAP[k] || clean(v);
+}
+
+function normalizeCity(v) {
+  const k = key(v);
+  return CITY_MAP[k] || clean(v);
 }
 
 function normalizeHotel(h, index) {
-  const rateSource = h.first_rate || h.rate || h;
-
   const hotel_id =
-    cleanText(pick(h, ["hotel_id", "id", "code", "hotelCode", "supplier_hotel_id"])) ||
-    `hotel-${index}`;
+    clean(
+      pick(h, [
+        "hotel_id",
+        "hotelId",
+        "id",
+        "code",
+        "hotelCode",
+        "supplier_hotel_id"
+      ])
+    ) || `hotel-${index}`;
 
-  const hotel_name = cleanText(pick(h, ["hotel_name", "name", "hotelName", "title"]));
-  const country = normalizeCountry(pick(h, ["country", "country_name", "countryName", "country_code", "countryCode"]));
-  const city = normalizeCity(pick(h, ["city", "city_name", "cityName", "destination", "destination_name", "destinationName"]));
+  const hotel_name = clean(
+    pick(h, [
+      "hotel_name",
+      "hotelName",
+      "name",
+      "title"
+    ])
+  );
 
-  if (!hotel_name || !country || !city) return null;
+  const country = normalizeCountry(
+    pick(h, [
+      "country",
+      "country_name",
+      "countryName",
+      "country_code",
+      "countryCode"
+    ])
+  );
 
-  const amount = Number(pick(rateSource, ["amount", "price", "total", "net", "sellingRate", "rate"]));
-  const currency = cleanText(pick(rateSource, ["currency", "currencyCode"])) || "GBP";
-  const rate_key = cleanText(pick(rateSource, ["rate_key", "rateKey"]));
-  const image_url = cleanText(pick(h, ["image_url", "image", "main_image", "photo", "thumbnail"]));
+  const city = normalizeCity(
+    pick(h, [
+      "city",
+      "city_name",
+      "cityName",
+      "destination",
+      "destination_name",
+      "destinationName"
+    ])
+  );
+
+  if (!hotel_name || !country || !city) {
+    return null;
+  }
+
+  const image_url = clean(
+    pick(h, [
+      "image_url",
+      "image",
+      "main_image",
+      "mainImage",
+      "photo",
+      "thumbnail"
+    ])
+  );
 
   return {
     id: hotel_id,
@@ -149,67 +167,102 @@ function normalizeHotel(h, index) {
     name: hotel_name,
     country,
     city,
-    area: cleanText(pick(h, ["area", "zone", "district"])),
-    address: cleanText(pick(h, ["address", "address1", "street"])),
-    rating: cleanText(pick(h, ["rating", "category", "stars"])),
+    area: clean(
+      pick(h, [
+        "area",
+        "zone",
+        "district"
+      ])
+    ),
+    address: clean(
+      pick(h, [
+        "address",
+        "address1",
+        "street"
+      ])
+    ),
+    rating: clean(
+      pick(h, [
+        "rating",
+        "category",
+        "stars"
+      ])
+    ),
     image_url,
-    image_caption: image_url ? "Verified property image" : "",
-    image_source: image_url ? "MySpace Hotel verified image" : "",
+    image_caption: image_url
+      ? "Verified property image"
+      : "",
+    image_source: image_url
+      ? "MySpace Hotel verified image"
+      : "",
     has_verified_image: Boolean(image_url),
     latitude: pick(h, ["latitude", "lat"]),
-    longitude: pick(h, ["longitude", "lng", "lon"]),
-    first_rate: amount > 0 ? { amount, currency, rate_key } : null
+    longitude: pick(h, ["longitude", "lng", "lon"])
   };
 }
 
 function getDestinations() {
   const payload =
-    readJson(DESTINATION_FILE_BACKEND, null) ||
-    readJson(DESTINATION_FILE_PUBLIC, null) ||
+    readJson(DEST_FILE_BACKEND, null) ||
+    readJson(DEST_FILE_PUBLIC, null) ||
     { countries: [] };
 
-  const countries = Array.isArray(payload.countries) ? payload.countries : [];
+  const countries = Array.isArray(payload.countries)
+    ? payload.countries
+    : [];
 
   return countries
     .map((c) => ({
-      country: cleanText(c.country || c.country_name || c.name),
+      country: clean(
+        c.country ||
+        c.country_name ||
+        c.name
+      ),
       cities: Array.isArray(c.cities)
         ? c.cities
             .map((x) => ({
-              city: cleanText(typeof x === "string" ? x : x.city || x.city_name || x.name)
+              city: clean(
+                typeof x === "string"
+                  ? x
+                  : x.city ||
+                    x.city_name ||
+                    x.name
+              )
             }))
             .filter((x) => x.city)
         : []
     }))
-    .filter((c) => c.country && c.cities.length)
-    .sort((a, b) => a.country.localeCompare(b.country));
+    .filter(
+      (c) =>
+        c.country &&
+        c.cities.length
+    )
+    .sort((a, b) =>
+      a.country.localeCompare(b.country)
+    );
 }
 
-function isSameCountry(hotelCountry, requestedCountry) {
-  return keyText(normalizeCountry(hotelCountry)) === keyText(normalizeCountry(requestedCountry));
-}
-
-function isSameCity(hotelCity, requestedCity) {
-  return keyText(normalizeCity(hotelCity)) === keyText(normalizeCity(requestedCity));
-}
-
-function uniqueKey(hotel) {
-  return [
-    keyText(hotel.hotel_name),
-    keyText(hotel.address),
-    keyText(hotel.city),
-    keyText(hotel.country)
-  ].join("|");
-}
-
-async function searchCompressedHotels(country, city, limit) {
+async function searchHotels({
+  country,
+  city,
+  stay_type,
+  limit
+}) {
   const results = [];
   const seen = new Set();
 
-  if (!fs.existsSync(HOTEL_GZ_FILE)) return results;
+  if (!fs.existsSync(HOTEL_FILE)) {
+    return [];
+  }
 
-  const stream = fs.createReadStream(HOTEL_GZ_FILE).pipe(zlib.createGunzip());
-  const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
+  const stream = fs
+    .createReadStream(HOTEL_FILE)
+    .pipe(zlib.createGunzip());
+
+  const rl = readline.createInterface({
+    input: stream,
+    crlfDelay: Infinity
+  });
 
   let index = 0;
 
@@ -223,16 +276,67 @@ async function searchCompressedHotels(country, city, limit) {
     if (!line.trim()) continue;
 
     try {
-      const hotel = normalizeHotel(JSON.parse(line), index);
+      const hotel = normalizeHotel(
+        JSON.parse(line),
+        index
+      );
+
       index += 1;
 
       if (!hotel) continue;
-      if (!isSameCountry(hotel.country, country)) continue;
-      if (!isSameCity(hotel.city, city)) continue;
 
-      const key = uniqueKey(hotel);
-      if (seen.has(key)) continue;
-      seen.add(key);
+      if (
+        key(hotel.country) !==
+        key(normalizeCountry(country))
+      ) {
+        continue;
+      }
+
+      if (
+        key(hotel.city) !==
+        key(normalizeCity(city))
+      ) {
+        continue;
+      }
+
+      const hotelTypeText = [
+        hotel.hotel_name,
+        hotel.area,
+        hotel.address
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      const isHotel =
+        hotelTypeText.includes("hotel");
+
+      const isOther =
+        hotelTypeText.includes("apartment") ||
+        hotelTypeText.includes("hostel") ||
+        hotelTypeText.includes("villa") ||
+        hotelTypeText.includes("suite") ||
+        hotelTypeText.includes("residence");
+
+      if (stay_type === "hotel" && !isHotel) {
+        continue;
+      }
+
+      if (stay_type === "other" && !isOther) {
+        continue;
+      }
+
+      const dedupe = [
+        key(hotel.hotel_name),
+        key(hotel.address),
+        key(hotel.city),
+        key(hotel.country)
+      ].join("|");
+
+      if (seen.has(dedupe)) {
+        continue;
+      }
+
+      seen.add(dedupe);
 
       results.push(hotel);
     } catch {}
@@ -241,120 +345,253 @@ async function searchCompressedHotels(country, city, limit) {
   return results;
 }
 
+function getLiveRate(hotel_id) {
+  const index = readJson(RATE_INDEX, {});
+
+  const rate = index[String(hotel_id)];
+
+  if (!rate) {
+    return null;
+  }
+
+  return {
+    amount: Number(rate.amount || 0),
+    currency: clean(rate.currency || "GBP"),
+    rate_key: clean(rate.rate_key || "")
+  };
+}
+
 app.get("/", (req, res) => {
-  res.json({ ok: true, service: "MySpace Hotel backend" });
+  res.json({
+    ok: true,
+    service: "MySpace Hotel backend"
+  });
 });
 
 app.get("/status", (req, res) => {
   const destinations = getDestinations();
-  const meta = readJson(HOTEL_META_FILE, { total_hotels: 0 });
+
+  const meta = readJson(
+    HOTEL_META,
+    { total_hotels: 0 }
+  );
 
   res.json({
     ok: true,
     service: "MySpace Hotel backend",
     hotels: Number(meta.total_hotels || 0),
     countries: destinations.length,
-    cities: destinations.reduce((sum, c) => sum + c.cities.length, 0),
+    cities: destinations.reduce(
+      (sum, c) => sum + c.cities.length,
+      0
+    ),
     stripe_ready: Boolean(stripe),
-    storage: fs.existsSync(HOTEL_GZ_FILE) ? "compressed_streaming" : "missing"
+    storage: fs.existsSync(HOTEL_FILE)
+      ? "compressed_streaming"
+      : "missing"
   });
 });
 
-app.get("/api/real-catalog/destinations", (req, res) => {
-  const countries = getDestinations();
-  res.json({ ok: true, total_countries: countries.length, countries });
-});
+app.get(
+  "/api/real-catalog/destinations",
+  (req, res) => {
+    const countries = getDestinations();
+
+    res.json({
+      ok: true,
+      total_countries: countries.length,
+      countries
+    });
+  }
+);
 
 app.get("/api/destinations", (req, res) => {
   const countries = getDestinations();
-  res.json({ ok: true, total_countries: countries.length, countries });
-});
-
-app.get("/api/hotels/search", async (req, res) => {
-  try {
-    const limit = Math.min(Number(req.query.limit || 100), 200);
-    const hotels = await searchCompressedHotels(req.query.country, req.query.city, limit);
-    res.json({ ok: true, total: hotels.length, hotels });
-  } catch (error) {
-    res.status(500).json({ ok: false, error: error.message || "Hotel search failed." });
-  }
-});
-
-app.post("/api/create-checkout-session", async (req, res) => {
-  try {
-    if (!stripe) {
-      return res.status(500).json({ ok: false, error: "Stripe is not configured." });
-    }
-
-    const body = req.body || {};
-    const amount = Math.max(50, Math.round(Number(body.amount || 0) * 100));
-    const currency = String(body.currency || "GBP").toLowerCase();
-
-    const successUrl =
-      process.env.STRIPE_SUCCESS_URL ||
-      "https://www.myspace-hotel.com/?payment=success";
-
-    const cancelUrl =
-      process.env.STRIPE_CANCEL_URL ||
-      "https://www.myspace-hotel.com/?payment=cancelled";
-
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      customer_email: body.customer_email || undefined,
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency,
-            unit_amount: amount,
-            product_data: {
-              name: body.hotel_name || "MySpace Hotel reservation",
-              description: `${body.destination || "Hotel stay"} | ${body.checkin || ""} to ${body.checkout || ""}`
-            }
-          }
-        }
-      ]
-    });
-
-    res.json({ ok: true, url: session.url });
-  } catch (error) {
-    res.status(500).json({ ok: false, error: error.message || "Checkout could not be created." });
-  }
-});
-
-app.post("/api/extranet/register", (req, res) => {
-  const body = req.body || {};
-  const file = path.join(BACKEND_DATA, "partner_applications.json");
-
-  try {
-    if (!fs.existsSync(BACKEND_DATA)) fs.mkdirSync(BACKEND_DATA, { recursive: true });
-    const old = readJson(file, []);
-    old.push({ id: `partner-${Date.now()}`, created_at: new Date().toISOString(), ...body });
-    fs.writeFileSync(file, JSON.stringify(old, null, 2));
-  } catch {}
 
   res.json({
     ok: true,
-    message: "Partner application received.",
-    partner_type: body.partner_type || "partner",
-    business_name: body.business_name || body.hotel_name || "",
-    email: body.email || ""
+    total_countries: countries.length,
+    countries
   });
 });
 
-app.post("/api/auth/login", (req, res) => {
-  res.status(401).json({ ok: false, error: "Partner login requires an approved token." });
-});
+app.get(
+  "/api/hotels/search",
+  async (req, res) => {
+    try {
+      const hotels =
+        await searchHotels({
+          country: req.query.country,
+          city: req.query.city,
+          stay_type:
+            req.query.stay_type ||
+            "both",
+          limit: Math.min(
+            Number(req.query.limit || 100),
+            200
+          )
+        });
+
+      res.json({
+        ok: true,
+        total: hotels.length,
+        hotels
+      });
+    } catch (error) {
+      res.status(500).json({
+        ok: false,
+        error:
+          error.message ||
+          "Hotel search failed."
+      });
+    }
+  }
+);
+
+app.get(
+  "/api/hotels/live-rate",
+  (req, res) => {
+    try {
+      const hotel_id = clean(
+        req.query.hotel_id
+      );
+
+      if (!hotel_id) {
+        return res.status(400).json({
+          ok: false,
+          error: "hotel_id required"
+        });
+      }
+
+      const rate =
+        getLiveRate(hotel_id);
+
+      if (!rate) {
+        return res.json({
+          ok: false,
+          live_available: false,
+          message:
+            "Live rate currently unavailable. Request confirmation."
+        });
+      }
+
+      res.json({
+        ok: true,
+        live_available: true,
+        hotel_id,
+        rate
+      });
+    } catch (error) {
+      res.status(500).json({
+        ok: false,
+        error:
+          error.message ||
+          "Live rate lookup failed."
+      });
+    }
+  }
+);
+
+app.post(
+  "/api/create-checkout-session",
+  async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({
+          ok: false,
+          error:
+            "Stripe is not configured."
+        });
+      }
+
+      const body = req.body || {};
+
+      const amount = Math.max(
+        50,
+        Math.round(
+          Number(body.amount || 0) *
+            100
+        )
+      );
+
+      const currency = String(
+        body.currency || "GBP"
+      ).toLowerCase();
+
+      const session =
+        await stripe.checkout.sessions.create({
+          mode: "payment",
+
+          success_url:
+            process.env
+              .STRIPE_SUCCESS_URL ||
+            "https://www.myspace-hotel.com/?payment=success",
+
+          cancel_url:
+            process.env
+              .STRIPE_CANCEL_URL ||
+            "https://www.myspace-hotel.com/?payment=cancelled",
+
+          line_items: [
+            {
+              quantity: 1,
+              price_data: {
+                currency,
+                unit_amount: amount,
+                product_data: {
+                  name:
+                    body.hotel_name ||
+                    "MySpace Hotel reservation"
+                }
+              }
+            }
+          ]
+        });
+
+      res.json({
+        ok: true,
+        url: session.url
+      });
+    } catch (error) {
+      res.status(500).json({
+        ok: false,
+        error:
+          error.message ||
+          "Checkout failed."
+      });
+    }
+  }
+);
 
 app.listen(PORT, "0.0.0.0", () => {
-  const destinations = getDestinations();
-  const meta = readJson(HOTEL_META_FILE, { total_hotels: 0 });
+  const destinations =
+    getDestinations();
 
-  console.log(`MySpace Hotel backend running on port ${PORT}`);
-  console.log(`Hotels: ${meta.total_hotels || 0}`);
-  console.log(`Countries: ${destinations.length}`);
-  console.log(`Cities: ${destinations.reduce((sum, c) => sum + c.cities.length, 0)}`);
-  console.log(`Stripe ready: ${Boolean(stripe)}`);
+  const meta = readJson(
+    HOTEL_META,
+    { total_hotels: 0 }
+  );
+
+  console.log(
+    `MySpace Hotel backend running on port ${PORT}`
+  );
+
+  console.log(
+    `Hotels: ${meta.total_hotels || 0}`
+  );
+
+  console.log(
+    `Countries: ${destinations.length}`
+  );
+
+  console.log(
+    `Cities: ${destinations.reduce(
+      (sum, c) => sum + c.cities.length,
+      0
+    )}`
+  );
+
+  console.log(
+    `Stripe ready: ${Boolean(stripe)}`
+  );
 });
