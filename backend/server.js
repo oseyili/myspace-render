@@ -27,32 +27,63 @@ const DESTINATION_FILE_PUBLIC = path.join(PUBLIC, "live-destinations.json");
 const HOTEL_GZ_FILE = path.join(BACKEND_DATA, "live-hotels.ndjson.gz");
 const HOTEL_META_FILE = path.join(BACKEND_DATA, "live-hotels-meta.json");
 
-const COUNTRY_ALIASES = {
-  "united kingdom": ["united kingdom", "uk", "gb", "gbr", "england"],
-  "united states": ["united states", "usa", "us", "america"],
-  france: ["france", "fr"],
-  spain: ["spain", "es"],
-  nigeria: ["nigeria", "ng"],
-  "united arab emirates": ["united arab emirates", "uae", "ae"]
+const COUNTRY_NAMES = {
+  gb: "United Kingdom",
+  gbr: "United Kingdom",
+  uk: "United Kingdom",
+  "united kingdom": "United Kingdom",
+  england: "United Kingdom",
+  us: "United States",
+  usa: "United States",
+  "united states": "United States",
+  fr: "France",
+  fra: "France",
+  france: "France",
+  es: "Spain",
+  esp: "Spain",
+  spain: "Spain",
+  ng: "Nigeria",
+  nga: "Nigeria",
+  nigeria: "Nigeria",
+  ae: "United Arab Emirates",
+  are: "United Arab Emirates",
+  uae: "United Arab Emirates",
+  "united arab emirates": "United Arab Emirates"
 };
 
-const CITY_ALIASES = {
-  london: ["london", "lon"],
-  paris: ["paris", "par"],
-  dubai: ["dubai", "dxb"],
-  "new york": ["new york", "nyc"],
-  barcelona: ["barcelona", "bcn"],
-  madrid: ["madrid", "mad"],
-  lagos: ["lagos", "los"],
-  abuja: ["abuja", "abv"],
-  "benin city": ["benin city", "bni"],
-  manchester: ["manchester", "man"],
-  birmingham: ["birmingham", "bhx"],
-  miami: ["miami", "mia"],
-  "los angeles": ["los angeles", "lax"],
-  nice: ["nice", "nce"],
-  lyon: ["lyon", "lys"],
-  "abu dhabi": ["abu dhabi", "auh"]
+const CITY_NAMES = {
+  lon: "London",
+  london: "London",
+  par: "Paris",
+  paris: "Paris",
+  dxb: "Dubai",
+  dubai: "Dubai",
+  nyc: "New York",
+  "new york": "New York",
+  bcn: "Barcelona",
+  barcelona: "Barcelona",
+  mad: "Madrid",
+  madrid: "Madrid",
+  los: "Lagos",
+  lagos: "Lagos",
+  abv: "Abuja",
+  abuja: "Abuja",
+  bni: "Benin City",
+  "benin city": "Benin City",
+  man: "Manchester",
+  manchester: "Manchester",
+  bhx: "Birmingham",
+  birmingham: "Birmingham",
+  mia: "Miami",
+  miami: "Miami",
+  lax: "Los Angeles",
+  "los angeles": "Los Angeles",
+  nce: "Nice",
+  nice: "Nice",
+  lys: "Lyon",
+  lyon: "Lyon",
+  auh: "Abu Dhabi",
+  "abu dhabi": "Abu Dhabi"
 };
 
 function cleanText(value) {
@@ -66,22 +97,14 @@ function keyText(value) {
   return cleanText(value).toLowerCase();
 }
 
-function aliasesFor(value, aliasMap) {
+function normalizeCountry(value) {
   const key = keyText(value);
-  const set = new Set([key]);
+  return COUNTRY_NAMES[key] || cleanText(value);
+}
 
-  if (aliasMap[key]) {
-    aliasMap[key].forEach((x) => set.add(x));
-  }
-
-  for (const [name, aliases] of Object.entries(aliasMap)) {
-    if (aliases.includes(key)) {
-      set.add(name);
-      aliases.forEach((x) => set.add(x));
-    }
-  }
-
-  return set;
+function normalizeCity(value) {
+  const key = keyText(value);
+  return CITY_NAMES[key] || cleanText(value);
 }
 
 function readJson(filePath, fallback) {
@@ -109,8 +132,8 @@ function normalizeHotel(h, index) {
     `hotel-${index}`;
 
   const hotel_name = cleanText(pick(h, ["hotel_name", "name", "hotelName", "title"]));
-  const country = cleanText(pick(h, ["country", "country_name", "countryName", "country_code", "countryCode"]));
-  const city = cleanText(pick(h, ["city", "city_name", "cityName", "destination", "destination_name", "destinationName"]));
+  const country = normalizeCountry(pick(h, ["country", "country_name", "countryName", "country_code", "countryCode"]));
+  const city = normalizeCity(pick(h, ["city", "city_name", "cityName", "destination", "destination_name", "destinationName"]));
 
   if (!hotel_name || !country || !city) return null;
 
@@ -162,38 +185,28 @@ function getDestinations() {
     .sort((a, b) => a.country.localeCompare(b.country));
 }
 
-function countryMatches(hotelCountry, wantedCountryAliases) {
-  const hc = keyText(hotelCountry);
-  if (!hc) return false;
-  if (wantedCountryAliases.has(hc)) return true;
-
-  for (const alias of wantedCountryAliases) {
-    if (alias && (hc.includes(alias) || alias.includes(hc))) return true;
-  }
-
-  return false;
+function isSameCountry(hotelCountry, requestedCountry) {
+  return keyText(normalizeCountry(hotelCountry)) === keyText(normalizeCountry(requestedCountry));
 }
 
-function cityMatches(hotelCity, wantedCityAliases) {
-  const hcity = keyText(hotelCity);
-  if (!hcity) return false;
-  if (wantedCityAliases.has(hcity)) return true;
+function isSameCity(hotelCity, requestedCity) {
+  return keyText(normalizeCity(hotelCity)) === keyText(normalizeCity(requestedCity));
+}
 
-  for (const alias of wantedCityAliases) {
-    if (alias && (hcity.includes(alias) || alias.includes(hcity))) return true;
-  }
-
-  return false;
+function uniqueKey(hotel) {
+  return [
+    keyText(hotel.hotel_name),
+    keyText(hotel.address),
+    keyText(hotel.city),
+    keyText(hotel.country)
+  ].join("|");
 }
 
 async function searchCompressedHotels(country, city, limit) {
-  const exact = [];
-  const countryOnly = [];
+  const results = [];
+  const seen = new Set();
 
-  const wantedCountryAliases = aliasesFor(country, COUNTRY_ALIASES);
-  const wantedCityAliases = aliasesFor(city, CITY_ALIASES);
-
-  if (!fs.existsSync(HOTEL_GZ_FILE)) return [];
+  if (!fs.existsSync(HOTEL_GZ_FILE)) return results;
 
   const stream = fs.createReadStream(HOTEL_GZ_FILE).pipe(zlib.createGunzip());
   const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
@@ -201,7 +214,7 @@ async function searchCompressedHotels(country, city, limit) {
   let index = 0;
 
   for await (const line of rl) {
-    if (exact.length >= limit) {
+    if (results.length >= limit) {
       rl.close();
       stream.destroy();
       break;
@@ -212,22 +225,20 @@ async function searchCompressedHotels(country, city, limit) {
     try {
       const hotel = normalizeHotel(JSON.parse(line), index);
       index += 1;
+
       if (!hotel) continue;
+      if (!isSameCountry(hotel.country, country)) continue;
+      if (!isSameCity(hotel.city, city)) continue;
 
-      const cMatch = !country || countryMatches(hotel.country, wantedCountryAliases);
-      if (!cMatch) continue;
+      const key = uniqueKey(hotel);
+      if (seen.has(key)) continue;
+      seen.add(key);
 
-      const cityMatch = !city || cityMatches(hotel.city, wantedCityAliases);
-
-      if (cityMatch) {
-        exact.push(hotel);
-      } else if (countryOnly.length < limit) {
-        countryOnly.push(hotel);
-      }
+      results.push(hotel);
     } catch {}
   }
 
-  return exact.length ? exact : countryOnly;
+  return results;
 }
 
 app.get("/", (req, res) => {
