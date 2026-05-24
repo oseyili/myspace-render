@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
 const readline = require("readline");
+const crypto = require("crypto");
 
 let stripe = null;
 try {
@@ -27,13 +28,19 @@ const DEST_PUBLIC = path.join(PUBLIC, "live-destinations.json");
 const HOTELS_GZ = path.join(DATA, "live-hotels.ndjson.gz");
 const HOTELS_META = path.join(DATA, "live-hotels-meta.json");
 
-const RATE_FILES = [
-  path.join(DATA, "REAL_ONLY_live_rates.json.gz"),
-  path.join(DATA, "live-rates-000001.ndjson.gz"),
-  path.join(DATA, "live-rates-000002.ndjson.gz"),
-  path.join(DATA, "live-rate-cache", "live-rates-000001.ndjson.gz"),
-  path.join(DATA, "live-rate-cache", "live-rates-000002.ndjson.gz")
-];
+const HOTELBEDS_API_KEY =
+  process.env.HOTELBEDS_API_KEY ||
+  process.env.HOTELBEDS_KEY ||
+  "";
+
+const HOTELBEDS_SECRET =
+  process.env.HOTELBEDS_SECRET ||
+  process.env.HOTELBEDS_API_SECRET ||
+  "";
+
+const HOTELBEDS_BASE_URL =
+  process.env.HOTELBEDS_BASE_URL ||
+  "https://api.hotelbeds.com";
 
 function clean(v) {
   return String(v || "").replace(/\s+/g, " ").trim();
@@ -103,9 +110,23 @@ function normalizeHotel(h, index) {
     clean(pick(h, ["hotel_id", "hotelId", "id", "code", "hotelCode", "supplier_hotel_id"])) ||
     `hotel-${index}`;
 
+  const hotel_code =
+    clean(pick(h, ["hotel_code", "hotelCode", "code", "supplier_hotel_id", "hotel_id", "id"])) ||
+    hotel_id;
+
+  const supplier =
+    clean(pick(h, ["supplier", "source", "provider"])) ||
+    "hotelbeds";
+
   const hotel_name = clean(pick(h, ["hotel_name", "hotelName", "name", "title"]));
-  const country = normalizeCountry(pick(h, ["country", "country_name", "countryName", "country_code", "countryCode"]));
-  const city = normalizeCity(pick(h, ["city", "city_name", "cityName", "destination", "destination_name", "destinationName"]));
+
+  const country = normalizeCountry(
+    pick(h, ["country", "country_name", "countryName", "country_code", "countryCode"])
+  );
+
+  const city = normalizeCity(
+    pick(h, ["city", "city_name", "cityName", "destination", "destination_name", "destinationName"])
+  );
 
   if (!hotel_name || !country || !city) return null;
 
@@ -114,6 +135,8 @@ function normalizeHotel(h, index) {
   return {
     id: hotel_id,
     hotel_id,
+    hotel_code,
+    supplier,
     hotel_name,
     name: hotel_name,
     country,
@@ -139,7 +162,9 @@ function getDestinations() {
       country: clean(c.country || c.country_name || c.name),
       cities: Array.isArray(c.cities)
         ? c.cities
-            .map((x) => ({ city: clean(typeof x === "string" ? x : x.city || x.city_name || x.name) }))
+            .map((x) => ({
+              city: clean(typeof x === "string" ? x : x.city || x.city_name || x.name)
+            }))
             .filter((x) => x.city)
         : []
     }))
@@ -213,110 +238,171 @@ async function searchHotels({ country, city, stay_type, limit }) {
   return results;
 }
 
-function rows(payload) {
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload.hotels)) return payload.hotels;
-  if (Array.isArray(payload.rates)) return payload.rates;
-  if (Array.isArray(payload.data)) return payload.data;
-  if (Array.isArray(payload.results)) return payload.results;
-  return [];
+async function findHotelById(hotelId) {
+  if (!fs.existsSync(HOTELS_GZ)) return null;
+
+  const wanted = clean(hotelId);
+  const stream = fs.createReadStream(HOTELS_GZ).pipe(zlib.createGunzip());
+  const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
+
+  let index = 0;
+
+  for await (const line of rl) {
+    if (!line.trim()) continue;
+
+    try {
+      const hotel = normalizeHotel(JSON.parse(line), index);
+      index += 1;
+
+      if (!hotel) continue;
+
+      if (
+        clean(hotel.hotel_id) === wanted ||
+        clean(hotel.id) === wanted ||
+        clean(hotel.hotel_code) === wanted
+      ) {
+        rl.close();
+        stream.destroy();
+        return hotel;
+      }
+    } catch {}
+  }
+
+  return null;
 }
 
-function hotelId(row) {
-  return clean(pick(row, ["hotel_id", "hotelId", "id", "code", "hotelCode", "supplier_hotel_id"]));
+function hotelbedsSignature() {
+  const timestamp = Math.floor(Date.now() / 1000);
+  return crypto
+    .createHash("sha256")
+    .update(HOTELBEDS_API_KEY + HOTELBEDS_SECRET + timestamp)
+    .digest("hex");
 }
 
-function extractRate(row) {
-  const src = row.first_rate || row.rate || row;
+function hotelbedsReady() {
+  return Boolean(HOTELBEDS_API_KEY && HOTELBEDS_SECRET);
+}
 
-  const amount = Number(pick(src, ["amount", "price", "total", "net", "sellingRate", "rate"]));
-  if (!(amount > 0)) return null;
+function roomOccupancy(guests) {
+  const adults = Math.max(1, Number(guests || 2));
+  return [{ rooms: 1, adults, children: 0 }];
+}
 
-  return {
-    amount,
-    currency: clean(pick(src, ["currency", "currencyCode"])) || "GBP",
-    rate_key: clean(pick(src, ["rate_key", "rateKey", "key"])) || `LIVE-${Date.now()}`
+async function fetchHotelbedsLiveRate({ hotel, checkin, checkout, guests, rooms }) {
+  if (!hotelbedsReady()) {
+    return null;
+  }
+
+  const hotelCode = clean(hotel.hotel_code || hotel.hotel_id || hotel.id);
+  if (!hotelCode) return null;
+
+  const occupancy = roomOccupancy(guests);
+
+  const body = {
+    stay: {
+      checkIn: checkin,
+      checkOut: checkout
+    },
+    occupancies: occupancy,
+    hotels: {
+      hotel: [Number(hotelCode)]
+    }
   };
-}
 
-async function scanJsonGzForLiveRate(file, wantedHotelId) {
-  if (!fs.existsSync(file)) return null;
+  if (!Number.isFinite(Number(hotelCode))) {
+    return null;
+  }
 
-  try {
-    const text = zlib.gunzipSync(fs.readFileSync(file)).toString("utf8");
-    const list = rows(JSON.parse(text));
+  const response = await fetch(`${HOTELBEDS_BASE_URL}/hotel-api/1.0/hotels`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Api-key": HOTELBEDS_API_KEY,
+      "X-Signature": hotelbedsSignature(),
+      Accept: "application/json",
+      "Accept-Encoding": "gzip"
+    },
+    body: JSON.stringify(body)
+  });
 
-    let best = null;
+  if (!response.ok) {
+    return null;
+  }
 
-    for (const row of list) {
-      if (hotelId(row) !== wantedHotelId) continue;
+  const data = await response.json();
 
-      const rate = extractRate(row);
-      if (!rate) continue;
+  const hbHotel = data?.hotels?.hotels?.[0];
+  const roomsList = Array.isArray(hbHotel?.rooms) ? hbHotel.rooms : [];
 
-      if (!best || rate.amount < best.amount) {
-        best = rate;
+  let best = null;
+
+  for (const room of roomsList) {
+    const rates = Array.isArray(room.rates) ? room.rates : [];
+
+    for (const rate of rates) {
+      const amount = Number(rate.net || rate.sellingRate || rate.amount || 0);
+      if (!(amount > 0)) continue;
+
+      const candidate = {
+        amount,
+        currency: clean(rate.currency || data?.hotels?.currency || "GBP"),
+        rate_key: clean(rate.rateKey || rate.rate_key || ""),
+        supplier: "hotelbeds",
+        source: "hotelbeds_live_availability",
+        room_name: clean(room.name || room.code || ""),
+        board_name: clean(rate.boardName || rate.boardCode || ""),
+        cancellation: rate.cancellationPolicies || []
+      };
+
+      if (candidate.rate_key && (!best || candidate.amount < best.amount)) {
+        best = candidate;
       }
     }
-
-    return best;
-  } catch {
-    return null;
-  }
-}
-
-async function scanNdjsonGzForLiveRate(file, wantedHotelId) {
-  if (!fs.existsSync(file)) return null;
-
-  let best = null;
-
-  try {
-    const stream = fs.createReadStream(file).pipe(zlib.createGunzip());
-    const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
-
-    for await (const line of rl) {
-      if (!line.trim()) continue;
-
-      try {
-        const row = JSON.parse(line);
-        if (hotelId(row) !== wantedHotelId) continue;
-
-        const rate = extractRate(row);
-        if (!rate) continue;
-
-        if (!best || rate.amount < best.amount) {
-          best = rate;
-        }
-      } catch {}
-    }
-  } catch {
-    return null;
   }
 
   return best;
 }
 
-async function findLiveRate(hotel_id) {
-  const wanted = clean(hotel_id);
-  if (!wanted) return null;
+async function fetchPartnerLiveRate(payload) {
+  const hotel = await findHotelById(payload.hotel_id);
 
-  let best = null;
-
-  for (const file of RATE_FILES) {
-    let rate = null;
-
-    if (file.toLowerCase().endsWith(".ndjson.gz")) {
-      rate = await scanNdjsonGzForLiveRate(file, wanted);
-    } else {
-      rate = await scanJsonGzForLiveRate(file, wanted);
-    }
-
-    if (rate && (!best || rate.amount < best.amount)) {
-      best = rate;
-    }
+  if (!hotel) {
+    return {
+      ok: false,
+      live_available: false,
+      message: "Selected stay was not found in the searchable catalogue."
+    };
   }
 
-  return best;
+  const suppliersTried = [];
+
+  suppliersTried.push("hotelbeds");
+
+  const hotelbedsRate = await fetchHotelbedsLiveRate({
+    hotel,
+    checkin: payload.checkin,
+    checkout: payload.checkout,
+    guests: payload.guests,
+    rooms: payload.rooms
+  });
+
+  if (hotelbedsRate) {
+    return {
+      ok: true,
+      live_available: true,
+      hotel,
+      rate: hotelbedsRate,
+      suppliers_tried: suppliersTried
+    };
+  }
+
+  return {
+    ok: false,
+    live_available: false,
+    hotel,
+    suppliers_tried: suppliersTried,
+    message: "No connected supplier returned a live rate for this selected stay."
+  };
 }
 
 app.get("/", (req, res) => {
@@ -334,8 +420,9 @@ app.get("/status", (req, res) => {
     countries: destinations.length,
     cities: destinations.reduce((sum, c) => sum + c.cities.length, 0),
     stripe_ready: Boolean(stripe),
+    hotelbeds_ready: hotelbedsReady(),
     storage: fs.existsSync(HOTELS_GZ) ? "compressed_streaming" : "missing",
-    live_rate_mode: "selected_hotel_only_no_fallback_price"
+    live_rate_mode: "selected_hotel_live_supplier_search_no_fallback_price"
   });
 });
 
@@ -366,30 +453,21 @@ app.get("/api/hotels/search", async (req, res) => {
 
 app.get("/api/hotels/live-rate", async (req, res) => {
   try {
-    const hotel_id = clean(req.query.hotel_id);
-
-    if (!hotel_id) {
-      return res.status(400).json({ ok: false, error: "hotel_id required" });
-    }
-
-    const rate = await findLiveRate(hotel_id);
-
-    if (!rate || !(Number(rate.amount) > 0)) {
-      return res.json({
-        ok: false,
-        live_available: false,
-        message: "Live price is not currently available for this selected stay."
-      });
-    }
-
-    res.json({
-      ok: true,
-      live_available: true,
-      hotel_id,
-      rate
+    const result = await fetchPartnerLiveRate({
+      hotel_id: req.query.hotel_id,
+      checkin: req.query.checkin,
+      checkout: req.query.checkout,
+      guests: req.query.guests,
+      rooms: req.query.rooms
     });
+
+    res.json(result);
   } catch (error) {
-    res.status(500).json({ ok: false, error: error.message || "Live rate lookup failed." });
+    res.status(500).json({
+      ok: false,
+      live_available: false,
+      error: error.message || "Live supplier rate lookup failed."
+    });
   }
 });
 
@@ -406,7 +484,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
     if (!(amountValue > 0) || !rateKey) {
       return res.status(400).json({
         ok: false,
-        error: "Checkout blocked. A real live price is required before payment."
+        error: "Checkout blocked. A real supplier live rate is required before payment."
       });
     }
 
@@ -434,7 +512,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
       metadata: {
         hotel_id: String(body.hotel_id || ""),
         rate_key: String(rateKey).slice(0, 450),
-        source: "selected_live_rate_only"
+        source: "selected_supplier_live_rate_only"
       }
     });
 
@@ -477,4 +555,5 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`Countries: ${destinations.length}`);
   console.log(`Cities: ${destinations.reduce((sum, c) => sum + c.cities.length, 0)}`);
   console.log(`Stripe ready: ${Boolean(stripe)}`);
+  console.log(`Hotelbeds ready: ${hotelbedsReady()}`);
 });
