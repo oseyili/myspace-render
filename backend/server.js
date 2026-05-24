@@ -1,4 +1,9 @@
-﻿const express = require("express");
+﻿# PROJECT ROOT — Windows PowerShell
+
+cd C:\frontend\hotel-booking-app
+
+@'
+const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
@@ -27,11 +32,52 @@ const DESTINATION_FILE_PUBLIC = path.join(PUBLIC, "live-destinations.json");
 const HOTEL_GZ_FILE = path.join(BACKEND_DATA, "live-hotels.ndjson.gz");
 const HOTEL_META_FILE = path.join(BACKEND_DATA, "live-hotels-meta.json");
 
+const CITY_ALIASES = {
+  london: ["london", "lon"],
+  paris: ["paris", "par"],
+  dubai: ["dubai", "dxb"],
+  "new york": ["new york", "nyc"],
+  barcelona: ["barcelona", "bcn"],
+  madrid: ["madrid", "mad"],
+  lagos: ["lagos", "los"],
+  abuja: ["abuja", "abv"],
+  "benin city": ["benin city", "bni"],
+  manchester: ["manchester", "man"],
+  birmingham: ["birmingham", "bhx"],
+  miami: ["miami", "mia"],
+  "los angeles": ["los angeles", "lax"],
+  nice: ["nice", "nce"],
+  lyon: ["lyon", "lys"],
+  "abu dhabi": ["abu dhabi", "auh"]
+};
+
 function cleanText(value) {
   return String(value || "")
     .replace(/\s*\(\s*\d+\s*\)\s*$/g, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function keyText(value) {
+  return cleanText(value).toLowerCase();
+}
+
+function aliasesForCity(city) {
+  const key = keyText(city);
+  const set = new Set([key]);
+
+  if (CITY_ALIASES[key]) {
+    for (const alias of CITY_ALIASES[key]) set.add(alias);
+  }
+
+  for (const [name, aliases] of Object.entries(CITY_ALIASES)) {
+    if (aliases.includes(key)) {
+      set.add(name);
+      for (const alias of aliases) set.add(alias);
+    }
+  }
+
+  return set;
 }
 
 function readJson(filePath, fallback) {
@@ -118,14 +164,12 @@ function getDestinations() {
 
 async function searchCompressedHotels(country, city, limit) {
   const results = [];
-  const wantedCountry = cleanText(country).toLowerCase();
-  const wantedCity = cleanText(city).toLowerCase();
+  const wantedCountry = keyText(country);
+  const wantedCityAliases = aliasesForCity(city);
 
   if (!fs.existsSync(HOTEL_GZ_FILE)) return results;
 
-  const stream = fs
-    .createReadStream(HOTEL_GZ_FILE)
-    .pipe(zlib.createGunzip());
+  const stream = fs.createReadStream(HOTEL_GZ_FILE).pipe(zlib.createGunzip());
 
   const rl = readline.createInterface({
     input: stream,
@@ -149,11 +193,22 @@ async function searchCompressedHotels(country, city, limit) {
 
       if (!hotel) continue;
 
-      const hc = cleanText(hotel.country).toLowerCase();
-      const hcity = cleanText(hotel.city).toLowerCase();
+      const hc = keyText(hotel.country);
+      const hcity = keyText(hotel.city);
 
-      if (wantedCountry && hc !== wantedCountry) continue;
-      if (wantedCity && hcity !== wantedCity) continue;
+      const countryMatch =
+        !wantedCountry ||
+        hc === wantedCountry ||
+        hc.includes(wantedCountry) ||
+        wantedCountry.includes(hc);
+
+      const cityMatch =
+        !city ||
+        wantedCityAliases.has(hcity) ||
+        hcity.includes(keyText(city)) ||
+        keyText(city).includes(hcity);
+
+      if (!countryMatch || !cityMatch) continue;
 
       results.push(hotel);
     } catch {}
@@ -321,3 +376,10 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`Cities: ${destinations.reduce((sum, c) => sum + c.cities.length, 0)}`);
   console.log(`Stripe ready: ${Boolean(stripe)}`);
 });
+'@ | Set-Content -Encoding UTF8 .\backend\server.js
+
+git add backend/server.js
+
+git commit -m "Match hotel search city names and codes"
+
+git push origin main
