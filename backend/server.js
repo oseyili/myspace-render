@@ -39,6 +39,11 @@ const META_FILE = path.join(
   "live-hotels-meta.json"
 );
 
+const LIVE_RATE_INDEX = path.join(
+  DATA_DIR,
+  "live-rate-index.json"
+);
+
 const HOTELBEDS_API_KEY =
   process.env.HOTELBEDS_API_KEY ||
   process.env.HOTELBEDS_KEY ||
@@ -81,11 +86,10 @@ function normalizeCountry(v) {
   const map = {
     uk: "United Kingdom",
     gb: "United Kingdom",
-    gbr: "United Kingdom",
-    us: "United States",
     usa: "United States",
-    ae: "United Arab Emirates",
-    uae: "United Arab Emirates"
+    us: "United States",
+    uae: "United Arab Emirates",
+    ae: "United Arab Emirates"
   };
 
   return map[key(v)] || clean(v);
@@ -95,8 +99,8 @@ function normalizeCity(v) {
   const map = {
     lon: "London",
     nyc: "New York",
-    dxb: "Dubai",
     par: "Paris",
+    dxb: "Dubai",
     los: "Lagos",
     abv: "Abuja",
     bni: "Benin City"
@@ -119,8 +123,8 @@ function hotelStayType(name) {
     "home",
     "residence",
     "hostel",
-    "farmhouse",
-    "house"
+    "house",
+    "farmhouse"
   ];
 
   for (const word of otherWords) {
@@ -165,8 +169,7 @@ function normalizeHotel(row, index) {
   const country =
     normalizeCountry(
       row.country ||
-      row.country_name ||
-      row.countryCode
+      row.country_name
     );
 
   const city =
@@ -388,18 +391,64 @@ function hotelbedsSignature() {
   const timestamp =
     Math.floor(Date.now() / 1000);
 
-  return {
-    signature: crypto
-      .createHash("sha256")
-      .update(
-        HOTELBEDS_API_KEY +
-        HOTELBEDS_SECRET +
-        timestamp
-      )
-      .digest("hex"),
+  return crypto
+    .createHash("sha256")
+    .update(
+      HOTELBEDS_API_KEY +
+      HOTELBEDS_SECRET +
+      timestamp
+    )
+    .digest("hex");
+}
 
-    timestamp
-  };
+function getSavedRate(hotel) {
+  const index = safeJson(
+    LIVE_RATE_INDEX,
+    {}
+  );
+
+  const keys = [
+    hotel.hotelbeds_code,
+    hotel.hotel_id,
+    hotel.id
+  ];
+
+  for (const k of keys) {
+    if (
+      k &&
+      index[k] &&
+      Number(index[k].amount) > 0
+    ) {
+      return {
+        ok: true,
+
+        supplier:
+          "saved_live_database",
+
+        rate_status:
+          "saved_recent",
+
+        warning:
+          "This is a recently saved supplier rate and may not reflect the latest live supplier update.",
+
+        amount:
+          Number(index[k].amount),
+
+        currency:
+          index[k].currency ||
+          "GBP",
+
+        rate_key:
+          index[k].rate_key ||
+          "",
+
+        source:
+          "saved_live_rate_database"
+      };
+    }
+  }
+
+  return null;
 }
 
 async function searchHotelbeds({
@@ -425,14 +474,9 @@ async function searchHotelbeds({
     return {
       ok: false,
       reason:
-        "Invalid Hotelbeds hotel code",
-      hotelbeds_code:
-        hotel.hotelbeds_code
+        "Invalid Hotelbeds hotel code"
     };
   }
-
-  const sig =
-    hotelbedsSignature();
 
   const body = {
     stay: {
@@ -468,7 +512,7 @@ async function searchHotelbeds({
             HOTELBEDS_API_KEY,
 
           "X-Signature":
-            sig.signature,
+            hotelbedsSignature(),
 
           Accept:
             "application/json",
@@ -490,11 +534,6 @@ async function searchHotelbeds({
       json = JSON.parse(text);
     } catch {}
 
-    console.log(
-      "HOTELBEDS STATUS:",
-      response.status
-    );
-
     if (!response.ok) {
       return {
         ok: false,
@@ -506,7 +545,7 @@ async function searchHotelbeds({
           response.status,
 
         body:
-          text.slice(0, 1500)
+          text.slice(0, 1000)
       };
     }
 
@@ -516,12 +555,8 @@ async function searchHotelbeds({
     if (!hbHotel) {
       return {
         ok: false,
-
         reason:
-          "No hotel returned",
-
-        body:
-          text.slice(0, 1500)
+          "No hotel returned"
       };
     }
 
@@ -573,18 +608,22 @@ async function searchHotelbeds({
     if (!best) {
       return {
         ok: false,
-
         reason:
-          "No live rates available",
-
-        hotel:
-          hbHotel.name || ""
+          "No live rates available"
       };
     }
 
     return {
       ok: true,
-      supplier: "hotelbeds",
+
+      supplier:
+        "hotelbeds",
+
+      rate_status:
+        "fresh_live",
+
+      warning: "",
+
       live_rate: best
     };
   } catch (error) {
@@ -641,8 +680,13 @@ app.get("/status", (req, res) => {
     hotelbeds_ready:
       hotelbedsReady(),
 
+    fallback_saved_rates:
+      fs.existsSync(
+        LIVE_RATE_INDEX
+      ),
+
     live_rate_engine:
-      "hotelbeds_live_supplier"
+      "fresh_live_then_saved_fallback"
   });
 });
 
@@ -724,7 +768,7 @@ app.get(
         });
       }
 
-      const result =
+      const fresh =
         await searchHotelbeds({
           hotel,
 
@@ -741,71 +785,63 @@ app.get(
             req.query.rooms
         });
 
-      return res.json({
-        ok: result.ok,
-
-        hotel,
-
-        result
-      });
-    } catch (error) {
-      res.status(500).json({
-        ok: false,
-        error:
-          error.message
-      });
-    }
-  }
-);
-
-app.get(
-  "/api/hotels/live-rate-debug",
-  async (req, res) => {
-    try {
-      const hotel =
-        await findHotel(
-          req.query.hotel_id
-        );
-
-      if (!hotel) {
+      if (fresh.ok) {
         return res.json({
-          ok: false,
-          reason:
-            "Hotel not found"
+          ok: true,
+
+          hotel,
+
+          supplier:
+            "hotelbeds",
+
+          rate_status:
+            "fresh_live",
+
+          warning: "",
+
+          result:
+            fresh.live_rate
         });
       }
 
-      const result =
-        await searchHotelbeds({
+      const saved =
+        getSavedRate(hotel);
+
+      if (saved) {
+        return res.json({
+          ok: true,
+
           hotel,
 
-          checkin:
-            req.query.checkin,
+          supplier:
+            "saved_live_database",
 
-          checkout:
-            req.query.checkout,
+          rate_status:
+            "saved_recent",
 
-          guests:
-            req.query.guests,
+          warning:
+            saved.warning,
 
-          rooms:
-            req.query.rooms
+          result: saved,
+
+          live_supplier_failure:
+            fresh
         });
+      }
 
-      res.json({
-        ok: true,
+      return res.json({
+        ok: false,
 
-        checked_supplier:
-          "hotelbeds",
+        hotel,
 
-        hotel_name:
-          hotel.hotel_name,
+        rate_status:
+          "unavailable",
 
-        hotelbeds_code:
-          hotel.hotelbeds_code,
+        live_supplier_failure:
+          fresh,
 
-        supplier_result:
-          result
+        message:
+          "No supplier rate available."
       });
     } catch (error) {
       res.status(500).json({
@@ -839,15 +875,7 @@ app.post(
         return res.status(400).json({
           ok: false,
           error:
-            "Real supplier live rate required"
-        });
-      }
-
-      if (!body.rate_key) {
-        return res.status(400).json({
-          ok: false,
-          error:
-            "Missing live supplier rate key"
+            "Real supplier or saved rate required."
         });
       }
 
@@ -884,15 +912,7 @@ app.post(
                   }
                 }
               }
-            ],
-
-            metadata: {
-              hotel_id:
-                body.hotel_id,
-
-              rate_key:
-                body.rate_key
-            }
+            ]
           }
         );
 
@@ -929,6 +949,13 @@ app.listen(
     console.log(
       "Hotelbeds Ready:",
       hotelbedsReady()
+    );
+
+    console.log(
+      "Saved Rate Index:",
+      fs.existsSync(
+        LIVE_RATE_INDEX
+      )
     );
 
     console.log(
