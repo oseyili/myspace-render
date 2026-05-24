@@ -1,7 +1,11 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+cd C:\frontend\hotel-booking-app\frontend
 
-const API_BASE =
+@'
+import React, { useEffect, useMemo, useState } from "react";
+
+const API =
   import.meta.env.VITE_API_BASE ||
+  import.meta.env.VITE_API_BASE_URL ||
   "https://myspace-hotel-backend.onrender.com";
 
 function todayISO() {
@@ -17,12 +21,16 @@ function money(v) {
   return Number.isFinite(n) ? n.toFixed(2) : "0.00";
 }
 
-function clean(v) {
-  return String(v || "").trim();
+function nightsBetween(a, b) {
+  const start = new Date(a);
+  const end = new Date(b);
+  const diff = Math.ceil((end - start) / 86400000);
+  return diff > 0 ? diff : 1;
 }
 
 export default function App() {
-  const [page, setPage] = useState("home");
+  const [view, setView] = useState("home");
+  const [status, setStatus] = useState(null);
   const [destinations, setDestinations] = useState([]);
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
@@ -30,1036 +38,1001 @@ export default function App() {
   const [checkout, setCheckout] = useState(tomorrowISO());
   const [guests, setGuests] = useState(2);
   const [rooms, setRooms] = useState(1);
-  const [stayType, setStayType] = useState("hotel");
   const [hotels, setHotels] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [selectedHotel, setSelectedHotel] = useState(null);
-  const [liveRate, setLiveRate] = useState(null);
-  const [liveLoading, setLiveLoading] = useState(false);
-  const [notice, setNotice] = useState("");
-  const [partnerSent, setPartnerSent] = useState(false);
-  const [loginNotice, setLoginNotice] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    loadDestinations();
-  }, []);
+  const [reservation, setReservation] = useState({
+    customer_name: "",
+    customer_email: "",
+    customer_phone: "",
+    note: ""
+  });
+
+  const [partnerId, setPartnerId] = useState("oracle-ohip");
+  const [partnerToken, setPartnerToken] = useState("");
+  const [partnerJwt, setPartnerJwt] = useState("");
+  const [partnerDashboard, setPartnerDashboard] = useState(null);
+  const [syncStatus, setSyncStatus] = useState(null);
+
+  const [hotelRegister, setHotelRegister] = useState({
+    hotel_name: "",
+    contact_name: "",
+    email: "",
+    phone: "",
+    country: "",
+    city: "",
+    pms_provider: "oracle-ohip"
+  });
+
+  const [hotelOnboarded, setHotelOnboarded] = useState(null);
+
+  const selectedCountry = useMemo(
+    () => destinations.find((x) => x.country === country),
+    [destinations, country]
+  );
+
+  const nights = nightsBetween(checkin, checkout);
+  const selectedRate = selectedHotel?.first_rate || null;
+  const total = selectedRate ? Number(selectedRate.amount || 0) * Number(rooms || 1) * nights : 0;
+
+  async function loadStatus() {
+    try {
+      const r = await fetch(`${API}/status`, { cache: "no-store" });
+      const j = await r.json();
+      setStatus(j);
+    } catch {}
+  }
 
   async function loadDestinations() {
     try {
-      const res = await fetch(`${API_BASE}/api/destinations`);
-      const data = await res.json();
-
-      const countries = data?.countries || [];
-
-      const cleanCountries = countries
-        .filter((x) => clean(x.country))
-        .map((x) => ({
-          country: clean(x.country),
-          cities: Array.from(
-            new Set((x.cities || []).map((c) => clean(c)).filter(Boolean))
-          ).sort((a, b) => a.localeCompare(b))
-        }))
-        .filter((x) => x.cities.length > 0)
-        .sort((a, b) => a.country.localeCompare(b.country));
-
-      setDestinations(cleanCountries);
-    } catch (e) {
-      console.log(e);
-      setNotice("Destinations could not be loaded. Please refresh the page.");
-    }
+      const r = await fetch(`${API}/api/real-catalog/destinations`, {
+        cache: "no-store"
+      });
+      const j = await r.json();
+      setDestinations(j.countries || []);
+    } catch {}
   }
 
-  const cities = useMemo(() => {
-    return destinations.find((x) => x.country === country)?.cities || [];
-  }, [country, destinations]);
-
-  async function searchHotels() {
-    setNotice("");
-
-    if (!country || !city) {
-      setNotice("Please select a country and city first.");
+  async function searchHotels(customCountry = country, customCity = city) {
+    if (!customCountry || !customCity) {
+      alert("Choose a country and destination first.");
       return;
     }
 
     setLoading(true);
     setHotels([]);
     setSelectedHotel(null);
-    setLiveRate(null);
 
     try {
-      const params = new URLSearchParams({
-        country,
-        city,
-        stay_type: stayType,
-        limit: "80"
-      });
-
-      const res = await fetch(`${API_BASE}/api/hotels/search?${params}`);
-      const data = await res.json();
-
-      const found = data?.hotels || [];
-      setHotels(found);
-
-      if (!found.length) {
-        setNotice("No stays found for this search. Try another city or date.");
-      }
-    } catch (e) {
-      console.log(e);
-      setNotice("Hotel search failed. Please try again.");
-    }
-
-    setLoading(false);
-  }
-
-  async function selectHotel(hotel) {
-    setSelectedHotel(hotel);
-    setLiveRate(null);
-    setLiveLoading(true);
-
-    try {
-      const params = new URLSearchParams({
-        hotel_id: hotel.hotelbeds_code || hotel.hotel_id || hotel.id || hotel.code,
+      const q = new URLSearchParams({
+        country: customCountry,
+        city: customCity,
         checkin,
         checkout,
         guests: String(guests),
-        rooms: String(rooms)
+        rooms: String(rooms),
+        limit: "80"
       });
 
-      const res = await fetch(`${API_BASE}/api/hotels/live-rate?${params}`);
-      const data = await res.json();
-
-      setLiveRate(data);
-    } catch (e) {
-      console.log(e);
-      setLiveRate({
-        live_available: false,
-        customer_message: "Live pricing could not be loaded for this stay."
+      const r = await fetch(`${API}/api/hotels/search?${q.toString()}`, {
+        cache: "no-store"
       });
+      const j = await r.json();
+
+      setHotels(j.hotels || []);
+      setView("results");
+    } catch {
+      setHotels([]);
+      alert("Hotels could not be loaded. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function sendReservation() {
+    if (!selectedHotel) {
+      alert("Choose a hotel first.");
+      return;
     }
 
-    setLiveLoading(false);
+    const body = {
+      ...reservation,
+      hotel_id: selectedHotel.hotel_id,
+      hotel_name: selectedHotel.hotel_name || selectedHotel.name,
+      destination: `${city}, ${country}`,
+      checkin,
+      checkout,
+      guests,
+      rooms,
+      rate_key: selectedRate?.rate_key || "",
+      amount: total,
+      currency: selectedRate?.currency || "GBP"
+    };
+
+    const r = await fetch(`${API}/reservation-request`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+
+    const j = await r.json();
+    alert(j.message || "Reservation request sent.");
   }
 
-  function Header() {
-    return (
-      <div style={s.header}>
-        <div onClick={() => setPage("home")} style={s.brand}>
-          <div style={s.logo}>MYSPACE HOTEL</div>
-          <div style={s.tagline}>Live stays. Clear prices. Better travel support.</div>
-        </div>
+  async function loginPartner() {
+    if (!partnerToken.trim()) {
+      alert("Paste your partner token first.");
+      return;
+    }
 
-        <div style={s.nav}>
-          <button style={s.navBtn} onClick={() => setPage("home")}>Stays</button>
-          <button style={s.navBtn} onClick={() => setPage("destinations")}>Destinations</button>
-          <button style={s.navBtn} onClick={() => setPage("guide")}>Guide</button>
-          <button style={s.navBtn} onClick={() => setPage("offers")}>Offers</button>
-          <button style={s.navBtn} onClick={() => setPage("help")}>Help</button>
-          <button style={s.goldBtn} onClick={() => setPage("partners")}>Partner Application Form</button>
-          <button style={s.darkBtn} onClick={() => setPage("login")}>Partner Login</button>
-        </div>
-      </div>
-    );
+    try {
+      const r = await fetch(`${API}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ partner_id: partnerId, token: partnerToken })
+      });
+
+      const j = await r.json();
+
+      if (!j.ok || !j.jwt) throw new Error("Login failed");
+
+      setPartnerJwt(j.jwt);
+      await loadPartnerDashboard(j.jwt);
+      await loadSync(j.jwt);
+      alert("Partner connected.");
+    } catch {
+      alert("Partner login failed.");
+    }
   }
 
-  function SearchBox() {
-    return (
-      <div style={s.searchBox}>
-        <div>
-          <label style={s.label}>Stay type</label>
-          <select value={stayType} onChange={(e) => setStayType(e.target.value)} style={s.input}>
-            <option value="hotel">Hotels only</option>
-            <option value="apartment">Apartments only</option>
-            <option value="villa">Villas only</option>
-          </select>
-        </div>
+  async function loadPartnerDashboard(jwt = partnerJwt) {
+    if (!jwt) return;
 
-        <div>
-          <label style={s.label}>Country</label>
-          <select
-            value={country}
-            onChange={(e) => {
-              setCountry(e.target.value);
-              setCity("");
-              setHotels([]);
-              setSelectedHotel(null);
-              setLiveRate(null);
-            }}
-            style={s.input}
-          >
-            <option value="">Select country</option>
-            {destinations.map((x) => (
-              <option key={x.country} value={x.country}>
-                {x.country}
-              </option>
-            ))}
-          </select>
-        </div>
+    const r = await fetch(`${API}/api/admin/dashboard`, {
+      headers: { Authorization: `Bearer ${jwt}` }
+    });
 
-        <div>
-          <label style={s.label}>City</label>
-          <select
-            value={city}
-            onChange={(e) => {
-              setCity(e.target.value);
-              setHotels([]);
-              setSelectedHotel(null);
-              setLiveRate(null);
-            }}
-            style={s.input}
-            disabled={!country}
-          >
-            <option value="">{country ? "Select city" : "Select country first"}</option>
-            {cities.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label style={s.label}>Check-in</label>
-          <input type="date" value={checkin} onChange={(e) => setCheckin(e.target.value)} style={s.input} />
-        </div>
-
-        <div>
-          <label style={s.label}>Check-out</label>
-          <input type="date" value={checkout} onChange={(e) => setCheckout(e.target.value)} style={s.input} />
-        </div>
-
-        <div>
-          <label style={s.label}>Guests</label>
-          <input type="number" min="1" value={guests} onChange={(e) => setGuests(e.target.value)} style={s.input} />
-        </div>
-
-        <div>
-          <label style={s.label}>Rooms</label>
-          <input type="number" min="1" value={rooms} onChange={(e) => setRooms(e.target.value)} style={s.input} />
-        </div>
-
-        <button onClick={searchHotels} style={s.searchBtn}>
-          {loading ? "Searching..." : "Search stays"}
-        </button>
-      </div>
-    );
+    const j = await r.json();
+    setPartnerDashboard(j);
   }
 
-  function ReservePanel() {
-    const rate = liveRate?.rate || liveRate?.first_rate || selectedHotel?.first_rate || null;
-    const currency = rate?.currency || liveRate?.currency || selectedHotel?.currency || "";
-    const amount = rate?.amount || liveRate?.amount || selectedHotel?.price || selectedHotel?.total;
+  async function loadSync(jwt = partnerJwt) {
+    if (!jwt) return;
 
-    return (
-      <div style={s.reserve}>
-        <div style={s.reserveTitle}>Reserve / Pay</div>
+    const r = await fetch(`${API}/api/sync/status`, {
+      headers: { Authorization: `Bearer ${jwt}` }
+    });
 
-        {!selectedHotel ? (
-          <div style={s.reserveEmpty}>
-            Select a stay to load the latest available price.
-          </div>
-        ) : (
-          <>
-            <div style={s.reserveHotel}>{selectedHotel.name}</div>
-            <div style={s.reserveAddress}>
-              {selectedHotel.address}{selectedHotel.city ? `, ${selectedHotel.city}` : ""}{selectedHotel.country ? `, ${selectedHotel.country}` : ""}
-            </div>
+    const j = await r.json();
+    setSyncStatus(j);
+  }
 
-            <div style={s.tripBox}>
-              <div><b>Check-in:</b> {checkin}</div>
-              <div><b>Check-out:</b> {checkout}</div>
-              <div><b>Guests:</b> {guests}</div>
-              <div><b>Rooms:</b> {rooms}</div>
-            </div>
+  async function runSync() {
+    if (!partnerJwt) {
+      alert("Connect partner first.");
+      return;
+    }
 
-            <div style={s.priceBox}>
-              {liveLoading ? (
-                <b>Loading live price...</b>
-              ) : liveRate?.live_available || rate || amount ? (
+    await fetch(`${API}/api/sync/run`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${partnerJwt}` }
+    });
+
+    await loadSync();
+    await loadPartnerDashboard();
+  }
+
+  async function registerHotel() {
+    const r = await fetch(`${API}/api/extranet/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(hotelRegister)
+    });
+
+    const j = await r.json();
+    setHotelOnboarded(j);
+  }
+
+  function choosePopular(destinationCountry, destinationCity) {
+    setCountry(destinationCountry);
+    setCity(destinationCity);
+    searchHotels(destinationCountry, destinationCity);
+  }
+
+  useEffect(() => {
+    loadStatus();
+    loadDestinations();
+    const t = setInterval(loadStatus, 20000);
+    return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    if (selectedCountry && !city) {
+      setCity(selectedCountry.cities?.[0]?.city || "");
+    }
+  }, [selectedCountry, city]);
+
+  return (
+    <div style={styles.page}>
+      <Header setView={setView} />
+
+      {view === "home" && (
+        <>
+          <Hero
+            country={country}
+            city={city}
+            setCountry={setCountry}
+            setCity={setCity}
+            destinations={destinations}
+            selectedCountry={selectedCountry}
+            checkin={checkin}
+            checkout={checkout}
+            setCheckin={setCheckin}
+            setCheckout={setCheckout}
+            guests={guests}
+            rooms={rooms}
+            setGuests={setGuests}
+            setRooms={setRooms}
+            searchHotels={() => searchHotels()}
+            loading={loading}
+          />
+
+          <TrustBar />
+
+          <PopularDestinations choosePopular={choosePopular} />
+
+          <CustomerActions setView={setView} />
+        </>
+      )}
+
+      {view === "results" && (
+        <main style={styles.main}>
+          <button style={styles.backBtn} onClick={() => setView("home")}>
+            ← Back to search
+          </button>
+
+          <div style={styles.resultsLayout}>
+            <section style={styles.resultsLeft}>
+              <h2 style={styles.sectionTitle}>
+                Stays in {city}, {country}
+              </h2>
+
+              <p style={styles.muted}>
+                Choose a verified stay, review your full total, then continue with confidence.
+              </p>
+
+              <div style={styles.hotelGrid}>
+                {hotels.map((h) => {
+                  const rate = h.first_rate;
+                  return (
+                    <div
+                      key={h.hotel_id}
+                      style={{
+                        ...styles.hotelCard,
+                        borderColor:
+                          selectedHotel?.hotel_id === h.hotel_id ? "#1d4ed8" : "#e5e7eb"
+                      }}
+                    >
+                      {h.image_url ? (
+                        <img src={h.image_url} style={styles.hotelImg} />
+                      ) : (
+                        <div style={styles.imageFallback}>MYSPACE HOTEL</div>
+                      )}
+
+                      <div style={styles.hotelBody}>
+                        <div style={styles.badgeRow}>
+                          <span style={styles.badge}>Verified stay</span>
+                          <span style={styles.greenBadge}>
+                            {rate ? "Current price available" : "Confirm price"}
+                          </span>
+                        </div>
+
+                        <h3 style={styles.hotelName}>{h.hotel_name || h.name}</h3>
+                        <p style={styles.hotelMeta}>
+                          {h.address || h.area || city}, {country}
+                        </p>
+
+                        <div style={styles.priceBox}>
+                          {rate ? (
+                            <>
+                              <span>From</span>
+                              <strong>
+                                {rate.currency || "GBP"} {money(rate.amount)}
+                              </strong>
+                              <small>per room / night</small>
+                            </>
+                          ) : (
+                            <strong>Price confirmation required</strong>
+                          )}
+                        </div>
+
+                        <button style={styles.selectBtn} onClick={() => setSelectedHotel(h)}>
+                          Select this stay
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+            <aside style={styles.reservePanel}>
+              <h2>Reserve / Pay</h2>
+
+              {selectedHotel ? (
                 <>
-                  <div style={s.priceLabel}>Current stay price</div>
-                  <div style={s.price}>{currency} {money(amount)}</div>
-                  <div style={s.priceNote}>
-                    {liveRate?.customer_message || "Price shown for the selected stay details."}
+                  <h3>{selectedHotel.hotel_name || selectedHotel.name}</h3>
+                  <p style={styles.muted}>
+                    {city}, {country}
+                  </p>
+
+                  <div style={styles.totalBox}>
+                    <span>Stay total</span>
+                    <strong>
+                      {selectedRate?.currency || "GBP"} {money(total)}
+                    </strong>
+                    <small>
+                      {nights} night{nights > 1 ? "s" : ""} | {guests} guests | {rooms} room{rooms > 1 ? "s" : ""}
+                    </small>
                   </div>
+
+                  <input
+                    style={styles.input}
+                    placeholder="Full name"
+                    value={reservation.customer_name}
+                    onChange={(e) =>
+                      setReservation({ ...reservation, customer_name: e.target.value })
+                    }
+                  />
+
+                  <input
+                    style={styles.input}
+                    placeholder="Email address"
+                    value={reservation.customer_email}
+                    onChange={(e) =>
+                      setReservation({ ...reservation, customer_email: e.target.value })
+                    }
+                  />
+
+                  <input
+                    style={styles.input}
+                    placeholder="Phone number"
+                    value={reservation.customer_phone}
+                    onChange={(e) =>
+                      setReservation({ ...reservation, customer_phone: e.target.value })
+                    }
+                  />
+
+                  <textarea
+                    style={styles.textarea}
+                    placeholder="Special request"
+                    value={reservation.note}
+                    onChange={(e) =>
+                      setReservation({ ...reservation, note: e.target.value })
+                    }
+                  />
+
+                  <button style={styles.primary} onClick={sendReservation}>
+                    Continue reservation
+                  </button>
                 </>
               ) : (
-                <>
-                  <div style={s.bad}>Live rate unavailable</div>
-                  <div style={s.priceNote}>Try another stay or different dates.</div>
-                </>
+                <div style={styles.notice}>Select a stay to continue.</div>
               )}
-            </div>
+            </aside>
+          </div>
+        </main>
+      )}
 
-            <button style={s.payBtn} onClick={() => setPage("checkout")}>
-              Continue to Secure Checkout
-            </button>
-          </>
-        )}
+      {view === "enterprise" && (
+        <Enterprise
+          status={status}
+          partnerId={partnerId}
+          setPartnerId={setPartnerId}
+          partnerToken={partnerToken}
+          setPartnerToken={setPartnerToken}
+          loginPartner={loginPartner}
+          partnerDashboard={partnerDashboard}
+          syncStatus={syncStatus}
+          runSync={runSync}
+          loadSync={loadSync}
+          hotelRegister={hotelRegister}
+          setHotelRegister={setHotelRegister}
+          registerHotel={registerHotel}
+          hotelOnboarded={hotelOnboarded}
+        />
+      )}
+
+      <Footer setView={setView} status={status} />
+    </div>
+  );
+}
+
+function Header({ setView }) {
+  return (
+    <header style={styles.header}>
+      <div style={styles.logoWrap}>
+        <div style={styles.logoIcon}>✦</div>
+        <div>
+          <div style={styles.logo}>MYSPACE HOTEL</div>
+          <div style={styles.tagline}>Stay with clarity</div>
+        </div>
       </div>
-    );
-  }
 
-  function HotelCard({ hotel, i }) {
-    return (
-      <div style={s.hotelCard}>
-        {hotel.image_url ? (
-          <img
-            src={hotel.image_url}
-            alt={hotel.name || "Hotel"}
-            style={s.hotelImage}
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-            }}
-          />
-        ) : null}
+      <nav style={styles.topNav}>
+        <button onClick={() => setView("home")} style={styles.topLink}>Stays</button>
+        <button onClick={() => setView("home")} style={styles.topLink}>Destinations</button>
+        <button onClick={() => setView("home")} style={styles.topLink}>Help</button>
+        <button onClick={() => setView("enterprise")} style={styles.loginBtn}>
+          Hotel / Partner Login
+        </button>
+      </nav>
+    </header>
+  );
+}
 
-        <div style={s.hotelBody}>
-          <div style={s.hotelName}>{hotel.name || hotel.hotel_name || "Available stay"}</div>
-          <div style={s.hotelLocation}>
-            {hotel.address || hotel.area || "Destination stay"}
-            {hotel.city ? `, ${hotel.city}` : ""}
-            {hotel.country ? `, ${hotel.country}` : ""}
+function Hero(props) {
+  const {
+    country,
+    city,
+    setCountry,
+    setCity,
+    destinations,
+    selectedCountry,
+    checkin,
+    checkout,
+    setCheckin,
+    setCheckout,
+    guests,
+    rooms,
+    setGuests,
+    setRooms,
+    searchHotels,
+    loading
+  } = props;
+
+  return (
+    <section style={styles.hero}>
+      <div style={styles.heroOverlay}>
+        <div style={styles.heroContent}>
+          <h1 style={styles.heroTitle}>Find your perfect stay.</h1>
+          <p style={styles.heroText}>
+            Search verified hotels and apartments, review your full stay total, and book with confidence.
+          </p>
+
+          <div style={styles.heroPoints}>
+            <span>Best available stays</span>
+            <span>Secure reservation flow</span>
+            <span>Destination support</span>
           </div>
+        </div>
 
-          <div style={s.hotelFacts}>
-            <span>{hotel.rating || "Stay option"}</span>
-            <span>{stayType}</span>
-            <span>Live price check</span>
-          </div>
+        <div style={styles.memberBox}>
+          <strong>Member benefits</strong>
+          <span>Clear pricing, helpful travel guidance, and trusted reservation support.</span>
+        </div>
 
-          <div style={s.liveNote}>
-            Select this stay to refresh the live rate for your dates, guests and rooms.
-          </div>
-
-          <div style={s.cardBtns}>
-            <button style={s.selectBtn} onClick={() => selectHotel(hotel)}>
-              Select Stay
-            </button>
-            <button
-              style={s.outlineBtn}
-              onClick={() => {
-                setSelectedHotel(hotel);
-                setPage("guide");
+        <div style={styles.searchBar}>
+          <div style={styles.searchCell}>
+            <label>Country</label>
+            <select
+              value={country}
+              onChange={(e) => {
+                setCountry(e.target.value);
+                setCity("");
               }}
             >
-              Guide / Map
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  function PageShell({ title, subtitle, children }) {
-    return (
-      <div style={s.root}>
-        <Header />
-        <div style={s.pageWrap}>
-          <div style={s.pageCard}>
-            <h1 style={s.pageTitle}>{title}</h1>
-            <p style={s.pageSub}>{subtitle}</p>
-            {children}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (page === "destinations") {
-    return (
-      <PageShell
-        title="Destinations"
-        subtitle="Choose a country and city, then return to stays to search available live stays."
-      >
-        <SearchBox />
-        <div style={s.grid3}>
-          {destinations.slice(0, 90).map((d) => (
-            <div style={s.infoCard} key={d.country}>
-              <h2>{d.country}</h2>
-              <p>{d.cities.slice(0, 12).join(", ")}</p>
-              <button
-                style={s.selectBtn}
-                onClick={() => {
-                  setCountry(d.country);
-                  setCity(d.cities[0] || "");
-                  setPage("home");
-                }}
-              >
-                Search this country
-              </button>
-            </div>
-          ))}
-        </div>
-      </PageShell>
-    );
-  }
-
-  if (page === "guide") {
-    return (
-      <PageShell
-        title="Destination Guide"
-        subtitle="Practical travel support for safety, transport, attractions and local services."
-      >
-        <div style={s.guideHero}>
-          <div>
-            <h2>{city || selectedHotel?.city || "Your destination"}</h2>
-            <p>
-              Use this page to plan local safety, airport movement, attractions,
-              restaurants and useful visitor services.
-            </p>
-          </div>
-          <button style={s.goldBtn} onClick={() => setPage("home")}>Back to stays</button>
-        </div>
-
-        <div style={s.grid3}>
-          <Info title="Emergency" text="Police, ambulance, hospital and fire service information should be checked locally before travel." />
-          <Info title="Airport & Transport" text="Plan airport transfer, taxi, public transport and arrival time before check-in." />
-          <Info title="Restaurants" text="Find nearby restaurants, cafÃ©s, family food options and late-night dining." />
-          <Info title="Attractions" text="Museums, tour buses, beaches, parks, landmarks and local experiences." />
-          <Info title="Family Travel" text="Zoos, aquariums, family attractions and safe visitor areas." />
-          <Info title="Before Arrival" text="Check check-in time, local currency, transport rules and travel documents." />
-        </div>
-
-        {selectedHotel && (
-          <div style={s.selectedBox}>
-            <h2>Selected stay</h2>
-            <p><b>{selectedHotel.name}</b></p>
-            <p>{selectedHotel.address}</p>
-          </div>
-        )}
-      </PageShell>
-    );
-  }
-
-  if (page === "offers") {
-    return (
-      <PageShell
-        title="Offers"
-        subtitle="Customer-focused stay ideas for business, leisure, family and longer visits."
-      >
-        <div style={s.grid3}>
-          <Info title="City breaks" text="Find practical stays near transport, restaurants and attractions." />
-          <Info title="Business travel" text="Choose stays near central districts, meeting areas and airports." />
-          <Info title="Family trips" text="Plan with rooms, destination support and useful local guidance." />
-          <Info title="Longer stays" text="Explore apartments and villas for flexible travel." />
-          <Info title="Weekend stays" text="Search short stays with clear dates and pricing." />
-          <Info title="Popular escapes" text="Compare city, beach and visitor destination stays." />
-        </div>
-      </PageShell>
-    );
-  }
-
-  if (page === "help") {
-    return (
-      <PageShell
-        title="Help & Support"
-        subtitle="Support for bookings, destination guidance and partner enquiries."
-      >
-        <div style={s.grid3}>
-          <Info title="Booking support" text="Search by country and city, select a stay and review the live price." />
-          <Info title="Price support" text="Prices can change by date, guests, rooms and live availability." />
-          <Info title="Travel guide" text="Use the guide page for transport, safety and attraction planning." />
-          <Info title="Checkout" text="Always confirm stay name, dates, guests, rooms and total before payment." />
-          <Info title="Partner support" text="Hotels and property providers can use the application form." />
-          <Info title="Customer trust" text="MySpace Hotel focuses on clarity, destination support and reliable booking flow." />
-        </div>
-      </PageShell>
-    );
-  }
-
-  if (page === "partners") {
-    return (
-      <PageShell
-        title="Partner Application Form"
-        subtitle="For hotels, apartments, villas and property providers who want to work with MySpace Hotel."
-      >
-        {partnerSent ? (
-          <div style={s.success}>Application received. MySpace Hotel will review the property details.</div>
-        ) : (
-          <form
-            style={s.form}
-            onSubmit={(e) => {
-              e.preventDefault();
-              setPartnerSent(true);
-            }}
-          >
-            <input required style={s.input} placeholder="Property name" />
-            <input required style={s.input} placeholder="Contact person" />
-            <input required type="email" style={s.input} placeholder="Contact email" />
-            <input style={s.input} placeholder="Phone number" />
-            <input required style={s.input} placeholder="Country" />
-            <input required style={s.input} placeholder="City" />
-            <select required style={s.input}>
-              <option value="">Property type</option>
-              <option>Hotel</option>
-              <option>Apartment</option>
-              <option>Villa</option>
-              <option>Resort</option>
-              <option>Other</option>
+              <option value="">Choose country</option>
+              {destinations.map((c) => (
+                <option key={c.country} value={c.country}>
+                  {c.country}
+                </option>
+              ))}
             </select>
-            <input style={s.input} placeholder="Number of rooms / units" />
-            <textarea required style={s.textarea} placeholder="Tell us about your property, booking setup, PMS/channel manager and target guests." />
-            <button style={s.submitBtn}>Submit Application</button>
-          </form>
-        )}
-      </PageShell>
-    );
-  }
+          </div>
 
-  if (page === "login") {
-    return (
-      <PageShell
-        title="Partner Login"
-        subtitle="Secure access area for approved partners."
-      >
-        <form
-          style={s.login}
-          onSubmit={(e) => {
-            e.preventDefault();
-            setLoginNotice("Partner login access will be enabled for approved properties.");
-          }}
-        >
-          <input required type="email" style={s.input} placeholder="Email address" />
-          <input required type="password" style={s.input} placeholder="Password" />
-          <button style={s.submitBtn}>Login</button>
-          {loginNotice && <div style={s.noticeSmall}>{loginNotice}</div>}
-        </form>
-      </PageShell>
-    );
-  }
+          <div style={styles.searchCell}>
+            <label>Destination</label>
+            <select value={city} onChange={(e) => setCity(e.target.value)}>
+              <option value="">Choose city</option>
+              {(selectedCountry?.cities || []).map((c) => (
+                <option key={c.city} value={c.city}>
+                  {c.city}
+                </option>
+              ))}
+            </select>
+          </div>
 
-  if (page === "checkout") {
-    return (
-      <PageShell
-        title="Secure Checkout"
-        subtitle="Review your stay before payment."
-      >
-        {!selectedHotel ? (
-          <div style={s.warning}>No stay selected. Please return to stays.</div>
-        ) : (
-          <div style={s.checkoutGrid}>
-            <div style={s.infoCard}>
-              <h2>{selectedHotel.name}</h2>
-              <p>{selectedHotel.address}</p>
-              <p>{selectedHotel.city} {selectedHotel.country}</p>
-              <p><b>Dates:</b> {checkin} to {checkout}</p>
-              <p><b>Guests:</b> {guests}</p>
-              <p><b>Rooms:</b> {rooms}</p>
-            </div>
-            <div style={s.infoCard}>
-              <h2>Payment review</h2>
-              <p>Confirm hotel, dates, guests, rooms and total before paying.</p>
-              <button style={s.payBtn}>Proceed to payment</button>
+          <div style={styles.searchCell}>
+            <label>Check-in</label>
+            <input type="date" value={checkin} onChange={(e) => setCheckin(e.target.value)} />
+          </div>
+
+          <div style={styles.searchCell}>
+            <label>Check-out</label>
+            <input type="date" value={checkout} onChange={(e) => setCheckout(e.target.value)} />
+          </div>
+
+          <div style={styles.searchCell}>
+            <label>Guests / Rooms</label>
+            <div style={styles.inlineSmall}>
+              <input type="number" min="1" value={guests} onChange={(e) => setGuests(e.target.value)} />
+              <input type="number" min="1" value={rooms} onChange={(e) => setRooms(e.target.value)} />
             </div>
           </div>
-        )}
-      </PageShell>
-    );
-  }
 
-  return (
-    <div style={s.root}>
-      <Header />
-
-      <section style={s.hero}>
-        <div style={s.heroInner}>
-          <div style={s.badge}>Professional hotel booking portal</div>
-          <h1 style={s.heroTitle}>Find trusted stays with clearer travel support.</h1>
-          <p style={s.heroText}>
-            Search hotels, apartments and villas, choose your destination,
-            review stay details and load live rates before checkout.
-          </p>
-          <SearchBox />
+          <button style={styles.searchBtn} onClick={searchHotels}>
+            {loading ? "Searching..." : "Search hotels"}
+          </button>
         </div>
-      </section>
-
-      <div style={s.trustRow}>
-        <Info title="Live rate flow" text="Select a stay to refresh the current available price." />
-        <Info title="Destination guide" text="Useful support for transport, safety and attractions." />
-        <Info title="Secure checkout" text="Review stay details before moving to payment." />
-        <Info title="Partner-ready" text="Hotels and properties can apply through the partner form." />
       </div>
-
-      {notice && <div style={s.notice}>{notice}</div>}
-
-      <main style={s.main}>
-        <section>
-          <div style={s.sectionHead}>
-            <div>
-              <h2 style={s.sectionTitle}>Available stays</h2>
-              <p style={s.sectionSub}>Search a destination, select a stay, then review live pricing.</p>
-            </div>
-            <button style={s.outlineBtn} onClick={() => setPage("guide")}>Open guide</button>
-          </div>
-
-          {loading && <div style={s.loading}>Searching available stays...</div>}
-
-          {!loading && !hotels.length && (
-            <div style={s.grid3}>
-              <Info title="Start with destination" text="Select country and city from the dropdowns above." />
-              <Info title="Choose your stay" text="Review hotel cards and select the best fit for your trip." />
-              <Info title="Check live rate" text="The reserve panel updates when a stay is selected." />
-            </div>
-          )}
-
-          <div style={s.hotelGrid}>
-            {hotels.map((hotel, i) => (
-              <HotelCard key={hotel.hotel_id || hotel.id || hotel.code || i} hotel={hotel} i={i} />
-            ))}
-          </div>
-        </section>
-
-        <ReservePanel />
-      </main>
-    </div>
+    </section>
   );
 }
 
-function Info({ title, text }) {
+function TrustBar() {
   return (
-    <div style={s.infoCard}>
-      <h3>{title}</h3>
-      <p>{text}</p>
+    <section style={styles.trustBar}>
+      <div>
+        <strong>Free cancellation options</strong>
+        <span>Shown where available</span>
+      </div>
+      <div>
+        <strong>Secure booking</strong>
+        <span>Your reservation details are protected</span>
+      </div>
+      <div>
+        <strong>Destination help</strong>
+        <span>Useful local support before arrival</span>
+      </div>
+    </section>
+  );
+}
+
+function PopularDestinations({ choosePopular }) {
+  const items = [
+    ["United Kingdom", "London", "London", "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=900&q=80"],
+    ["France", "Paris", "Paris", "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=900&q=80"],
+    ["United Arab Emirates", "Dubai", "Dubai", "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=900&q=80"],
+    ["United States", "New York", "New York", "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?auto=format&fit=crop&w=900&q=80"],
+    ["Spain", "Barcelona", "Barcelona", "https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=900&q=80"]
+  ];
+
+  return (
+    <section style={styles.main}>
+      <h2 style={styles.sectionTitle}>Popular destinations</h2>
+
+      <div style={styles.destinationGrid}>
+        {items.map(([country, city, title, img]) => (
+          <button
+            key={`${country}-${city}`}
+            style={{ ...styles.destCard, backgroundImage: `url(${img})` }}
+            onClick={() => choosePopular(country, city)}
+          >
+            <div>
+              <strong>{title}</strong>
+              <span>{country}</span>
+            </div>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CustomerActions({ setView }) {
+  return (
+    <section style={styles.actionStrip}>
+      <button onClick={() => setView("enterprise")}>
+        <strong>Hotel Extranet</strong>
+        <span>Manage your property</span>
+      </button>
+      <button onClick={() => setView("enterprise")}>
+        <strong>PMS Sync Status</strong>
+        <span>Live connection monitoring</span>
+      </button>
+      <button onClick={() => setView("enterprise")}>
+        <strong>Hotel Onboarding</strong>
+        <span>Join MySpace Hotel</span>
+      </button>
+      <button onClick={() => setView("enterprise")}>
+        <strong>Partner API</strong>
+        <span>Integration tools</span>
+      </button>
+    </section>
+  );
+}
+
+function Enterprise(props) {
+  const {
+    status,
+    partnerId,
+    setPartnerId,
+    partnerToken,
+    setPartnerToken,
+    loginPartner,
+    partnerDashboard,
+    syncStatus,
+    runSync,
+    loadSync,
+    hotelRegister,
+    setHotelRegister,
+    registerHotel,
+    hotelOnboarded
+  } = props;
+
+  return (
+    <main style={styles.enterprisePage}>
+      <button style={styles.backBtn} onClick={() => window.location.reload()}>
+        ← Back to customer homepage
+      </button>
+
+      <h1 style={styles.enterpriseTitle}>Hotel Extranet & Partner Operations</h1>
+      <p style={styles.muted}>
+        PMS monitoring, hotel onboarding, partner authentication and enterprise readiness tools.
+      </p>
+
+      <div style={styles.enterpriseGrid}>
+        <div style={styles.enterpriseCard}>
+          <h2>Platform Status</h2>
+          <MetricGrid
+            data={{
+              Hotels: status?.hotels_loaded,
+              Countries: status?.countries,
+              Cities: status?.cities,
+              Inventory: status?.inventory_syncs,
+              Rates: status?.rate_syncs,
+              Reservations: status?.reservation_syncs,
+              Failures: status?.sync_failures || 0
+            }}
+          />
+        </div>
+
+        <div style={styles.enterpriseCard}>
+          <h2>Partner Login</h2>
+          <input style={styles.input} value={partnerId} onChange={(e) => setPartnerId(e.target.value)} />
+          <input
+            style={styles.input}
+            placeholder="Paste partner token"
+            type="password"
+            value={partnerToken}
+            onChange={(e) => setPartnerToken(e.target.value)}
+          />
+          <button style={styles.primary} onClick={loginPartner}>Connect partner</button>
+        </div>
+
+        <div style={styles.enterpriseCard}>
+          <h2>PMS Sync</h2>
+          <MetricGrid
+            data={{
+              Partners: syncStatus?.partners?.length || 0,
+              Inventory: syncStatus?.inventory_syncs || 0,
+              Rates: syncStatus?.rate_syncs || 0,
+              Reservations: syncStatus?.reservation_syncs || 0,
+              Failures: syncStatus?.failures || 0
+            }}
+          />
+          <button style={styles.primary} onClick={runSync}>Run sync now</button>
+          <button style={styles.secondary} onClick={() => loadSync()}>Refresh</button>
+        </div>
+
+        <div style={styles.enterpriseCard}>
+          <h2>Hotel Onboarding</h2>
+          {Object.keys(hotelRegister).map((k) => (
+            <input
+              key={k}
+              style={styles.input}
+              placeholder={k}
+              value={hotelRegister[k]}
+              onChange={(e) => setHotelRegister({ ...hotelRegister, [k]: e.target.value })}
+            />
+          ))}
+          <button style={styles.primary} onClick={registerHotel}>Activate hotel</button>
+          {hotelOnboarded && <pre style={styles.pre}>{JSON.stringify(hotelOnboarded, null, 2)}</pre>}
+        </div>
+
+        <div style={styles.enterpriseCardWide}>
+          <h2>Partner Dashboard</h2>
+          <pre style={styles.pre}>{JSON.stringify(partnerDashboard || {}, null, 2)}</pre>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function MetricGrid({ data }) {
+  return (
+    <div style={styles.metricGrid}>
+      {Object.entries(data).map(([k, v]) => (
+        <div key={k} style={styles.metricBox}>
+          <span>{k}</span>
+          <strong>{v ?? "-"}</strong>
+        </div>
+      ))}
     </div>
   );
 }
 
-const s = {
-  root: {
+function Footer({ setView, status }) {
+  return (
+    <footer style={styles.footer}>
+      <div>
+        <strong>MySpace Hotel</strong>
+        <span> Book with clarity before you arrive.</span>
+      </div>
+      <div style={styles.footerLinks}>
+        <button onClick={() => setView("enterprise")}>Partners</button>
+        <button onClick={() => setView("enterprise")}>Developers</button>
+        <button onClick={() => setView("enterprise")}>Status</button>
+        <span>{status?.api === "online" || status?.ok ? "System online" : "Checking system"}</span>
+      </div>
+    </footer>
+  );
+}
+
+const styles = {
+  page: {
     minHeight: "100vh",
-    background: "#edf3fb",
-    color: "#081b44",
+    background: "#f6f8fc",
+    color: "#07142f",
     fontFamily: "Inter, Arial, sans-serif"
   },
   header: {
+    height: 88,
+    background: "#fff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "0 44px",
+    boxShadow: "0 2px 18px rgba(15, 23, 42, 0.08)",
     position: "sticky",
     top: 0,
-    zIndex: 100,
-    background: "#ffffff",
-    borderBottom: "1px solid #d9e4f2",
-    padding: "16px 28px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 20
+    zIndex: 10
   },
-  brand: {
+  logoWrap: { display: "flex", alignItems: "center", gap: 12 },
+  logoIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    display: "grid",
+    placeItems: "center",
+    background: "#fff3c4",
+    color: "#b77900",
+    fontSize: 24,
+    fontWeight: 900
+  },
+  logo: { fontSize: 26, fontWeight: 900, letterSpacing: 1 },
+  tagline: { fontSize: 13, color: "#64748b", fontWeight: 700 },
+  topNav: { display: "flex", alignItems: "center", gap: 20 },
+  topLink: {
+    border: 0,
+    background: "transparent",
+    fontWeight: 800,
+    fontSize: 15,
     cursor: "pointer",
-    minWidth: 260
+    color: "#0f172a"
   },
-  logo: {
-    fontSize: 34,
-    fontWeight: 950,
-    letterSpacing: "-1px"
-  },
-  tagline: {
-    color: "#61718b",
-    fontWeight: 800
-  },
-  nav: {
-    display: "flex",
-    gap: 10,
-    flexWrap: "wrap",
-    justifyContent: "flex-end"
-  },
-  navBtn: {
-    background: "#ffffff",
-    border: "1px solid #d7e1ef",
-    borderRadius: 12,
-    padding: "11px 15px",
+  loginBtn: {
+    border: "1px solid #cbd5e1",
+    background: "#fff",
+    color: "#1747b8",
+    borderRadius: 14,
+    padding: "12px 18px",
     fontWeight: 900,
     cursor: "pointer"
   },
-  goldBtn: {
-    background: "#f4c430",
-    border: "none",
-    borderRadius: 12,
-    padding: "12px 18px",
-    fontWeight: 950,
-    cursor: "pointer"
-  },
-  darkBtn: {
-    background: "#081b44",
-    color: "#ffffff",
-    border: "none",
-    borderRadius: 12,
-    padding: "12px 18px",
-    fontWeight: 950,
-    cursor: "pointer"
-  },
   hero: {
+    minHeight: 470,
     backgroundImage:
-      "linear-gradient(90deg, rgba(255,255,255,0.97), rgba(255,255,255,0.78)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1800')",
+      "linear-gradient(90deg, rgba(255,255,255,.96), rgba(255,255,255,.72), rgba(255,255,255,.28)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2000&q=80')",
     backgroundSize: "cover",
-    backgroundPosition: "center"
+    backgroundPosition: "center",
+    position: "relative"
   },
-  heroInner: {
-    maxWidth: 1500,
-    margin: "0 auto",
-    padding: "42px 30px"
+  heroOverlay: { maxWidth: 1420, margin: "0 auto", padding: "68px 42px 40px" },
+  heroContent: { maxWidth: 720 },
+  heroTitle: { fontSize: 58, lineHeight: 1.02, margin: 0, letterSpacing: -2, color: "#07142f" },
+  heroText: { fontSize: 22, color: "#334155", marginTop: 16, fontWeight: 700 },
+  heroPoints: { display: "flex", flexWrap: "wrap", gap: 14, marginTop: 28 },
+  memberBox: {
+    position: "absolute",
+    right: 60,
+    top: 145,
+    width: 310,
+    background: "rgba(255,255,255,.92)",
+    borderRadius: 22,
+    padding: 24,
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+    boxShadow: "0 20px 45px rgba(15,23,42,.16)"
   },
-  badge: {
-    display: "inline-block",
-    background: "#dbeafe",
-    color: "#1d4ed8",
-    borderRadius: 999,
-    padding: "10px 16px",
-    fontWeight: 950,
-    marginBottom: 18
+  searchBar: {
+    marginTop: 60,
+    background: "#fff",
+    borderRadius: 24,
+    display: "grid",
+    gridTemplateColumns: "1.2fr 1.2fr .9fr .9fr .9fr 1fr",
+    gap: 0,
+    boxShadow: "0 26px 60px rgba(15,23,42,.18)",
+    overflow: "hidden"
   },
-  heroTitle: {
-    maxWidth: 900,
-    margin: 0,
-    fontSize: 64,
-    lineHeight: 1.02,
-    fontWeight: 950
+  searchCell: {
+    padding: 18,
+    borderRight: "1px solid #e2e8f0",
+    display: "flex",
+    flexDirection: "column",
+    gap: 8
   },
-  heroText: {
-    maxWidth: 920,
-    marginTop: 18,
-    color: "#334967",
-    fontSize: 23,
-    fontWeight: 750
+  inlineSmall: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 },
+  searchBtn: {
+    border: 0,
+    background: "#1857df",
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: 900,
+    cursor: "pointer"
   },
-  searchBox: {
-    marginTop: 28,
-    background: "#ffffff",
-    borderRadius: 28,
+  trustBar: {
+    maxWidth: 1320,
+    margin: "24px auto",
+    background: "#fff",
+    borderRadius: 20,
     padding: 20,
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))",
-    gap: 14,
-    alignItems: "end",
-    boxShadow: "0 18px 50px rgba(8,27,68,0.12)"
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: 20,
+    boxShadow: "0 15px 45px rgba(15,23,42,.08)"
   },
-  label: {
-    display: "block",
-    marginBottom: 8,
-    fontWeight: 950
+  main: { maxWidth: 1420, margin: "0 auto", padding: "28px 42px" },
+  sectionTitle: { fontSize: 30, margin: "0 0 16px" },
+  destinationGrid: { display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 16 },
+  destCard: {
+    height: 220,
+    border: 0,
+    borderRadius: 18,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    color: "#fff",
+    textAlign: "left",
+    padding: 22,
+    display: "flex",
+    alignItems: "flex-end",
+    cursor: "pointer",
+    boxShadow: "0 14px 35px rgba(15,23,42,.18)",
+    overflow: "hidden"
+  },
+  actionStrip: {
+    maxWidth: 1320,
+    margin: "28px auto 48px",
+    background: "#fff",
+    borderRadius: 18,
+    padding: 16,
+    display: "grid",
+    gridTemplateColumns: "repeat(4, 1fr)",
+    gap: 12,
+    boxShadow: "0 15px 45px rgba(15,23,42,.08)"
+  },
+  resultsLayout: { display: "grid", gridTemplateColumns: "1fr 390px", gap: 24 },
+  resultsLeft: { minWidth: 0 },
+  hotelGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(295px, 1fr))", gap: 18 },
+  hotelCard: {
+    background: "#fff",
+    border: "2px solid #e5e7eb",
+    borderRadius: 22,
+    overflow: "hidden",
+    boxShadow: "0 16px 40px rgba(15,23,42,.08)"
+  },
+  hotelImg: { width: "100%", height: 190, objectFit: "cover" },
+  imageFallback: {
+    height: 190,
+    display: "grid",
+    placeItems: "center",
+    background: "#dbeafe",
+    color: "#1747b8",
+    fontWeight: 900
+  },
+  hotelBody: { padding: 18 },
+  badgeRow: { display: "flex", justifyContent: "space-between", gap: 8 },
+  badge: { background: "#dbeafe", color: "#1747b8", borderRadius: 999, padding: "7px 10px", fontWeight: 900, fontSize: 12 },
+  greenBadge: { background: "#dcfce7", color: "#166534", borderRadius: 999, padding: "7px 10px", fontWeight: 900, fontSize: 12 },
+  hotelName: { fontSize: 22, marginBottom: 8 },
+  hotelMeta: { color: "#64748b", fontWeight: 700 },
+  priceBox: {
+    background: "#f8fafc",
+    borderRadius: 14,
+    padding: 14,
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+    marginBottom: 12
+  },
+  selectBtn: {
+    width: "100%",
+    border: 0,
+    borderRadius: 14,
+    background: "#f6c744",
+    padding: 14,
+    fontWeight: 900,
+    cursor: "pointer"
+  },
+  reservePanel: {
+    position: "sticky",
+    top: 110,
+    alignSelf: "start",
+    background: "#fff",
+    borderRadius: 24,
+    padding: 24,
+    boxShadow: "0 18px 50px rgba(15,23,42,.12)"
+  },
+  totalBox: {
+    background: "#dcfce7",
+    borderRadius: 18,
+    padding: 18,
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+    margin: "18px 0"
   },
   input: {
     width: "100%",
-    height: 52,
+    padding: 13,
     borderRadius: 13,
-    border: "1px solid #cbd7e8",
-    padding: "0 14px",
-    fontSize: 16,
-    boxSizing: "border-box",
-    background: "#ffffff"
+    border: "1px solid #cbd5e1",
+    marginBottom: 12,
+    fontWeight: 700
   },
   textarea: {
-    gridColumn: "1 / -1",
     width: "100%",
-    minHeight: 160,
+    minHeight: 88,
+    padding: 13,
     borderRadius: 13,
-    border: "1px solid #cbd7e8",
-    padding: 14,
-    fontSize: 16,
-    boxSizing: "border-box"
+    border: "1px solid #cbd5e1",
+    marginBottom: 12
   },
-  searchBtn: {
-    background: "#1d4ed8",
-    color: "#ffffff",
-    border: "none",
-    borderRadius: 15,
-    padding: "16px 20px",
-    minHeight: 52,
-    fontSize: 17,
-    fontWeight: 950,
+  primary: {
+    width: "100%",
+    border: 0,
+    background: "#1857df",
+    color: "#fff",
+    padding: 14,
+    borderRadius: 14,
+    fontWeight: 900,
+    cursor: "pointer",
+    marginBottom: 10
+  },
+  secondary: {
+    width: "100%",
+    border: "1px solid #cbd5e1",
+    background: "#fff",
+    color: "#1747b8",
+    padding: 14,
+    borderRadius: 14,
+    fontWeight: 900,
     cursor: "pointer"
   },
-  trustRow: {
-    maxWidth: 1500,
-    margin: "22px auto 0",
-    padding: "0 30px",
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))",
-    gap: 16
-  },
-  main: {
-    maxWidth: 1500,
-    margin: "0 auto",
-    padding: 30,
-    display: "grid",
-    gridTemplateColumns: "1fr 410px",
-    gap: 24,
-    alignItems: "start"
-  },
-  sectionHead: {
+  backBtn: { border: 0, background: "#e0ecff", color: "#1747b8", padding: "12px 16px", borderRadius: 14, fontWeight: 900, cursor: "pointer", marginBottom: 18 },
+  muted: { color: "#64748b", fontWeight: 700 },
+  notice: { background: "#f8fafc", borderRadius: 14, padding: 14 },
+  enterprisePage: { maxWidth: 1400, margin: "0 auto", padding: 42 },
+  enterpriseTitle: { fontSize: 46, margin: 0 },
+  enterpriseGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(330px, 1fr))", gap: 18, marginTop: 24 },
+  enterpriseCard: { background: "#fff", borderRadius: 24, padding: 22, boxShadow: "0 15px 45px rgba(15,23,42,.08)" },
+  enterpriseCardWide: { background: "#fff", borderRadius: 24, padding: 22, gridColumn: "1 / -1", boxShadow: "0 15px 45px rgba(15,23,42,.08)" },
+  metricGrid: { display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 },
+  metricBox: { background: "#f1f5f9", borderRadius: 14, padding: 14, display: "flex", flexDirection: "column", gap: 6 },
+  pre: { background: "#0f172a", color: "#dbeafe", padding: 16, borderRadius: 16, overflow: "auto", maxHeight: 360 },
+  footer: {
+    background: "#fff",
+    borderTop: "1px solid #e2e8f0",
+    padding: "22px 42px",
     display: "flex",
     justifyContent: "space-between",
-    gap: 20,
-    alignItems: "center",
-    marginBottom: 22
-  },
-  sectionTitle: {
-    fontSize: 38,
-    margin: 0,
-    fontWeight: 950
-  },
-  sectionSub: {
-    margin: "8px 0 0",
-    color: "#60708a",
-    fontWeight: 800
-  },
-  grid3: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit,minmax(250px,1fr))",
-    gap: 18,
-    marginTop: 22
-  },
-  infoCard: {
-    background: "#ffffff",
-    borderRadius: 24,
-    padding: 24,
-    boxShadow: "0 10px 28px rgba(8,27,68,0.07)",
-    fontWeight: 750
-  },
-  hotelGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))",
-    gap: 22
-  },
-  hotelCard: {
-    background: "#ffffff",
-    borderRadius: 26,
-    overflow: "hidden",
-    boxShadow: "0 14px 36px rgba(8,27,68,0.10)"
-  },
-  hotelImage: {
-    width: "100%",
-    height: 235,
-    objectFit: "cover",
-    background: "#dbe4f2"
-  },
-  hotelBody: {
-    padding: 22
-  },
-  hotelName: {
-    fontSize: 25,
-    fontWeight: 950
-  },
-  hotelLocation: {
-    marginTop: 10,
-    color: "#5d6f89",
-    fontWeight: 800
-  },
-  hotelFacts: {
-    marginTop: 14,
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 8,
-    color: "#415875",
-    fontWeight: 900
-  },
-  liveNote: {
-    marginTop: 16,
-    background: "#eef6ff",
-    borderRadius: 15,
-    padding: 14,
-    color: "#124078",
-    fontWeight: 850
-  },
-  cardBtns: {
-    display: "flex",
-    gap: 12,
-    marginTop: 20
-  },
-  selectBtn: {
-    background: "#f4c430",
-    border: "none",
-    borderRadius: 14,
-    padding: "15px 16px",
-    fontWeight: 950,
-    cursor: "pointer"
-  },
-  outlineBtn: {
-    background: "#ffffff",
-    border: "2px solid #d9e3ef",
-    borderRadius: 14,
-    padding: "15px 16px",
-    fontWeight: 950,
-    cursor: "pointer"
-  },
-  reserve: {
-    background: "#ffffff",
-    borderRadius: 28,
-    padding: 24,
-    position: "sticky",
-    top: 100,
-    boxShadow: "0 14px 36px rgba(8,27,68,0.10)"
-  },
-  reserveTitle: {
-    fontSize: 38,
-    fontWeight: 950
-  },
-  reserveEmpty: {
-    marginTop: 24,
-    background: "#f4f8fd",
-    borderRadius: 18,
-    padding: 20,
-    color: "#5c6f89",
-    fontWeight: 850
-  },
-  reserveHotel: {
-    marginTop: 22,
-    fontSize: 27,
-    fontWeight: 950
-  },
-  reserveAddress: {
-    marginTop: 10,
-    color: "#60708a",
-    fontWeight: 800
-  },
-  tripBox: {
-    marginTop: 18,
-    display: "grid",
-    gap: 8,
-    background: "#f4f8fd",
-    borderRadius: 18,
-    padding: 18,
-    color: "#415875"
-  },
-  priceBox: {
-    marginTop: 22,
-    background: "#ecfdf3",
-    borderRadius: 19,
-    padding: 22
-  },
-  priceLabel: {
-    color: "#25603a",
-    fontWeight: 950
-  },
-  price: {
-    marginTop: 8,
-    fontSize: 42,
-    fontWeight: 950
-  },
-  priceNote: {
-    marginTop: 10,
-    color: "#365943",
-    fontWeight: 750
-  },
-  bad: {
-    color: "#991b1b",
-    fontWeight: 950
-  },
-  payBtn: {
-    width: "100%",
-    marginTop: 22,
-    background: "#10b981",
-    color: "#ffffff",
-    border: "none",
-    borderRadius: 18,
-    padding: 19,
-    fontSize: 19,
-    fontWeight: 950,
-    cursor: "pointer"
-  },
-  notice: {
-    maxWidth: 1440,
-    margin: "20px auto 0",
-    background: "#fff7ed",
-    color: "#9a3412",
-    border: "1px solid #fed7aa",
-    borderRadius: 18,
-    padding: 18,
-    fontWeight: 900
-  },
-  noticeSmall: {
-    background: "#eff6ff",
-    color: "#1d4ed8",
-    borderRadius: 14,
-    padding: 14,
-    fontWeight: 850
-  },
-  loading: {
-    background: "#ffffff",
-    borderRadius: 22,
-    padding: 26,
-    fontWeight: 950,
-    boxShadow: "0 10px 26px rgba(8,27,68,0.06)"
-  },
-  pageWrap: {
-    maxWidth: 1380,
-    margin: "0 auto",
-    padding: 30
-  },
-  pageCard: {
-    background: "#ffffff",
-    borderRadius: 30,
-    padding: 36,
-    boxShadow: "0 14px 36px rgba(8,27,68,0.08)"
-  },
-  pageTitle: {
-    margin: 0,
-    fontSize: 50,
-    fontWeight: 950
-  },
-  pageSub: {
-    color: "#5a6d87",
-    fontSize: 20,
-    fontWeight: 800,
-    marginTop: 12
-  },
-  guideHero: {
-    marginTop: 24,
-    background: "#081b44",
-    color: "#ffffff",
-    borderRadius: 26,
-    padding: 30,
-    display: "flex",
-    justifyContent: "space-between",
-    gap: 20,
     alignItems: "center"
   },
-  selectedBox: {
-    marginTop: 24,
-    background: "#eef6ff",
-    borderRadius: 24,
-    padding: 24,
-    fontWeight: 800
-  },
-  form: {
-    marginTop: 28,
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))",
-    gap: 16
-  },
-  login: {
-    marginTop: 28,
-    maxWidth: 520,
-    display: "grid",
-    gap: 16
-  },
-  submitBtn: {
-    background: "#1d4ed8",
-    color: "#ffffff",
-    border: "none",
-    borderRadius: 15,
-    padding: 18,
-    fontSize: 18,
-    fontWeight: 950,
-    cursor: "pointer"
-  },
-  success: {
-    marginTop: 24,
-    background: "#ecfdf3",
-    color: "#166534",
-    borderRadius: 17,
-    padding: 18,
-    fontWeight: 950
-  },
-  warning: {
-    marginTop: 14,
-    background: "#fef2f2",
-    color: "#991b1b",
-    borderRadius: 15,
-    padding: 15,
-    fontWeight: 900
-  },
-  checkoutGrid: {
-    marginTop: 26,
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))",
-    gap: 22
-  }
+  footerLinks: { display: "flex", gap: 14, alignItems: "center" }
 };
+'@ | Set-Content .\src\App.jsx -Encoding UTF8
+
+npm run build
