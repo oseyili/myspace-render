@@ -1,7 +1,8 @@
 {
   "ok": true,
-  "generated_at": "2026-05-24T00:26:45.444Z",
-  "total_hotels": 24128,
+  "generated_at": "2026-05-24T01:15:46.091Z",
+  "total_hotels": 101661,
   "storage": "compressed_ndjson_gzip",
+  "source": "master_hotel_registry_json_gz",
   "file": "backend/data/live-hotels.ndjson.gz"
 }
