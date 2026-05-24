@@ -22,16 +22,14 @@ const PORT = process.env.PORT || 5050;
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 
-const ROOT = path.resolve(__dirname, "..");
-
 const DATA_DIR = path.join(__dirname, "data");
 
-const HOTELS_GZ = path.join(
+const HOTEL_FILE = path.join(
   DATA_DIR,
   "live-hotels.ndjson.gz"
 );
 
-const DESTINATIONS_FILE = path.join(
+const DEST_FILE = path.join(
   DATA_DIR,
   "live-destinations.json"
 );
@@ -39,11 +37,6 @@ const DESTINATIONS_FILE = path.join(
 const META_FILE = path.join(
   DATA_DIR,
   "live-hotels-meta.json"
-);
-
-const PARTNER_FILE = path.join(
-  DATA_DIR,
-  "partner_applications.json"
 );
 
 const HOTELBEDS_API_KEY =
@@ -85,27 +78,20 @@ function safeJson(file, fallback) {
 }
 
 function normalizeCountry(v) {
-  const x = key(v);
-
   const map = {
     uk: "United Kingdom",
     gb: "United Kingdom",
     gbr: "United Kingdom",
-    usa: "United States",
     us: "United States",
+    usa: "United States",
     ae: "United Arab Emirates",
-    uae: "United Arab Emirates",
-    ng: "Nigeria",
-    fr: "France",
-    es: "Spain"
+    uae: "United Arab Emirates"
   };
 
-  return map[x] || clean(v);
+  return map[key(v)] || clean(v);
 }
 
 function normalizeCity(v) {
-  const x = key(v);
-
   const map = {
     lon: "London",
     nyc: "New York",
@@ -113,14 +99,10 @@ function normalizeCity(v) {
     par: "Paris",
     los: "Lagos",
     abv: "Abuja",
-    bni: "Benin City",
-    mad: "Madrid",
-    bcn: "Barcelona",
-    lax: "Los Angeles",
-    mia: "Miami"
+    bni: "Benin City"
   };
 
-  return map[x] || clean(v);
+  return map[key(v)] || clean(v);
 }
 
 function hotelStayType(name) {
@@ -130,34 +112,15 @@ function hotelStayType(name) {
     "apartment",
     "apartments",
     "flat",
-    "flats",
     "villa",
-    "villas",
-    "hostel",
-    "residence",
-    "residences",
     "suite",
-    "suites",
-    "guest house",
     "guesthouse",
+    "guest house",
     "home",
-    "homes",
-    "house",
-    "houses",
-    "cottage",
-    "cottages",
+    "residence",
+    "hostel",
     "farmhouse",
-    "studio",
-    "studios",
-    "bnb",
-    "b&b",
-    "bed and breakfast",
-    "holiday rental",
-    "shortlet",
-    "short-let",
-    "serviced apartment",
-    "city2stay",
-    "frankie says"
+    "house"
   ];
 
   for (const word of otherWords) {
@@ -166,57 +129,33 @@ function hotelStayType(name) {
     }
   }
 
-  const hotelWords = [
-    "hotel",
-    "inn",
-    "motel",
-    "resort",
-    "lodge"
-  ];
-
-  for (const word of hotelWords) {
-    if (text.includes(word)) {
-      return "hotel";
-    }
-  }
-
-  return "other";
+  return "hotel";
 }
 
-function stayTypeMatch(
-  requested,
-  hotelName
-) {
-  if (
-    !requested ||
-    requested === "both"
-  ) {
+function stayMatch(type, hotelName) {
+  if (!type || type === "both") {
     return true;
   }
 
-  const type =
+  const found =
     hotelStayType(hotelName);
 
-  if (requested === "hotel") {
-    return type === "hotel";
+  if (type === "hotel") {
+    return found === "hotel";
   }
 
-  if (requested === "other") {
-    return type === "other";
+  if (type === "other") {
+    return found === "other";
   }
 
   return true;
 }
 
-function normalizeHotel(
-  row,
-  index
-) {
+function normalizeHotel(row, index) {
   const hotel_name = clean(
     row.hotel_name ||
     row.hotelName ||
-    row.name ||
-    row.title
+    row.name
   );
 
   if (!hotel_name) {
@@ -241,14 +180,6 @@ function normalizeHotel(
     return null;
   }
 
-  const image =
-    clean(
-      row.image_url ||
-      row.image ||
-      row.photo ||
-      row.main_image
-    );
-
   return {
     id:
       clean(
@@ -264,11 +195,11 @@ function normalizeHotel(
         row.code
       ) || `hotel-${index}`,
 
-    hotel_code:
+    hotelbeds_code:
       clean(
+        row.hotelbeds_code ||
         row.hotel_code ||
         row.hotel_id ||
-        row.id ||
         row.code
       ),
 
@@ -286,8 +217,7 @@ function normalizeHotel(
 
     address: clean(
       row.address ||
-      row.street ||
-      row.address1
+      row.street
     ),
 
     area: clean(
@@ -301,44 +231,23 @@ function normalizeHotel(
     ),
 
     latitude:
-      row.latitude ||
-      row.lat ||
-      "",
+      row.latitude || "",
 
     longitude:
-      row.longitude ||
-      row.lng ||
-      row.lon ||
-      "",
+      row.longitude || "",
 
-    image_url: image,
-
-    image_caption: image
-      ? "Verified property image"
-      : "",
-
-    image_source: image
-      ? "MySpace Hotel verified image"
-      : "",
+    image_url:
+      clean(
+        row.image_url ||
+        row.image
+      ),
 
     has_verified_image:
-      Boolean(image)
+      Boolean(
+        row.image_url ||
+        row.image
+      )
   };
-}
-
-function getDestinations() {
-  const payload = safeJson(
-    DESTINATIONS_FILE,
-    {
-      countries: []
-    }
-  );
-
-  return Array.isArray(
-    payload.countries
-  )
-    ? payload.countries
-    : [];
 }
 
 async function streamHotels({
@@ -348,14 +257,15 @@ async function streamHotels({
   limit
 }) {
   const hotels = [];
+
   const seen = new Set();
 
-  if (!fs.existsSync(HOTELS_GZ)) {
+  if (!fs.existsSync(HOTEL_FILE)) {
     return [];
   }
 
   const stream = fs
-    .createReadStream(HOTELS_GZ)
+    .createReadStream(HOTEL_FILE)
     .pipe(zlib.createGunzip());
 
   const rl = readline.createInterface({
@@ -369,12 +279,9 @@ async function streamHotels({
     if (!line.trim()) continue;
 
     try {
-      const parsed =
-        JSON.parse(line);
-
       const hotel =
         normalizeHotel(
-          parsed,
+          JSON.parse(line),
           index++
         );
 
@@ -382,22 +289,20 @@ async function streamHotels({
 
       if (
         key(hotel.country) !==
-        key(
-          normalizeCountry(country)
-        )
+        key(country)
       ) {
         continue;
       }
 
       if (
         key(hotel.city) !==
-        key(normalizeCity(city))
+        key(city)
       ) {
         continue;
       }
 
       if (
-        !stayTypeMatch(
+        !stayMatch(
           stay_type,
           hotel.hotel_name
         )
@@ -407,9 +312,7 @@ async function streamHotels({
 
       const dedupe = [
         key(hotel.hotel_name),
-        key(hotel.address),
-        key(hotel.city),
-        key(hotel.country)
+        key(hotel.address)
       ].join("|");
 
       if (seen.has(dedupe)) {
@@ -431,17 +334,13 @@ async function streamHotels({
   return hotels;
 }
 
-async function findHotel(
-  hotelId
-) {
-  if (!fs.existsSync(HOTELS_GZ)) {
+async function findHotel(hotelId) {
+  if (!fs.existsSync(HOTEL_FILE)) {
     return null;
   }
 
-  const wanted = clean(hotelId);
-
   const stream = fs
-    .createReadStream(HOTELS_GZ)
+    .createReadStream(HOTEL_FILE)
     .pipe(zlib.createGunzip());
 
   const rl = readline.createInterface({
@@ -465,8 +364,7 @@ async function findHotel(
 
       if (
         clean(hotel.hotel_id) ===
-          wanted ||
-        clean(hotel.id) === wanted
+        clean(hotelId)
       ) {
         rl.close();
         stream.destroy();
@@ -482,7 +380,7 @@ async function findHotel(
 function hotelbedsReady() {
   return Boolean(
     HOTELBEDS_API_KEY &&
-      HOTELBEDS_SECRET
+    HOTELBEDS_SECRET
   );
 }
 
@@ -490,33 +388,51 @@ function hotelbedsSignature() {
   const timestamp =
     Math.floor(Date.now() / 1000);
 
-  return crypto
-    .createHash("sha256")
-    .update(
-      HOTELBEDS_API_KEY +
+  return {
+    signature: crypto
+      .createHash("sha256")
+      .update(
+        HOTELBEDS_API_KEY +
         HOTELBEDS_SECRET +
         timestamp
-    )
-    .digest("hex");
+      )
+      .digest("hex"),
+
+    timestamp
+  };
 }
 
 async function searchHotelbeds({
   hotel,
   checkin,
   checkout,
-  guests
+  guests,
+  rooms
 }) {
   if (!hotelbedsReady()) {
-    return null;
+    return {
+      ok: false,
+      reason:
+        "Hotelbeds keys missing"
+    };
   }
 
-  const hotelCode = Number(
-    hotel.hotel_code
+  const code = Number(
+    hotel.hotelbeds_code
   );
 
-  if (!Number.isFinite(hotelCode)) {
-    return null;
+  if (!Number.isFinite(code)) {
+    return {
+      ok: false,
+      reason:
+        "Invalid Hotelbeds hotel code",
+      hotelbeds_code:
+        hotel.hotelbeds_code
+    };
   }
+
+  const sig =
+    hotelbedsSignature();
 
   const body = {
     stay: {
@@ -526,134 +442,175 @@ async function searchHotelbeds({
 
     occupancies: [
       {
-        rooms: 1,
+        rooms:
+          Number(rooms || 1),
 
-        adults: Math.max(
-          1,
-          Number(guests || 2)
-        ),
+        adults:
+          Number(guests || 2),
 
         children: 0
       }
     ],
 
     hotels: {
-      hotel: [hotelCode]
+      hotel: [code]
     }
   };
 
-  const response = await fetch(
-    `${HOTELBEDS_BASE}/hotel-api/1.0/hotels`,
-    {
-      method: "POST",
+  try {
+    const response = await fetch(
+      `${HOTELBEDS_BASE}/hotel-api/1.0/hotels`,
+      {
+        method: "POST",
 
-      headers: {
-        "Api-key":
-          HOTELBEDS_API_KEY,
+        headers: {
+          "Api-key":
+            HOTELBEDS_API_KEY,
 
-        "X-Signature":
-          hotelbedsSignature(),
+          "X-Signature":
+            sig.signature,
 
-        "Content-Type":
-          "application/json",
+          Accept:
+            "application/json",
 
-        Accept:
-          "application/json"
-      },
+          "Content-Type":
+            "application/json"
+        },
 
-      body: JSON.stringify(body)
-    }
-  );
+        body: JSON.stringify(body)
+      }
+    );
 
-  if (!response.ok) {
+    const text =
+      await response.text();
+
+    let json = null;
+
+    try {
+      json = JSON.parse(text);
+    } catch {}
+
     console.log(
       "HOTELBEDS STATUS:",
       response.status
     );
 
-    return null;
-  }
+    if (!response.ok) {
+      return {
+        ok: false,
 
-  const data =
-    await response.json();
+        reason:
+          "Hotelbeds request failed",
 
-  const hbHotel =
-    data?.hotels?.hotels?.[0];
+        status:
+          response.status,
 
-  if (!hbHotel) {
-    return null;
-  }
+        body:
+          text.slice(0, 1500)
+      };
+    }
 
-  let best = null;
+    const hbHotel =
+      json?.hotels?.hotels?.[0];
 
-  for (const room of hbHotel.rooms || []) {
-    for (const rate of room.rates || []) {
-      const amount = Number(
-        rate.net ||
+    if (!hbHotel) {
+      return {
+        ok: false,
+
+        reason:
+          "No hotel returned",
+
+        body:
+          text.slice(0, 1500)
+      };
+    }
+
+    let best = null;
+
+    for (const room of hbHotel.rooms || []) {
+      for (const rate of room.rates || []) {
+        const amount = Number(
+          rate.net ||
           rate.sellingRate ||
           0
-      );
+        );
 
-      if (!(amount > 0)) {
-        continue;
-      }
+        if (!(amount > 0)) {
+          continue;
+        }
 
-      const candidate = {
-        supplier: "hotelbeds",
+        const candidate = {
+          amount,
 
-        source:
-          "hotelbeds_live_search",
+          currency:
+            rate.currency ||
+            "GBP",
 
-        currency:
-          rate.currency ||
-          "GBP",
+          rate_key:
+            rate.rateKey ||
+            "",
 
-        amount,
+          room_name:
+            room.name || "",
 
-        rate_key:
-          rate.rateKey || "",
+          board_name:
+            rate.boardName || ""
+        };
 
-        room_name:
-          room.name || "",
-
-        board_name:
-          rate.boardName || ""
-      };
-
-      if (
-        candidate.rate_key &&
-        (
-          !best ||
-          candidate.amount <
+        if (
+          candidate.rate_key &&
+          (
+            !best ||
+            candidate.amount <
             best.amount
-        )
-      ) {
-        best = candidate;
+          )
+        ) {
+          best = candidate;
+        }
       }
     }
-  }
 
-  return best;
+    if (!best) {
+      return {
+        ok: false,
+
+        reason:
+          "No live rates available",
+
+        hotel:
+          hbHotel.name || ""
+      };
+    }
+
+    return {
+      ok: true,
+      supplier: "hotelbeds",
+      live_rate: best
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      reason:
+        error.message
+    };
+  }
 }
 
-app.get("/", (req, res) => {
-  res.json({
-    ok: true,
-    service:
-      "MySpace Hotel backend"
-  });
-});
-
 app.get("/status", (req, res) => {
-  const destinations =
-    getDestinations();
-
   const meta = safeJson(
     META_FILE,
     {
       total_hotels: 0
     }
   );
+
+  const destinations =
+    safeJson(
+      DEST_FILE,
+      {
+        countries: []
+      }
+    );
 
   res.json({
     ok: true,
@@ -662,23 +619,18 @@ app.get("/status", (req, res) => {
       "MySpace Hotel backend",
 
     hotels:
-      Number(
-        meta.total_hotels || 0
-      ),
+      meta.total_hotels || 0,
 
     countries:
-      destinations.length,
+      destinations.countries
+        ?.length || 0,
 
     cities:
-      destinations.reduce(
-        (s, x) =>
+      destinations.countries?.reduce(
+        (s, c) =>
           s +
           (
-            Array.isArray(
-              x.cities
-            )
-              ? x.cities.length
-              : 0
+            c.cities?.length || 0
           ),
         0
       ),
@@ -690,40 +642,23 @@ app.get("/status", (req, res) => {
       hotelbedsReady(),
 
     live_rate_engine:
-      "selected_hotel_live_supplier_search"
+      "hotelbeds_live_supplier"
   });
 });
 
 app.get(
-  "/api/real-catalog/destinations",
-  (req, res) => {
-    const countries =
-      getDestinations();
-
-    res.json({
-      ok: true,
-
-      total_countries:
-        countries.length,
-
-      countries
-    });
-  }
-);
-
-app.get(
   "/api/destinations",
   (req, res) => {
-    const countries =
-      getDestinations();
+    const data = safeJson(
+      DEST_FILE,
+      {
+        countries: []
+      }
+    );
 
     res.json({
       ok: true,
-
-      total_countries:
-        countries.length,
-
-      countries
+      ...data
     });
   }
 );
@@ -735,10 +670,14 @@ app.get(
       const hotels =
         await streamHotels({
           country:
-            req.query.country,
+            normalizeCountry(
+              req.query.country
+            ),
 
           city:
-            req.query.city,
+            normalizeCity(
+              req.query.city
+            ),
 
           stay_type:
             req.query.stay_type ||
@@ -747,7 +686,7 @@ app.get(
           limit: Math.min(
             Number(
               req.query.limit ||
-                100
+              100
             ),
             200
           )
@@ -762,8 +701,7 @@ app.get(
       res.status(500).json({
         ok: false,
         error:
-          error.message ||
-          "Hotel search failed"
+          error.message
       });
     }
   }
@@ -781,15 +719,12 @@ app.get(
       if (!hotel) {
         return res.json({
           ok: false,
-
-          live_available: false,
-
-          message:
-            "Hotel not found."
+          reason:
+            "Hotel not found"
         });
       }
 
-      const hotelbeds =
+      const result =
         await searchHotelbeds({
           hotel,
 
@@ -800,45 +735,83 @@ app.get(
             req.query.checkout,
 
           guests:
-            req.query.guests
+            req.query.guests,
+
+          rooms:
+            req.query.rooms
         });
-
-      if (hotelbeds) {
-        return res.json({
-          ok: true,
-
-          live_available: true,
-
-          supplier:
-            "hotelbeds",
-
-          hotel,
-
-          rate: hotelbeds
-        });
-      }
 
       return res.json({
-        ok: false,
+        ok: result.ok,
 
-        live_available: false,
+        hotel,
 
-        suppliers_checked: [
-          "hotelbeds"
-        ],
-
-        message:
-          "No supplier returned a live rate for this selected stay."
+        result
       });
     } catch (error) {
       res.status(500).json({
         ok: false,
-
-        live_available: false,
-
         error:
-          error.message ||
-          "Live rate failed"
+          error.message
+      });
+    }
+  }
+);
+
+app.get(
+  "/api/hotels/live-rate-debug",
+  async (req, res) => {
+    try {
+      const hotel =
+        await findHotel(
+          req.query.hotel_id
+        );
+
+      if (!hotel) {
+        return res.json({
+          ok: false,
+          reason:
+            "Hotel not found"
+        });
+      }
+
+      const result =
+        await searchHotelbeds({
+          hotel,
+
+          checkin:
+            req.query.checkin,
+
+          checkout:
+            req.query.checkout,
+
+          guests:
+            req.query.guests,
+
+          rooms:
+            req.query.rooms
+        });
+
+      res.json({
+        ok: true,
+
+        checked_supplier:
+          "hotelbeds",
+
+        hotel_name:
+          hotel.hotel_name,
+
+        hotelbeds_code:
+          hotel.hotelbeds_code,
+
+        supplier_result:
+          result
+      });
+    } catch (error) {
+      res.status(500).json({
+        ok: false,
+        error:
+          error.message
       });
     }
   }
@@ -852,7 +825,7 @@ app.post(
         return res.status(500).json({
           ok: false,
           error:
-            "Stripe is not configured."
+            "Stripe not configured"
         });
       }
 
@@ -865,18 +838,16 @@ app.post(
       if (!(amount > 0)) {
         return res.status(400).json({
           ok: false,
-
           error:
-            "A real supplier live rate is required before checkout."
+            "Real supplier live rate required"
         });
       }
 
       if (!body.rate_key) {
         return res.status(400).json({
           ok: false,
-
           error:
-            "Missing live supplier rate key."
+            "Missing live supplier rate key"
         });
       }
 
@@ -886,18 +857,10 @@ app.post(
             mode: "payment",
 
             success_url:
-              process.env
-                .STRIPE_SUCCESS_URL ||
               "https://www.myspace-hotel.com/?payment=success",
 
             cancel_url:
-              process.env
-                .STRIPE_CANCEL_URL ||
               "https://www.myspace-hotel.com/?payment=cancelled",
-
-            customer_email:
-              body.customer_email ||
-              undefined,
 
             line_items: [
               {
@@ -917,11 +880,7 @@ app.post(
 
                   product_data: {
                     name:
-                      body.hotel_name ||
-                      "MySpace Hotel stay",
-
-                    description:
-                      `${body.destination || ""} | ${body.checkin || ""} to ${body.checkout || ""}`
+                      body.hotel_name
                   }
                 }
               }
@@ -929,19 +888,10 @@ app.post(
 
             metadata: {
               hotel_id:
-                String(
-                  body.hotel_id ||
-                    ""
-                ),
+                body.hotel_id,
 
               rate_key:
-                String(
-                  body.rate_key ||
-                    ""
-                ).slice(0, 450),
-
-              source:
-                "live_supplier_only"
+                body.rate_key
             }
           }
         );
@@ -953,73 +903,10 @@ app.post(
     } catch (error) {
       res.status(500).json({
         ok: false,
-
         error:
-          error.message ||
-          "Checkout failed"
+          error.message
       });
     }
-  }
-);
-
-app.post(
-  "/api/extranet/register",
-  (req, res) => {
-    const body = req.body || {};
-
-    try {
-      const existing =
-        safeJson(
-          PARTNER_FILE,
-          []
-        );
-
-      existing.push({
-        id:
-          "partner-" +
-          Date.now(),
-
-        created_at:
-          new Date().toISOString(),
-
-        ...body
-      });
-
-      fs.writeFileSync(
-        PARTNER_FILE,
-        JSON.stringify(
-          existing,
-          null,
-          2
-        )
-      );
-    } catch {}
-
-    res.json({
-      ok: true,
-
-      message:
-        "Partner application received.",
-
-      business_name:
-        body.business_name ||
-        "",
-
-      email:
-        body.email || ""
-    });
-  }
-);
-
-app.post(
-  "/api/auth/login",
-  (req, res) => {
-    res.status(401).json({
-      ok: false,
-
-      error:
-        "Partner login requires approved credentials."
-    });
   }
 );
 
@@ -1027,16 +914,6 @@ app.listen(
   PORT,
   "0.0.0.0",
   () => {
-    const destinations =
-      getDestinations();
-
-    const meta = safeJson(
-      META_FILE,
-      {
-        total_hotels: 0
-      }
-    );
-
     console.log(
       "================================="
     );
@@ -1050,38 +927,12 @@ app.listen(
     );
 
     console.log(
-      "Hotels:",
-      meta.total_hotels || 0
-    );
-
-    console.log(
-      "Countries:",
-      destinations.length
-    );
-
-    console.log(
-      "Cities:",
-      destinations.reduce(
-        (s, x) =>
-          s +
-          (
-            Array.isArray(
-              x.cities
-            )
-              ? x.cities.length
-              : 0
-          ),
-        0
-      )
-    );
-
-    console.log(
-      "Hotelbeds ready:",
+      "Hotelbeds Ready:",
       hotelbedsReady()
     );
 
     console.log(
-      "Stripe ready:",
+      "Stripe Ready:",
       Boolean(stripe)
     );
 
