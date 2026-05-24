@@ -1,6 +1,4 @@
-﻿cd C:\frontend\hotel-booking-app\backend
-
-@'
+﻿
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
@@ -831,6 +829,4 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("Swagger:", `http://127.0.0.1:${PORT}/docs`);
   console.log("====================================");
 });
-'@ | Set-Content .\server.js -Encoding UTF8
 
-node .\server.js
