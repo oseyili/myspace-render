@@ -610,11 +610,13 @@ function SearchPanel(props) {
       </div>
 
       <div style={styles.searchCell}>
-        <label>Guests & Rooms</label>
-        <div style={styles.twoInputs}>
-          <input type="number" min="1" value={guests} onChange={(e) => setGuests(e.target.value)} />
-          <input type="number" min="1" value={rooms} onChange={(e) => setRooms(e.target.value)} />
-        </div>
+        <label>Guests</label>
+        <input type="number" min="1" value={guests} onChange={(e) => setGuests(e.target.value)} />
+      </div>
+
+      <div style={styles.searchCell}>
+        <label>Rooms</label>
+        <input type="number" min="1" value={rooms} onChange={(e) => setRooms(e.target.value)} />
       </div>
 
       <button style={styles.searchButton} onClick={searchHotels}>{loading ? "Searching..." : "Search stays"}</button>
@@ -950,7 +952,7 @@ const styles = {
   resultsLayout: { display: "grid", gridTemplateColumns: "1fr 390px", gap: 24 },
   muted: { color: "#64748b", fontWeight: 700 },
   hotelGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(295px,1fr))", gap: 18 },
-  hotelCard: { background: "#fff", borderRadius: 22, overflow: "hidden", boxShadow: "0 16px 40px rgba(15,23,42,.08)" },
+  hotelCard: { background: "#fff", borderRadius: 22, overflow: "visible", boxShadow: "0 16px 40px rgba(15,23,42,.08)" },
   hotelImage: { width: "100%", height: 190, objectFit: "cover" },
   noImage: { height: 190, display: "grid", placeItems: "center", background: "#dbeafe", color: "#1747b8", fontWeight: 900 },
   hotelBody: { padding: 18 },
@@ -985,3 +987,4 @@ const styles = {
   footer: { background: "#fff", borderTop: "1px solid #e2e8f0", padding: "22px 52px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14 },
   footerLinks: { display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }
 };
+
