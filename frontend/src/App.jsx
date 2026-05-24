@@ -1,4 +1,4 @@
-# COMPLETE REPLACEMENT — frontend/src/App.jsx
+﻿# COMPLETE REPLACEMENT â€” frontend/src/App.jsx
 
 ```jsx
 import React, { useEffect, useState } from "react";
@@ -800,7 +800,7 @@ const styles = {
 After pasting:
 
 ```powershell
-# FRONTEND WINDOW — Windows PowerShell
+# FRONTEND WINDOW â€” Windows PowerShell
 
 cd C:\frontend\hotel-booking-app\frontend
 
@@ -815,4 +815,3 @@ git add frontend/src/App.jsx
 git commit -m "Restore stable full customer frontend"
 
 git push origin main
-```
