@@ -126,20 +126,61 @@ function normalizeCity(v) {
 function hotelStayType(name) {
   const text = key(name);
 
-  if (
-    text.includes("apartment") ||
-    text.includes("apartments") ||
-    text.includes("villa") ||
-    text.includes("hostel") ||
-    text.includes("residence") ||
-    text.includes("guest house") ||
-    text.includes("guesthouse") ||
-    text.includes("suite")
-  ) {
-    return "other";
+  const otherWords = [
+    "apartment",
+    "apartments",
+    "flat",
+    "flats",
+    "villa",
+    "villas",
+    "hostel",
+    "residence",
+    "residences",
+    "suite",
+    "suites",
+    "guest house",
+    "guesthouse",
+    "home",
+    "homes",
+    "house",
+    "houses",
+    "cottage",
+    "cottages",
+    "farmhouse",
+    "studio",
+    "studios",
+    "bnb",
+    "b&b",
+    "bed and breakfast",
+    "holiday rental",
+    "shortlet",
+    "short-let",
+    "serviced apartment",
+    "city2stay",
+    "frankie says"
+  ];
+
+  for (const word of otherWords) {
+    if (text.includes(word)) {
+      return "other";
+    }
   }
 
-  return "hotel";
+  const hotelWords = [
+    "hotel",
+    "inn",
+    "motel",
+    "resort",
+    "lodge"
+  ];
+
+  for (const word of hotelWords) {
+    if (text.includes(word)) {
+      return "hotel";
+    }
+  }
+
+  return "other";
 }
 
 function stayTypeMatch(
