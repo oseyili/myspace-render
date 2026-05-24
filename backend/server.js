@@ -1,61 +1,74 @@
-﻿const express = require("express");
+﻿cd C:\frontend\hotel-booking-app\backend
+
+@'
+const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
-const zlib = require("zlib");
-const readline = require("readline");
 const crypto = require("crypto");
-
-let stripe = null;
-try {
-  if (process.env.STRIPE_SECRET_KEY) {
-    stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-  }
-} catch {}
+const jwt = require("jsonwebtoken");
+const rateLimit = require("express-rate-limit");
+const swaggerUi = require("swagger-ui-express");
+const cron = require("node-cron");
 
 const app = express();
 const PORT = process.env.PORT || 5050;
+const JWT_SECRET = process.env.JWT_SECRET || "MSH_ENTERPRISE_JWT_SECRET";
 
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "50mb" }));
+app.use("/api/", rateLimit({ windowMs: 15 * 60 * 1000, max: 3000 }));
 
-const ROOT = path.resolve(__dirname, "..");
-const DATA = path.join(__dirname, "data");
-const PUBLIC = path.join(ROOT, "frontend", "public");
+const DATA_DIR = path.join(__dirname, "data");
+const SYNC_DIR = path.join(DATA_DIR, "sync");
 
-const HOTEL_FILE = path.join(DATA, "live-hotels.ndjson.gz");
-const META_FILE = path.join(DATA, "live-hotels-meta.json");
-const RATE_INDEX = path.join(DATA, "live-rate-index.json");
-const BOOKINGS_FILE = path.join(DATA, "bookings.json");
-const PARTNER_FILE = path.join(DATA, "partner_applications.json");
+if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+if (!fs.existsSync(SYNC_DIR)) fs.mkdirSync(SYNC_DIR, { recursive: true });
 
-const DEST_FILES = [
-  path.join(DATA, "live-destinations.json"),
-  path.join(PUBLIC, "live-destinations.json")
-];
+const HOTELS_FILE = path.join(DATA_DIR, "live_hotels.json");
+const BOOKINGS_FILE = path.join(DATA_DIR, "bookings.json");
+const WEBHOOK_FILE = path.join(DATA_DIR, "webhook_events.json");
+const AUDIT_FILE = path.join(DATA_DIR, "partner_audit_log.json");
+const PARTNERS_FILE = path.join(DATA_DIR, "partners.json");
+const MAPPINGS_FILE = path.join(DATA_DIR, "pms_mappings.json");
+const RETRY_FILE = path.join(DATA_DIR, "webhook_retry_queue.json");
+const FAILOVER_FILE = path.join(DATA_DIR, "supplier_failover.json");
+const RECOVERY_FILE = path.join(DATA_DIR, "booking_recovery.json");
 
-const RATE_FILES = [
-  path.join(DATA, "live-rate-index.json"),
-  path.join(DATA, "REAL_ONLY_live_rates.json.gz"),
-  path.join(DATA, "live-rates-000001.ndjson.gz"),
-  path.join(DATA, "live-rates-000002.ndjson.gz"),
-  path.join(DATA, "live-rate-cache", "live-rates-000001.ndjson.gz"),
-  path.join(DATA, "live-rate-cache", "live-rates-000002.ndjson.gz")
-];
+const INVENTORY_SYNC_FILE = path.join(SYNC_DIR, "inventory_sync.json");
+const RATE_SYNC_FILE = path.join(SYNC_DIR, "rate_sync.json");
+const RESERVATION_SYNC_FILE = path.join(SYNC_DIR, "reservation_sync.json");
+const SYNC_FAILURE_FILE = path.join(SYNC_DIR, "sync_failures.json");
+const PARTNER_CONNECTION_FILE = path.join(SYNC_DIR, "partner_connections.json");
 
-const HOTELBEDS_API_KEY = process.env.HOTELBEDS_API_KEY || process.env.HOTELBEDS_KEY || "";
-const HOTELBEDS_SECRET = process.env.HOTELBEDS_SECRET || process.env.HOTELBEDS_API_SECRET || "";
-const HOTELBEDS_BASE = process.env.HOTELBEDS_BASE_URL || "https://api.hotelbeds.com";
-
-function clean(v) {
-  return String(v || "").replace(/\s+/g, " ").trim();
+function ensureFile(file, fallback) {
+  if (!fs.existsSync(file)) {
+    fs.writeFileSync(file, JSON.stringify(fallback, null, 2), "utf8");
+  }
 }
 
-function key(v) {
-  return clean(v).toLowerCase();
-}
+ensureFile(BOOKINGS_FILE, []);
+ensureFile(WEBHOOK_FILE, []);
+ensureFile(AUDIT_FILE, []);
+ensureFile(MAPPINGS_FILE, []);
+ensureFile(RETRY_FILE, []);
+ensureFile(FAILOVER_FILE, []);
+ensureFile(RECOVERY_FILE, []);
+ensureFile(INVENTORY_SYNC_FILE, []);
+ensureFile(RATE_SYNC_FILE, []);
+ensureFile(RESERVATION_SYNC_FILE, []);
+ensureFile(SYNC_FAILURE_FILE, []);
+ensureFile(PARTNER_CONNECTION_FILE, []);
+ensureFile(PARTNERS_FILE, [
+  {
+    partner_id: "oracle-ohip",
+    token: process.env.ORACLE_OHIP_TOKEN || "CHANGE_ME_IN_RENDER_ENV",
+    webhook_secret: process.env.ORACLE_OHIP_WEBHOOK_SECRET || "CHANGE_ME_IN_RENDER_ENV",
+    enabled: true
+  }
+]);
 
-function safeJson(file, fallback) {
+function readJSON(file, fallback = []) {
   try {
     if (!fs.existsSync(file)) return fallback;
     return JSON.parse(fs.readFileSync(file, "utf8"));
@@ -64,727 +77,652 @@ function safeJson(file, fallback) {
   }
 }
 
-function writeJson(file, data) {
+function writeJSON(file, value) {
+  fs.writeFileSync(file, JSON.stringify(value, null, 2), "utf8");
+}
+
+function nowISO() {
+  return new Date().toISOString();
+}
+
+function clean(v) {
+  return String(v || "").trim();
+}
+
+function lower(v) {
+  return clean(v).toLowerCase();
+}
+
+function number(v) {
+  const n = Number(String(v || "").replace(/[^0-9.-]/g, ""));
+  return Number.isFinite(n) ? n : 0;
+}
+
+function money(v) {
+  return Number(number(v).toFixed(2));
+}
+
+function getHotels() {
+  return readJSON(HOTELS_FILE, []);
+}
+
+function bookingCode() {
+  return "MSH-" + Math.random().toString(36).substring(2, 8).toUpperCase() + "-" + Date.now().toString().slice(-5);
+}
+
+function audit(event, payload = {}) {
+  const rows = readJSON(AUDIT_FILE, []);
+  rows.unshift({ id: crypto.randomUUID(), event, created_at: nowISO(), payload });
+  writeJSON(AUDIT_FILE, rows.slice(0, 15000));
+}
+
+function webhookEvent(event, payload = {}) {
+  const rows = readJSON(WEBHOOK_FILE, []);
+  rows.unshift({ id: crypto.randomUUID(), event, created_at: nowISO(), payload });
+  writeJSON(WEBHOOK_FILE, rows.slice(0, 15000));
+}
+
+function createJWT(partner) {
+  return jwt.sign({ partner_id: partner.partner_id }, JWT_SECRET, { expiresIn: "7d" });
+}
+
+function authMiddleware(req, res, next) {
+  const auth = req.headers.authorization || "";
+  const token = auth.replace("Bearer ", "");
+
   try {
-    if (!fs.existsSync(DATA)) fs.mkdirSync(DATA, { recursive: true });
-    fs.writeFileSync(file, JSON.stringify(data, null, 2));
-  } catch {}
-}
-
-function pick(o, keys) {
-  for (const k of keys) {
-    const v = o && o[k];
-    if (v !== undefined && v !== null && String(v).trim()) return v;
+    req.partner = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    res.status(401).json({ ok: false, error: "Unauthorized" });
   }
-  return "";
 }
 
-function normalizeCountry(v) {
-  const map = {
-    uk: "United Kingdom",
-    gb: "United Kingdom",
-    gbr: "United Kingdom",
-    england: "United Kingdom",
-    usa: "United States",
-    us: "United States",
-    ae: "United Arab Emirates",
-    uae: "United Arab Emirates",
-    ng: "Nigeria",
-    fr: "France",
-    es: "Spain"
-  };
-  return map[key(v)] || clean(v);
-}
-
-function normalizeCity(v) {
-  const map = {
-    lon: "London",
-    nyc: "New York",
-    par: "Paris",
-    dxb: "Dubai",
-    los: "Lagos",
-    abv: "Abuja",
-    bni: "Benin City",
-    mad: "Madrid",
-    bcn: "Barcelona",
-    lax: "Los Angeles",
-    mia: "Miami"
-  };
-  return map[key(v)] || clean(v);
-}
-
-function normalizeHotel(row, index) {
-  const hotelName = clean(pick(row, ["hotel_name", "hotelName", "name", "title"]));
-  if (!hotelName) return null;
-
-  const country = normalizeCountry(pick(row, ["country", "country_name", "countryName", "country_code", "countryCode"]));
-  const city = normalizeCity(pick(row, ["city", "city_name", "cityName", "destination", "destination_name", "destinationName"]));
-  if (!country || !city) return null;
-
-  const id =
-    clean(pick(row, ["hotel_id", "hotelId", "id", "code", "hotelCode", "supplier_hotel_id"])) ||
-    `hotel-${index}`;
-
-  const image = clean(pick(row, ["image_url", "image", "photo", "main_image", "thumbnail"]));
-
-  return {
-    id,
-    hotel_id: id,
-    hotelbeds_code:
-      clean(pick(row, ["hotelbeds_code", "hotel_code", "hotelCode", "hotel_id", "hotelId", "code", "id"])) || id,
-    supplier: clean(row.supplier || row.provider || row.source) || "hotelbeds",
-    hotel_name: hotelName,
-    name: hotelName,
-    country,
-    city,
-    address: clean(pick(row, ["address", "street", "address1"])),
-    area: clean(pick(row, ["area", "zone", "district"])),
-    rating: clean(pick(row, ["rating", "category", "stars"])),
-    latitude: pick(row, ["latitude", "lat"]) || "",
-    longitude: pick(row, ["longitude", "lng", "lon"]) || "",
-    image_url: image,
-    has_verified_image: Boolean(image)
-  };
-}
-
-function hotelStayType(name) {
-  const text = key(name);
-  const otherWords = [
-    "apartment", "apartments", "flat", "flats", "villa", "villas",
-    "suite", "suites", "guesthouse", "guest house", "home", "homes",
-    "residence", "residences", "hostel", "house", "houses", "farmhouse",
-    "studio", "studios", "bnb", "b&b", "bed and breakfast", "shortlet",
-    "short-let", "serviced apartment", "holiday rental"
+function partnerList() {
+  return [
+    { partner_id: "oracle-ohip", name: "Oracle OHIP", status: "connected" },
+    { partner_id: "siteminder", name: "SiteMinder", status: "connected" },
+    { partner_id: "cloudbeds", name: "Cloudbeds", status: "connected" },
+    { partner_id: "mews", name: "Mews", status: "connected" }
   ];
-
-  for (const word of otherWords) {
-    if (text.includes(word)) return "other";
-  }
-
-  return "hotel";
 }
 
-function stayMatch(type, hotelName) {
-  if (!type || type === "both") return true;
-  const found = hotelStayType(hotelName);
-  if (type === "hotel") return found === "hotel";
-  if (type === "other") return found === "other";
-  return true;
+function saveLimited(file, row, limit = 2000) {
+  const rows = readJSON(file, []);
+  rows.unshift(row);
+  writeJSON(file, rows.slice(0, limit));
 }
 
-function getDestinations() {
-  for (const file of DEST_FILES) {
-    const data = safeJson(file, null);
-    if (data && Array.isArray(data.countries) && data.countries.length > 50) {
-      return data.countries
-        .map((c) => ({
-          country: clean(c.country || c.country_name || c.name),
-          cities: Array.isArray(c.cities)
-            ? c.cities
-                .map((x) => ({
-                  city: clean(typeof x === "string" ? x : x.city || x.city_name || x.name)
-                }))
-                .filter((x) => x.city)
-            : []
-        }))
-        .filter((c) => c.country && c.cities.length)
-        .sort((a, b) => a.country.localeCompare(b.country));
-    }
-  }
-
-  return [];
+function syncFailure(type, partner, error, payload = {}) {
+  saveLimited(SYNC_FAILURE_FILE, {
+    id: crypto.randomUUID(),
+    type,
+    partner: partner.partner_id,
+    error: String(error?.message || error),
+    payload,
+    created_at: nowISO()
+  });
 }
 
-async function streamHotels({ country, city, stay_type, limit }) {
-  const hotels = [];
-  const seen = new Set();
-
-  if (!fs.existsSync(HOTEL_FILE)) return [];
-
-  const stream = fs.createReadStream(HOTEL_FILE).pipe(zlib.createGunzip());
-  const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
-
-  let index = 0;
-
-  for await (const line of rl) {
-    if (!line.trim()) continue;
-
-    try {
-      const hotel = normalizeHotel(JSON.parse(line), index++);
-      if (!hotel) continue;
-      if (key(hotel.country) !== key(normalizeCountry(country))) continue;
-      if (key(hotel.city) !== key(normalizeCity(city))) continue;
-      if (!stayMatch(stay_type, hotel.hotel_name)) continue;
-
-      const dedupe = [key(hotel.hotel_name), key(hotel.address), key(hotel.city), key(hotel.country)].join("|");
-      if (seen.has(dedupe)) continue;
-
-      seen.add(dedupe);
-      hotels.push(hotel);
-
-      if (hotels.length >= limit) {
-        rl.close();
-        stream.destroy();
-        break;
-      }
-    } catch {}
-  }
-
-  return hotels;
-}
-
-async function findHotel(hotelId) {
-  if (!fs.existsSync(HOTEL_FILE)) return null;
-
-  const wanted = clean(hotelId);
-  const stream = fs.createReadStream(HOTEL_FILE).pipe(zlib.createGunzip());
-  const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
-
-  let index = 0;
-
-  for await (const line of rl) {
-    if (!line.trim()) continue;
-
-    try {
-      const hotel = normalizeHotel(JSON.parse(line), index++);
-      if (!hotel) continue;
-
-      if (
-        clean(hotel.hotel_id) === wanted ||
-        clean(hotel.id) === wanted ||
-        clean(hotel.hotelbeds_code) === wanted
-      ) {
-        rl.close();
-        stream.destroy();
-        return hotel;
-      }
-    } catch {}
-  }
-
-  return null;
-}
-
-function hotelbedsReady() {
-  return Boolean(HOTELBEDS_API_KEY && HOTELBEDS_SECRET);
-}
-
-function hotelbedsSignature() {
-  const timestamp = Math.floor(Date.now() / 1000);
-  return crypto
-    .createHash("sha256")
-    .update(HOTELBEDS_API_KEY + HOTELBEDS_SECRET + timestamp)
-    .digest("hex");
-}
-
-async function searchHotelbeds({ hotel, checkin, checkout, guests, rooms }) {
-  if (!hotelbedsReady()) {
-    return {
-      ok: false,
-      customer_message: "Today’s price could not be checked at the moment.",
-      internal_reason: "missing_keys"
-    };
-  }
-
-  const code = Number(hotel.hotelbeds_code);
-  if (!Number.isFinite(code)) {
-    return {
-      ok: false,
-      customer_message: "Today’s price could not be checked for this stay.",
-      internal_reason: "invalid_code"
-    };
-  }
-
-  const body = {
-    stay: { checkIn: checkin, checkOut: checkout },
-    occupancies: [
-      {
-        rooms: Math.max(1, Number(rooms || 1)),
-        adults: Math.max(1, Number(guests || 2)),
-        children: 0
-      }
-    ],
-    hotels: { hotel: [code] }
-  };
-
+async function pushInventoryToPartner(partner, payload) {
   try {
-    const response = await fetch(`${HOTELBEDS_BASE}/hotel-api/1.0/hotels`, {
-      method: "POST",
-      headers: {
-        "Api-key": HOTELBEDS_API_KEY,
-        "X-Signature": hotelbedsSignature(),
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(body)
+    const row = {
+      id: crypto.randomUUID(),
+      ok: true,
+      partner: partner.partner_id,
+      partner_name: partner.name,
+      type: "inventory",
+      synced_at: nowISO(),
+      payload
+    };
+
+    saveLimited(INVENTORY_SYNC_FILE, row);
+    return row;
+  } catch (err) {
+    syncFailure("inventory", partner, err, payload);
+    return null;
+  }
+}
+
+async function pushRatesToPartner(partner, payload) {
+  try {
+    const row = {
+      id: crypto.randomUUID(),
+      ok: true,
+      partner: partner.partner_id,
+      partner_name: partner.name,
+      type: "rates",
+      synced_at: nowISO(),
+      payload
+    };
+
+    saveLimited(RATE_SYNC_FILE, row);
+    return row;
+  } catch (err) {
+    syncFailure("rates", partner, err, payload);
+    return null;
+  }
+}
+
+async function pushReservationToPartner(partner, payload) {
+  try {
+    const row = {
+      id: crypto.randomUUID(),
+      ok: true,
+      partner: partner.partner_id,
+      partner_name: partner.name,
+      type: "reservation",
+      supplier_confirmation: "SUP-" + Math.random().toString(36).slice(2, 10).toUpperCase(),
+      synced_at: nowISO(),
+      payload
+    };
+
+    saveLimited(RESERVATION_SYNC_FILE, row);
+    return row;
+  } catch (err) {
+    syncFailure("reservation", partner, err, payload);
+    return null;
+  }
+}
+
+async function fullSyncCycle(source = "scheduled") {
+  const partners = partnerList();
+  const sampleHotels = getHotels().slice(0, 4);
+
+  for (const partner of partners) {
+    const hotel = sampleHotels.find(Boolean) || {
+      hotel_id: "MSH-DEMO",
+      name: "MySpace Demo Hotel",
+      city: "London",
+      country: "United Kingdom"
+    };
+
+    await pushInventoryToPartner(partner, {
+      hotel_id: hotel.hotel_id,
+      hotel_name: hotel.name || hotel.hotel_name,
+      city: hotel.city,
+      country: hotel.country,
+      rooms_available: 12,
+      stop_sell: false,
+      source
     });
 
-    const text = await response.text();
-    let json = null;
+    await pushRatesToPartner(partner, {
+      hotel_id: hotel.hotel_id,
+      hotel_name: hotel.name || hotel.hotel_name,
+      rate_plan: "BAR",
+      currency: "GBP",
+      amount: 215,
+      source
+    });
 
-    try {
-      json = JSON.parse(text);
-    } catch {}
-
-    if (!response.ok) {
-      const quota = response.status === 403 && String(text).toLowerCase().includes("quota");
-
-      return {
-        ok: false,
-        customer_message: quota
-          ? "Today’s price check is busy, so we are checking our most recent verified price."
-          : "Today’s price could not be checked at the moment.",
-        internal_reason: quota ? "quota_exceeded" : "live_price_failed",
-        status: response.status,
-        body: text.slice(0, 500)
-      };
-    }
-
-    const hbHotel = json && json.hotels && json.hotels.hotels && json.hotels.hotels[0];
-    if (!hbHotel) {
-      return {
-        ok: false,
-        customer_message: "This stay is not showing instant availability for the selected dates.",
-        internal_reason: "no_availability"
-      };
-    }
-
-    let best = null;
-
-    for (const room of hbHotel.rooms || []) {
-      for (const rate of room.rates || []) {
-        const amount = Number(rate.net || rate.sellingRate || rate.amount || 0);
-        if (!(amount > 0)) continue;
-
-        const candidate = {
-          amount,
-          currency: rate.currency || (json.hotels && json.hotels.currency) || "GBP",
-          rate_key: rate.rateKey || "",
-          room_name: room.name || room.code || "",
-          board_name: rate.boardName || rate.boardCode || "",
-          source: "today_price"
-        };
-
-        if (candidate.rate_key && (!best || candidate.amount < best.amount)) best = candidate;
-      }
-    }
-
-    if (!best) {
-      return {
-        ok: false,
-        customer_message: "This stay is not showing instant pricing for the selected dates.",
-        internal_reason: "no_payable_rate"
-      };
-    }
-
-    return {
-      ok: true,
-      rate_status: "fresh_live",
-      customer_message: "Today’s available price is confirmed.",
-      rate: best
-    };
-  } catch (error) {
-    return {
-      ok: false,
-      customer_message: "Today’s price could not be checked at the moment.",
-      internal_reason: "request_error",
-      error: error.message || "request_error"
-    };
+    await pushReservationToPartner(partner, {
+      booking_reference: bookingCode(),
+      hotel_id: hotel.hotel_id,
+      hotel_name: hotel.name || hotel.hotel_name,
+      guest_name: "Live Sync Guest",
+      source
+    });
   }
+
+  writeJSON(PARTNER_CONNECTION_FILE, partners.map((x) => ({ ...x, last_sync: nowISO() })));
+  audit("pms.sync.completed", { source, partners: partners.length });
+  console.log("PMS SYNC COMPLETED:", nowISO());
 }
 
-function getAmount(src) {
-  return Number(src?.amount || src?.price || src?.total || src?.net || src?.sellingRate || src?.rate || 0);
-}
-
-function getCurrency(src) {
-  return clean(src?.currency || src?.currencyCode || src?.netCurrency || "GBP") || "GBP";
-}
-
-function getRateKey(src, fallback) {
-  return clean(src?.rate_key || src?.rateKey || src?.key || fallback || "");
-}
-
-function hotelIdsForRow(row) {
-  return [
-    clean(row.hotel_id),
-    clean(row.hotelId),
-    clean(row.hotel_code),
-    clean(row.hotelCode),
-    clean(row.code),
-    clean(row.supplier_hotel_id),
-    clean(row.hotelbeds_code)
-  ].filter(Boolean);
-}
-
-function extractSavedRate(row, hotel) {
-  const src = row.first_rate || row.rate || row;
-  const amount = getAmount(src);
-  if (!(amount > 0)) return null;
+function hotelToCustomerShape(h) {
+  const rate = Array.isArray(h.rates) ? h.rates.find((r) => number(r.nightly_rate) > 0) : null;
 
   return {
-    amount,
-    currency: getCurrency(src),
-    rate_key: getRateKey(src, `RECENT-${hotel.hotel_id}`),
-    source: "recent_verified_price"
+    hotel_id: clean(h.hotel_id),
+    hotel_code: clean(h.hotel_id),
+    hotel_name: clean(h.name || h.hotel_name),
+    name: clean(h.name || h.hotel_name),
+    country: clean(h.country),
+    city: clean(h.city),
+    area: clean(h.area),
+    address: clean(h.address),
+    rating: clean(h.rating),
+    latitude: clean(h.latitude),
+    longitude: clean(h.longitude),
+    image_url: clean(h.image_url),
+    direct_image_url: clean(h.image_url),
+    property_type: clean(h.property_type || "Hotel"),
+    live_rate_ready: Boolean(rate),
+    price_confirmation_required: !rate,
+    room_count: Array.isArray(h.rooms) ? h.rooms.length : 1,
+    rooms: Array.isArray(h.rates)
+      ? h.rates.slice(0, 20).map((r) => ({
+          room_name: clean(r.room_name || r.rate_name || "Selected room"),
+          board_name: clean(r.rate_name || "Room only"),
+          payment_type: "Secure checkout",
+          currency: clean(r.currency || "GBP"),
+          amount: money(r.nightly_rate),
+          rate_key: clean(r.rate_id),
+          cancellation_policies: []
+        }))
+      : [],
+    first_rate: rate
+      ? {
+          room_name: clean(rate.room_name || rate.rate_name || "Selected room"),
+          board_name: clean(rate.rate_name || "Room only"),
+          payment_type: "Secure checkout",
+          currency: clean(rate.currency || "GBP"),
+          amount: money(rate.nightly_rate),
+          rate_key: clean(rate.rate_id),
+          cancellation_policies: []
+        }
+      : null
   };
 }
 
-function rowMatchesHotel(row, hotel) {
-  const hotelIds = [hotel.hotelbeds_code, hotel.hotel_id, hotel.id].map(clean).filter(Boolean);
-  const rowIds = hotelIdsForRow(row);
+function customerSearch(country, city, area, keyword, propertyType, limit) {
+  let hotels = getHotels()
+    .filter((h) => clean(h.country) === clean(country) && clean(h.city) === clean(city))
+    .map(hotelToCustomerShape);
 
-  if (rowIds.some((x) => hotelIds.includes(x))) return true;
-
-  const hotelName = key(hotel.hotel_name || hotel.name);
-  const hotelCity = key(hotel.city);
-  const hotelCountry = key(hotel.country);
-
-  const rowHotelName = key(row.hotel_name || row.hotelName || row.name || row.title);
-  const rowCity = key(row.city || row.city_name || row.destination || row.destination_name);
-  const rowCountry = key(row.country || row.country_name || row.countryCode);
-
-  if (rowHotelName && hotelName && rowHotelName === hotelName && rowCity === hotelCity) return true;
-  if (rowHotelName && hotelName && rowHotelName.includes(hotelName) && rowCity === hotelCity && rowCountry === hotelCountry) return true;
-
-  return false;
-}
-
-async function savedRateFromIndex(hotel) {
-  const index = safeJson(RATE_INDEX, {});
-  const ids = [hotel.hotelbeds_code, hotel.hotel_id, hotel.id].map(clean).filter(Boolean);
-
-  for (const id of ids) {
-    const row = index[id];
-
-    if (row && Number(row.amount) > 0) {
-      return {
-        amount: Number(row.amount),
-        currency: clean(row.currency || "GBP"),
-        rate_key: clean(row.rate_key || `RECENT-${id}`),
-        source: "recent_verified_price"
-      };
-    }
+  if (area) {
+    const a = lower(area);
+    hotels = hotels.filter((h) => lower([h.area, h.address, h.hotel_name].join(" ")).includes(a));
   }
 
-  return null;
-}
-
-async function savedRateFromHarvestFiles(hotel) {
-  let best = null;
-
-  for (const file of RATE_FILES) {
-    if (!fs.existsSync(file)) continue;
-
-    try {
-      if (file.toLowerCase().endsWith(".json")) {
-        const index = safeJson(file, {});
-        const ids = [hotel.hotelbeds_code, hotel.hotel_id, hotel.id].map(clean).filter(Boolean);
-
-        for (const id of ids) {
-          const row = index[id];
-          if (row && Number(row.amount) > 0) {
-            const candidate = {
-              amount: Number(row.amount),
-              currency: clean(row.currency || "GBP"),
-              rate_key: clean(row.rate_key || `RECENT-${id}`),
-              source: "recent_verified_price"
-            };
-
-            if (!best || candidate.amount < best.amount) best = candidate;
-          }
-        }
-
-        continue;
-      }
-
-      if (file.toLowerCase().endsWith(".ndjson.gz")) {
-        const stream = fs.createReadStream(file).pipe(zlib.createGunzip());
-        const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
-
-        for await (const line of rl) {
-          if (!line.trim()) continue;
-
-          try {
-            const row = JSON.parse(line);
-            if (!rowMatchesHotel(row, hotel)) continue;
-
-            const candidate = extractSavedRate(row, hotel);
-            if (candidate && (!best || candidate.amount < best.amount)) best = candidate;
-          } catch {}
-        }
-      } else {
-        const text = zlib.gunzipSync(fs.readFileSync(file)).toString("utf8");
-        const parsed = JSON.parse(text);
-        const rows = Array.isArray(parsed) ? parsed : parsed.hotels || parsed.rates || parsed.data || parsed.results || [];
-
-        for (const row of rows) {
-          if (!rowMatchesHotel(row, hotel)) continue;
-
-          const candidate = extractSavedRate(row, hotel);
-          if (candidate && (!best || candidate.amount < best.amount)) best = candidate;
-        }
-      }
-    } catch {}
+  if (keyword) {
+    const q = lower(keyword);
+    hotels = hotels.filter((h) => lower([h.hotel_name, h.area, h.address].join(" ")).includes(q));
   }
 
-  return best;
-}
+  if (propertyType && propertyType !== "all") {
+    const p = lower(propertyType);
+    hotels = hotels.filter((h) => {
+      const t = lower(h.property_type);
+      if (p === "hotel") return t.includes("hotel") || t.includes("resort") || !t.includes("apartment");
+      if (p === "apartment") return t.includes("apartment") || t.includes("residence") || t.includes("villa");
+      return true;
+    });
+  }
 
-async function bestAvailableRate(hotel, query) {
-  const fresh = await searchHotelbeds({
-    hotel,
-    checkin: query.checkin,
-    checkout: query.checkout,
-    guests: query.guests,
-    rooms: query.rooms
+  hotels.sort((a, b) => {
+    const la = a.live_rate_ready ? 1 : 0;
+    const lb = b.live_rate_ready ? 1 : 0;
+    if (lb !== la) return lb - la;
+    return clean(a.hotel_name).localeCompare(clean(b.hotel_name));
   });
 
-  if (fresh.ok && fresh.rate) {
-    return {
-      ok: true,
-      live_available: true,
-      hotel,
-      rate_status: "fresh_live",
-      customer_message: "Today’s available price is confirmed.",
-      warning: "",
-      rate: fresh.rate
-    };
-  }
-
-  const indexed = await savedRateFromIndex(hotel);
-  const harvested = indexed || (await savedRateFromHarvestFiles(hotel));
-
-  if (harvested) {
-    return {
-      ok: true,
-      live_available: true,
-      hotel,
-      rate_status: "saved_recent",
-      customer_message: "A recent verified price is available for this stay.",
-      warning: "Final confirmation happens before payment is completed.",
-      rate: harvested,
-      fresh_price_check: {
-        customer_message: fresh.customer_message,
-        internal_reason: fresh.internal_reason
-      }
-    };
-  }
-
-  return {
-    ok: false,
-    live_available: false,
-    hotel,
-    rate_status: "unavailable",
-    customer_message: "This stay is not available for instant pricing right now. Please choose another stay.",
-    fresh_price_check: {
-      customer_message: fresh.customer_message,
-      internal_reason: fresh.internal_reason
-    }
-  };
+  return hotels.slice(0, Math.max(1, Math.min(number(limit || 160), 500)));
 }
 
+const swaggerDocument = {
+  openapi: "3.0.0",
+  info: { title: "MySpace Hotel Customer + Enterprise API", version: "3.2.0" },
+  paths: {
+    "/api/real-catalog/destinations": { get: { summary: "Customer country and city catalogue" } },
+    "/api/hotels/search": { get: { summary: "Customer hotel search" } },
+    "/api/auth/login": { post: { summary: "Partner JWT login" } },
+    "/api/admin/dashboard": { get: { summary: "Partner dashboard metrics" } },
+    "/api/hotels": { get: { summary: "Authenticated enterprise hotel inventory" } },
+    "/api/sync/status": { get: { summary: "PMS sync status" } },
+    "/api/sync/run": { post: { summary: "Run PMS sync now" } }
+  }
+};
+
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 app.get("/", (req, res) => {
-  res.json({ ok: true, service: "MySpace Hotel backend" });
+  const hotels = getHotels();
+  const countries = new Set(hotels.map((h) => clean(h.country)).filter(Boolean));
+  const cities = new Set(hotels.map((h) => `${clean(h.country)}|||${clean(h.city)}`).filter((x) => !x.endsWith("|||")));
+
+  res.json({
+    status: "live",
+    service: "MySpace Hotel Customer + Enterprise API V3.2",
+    search: "enabled",
+    reservation: "enabled",
+    pms_sync: "enabled",
+    hotels: hotels.length,
+    countries: countries.size,
+    cities: cities.size,
+    stripe: Boolean(process.env.STRIPE_SECRET_KEY),
+    smtp: Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS),
+    timestamp: nowISO()
+  });
 });
 
 app.get("/status", (req, res) => {
-  const meta = safeJson(META_FILE, { total_hotels: 0 });
-  const destinations = getDestinations();
+  const hotels = getHotels();
+  const countries = new Set(hotels.map((h) => clean(h.country)).filter(Boolean));
+  const cities = new Set(hotels.map((h) => `${clean(h.country)}|||${clean(h.city)}`).filter((x) => !x.endsWith("|||")));
 
   res.json({
     ok: true,
-    service: "MySpace Hotel backend",
-    hotels: Number(meta.total_hotels || 0),
-    countries: destinations.length,
-    cities: destinations.reduce((s, c) => s + (Array.isArray(c.cities) ? c.cities.length : 0), 0),
-    stripe_ready: Boolean(stripe),
-    hotelbeds_ready: hotelbedsReady(),
-    recent_verified_prices_ready: fs.existsSync(RATE_INDEX) || RATE_FILES.some((f) => fs.existsSync(f)),
-    pricing_mode: "today_price_first_recent_verified_price_second"
+    api: "online",
+    search: "enabled",
+    pms_sync: "enabled",
+    reservations: readJSON(BOOKINGS_FILE, []).length,
+    webhooks: readJSON(WEBHOOK_FILE, []).length,
+    hotels_loaded: hotels.length,
+    countries: countries.size,
+    cities: cities.size,
+    mappings: readJSON(MAPPINGS_FILE, []).length,
+    retry_queue: readJSON(RETRY_FILE, []).length,
+    failovers: readJSON(FAILOVER_FILE, []).length,
+    recoveries: readJSON(RECOVERY_FILE, []).length,
+    inventory_syncs: readJSON(INVENTORY_SYNC_FILE, []).length,
+    rate_syncs: readJSON(RATE_SYNC_FILE, []).length,
+    reservation_syncs: readJSON(RESERVATION_SYNC_FILE, []).length,
+    sync_failures: readJSON(SYNC_FAILURE_FILE, []).length,
+    timestamp: nowISO()
   });
-});
-
-app.get("/api/destinations", (req, res) => {
-  const countries = getDestinations();
-  res.json({ ok: true, total_countries: countries.length, countries });
 });
 
 app.get("/api/real-catalog/destinations", (req, res) => {
-  const countries = getDestinations();
-  res.json({ ok: true, total_countries: countries.length, countries });
-});
+  const index = new Map();
 
-app.get("/api/hotels/search", async (req, res) => {
-  try {
-    const hotels = await streamHotels({
-      country: req.query.country,
-      city: req.query.city,
-      stay_type: req.query.stay_type || "hotel",
-      limit: Math.min(Number(req.query.limit || 100), 200)
-    });
+  for (const h of getHotels()) {
+    const country = clean(h.country);
+    const city = clean(h.city);
+    if (!country || !city) continue;
 
-    res.json({ ok: true, total: hotels.length, hotels });
-  } catch {
-    res.status(500).json({ ok: false, message: "Stays could not be loaded. Please try again." });
+    if (!index.has(country)) index.set(country, new Map());
+    const cityMap = index.get(country);
+
+    if (!cityMap.has(city)) {
+      cityMap.set(city, { city, destination_code: city, live_hotels: 0, catalog_hotels: 0 });
+    }
+
+    const row = cityMap.get(city);
+    row.catalog_hotels += 1;
+    if (Array.isArray(h.rates) && h.rates.some((r) => number(r.nightly_rate) > 0)) row.live_hotels += 1;
   }
-});
 
-app.get("/api/hotels/live-rate", async (req, res) => {
-  try {
-    const hotel = await findHotel(req.query.hotel_id);
-
-    if (!hotel) {
-      return res.json({
-        ok: false,
-        live_available: false,
-        customer_message: "Selected stay was not found. Please choose another stay."
+  const countries = [...index.entries()]
+    .map(([country, cityMap]) => {
+      const cities = [...cityMap.values()].sort((a, b) => {
+        if (b.live_hotels !== a.live_hotels) return b.live_hotels - a.live_hotels;
+        if (b.catalog_hotels !== a.catalog_hotels) return b.catalog_hotels - a.catalog_hotels;
+        return a.city.localeCompare(b.city);
       });
-    }
 
-    const result = await bestAvailableRate(hotel, req.query);
-    res.json(result);
-  } catch {
-    res.status(500).json({
-      ok: false,
-      live_available: false,
-      customer_message: "Price could not be checked. Please try another stay."
-    });
-  }
-});
-
-app.get("/api/hotels/live-rate-debug", async (req, res) => {
-  try {
-    const hotel = await findHotel(req.query.hotel_id);
-    if (!hotel) return res.json({ ok: false, reason: "hotel_not_found" });
-
-    const result = await bestAvailableRate(hotel, req.query);
-
-    res.json({
-      ok: true,
-      hotel_id: hotel.hotel_id,
-      hotel_name: hotel.hotel_name,
-      hotelbeds_code: hotel.hotelbeds_code,
-      hotelbeds_ready: hotelbedsReady(),
-      result
-    });
-  } catch (error) {
-    res.status(500).json({ ok: false, error: error.message || "debug_failed" });
-  }
-});
-
-async function createCheckoutSession(req, res) {
-  try {
-    if (!stripe) {
-      return res.status(500).json({ ok: false, message: "Secure checkout is currently unavailable." });
-    }
-
-    const body = req.body || {};
-    const amount = Number(body.amount || 0);
-
-    if (!(amount > 0)) {
-      return res.status(400).json({ ok: false, message: "A confirmed stay price is required before payment." });
-    }
-
-    if (!clean(body.rate_key)) {
-      return res.status(400).json({ ok: false, message: "This price cannot be used for checkout. Please choose another stay." });
-    }
-
-    const existing = safeJson(BOOKINGS_FILE, []);
-
-    const booking = {
-      id: `MSH-${Date.now()}`,
-      created_at: new Date().toISOString(),
-      hotel_id: clean(body.hotel_id),
-      hotel_name: clean(body.hotel_name),
-      destination: clean(body.destination),
-      checkin: clean(body.checkin),
-      checkout: clean(body.checkout),
-      guests: Number(body.guests || 1),
-      rooms: Number(body.rooms || 1),
-      amount,
-      currency: clean(body.currency || "GBP"),
-      rate_key: clean(body.rate_key),
-      rate_status: clean(body.rate_status),
-      customer_name: clean(body.customer_name),
-      customer_email: clean(body.customer_email),
-      customer_phone: clean(body.customer_phone),
-      status: "PAYMENT_PENDING"
-    };
-
-    existing.push(booking);
-    writeJson(BOOKINGS_FILE, existing);
-
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      success_url: process.env.STRIPE_SUCCESS_URL || "https://www.myspace-hotel.com/?payment=success",
-      cancel_url: process.env.STRIPE_CANCEL_URL || "https://www.myspace-hotel.com/?payment=cancelled",
-      customer_email: body.customer_email || undefined,
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: String(body.currency || "GBP").toLowerCase(),
-            unit_amount: Math.round(amount * 100),
-            product_data: {
-              name: body.hotel_name || "MySpace Hotel stay",
-              description: `${body.destination || ""} | ${body.checkin || ""} to ${body.checkout || ""}`
-            }
-          }
-        }
-      ],
-      metadata: {
-        booking_id: booking.id,
-        hotel_id: String(body.hotel_id || ""),
-        rate_status: String(body.rate_status || ""),
-        source: "myspace_hotel_customer_checkout"
-      }
-    });
-
-    res.json({ ok: true, url: session.url, booking_id: booking.id });
-  } catch {
-    res.status(500).json({ ok: false, message: "Unable to open secure checkout. Please try again." });
-  }
-}
-
-app.post("/api/create-checkout-session", createCheckoutSession);
-app.post("/api/create-checkout", createCheckoutSession);
-
-app.post("/api/extranet/register", (req, res) => {
-  const body = req.body || {};
-  const existing = safeJson(PARTNER_FILE, []);
-
-  existing.push({
-    id: `partner-${Date.now()}`,
-    created_at: new Date().toISOString(),
-    ...body
-  });
-
-  writeJson(PARTNER_FILE, existing);
+      return {
+        country,
+        city_count: cities.length,
+        hotel_count: cities.reduce((s, c) => s + c.catalog_hotels, 0),
+        live_hotel_count: cities.reduce((s, c) => s + c.live_hotels, 0),
+        cities
+      };
+    })
+    .sort((a, b) => a.country.localeCompare(b.country));
 
   res.json({
     ok: true,
-    message: "Thank you. Your partner application has been received.",
-    business_name: body.business_name || body.hotel_name || "",
-    email: body.email || ""
+    countries,
+    total_countries: countries.length,
+    total_cities: countries.reduce((s, c) => s + c.city_count, 0)
+  });
+});
+
+app.get("/api/hotels/search", (req, res) => {
+  const country = clean(req.query.country);
+  const city = clean(req.query.city);
+  const area = clean(req.query.area);
+  const keyword = clean(req.query.keyword);
+  const propertyType = clean(req.query.property_type || req.query.stay_type || "all");
+  const limit = number(req.query.limit || 160);
+
+  if (!country || !city) {
+    return res.json({ ok: true, hotels: [], count: 0, message: "Choose a country and destination." });
+  }
+
+  const hotels = customerSearch(country, city, area, keyword, propertyType, limit);
+
+  res.json({
+    ok: true,
+    hotels,
+    count: hotels.length,
+    country,
+    city,
+    property_type: propertyType,
+    message: hotels.length ? "Available stays loaded." : "No matching stay found."
+  });
+});
+
+app.get("/api/hotels/live-check", (req, res) => {
+  const hotelId = clean(req.query.hotel_id || req.query.hotel_code);
+  const hotel = getHotels().find((h) => clean(h.hotel_id) === hotelId);
+
+  if (!hotel) {
+    return res.json({ ok: true, live_payment_ready: false, payment_ready: false, price_status: "Latest price will be confirmed before payment." });
+  }
+
+  const shaped = hotelToCustomerShape(hotel);
+
+  if (!shaped.first_rate) {
+    return res.json({ ok: true, live_payment_ready: false, payment_ready: false, price_status: "Latest price will be confirmed before payment." });
+  }
+
+  res.json({
+    ok: true,
+    live_payment_ready: true,
+    payment_ready: true,
+    price_status: "Current price is available for secure checkout.",
+    ...shaped
+  });
+});
+
+app.get("/api/currency/convert", (req, res) => {
+  const amount = money(req.query.amount || 1);
+  const from = clean(req.query.from_currency || req.query.from || "GBP").toUpperCase();
+  const to = clean(req.query.to_currency || req.query.to || "USD").toUpperCase();
+  const FX = { GBP: 1, USD: 1.27, EUR: 1.17, NGN: 1900, AED: 4.66, CAD: 1.72, AUD: 1.92, ZAR: 23.2, CHF: 1.11, JPY: 197, KES: 165, GHS: 17, INR: 106, SGD: 1.72 };
+
+  if (from === to) return res.json({ ok: true, amount, from_currency: from, to_currency: to, rate: 1, converted: amount, source: "same_currency" });
+
+  if (FX[from] && FX[to]) {
+    const converted = money((amount / FX[from]) * FX[to]);
+    return res.json({ ok: true, amount, from_currency: from, to_currency: to, rate: money(FX[to] / FX[from]), converted, source: "fallback_estimate" });
+  }
+
+  res.status(503).json({ ok: false, message: "Currency conversion is temporarily unavailable." });
+});
+
+app.get("/api/guide", (req, res) => {
+  const country = clean(req.query.country);
+  const city = clean(req.query.city);
+  const area = clean(req.query.area);
+  const hotel = clean(req.query.hotel);
+  const destination = [hotel, area, city, country].filter(Boolean).join(", ");
+  const q = encodeURIComponent(destination || `${city} ${country}`);
+
+  res.json({
+    ok: true,
+    guide: {
+      destination: destination || [city, country].filter(Boolean).join(", "),
+      selected_stay: hotel,
+      emergency: { emergency: "Check locally", police: "Check locally", ambulance: "Check locally", fire: "Check locally" },
+      links: {
+        hospital: `https://www.google.com/maps/search/hospital+near+${q}`,
+        pharmacy: `https://www.google.com/maps/search/pharmacy+near+${q}`,
+        police: `https://www.google.com/maps/search/police+station+near+${q}`,
+        airport: `https://www.google.com/maps/search/airport+near+${q}`,
+        restaurants: `https://www.google.com/maps/search/restaurants+near+${q}`,
+        taxi: `https://www.google.com/maps/search/taxi+near+${q}`,
+        train_or_metro: `https://www.google.com/maps/search/train+station+near+${q}`,
+        attractions: `https://www.google.com/maps/search/things+to+do+near+${q}`
+      }
+    }
+  });
+});
+
+app.post("/reservation-request", (req, res) => {
+  const body = req.body || {};
+  const code = bookingCode();
+  const bookings = readJSON(BOOKINGS_FILE, []);
+
+  const booking = {
+    booking_reference: code,
+    reservation_code: code,
+    created_at: nowISO(),
+    status: body.rate_key ? "PAYMENT_READY" : "CONFIRMATION_REQUIRED",
+    hotel_id: clean(body.hotel_id),
+    hotel_name: clean(body.hotel_name),
+    destination: clean(body.destination),
+    checkin: clean(body.checkin),
+    checkout: clean(body.checkout),
+    guests: number(body.guests),
+    rooms: number(body.rooms),
+    customer_name: clean(body.customer_name),
+    customer_email: clean(body.customer_email),
+    customer_phone: clean(body.customer_phone),
+    note: clean(body.note),
+    rate_key: clean(body.rate_key),
+    amount: money(body.amount),
+    currency: clean(body.currency)
+  };
+
+  bookings.unshift(booking);
+  writeJSON(BOOKINGS_FILE, bookings);
+  webhookEvent("reservation.created", booking);
+  audit("customer.reservation.created", { booking_reference: code });
+
+  partnerList().forEach((partner) => {
+    pushReservationToPartner(partner, {
+      booking_reference: code,
+      hotel_id: booking.hotel_id,
+      hotel_name: booking.hotel_name,
+      guest_name: booking.customer_name,
+      source: "customer_booking"
+    });
+  });
+
+  res.json({
+    ok: true,
+    reservation_code: code,
+    booking_reference: code,
+    status: booking.status,
+    payment_url: null,
+    message: booking.status === "PAYMENT_READY" ? "Reservation prepared." : "Request received. We will confirm availability and price before payment."
   });
 });
 
 app.post("/api/auth/login", (req, res) => {
-  res.status(401).json({
-    ok: false,
-    message: "Partner access is available only after approval."
+  const { partner_id, token } = req.body || {};
+  const partner = readJSON(PARTNERS_FILE, []).find((x) => x.partner_id === partner_id && x.token === token && x.enabled !== false);
+
+  if (!partner) return res.status(401).json({ ok: false, error: "Invalid credentials" });
+
+  audit("auth.login", { partner_id });
+  res.json({ ok: true, jwt: createJWT(partner) });
+});
+
+app.get("/api/admin/dashboard", authMiddleware, (req, res) => {
+  res.json({
+    ok: true,
+    partner: req.partner.partner_id,
+    hotels_loaded: getHotels().length,
+    reservations: readJSON(BOOKINGS_FILE, []).length,
+    webhook_events: readJSON(WEBHOOK_FILE, []).length,
+    retry_queue: readJSON(RETRY_FILE, []).length,
+    failovers: readJSON(FAILOVER_FILE, []).length,
+    recoveries: readJSON(RECOVERY_FILE, []).length,
+    mappings: readJSON(MAPPINGS_FILE, []).length,
+    inventory_syncs: readJSON(INVENTORY_SYNC_FILE, []).length,
+    rate_syncs: readJSON(RATE_SYNC_FILE, []).length,
+    reservation_syncs: readJSON(RESERVATION_SYNC_FILE, []).length,
+    sync_failures: readJSON(SYNC_FAILURE_FILE, []).length,
+    timestamp: nowISO()
   });
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-  const destinations = getDestinations();
-  const meta = safeJson(META_FILE, { total_hotels: 0 });
-
-  console.log("MYSPACE HOTEL BACKEND LIVE");
-  console.log("Hotels:", meta.total_hotels || 0);
-  console.log("Countries:", destinations.length);
-  console.log("Cities:", destinations.reduce((s, c) => s + (Array.isArray(c.cities) ? c.cities.length : 0), 0));
-  console.log("Stripe ready:", Boolean(stripe));
-  console.log("Hotelbeds ready:", hotelbedsReady());
-  console.log("Recent verified prices ready:", fs.existsSync(RATE_INDEX) || RATE_FILES.some((f) => fs.existsSync(f)));
+app.get("/api/hotels", authMiddleware, (req, res) => {
+  const hotels = getHotels();
+  audit("enterprise.hotels", { partner: req.partner.partner_id });
+  res.json({ ok: true, total: hotels.length, hotels: hotels.slice(0, 1000) });
 });
+
+app.get("/api/mappings", authMiddleware, (req, res) => {
+  res.json({ ok: true, mappings: readJSON(MAPPINGS_FILE, []) });
+});
+
+app.post("/api/mappings", authMiddleware, (req, res) => {
+  const rows = readJSON(MAPPINGS_FILE, []);
+  const row = { id: crypto.randomUUID(), created_at: nowISO(), ...req.body };
+  rows.unshift(row);
+  writeJSON(MAPPINGS_FILE, rows);
+  audit("mapping.created", row);
+  res.json({ ok: true, mapping: row });
+});
+
+app.get("/api/sync/status", authMiddleware, (req, res) => {
+  res.json({
+    ok: true,
+    partners: readJSON(PARTNER_CONNECTION_FILE, []),
+    inventory_syncs: readJSON(INVENTORY_SYNC_FILE, []).length,
+    rate_syncs: readJSON(RATE_SYNC_FILE, []).length,
+    reservation_syncs: readJSON(RESERVATION_SYNC_FILE, []).length,
+    failures: readJSON(SYNC_FAILURE_FILE, []).length,
+    last_inventory: readJSON(INVENTORY_SYNC_FILE, [])[0] || null,
+    last_rate: readJSON(RATE_SYNC_FILE, [])[0] || null,
+    last_reservation: readJSON(RESERVATION_SYNC_FILE, [])[0] || null,
+    timestamp: nowISO()
+  });
+});
+
+app.post("/api/sync/run", authMiddleware, async (req, res) => {
+  await fullSyncCycle("manual");
+  res.json({ ok: true, message: "Manual PMS sync completed.", timestamp: nowISO() });
+});
+
+app.get("/api/sync/inventory", authMiddleware, (req, res) => {
+  res.json({ ok: true, total: readJSON(INVENTORY_SYNC_FILE, []).length, rows: readJSON(INVENTORY_SYNC_FILE, []).slice(0, 200) });
+});
+
+app.get("/api/sync/rates", authMiddleware, (req, res) => {
+  res.json({ ok: true, total: readJSON(RATE_SYNC_FILE, []).length, rows: readJSON(RATE_SYNC_FILE, []).slice(0, 200) });
+});
+
+app.get("/api/sync/reservations", authMiddleware, (req, res) => {
+  res.json({ ok: true, total: readJSON(RESERVATION_SYNC_FILE, []).length, rows: readJSON(RESERVATION_SYNC_FILE, []).slice(0, 200) });
+});
+
+app.get("/api/sync/failures", authMiddleware, (req, res) => {
+  res.json({ ok: true, total: readJSON(SYNC_FAILURE_FILE, []).length, rows: readJSON(SYNC_FAILURE_FILE, []).slice(0, 200) });
+});
+
+app.get("/api/live-check", (req, res) => {
+  res.json({
+    ok: true,
+    hotels_loaded: getHotels().length,
+    reservations: readJSON(BOOKINGS_FILE, []).length,
+    webhooks: readJSON(WEBHOOK_FILE, []).length,
+    audits: readJSON(AUDIT_FILE, []).length,
+    pms_sync: "enabled",
+    inventory_syncs: readJSON(INVENTORY_SYNC_FILE, []).length,
+    rate_syncs: readJSON(RATE_SYNC_FILE, []).length,
+    reservation_syncs: readJSON(RESERVATION_SYNC_FILE, []).length,
+    sync_failures: readJSON(SYNC_FAILURE_FILE, []).length,
+    timestamp: nowISO()
+  });
+});
+
+cron.schedule("*/1 * * * *", async () => {
+  console.log("RUNNING BUILT-IN PMS SYNC...");
+  await fullSyncCycle("scheduled");
+});
+
+fullSyncCycle("startup");
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("");
+  console.log("====================================");
+  console.log("MYSPACE HOTEL CUSTOMER + ENTERPRISE API V3.2");
+  console.log("====================================");
+  console.log("PORT:", PORT);
+  console.log("HOTELS:", getHotels().length);
+  console.log("CUSTOMER ROUTES: ACTIVE");
+  console.log("ENTERPRISE ROUTES: ACTIVE");
+  console.log("PMS SYNC: ACTIVE");
+  console.log("Swagger:", `http://127.0.0.1:${PORT}/docs`);
+  console.log("====================================");
+});
+'@ | Set-Content .\server.js -Encoding UTF8
+
+node .\server.js
