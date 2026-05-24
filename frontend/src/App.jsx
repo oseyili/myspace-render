@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 
 const API =
   import.meta.env.VITE_API_BASE ||
@@ -547,7 +547,7 @@ function Header({ setPage, displayCurrency, setDisplayCurrency }) {
   return (
     <header style={styles.header}>
       <button style={styles.logoButton} onClick={() => setPage("home")}>
-        <div style={styles.logoIcon}>✦</div>
+        <div style={styles.logoIcon}>âœ¦</div>
         <div>
           <div style={styles.logo}>MYSPACE HOTEL</div>
           <div style={styles.logoSub}>Stay with clarity</div>
@@ -901,7 +901,7 @@ function InfoPage({ setPage, title, sections }) {
 function Footer({ setPage }) {
   return (
     <footer style={styles.footer}>
-      <span>© 2026 MySpace Hotel. All rights reserved.</span>
+      <span>Â© 2026 MySpace Hotel. All rights reserved.</span>
       <div style={styles.footerLinks}>
         <button onClick={() => setPage("contact")}>Contact</button>
         <button onClick={() => setPage("privacy")}>Privacy</button>
@@ -933,10 +933,10 @@ const styles = {
   heroTitle: { fontSize: 58, lineHeight: 1.02, margin: 0, letterSpacing: -2 },
   heroText: { fontSize: 22, color: "#334155", marginTop: 14, fontWeight: 700 },
   heroBadges: { display: "flex", flexWrap: "wrap", gap: 28, marginTop: 24, color: "#1857df", fontWeight: 900 },
-  searchPanel: { marginTop: 34, background: "#fff", borderRadius: 24, display: "grid", gridTemplateColumns: "1.25fr 1fr 1fr .85fr .85fr .9fr 1fr", boxShadow: "0 26px 60px rgba(15,23,42,.18)", overflow: "hidden" },
+  searchPanel: { marginTop: 34, background: "#fff", borderRadius: 24, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", boxShadow: "0 26px 60px rgba(15,23,42,.18)", overflow: "visible" },
   searchCell: { padding: 18, borderRight: "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: 8 },
   twoInputs: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 },
-  searchButton: { border: 0, background: "#1857df", color: "#fff", fontSize: 16, fontWeight: 900, cursor: "pointer" },
+  searchButton: { border: 0, background: "#1857df", color: "#fff", fontSize: 16, fontWeight: 900, cursor: "pointer", minHeight: 72, borderRadius: 18, padding: "16px 22px" },
   trustStrip: { maxWidth: 1320, margin: "-22px auto 24px", background: "#fff", borderRadius: 20, padding: 22, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, boxShadow: "0 15px 45px rgba(15,23,42,.08)", position: "relative", zIndex: 2 },
   section: { maxWidth: 1420, margin: "0 auto", padding: "28px 52px" },
   sectionHeader: { display: "flex", alignItems: "center", justifyContent: "space-between" },
