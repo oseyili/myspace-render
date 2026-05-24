@@ -1,3 +1,6 @@
+# COMPLETE REPLACEMENT — frontend/src/App.jsx
+
+```jsx
 import React, { useEffect, useState } from "react";
 
 const API_BASE =
@@ -26,46 +29,25 @@ function money(v) {
 }
 
 export default function App() {
-  const [countries, setCountries] =
-    useState([]);
+  const [countries, setCountries] = useState([]);
+  const [cities, setCities] = useState([]);
 
-  const [cities, setCities] =
-    useState([]);
-
-  const [country, setCountry] =
-    useState("");
-
+  const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
 
-  const [stayType, setStayType] =
-    useState("hotel");
+  const [stayType, setStayType] = useState("hotel");
 
-  const [checkin, setCheckin] =
-    useState(todayISO());
+  const [checkin, setCheckin] = useState(todayISO());
+  const [checkout, setCheckout] = useState(tomorrowISO());
 
-  const [checkout, setCheckout] =
-    useState(tomorrowISO());
+  const [guests, setGuests] = useState(2);
+  const [rooms, setRooms] = useState(1);
 
-  const [guests, setGuests] =
-    useState(2);
+  const [hotels, setHotels] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const [rooms, setRooms] =
-    useState(1);
-
-  const [hotels, setHotels] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [selectedHotel, setSelectedHotel] =
-    useState(null);
-
-  const [liveRate, setLiveRate] =
-    useState(null);
-
-  const [currency, setCurrency] =
-    useState("GBP");
+  const [selectedHotel, setSelectedHotel] = useState(null);
+  const [liveRate, setLiveRate] = useState(null);
 
   useEffect(() => {
     loadDestinations();
@@ -73,62 +55,73 @@ export default function App() {
 
   async function loadDestinations() {
     try {
-      const res = await fetch(
-        `${API_BASE}/api/destinations`
-      );
-
+      const res = await fetch(`${API_BASE}/api/destinations`);
       const data = await res.json();
 
-      setCountries(
-        Array.isArray(data.countries)
-          ? data.countries
-          : []
-      );
+      const rows = Array.isArray(data.countries)
+        ? data.countries
+        : [];
+
+      setCountries(rows);
     } catch (err) {
       console.log(err);
     }
   }
 
   useEffect(() => {
-    const selected = countries.find(
+    const found = countries.find(
       (x) => x.country === country
     );
 
-    if (!selected) {
+    if (!found) {
       setCities([]);
+      setCity("");
       return;
     }
 
-    setCities(selected.cities || []);
+    const rows = Array.isArray(found.cities)
+      ? found.cities.map((x) =>
+          typeof x === "string"
+            ? x
+            : x.city
+        )
+      : [];
+
+    setCities(rows);
+
+    if (rows.length > 0) {
+      setCity(rows[0]);
+    }
   }, [country, countries]);
 
   async function searchHotels() {
-    if (!country || !city) return;
+    if (!country || !city) {
+      alert("Please select country and city.");
+      return;
+    }
 
     setLoading(true);
 
     setHotels([]);
-
     setSelectedHotel(null);
-
     setLiveRate(null);
 
     try {
-      const res = await fetch(
-        `${API_BASE}/api/hotels/search?country=${encodeURIComponent(
-          country
-        )}&city=${encodeURIComponent(
-          city
-        )}&stay_type=${encodeURIComponent(
-          stayType
-        )}&limit=60`
-      );
+      const url = `${API_BASE}/api/hotels/search?country=${encodeURIComponent(
+        country
+      )}&city=${encodeURIComponent(
+        city
+      )}&stay_type=${encodeURIComponent(
+        stayType
+      )}&limit=60`;
 
+      const res = await fetch(url);
       const data = await res.json();
 
-      setHotels(data.hotels || []);
+      setHotels(Array.isArray(data.hotels) ? data.hotels : []);
     } catch (err) {
       console.log(err);
+      alert("Hotel search failed.");
     }
 
     setLoading(false);
@@ -142,16 +135,17 @@ export default function App() {
     });
 
     try {
-      const res = await fetch(
-        `${API_BASE}/api/hotels/live-rate?hotel_id=${encodeURIComponent(
-          hotel.hotel_id || hotel.id
-        )}&checkin=${checkin}&checkout=${checkout}&guests=${guests}&rooms=${rooms}`
-      );
+      const url = `${API_BASE}/api/hotels/live-rate?hotel_id=${encodeURIComponent(
+        hotel.hotel_id || hotel.id
+      )}&checkin=${checkin}&checkout=${checkout}&guests=${guests}&rooms=${rooms}`;
 
+      const res = await fetch(url);
       const data = await res.json();
 
       setLiveRate(data);
     } catch (err) {
+      console.log(err);
+
       setLiveRate({
         ok: false,
         customer_message:
@@ -160,510 +154,272 @@ export default function App() {
     }
   }
 
-  return (
-    <div
-      style={{
-        background: "#f4f7fb",
-        minHeight: "100vh",
-        fontFamily:
-          "Inter, Arial, sans-serif"
-      }}
-    >
-      {/* HEADER */}
+  function openHelp() {
+    alert(
+      "MySpace Hotel Support\n\nEmail: reservations@myspace-hotel.com"
+    );
+  }
 
-      <div
-        style={{
-          background: "#fff",
-          padding: "22px 36px",
-          borderBottom:
-            "1px solid #e5e7eb",
-          display: "flex",
-          justifyContent:
-            "space-between",
-          alignItems: "center",
-          position: "sticky",
-          top: 0,
-          zIndex: 50
-        }}
-      >
+  function openOffers() {
+    alert(
+      "Special destination offers are being updated."
+    );
+  }
+
+  function openPartnerForm() {
+    alert(
+      "Partner onboarding available through MySpace Hotel support."
+    );
+  }
+
+  function openPartnerLogin() {
+    alert(
+      "Partner login access is available after approval."
+    );
+  }
+
+  return (
+    <div style={styles.page}>
+      <div style={styles.header}>
         <div>
-          <div
-            style={{
-              fontSize: 54,
-              fontWeight: 900,
-              color: "#071437",
-              lineHeight: 1
-            }}
-          >
+          <div style={styles.logo}>
             MYSPACE HOTEL
           </div>
 
-          <div
-            style={{
-              marginTop: 6,
-              fontWeight: 600,
-              color: "#6b7280",
-              fontSize: 18
-            }}
-          >
-            Stay with clarity
+          <div style={styles.tagline}>
+            Trusted stays worldwide
           </div>
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            gap: 14,
-            alignItems: "center"
-          }}
-        >
-          <button style={navBtn}>
+        <div style={styles.navArea}>
+          <button style={styles.navBtn}>
             Stays
           </button>
 
-          <button style={navBtn}>
+          <button style={styles.navBtn}>
             Destinations
           </button>
 
-          <button style={navBtn}>
+          <button
+            style={styles.navBtn}
+            onClick={openOffers}
+          >
             Offers
           </button>
 
-          <button style={navBtn}>
+          <button
+            style={styles.navBtn}
+            onClick={openHelp}
+          >
             Help
           </button>
 
-          <select
-            value={currency}
-            onChange={(e) =>
-              setCurrency(
-                e.target.value
-              )
-            }
-            style={currencyBox}
+          <button
+            style={styles.goldBtn}
+            onClick={openPartnerForm}
           >
-            <option>GBP</option>
-            <option>USD</option>
-            <option>EUR</option>
-          </select>
-
-          <button style={goldBtn}>
-            Partner Application Form
+            Partner Form
           </button>
 
-          <button style={outlineBtn}>
+          <button
+            style={styles.outlineBtn}
+            onClick={openPartnerLogin}
+          >
             Partner Login
           </button>
         </div>
       </div>
 
-      {/* HERO */}
-
-      <div
-        style={{
-          padding:
-            "70px 40px 100px",
-          backgroundImage:
-            "url(https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2200&auto=format&fit=crop)",
-          backgroundSize: "cover",
-          backgroundPosition:
-            "center"
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 1100
-          }}
-        >
-          <div
-            style={{
-              color: "#2563eb",
-              fontWeight: 900,
-              fontSize: 26
-            }}
-          >
-            Trusted stays. Clear
-            pricing. Worldwide
-            support.
+      <div style={styles.hero}>
+        <div style={styles.heroOverlay}>
+          <div style={styles.heroText1}>
+            Hotels, apartments and villas
           </div>
 
-          <div
-            style={{
-              marginTop: 24,
-              fontSize: 92,
-              fontWeight: 900,
-              lineHeight: 1,
-              color: "#071437"
-            }}
-          >
-            Find your perfect stay
+          <div style={styles.heroText2}>
+            Find your next stay
           </div>
 
-          <div
-            style={{
-              marginTop: 28,
-              fontSize: 30,
-              lineHeight: 1.45,
-              color: "#1f2937",
-              maxWidth: 1000,
-              fontWeight: 600
-            }}
-          >
-            Search hotels,
-            apartments, villas and
-            accommodation worldwide
-            with transparent pricing
-            and secure checkout.
+          <div style={styles.heroText3}>
+            Clear pricing. Secure checkout.
+            Worldwide destinations.
           </div>
-        </div>
 
-        {/* SEARCH */}
-
-        <div
-          style={{
-            marginTop: 50,
-            background: "#fff",
-            borderRadius: 32,
-            padding: 28,
-            boxShadow:
-              "0 20px 60px rgba(0,0,0,0.12)"
-          }}
-        >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "1.2fr 1fr 1.2fr 1fr 1fr 0.7fr 0.7fr auto",
-              gap: 18,
-              alignItems: "end"
-            }}
-          >
-            <Field label="Stay type">
-              <select
-                value={stayType}
-                onChange={(e) =>
-                  setStayType(
-                    e.target.value
-                  )
-                }
-                style={input}
-              >
-                <option value="hotel">
-                  Hotels only
-                </option>
-
-                <option value="apartment">
-                  Apartments only
-                </option>
-
-                <option value="villa">
-                  Villas only
-                </option>
-
-                <option value="all">
-                  Hotels and apartments
-                </option>
-              </select>
-            </Field>
-
-            <Field label="Country">
-              <select
-                value={country}
-                onChange={(e) =>
-                  setCountry(
-                    e.target.value
-                  )
-                }
-                style={input}
-              >
-                <option value="">
-                  Select country
-                </option>
-
-                {countries.map((c) => (
-                  <option
-                    key={c.country}
-                    value={c.country}
-                  >
-                    {c.country}
+          <div style={styles.searchBox}>
+            <div style={styles.searchGrid}>
+              <Field label="Stay type">
+                <select
+                  value={stayType}
+                  onChange={(e) =>
+                    setStayType(e.target.value)
+                  }
+                  style={styles.input}
+                >
+                  <option value="hotel">
+                    Hotels only
                   </option>
-                ))}
-              </select>
-            </Field>
 
-            <Field label="City">
-              <select
-                value={city}
-                onChange={(e) =>
-                  setCity(
-                    e.target.value
-                  )
-                }
-                style={input}
-              >
-                <option value="">
-                  Select city
-                </option>
-
-                {cities.map((c) => (
-                  <option
-                    key={c}
-                    value={c}
-                  >
-                    {c}
+                  <option value="apartment">
+                    Apartments only
                   </option>
-                ))}
-              </select>
-            </Field>
 
-            <Field label="Check-in">
-              <input
-                type="date"
-                value={checkin}
-                onChange={(e) =>
-                  setCheckin(
-                    e.target.value
-                  )
-                }
-                style={input}
-              />
-            </Field>
+                  <option value="villa">
+                    Villas only
+                  </option>
 
-            <Field label="Check-out">
-              <input
-                type="date"
-                value={checkout}
-                onChange={(e) =>
-                  setCheckout(
-                    e.target.value
-                  )
-                }
-                style={input}
-              />
-            </Field>
+                  <option value="all">
+                    Hotels and apartments
+                  </option>
+                </select>
+              </Field>
 
-            <Field label="Guests">
-              <input
-                type="number"
-                min="1"
-                value={guests}
-                onChange={(e) =>
-                  setGuests(
-                    e.target.value
-                  )
-                }
-                style={input}
-              />
-            </Field>
+              <Field label="Country">
+                <select
+                  value={country}
+                  onChange={(e) =>
+                    setCountry(e.target.value)
+                  }
+                  style={styles.input}
+                >
+                  <option value="">
+                    Select country
+                  </option>
 
-            <Field label="Rooms">
-              <input
-                type="number"
-                min="1"
-                value={rooms}
-                onChange={(e) =>
-                  setRooms(
-                    e.target.value
-                  )
-                }
-                style={input}
-              />
-            </Field>
+                  {countries.map((c) => (
+                    <option
+                      key={c.country}
+                      value={c.country}
+                    >
+                      {c.country}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
-            <button
-              onClick={searchHotels}
-              style={{
-                height: 60,
-                width: 180,
-                border: "none",
-                borderRadius: 18,
-                background:
-                  "#2563eb",
-                color: "#fff",
-                fontSize: 24,
-                fontWeight: 900,
-                cursor: "pointer"
-              }}
-            >
-              Search stays
-            </button>
+              <Field label="City">
+                <select
+                  value={city}
+                  onChange={(e) =>
+                    setCity(e.target.value)
+                  }
+                  style={styles.input}
+                >
+                  <option value="">
+                    Select city
+                  </option>
+
+                  {cities.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              <Field label="Check-in">
+                <input
+                  type="date"
+                  value={checkin}
+                  onChange={(e) =>
+                    setCheckin(e.target.value)
+                  }
+                  style={styles.input}
+                />
+              </Field>
+
+              <Field label="Check-out">
+                <input
+                  type="date"
+                  value={checkout}
+                  onChange={(e) =>
+                    setCheckout(e.target.value)
+                  }
+                  style={styles.input}
+                />
+              </Field>
+
+              <Field label="Guests">
+                <input
+                  type="number"
+                  min="1"
+                  value={guests}
+                  onChange={(e) =>
+                    setGuests(e.target.value)
+                  }
+                  style={styles.input}
+                />
+              </Field>
+
+              <Field label="Rooms">
+                <input
+                  type="number"
+                  min="1"
+                  value={rooms}
+                  onChange={(e) =>
+                    setRooms(e.target.value)
+                  }
+                  style={styles.input}
+                />
+              </Field>
+
+              <button
+                style={styles.searchBtn}
+                onClick={searchHotels}
+              >
+                Search
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* MAIN */}
-
-      <div
-        style={{
-          padding: "40px",
-          display: "grid",
-          gridTemplateColumns:
-            "1fr 420px",
-          gap: 32
-        }}
-      >
-        {/* LEFT */}
-
+      <div style={styles.main}>
         <div>
           {loading && (
-            <div
-              style={{
-                fontSize: 28,
-                fontWeight: 900
-              }}
-            >
+            <div style={styles.loading}>
               Searching stays...
             </div>
           )}
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fill,minmax(420px,1fr))",
-              gap: 28
-            }}
-          >
+          <div style={styles.hotelGrid}>
             {hotels.map((hotel) => (
               <div
-                key={
-                  hotel.hotel_id ||
-                  hotel.id
-                }
-                style={hotelCard}
+                key={hotel.hotel_id || hotel.id}
+                style={styles.card}
               >
                 <img
                   src={hotel.image_url}
                   alt={hotel.name}
-                  style={{
-                    width: "100%",
-                    height: 280,
-                    objectFit: "cover"
-                  }}
+                  style={styles.hotelImage}
                 />
 
-                <div
-                  style={{
-                    padding: 24
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent:
-                        "space-between",
-                      fontWeight: 800,
-                      color: "#2563eb"
-                    }}
-                  >
-                    <span>
-                      Verified stay
-                    </span>
-
-                    <span>
-                      Live pricing
-                    </span>
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 18,
-                      fontSize: 38,
-                      fontWeight: 900,
-                      color: "#071437",
-                      lineHeight: 1.1
-                    }}
-                  >
+                <div style={styles.cardBody}>
+                  <div style={styles.hotelTitle}>
                     {hotel.name}
                   </div>
 
-                  <div
-                    style={{
-                      marginTop: 14,
-                      color: "#374151",
-                      fontSize: 20
-                    }}
-                  >
-                    {hotel.address},{" "}
-                    {hotel.city},{" "}
-                    {hotel.country}
+                  <div style={styles.hotelLocation}>
+                    {hotel.address}, {hotel.city}, {hotel.country}
                   </div>
 
-                  <div
-                    style={{
-                      marginTop: 22,
-                      background:
-                        "#f4f7fb",
-                      borderRadius: 18,
-                      padding: 18
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontWeight: 900,
-                        fontSize: 22
-                      }}
-                    >
-                      Fresh price check
-                    </div>
-
-                    <div
-                      style={{
-                        marginTop: 8,
-                        color: "#4b5563",
-                        fontSize: 17
-                      }}
-                    >
-                      Latest available
-                      pricing is checked
-                      after selection.
-                    </div>
+                  <div style={styles.infoBox}>
+                    Latest available pricing is checked after stay selection.
                   </div>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: 14,
-                      marginTop: 24
-                    }}
-                  >
+                  <div style={styles.cardBtns}>
                     <button
+                      style={styles.selectBtn}
                       onClick={() =>
-                        selectHotel(
-                          hotel
-                        )
+                        selectHotel(hotel)
                       }
-                      style={{
-                        flex: 1,
-                        border: "none",
-                        borderRadius: 16,
-                        background:
-                          "#f4c430",
-                        padding:
-                          "18px 0",
-                        fontWeight: 900,
-                        fontSize: 22,
-                        cursor: "pointer"
-                      }}
                     >
                       Select Stay
                     </button>
 
                     <button
-                      style={{
-                        flex: 1,
-                        borderRadius: 16,
-                        border:
-                          "2px solid #dbe2ea",
-                        background:
-                          "#fff",
-                        padding:
-                          "18px 0",
-                        fontWeight: 800,
-                        fontSize: 22
-                      }}
+                      style={styles.guideBtn}
                     >
-                      Guide / Map
+                      Guide
                     </button>
                   </div>
                 </div>
@@ -672,85 +428,31 @@ export default function App() {
           </div>
         </div>
 
-        {/* RIGHT */}
-
-        <div
-          style={{
-            position: "sticky",
-            top: 110,
-            alignSelf: "start",
-            background: "#fff",
-            borderRadius: 28,
-            padding: 28,
-            boxShadow:
-              "0 10px 40px rgba(0,0,0,0.08)"
-          }}
-        >
-          <div
-            style={{
-              fontSize: 46,
-              fontWeight: 900,
-              color: "#071437"
-            }}
-          >
+        <div style={styles.sidePanel}>
+          <div style={styles.sideTitle}>
             Reserve / Pay
           </div>
 
           {!selectedHotel && (
-            <div
-              style={{
-                marginTop: 24,
-                fontSize: 22,
-                color: "#6b7280"
-              }}
-            >
-              Select a stay to
-              continue.
+            <div style={styles.sideText}>
+              Select a stay to continue.
             </div>
           )}
 
           {selectedHotel && (
             <>
-              <div
-                style={{
-                  marginTop: 24,
-                  fontSize: 30,
-                  fontWeight: 900
-                }}
-              >
+              <div style={styles.sideHotel}>
                 {selectedHotel.name}
               </div>
 
-              <div
-                style={{
-                  marginTop: 12,
-                  color: "#4b5563",
-                  fontSize: 18
-                }}
-              >
-                {
-                  selectedHotel.address
-                }
+              <div style={styles.sideAddress}>
+                {selectedHotel.address}
               </div>
 
-              <div
-                style={{
-                  marginTop: 24,
-                  background:
-                    "#ecfdf3",
-                  borderRadius: 22,
-                  padding: 24
-                }}
-              >
+              <div style={styles.priceBox}>
                 {liveRate?.loading && (
-                  <div
-                    style={{
-                      fontWeight: 900,
-                      fontSize: 24
-                    }}
-                  >
-                    Searching latest
-                    price...
+                  <div style={styles.priceSearching}>
+                    Searching latest price...
                   </div>
                 )}
 
@@ -758,42 +460,16 @@ export default function App() {
                   liveRate?.ok &&
                   liveRate?.rate && (
                     <>
-                      <div
-                        style={{
-                          fontWeight: 900,
-                          fontSize: 22
-                        }}
-                      >
+                      <div style={styles.totalLabel}>
                         Stay total
                       </div>
 
-                      <div
-                        style={{
-                          marginTop: 12,
-                          fontSize: 52,
-                          fontWeight: 900
-                        }}
-                      >
-                        {
-                          liveRate.rate
-                            .currency
-                        }{" "}
-                        {money(
-                          liveRate
-                            .rate
-                            .amount
-                        )}
+                      <div style={styles.priceBig}>
+                        {liveRate.rate.currency} {money(liveRate.rate.amount)}
                       </div>
 
-                      <div
-                        style={{
-                          marginTop: 12,
-                          color: "#374151"
-                        }}
-                      >
-                        {
-                          liveRate.customer_message
-                        }
+                      <div style={styles.sideText}>
+                        {liveRate.customer_message}
                       </div>
                     </>
                   )}
@@ -801,27 +477,12 @@ export default function App() {
                 {!liveRate?.loading &&
                   !liveRate?.ok && (
                     <>
-                      <div
-                        style={{
-                          fontWeight: 900,
-                          fontSize: 24,
-                          color:
-                            "#b91c1c"
-                        }}
-                      >
-                        Live pricing
-                        unavailable
+                      <div style={styles.errorTitle}>
+                        Live pricing unavailable
                       </div>
 
-                      <div
-                        style={{
-                          marginTop: 12,
-                          color: "#374151"
-                        }}
-                      >
-                        {
-                          liveRate.customer_message
-                        }
+                      <div style={styles.sideText}>
+                        {liveRate.customer_message}
                       </div>
                     </>
                   )}
@@ -834,76 +495,324 @@ export default function App() {
   );
 }
 
-function Field({
-  label,
-  children
-}) {
+function Field({ label, children }) {
   return (
     <div>
-      <div
-        style={{
-          marginBottom: 10,
-          fontWeight: 900,
-          fontSize: 18,
-          color: "#071437"
-        }}
-      >
-        {label}
-      </div>
-
+      <div style={styles.label}>{label}</div>
       {children}
     </div>
   );
 }
 
-const input = {
-  width: "100%",
-  height: 58,
-  borderRadius: 12,
-  border: "1px solid #cbd5e1",
-  padding: "0 14px",
-  fontSize: 18
-};
+const styles = {
+  page: {
+    background: "#f4f7fb",
+    minHeight: "100vh",
+    fontFamily: "Arial"
+  },
 
-const navBtn = {
-  border: "1px solid #d1d5db",
-  background: "#fff",
-  borderRadius: 12,
-  padding: "12px 18px",
-  fontWeight: 700,
-  cursor: "pointer"
-};
+  header: {
+    background: "#fff",
+    padding: "20px 30px",
+    borderBottom: "1px solid #e5e7eb",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
 
-const currencyBox = {
-  height: 48,
-  borderRadius: 12,
-  border: "1px solid #d1d5db",
-  padding: "0 10px",
-  fontWeight: 700
-};
+  logo: {
+    fontSize: 48,
+    fontWeight: 900,
+    color: "#071437"
+  },
 
-const goldBtn = {
-  border: "none",
-  background: "#f4c430",
-  borderRadius: 14,
-  padding: "14px 22px",
-  fontWeight: 900,
-  cursor: "pointer"
-};
+  tagline: {
+    marginTop: 6,
+    color: "#6b7280",
+    fontWeight: 600
+  },
 
-const outlineBtn = {
-  border: "1px solid #cbd5e1",
-  background: "#fff",
-  borderRadius: 14,
-  padding: "14px 22px",
-  fontWeight: 800,
-  cursor: "pointer"
-};
+  navArea: {
+    display: "flex",
+    gap: 12,
+    alignItems: "center"
+  },
 
-const hotelCard = {
-  background: "#fff",
-  borderRadius: 28,
-  overflow: "hidden",
-  boxShadow:
-    "0 10px 40px rgba(0,0,0,0.08)"
+  navBtn: {
+    border: "1px solid #d1d5db",
+    background: "#fff",
+    borderRadius: 12,
+    padding: "12px 18px",
+    fontWeight: 700,
+    cursor: "pointer"
+  },
+
+  goldBtn: {
+    border: "none",
+    background: "#f4c430",
+    borderRadius: 14,
+    padding: "14px 20px",
+    fontWeight: 900,
+    cursor: "pointer"
+  },
+
+  outlineBtn: {
+    border: "1px solid #d1d5db",
+    background: "#fff",
+    borderRadius: 14,
+    padding: "14px 20px",
+    fontWeight: 800,
+    cursor: "pointer"
+  },
+
+  hero: {
+    backgroundImage:
+      "url(https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2200&auto=format&fit=crop)",
+    backgroundSize: "cover",
+    backgroundPosition: "center"
+  },
+
+  heroOverlay: {
+    background: "rgba(255,255,255,0.82)",
+    padding: "70px 40px"
+  },
+
+  heroText1: {
+    fontSize: 24,
+    color: "#2563eb",
+    fontWeight: 900
+  },
+
+  heroText2: {
+    marginTop: 20,
+    fontSize: 80,
+    lineHeight: 1,
+    fontWeight: 900,
+    color: "#071437"
+  },
+
+  heroText3: {
+    marginTop: 24,
+    fontSize: 28,
+    lineHeight: 1.4,
+    maxWidth: 900,
+    color: "#1f2937",
+    fontWeight: 600
+  },
+
+  searchBox: {
+    marginTop: 40,
+    background: "#fff",
+    borderRadius: 28,
+    padding: 24,
+    boxShadow:
+      "0 20px 60px rgba(0,0,0,0.10)"
+  },
+
+  searchGrid: {
+    display: "grid",
+    gridTemplateColumns:
+      "1fr 1fr 1fr 1fr 1fr 0.7fr 0.7fr auto",
+    gap: 16,
+    alignItems: "end"
+  },
+
+  label: {
+    marginBottom: 10,
+    fontWeight: 800,
+    color: "#071437"
+  },
+
+  input: {
+    width: "100%",
+    height: 56,
+    borderRadius: 12,
+    border: "1px solid #cbd5e1",
+    padding: "0 14px",
+    fontSize: 16
+  },
+
+  searchBtn: {
+    height: 56,
+    width: 150,
+    border: "none",
+    borderRadius: 16,
+    background: "#2563eb",
+    color: "#fff",
+    fontWeight: 900,
+    fontSize: 20,
+    cursor: "pointer"
+  },
+
+  main: {
+    padding: 40,
+    display: "grid",
+    gridTemplateColumns: "1fr 420px",
+    gap: 28
+  },
+
+  loading: {
+    fontSize: 24,
+    fontWeight: 900,
+    marginBottom: 20
+  },
+
+  hotelGrid: {
+    display: "grid",
+    gridTemplateColumns:
+      "repeat(auto-fill,minmax(420px,1fr))",
+    gap: 28
+  },
+
+  card: {
+    background: "#fff",
+    borderRadius: 28,
+    overflow: "hidden",
+    boxShadow:
+      "0 10px 40px rgba(0,0,0,0.08)"
+  },
+
+  hotelImage: {
+    width: "100%",
+    height: 260,
+    objectFit: "cover"
+  },
+
+  cardBody: {
+    padding: 22
+  },
+
+  hotelTitle: {
+    fontSize: 34,
+    lineHeight: 1.1,
+    fontWeight: 900,
+    color: "#071437"
+  },
+
+  hotelLocation: {
+    marginTop: 12,
+    color: "#4b5563",
+    fontSize: 18
+  },
+
+  infoBox: {
+    marginTop: 20,
+    background: "#f3f6fb",
+    padding: 18,
+    borderRadius: 18,
+    color: "#374151",
+    lineHeight: 1.5
+  },
+
+  cardBtns: {
+    display: "flex",
+    gap: 14,
+    marginTop: 24
+  },
+
+  selectBtn: {
+    flex: 1,
+    border: "none",
+    borderRadius: 16,
+    background: "#f4c430",
+    padding: "18px 0",
+    fontWeight: 900,
+    fontSize: 20,
+    cursor: "pointer"
+  },
+
+  guideBtn: {
+    flex: 1,
+    borderRadius: 16,
+    border: "2px solid #dbe2ea",
+    background: "#fff",
+    padding: "18px 0",
+    fontWeight: 800,
+    fontSize: 20,
+    cursor: "pointer"
+  },
+
+  sidePanel: {
+    background: "#fff",
+    borderRadius: 28,
+    padding: 28,
+    position: "sticky",
+    top: 30,
+    height: "fit-content",
+    boxShadow:
+      "0 10px 40px rgba(0,0,0,0.08)"
+  },
+
+  sideTitle: {
+    fontSize: 40,
+    fontWeight: 900,
+    color: "#071437"
+  },
+
+  sideText: {
+    marginTop: 14,
+    color: "#4b5563",
+    lineHeight: 1.6
+  },
+
+  sideHotel: {
+    marginTop: 24,
+    fontSize: 28,
+    fontWeight: 900
+  },
+
+  sideAddress: {
+    marginTop: 10,
+    color: "#6b7280"
+  },
+
+  priceBox: {
+    marginTop: 24,
+    background: "#ecfdf3",
+    borderRadius: 22,
+    padding: 22
+  },
+
+  priceSearching: {
+    fontSize: 24,
+    fontWeight: 900
+  },
+
+  totalLabel: {
+    fontSize: 20,
+    fontWeight: 900
+  },
+
+  priceBig: {
+    marginTop: 12,
+    fontSize: 50,
+    fontWeight: 900
+  },
+
+  errorTitle: {
+    fontSize: 24,
+    fontWeight: 900,
+    color: "#b91c1c"
+  }
 };
+```
+
+After pasting:
+
+```powershell
+# FRONTEND WINDOW — Windows PowerShell
+
+cd C:\frontend\hotel-booking-app\frontend
+
+Ctrl+C
+
+npm run build
+
+cd C:\frontend\hotel-booking-app
+
+git add frontend/src/App.jsx
+
+git commit -m "Restore stable full customer frontend"
+
+git push origin main
+```
