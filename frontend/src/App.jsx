@@ -234,7 +234,7 @@ export default function App() {
 
         <nav style={styles.nav}>
           <button onClick={() => setPage("home")}>Stays</button>
-          <button onClick={() => setPage("destinations")}>Destinations</button>
+          <button onClick={() => setPage("destinations")}>About & Support</button>
           <button onClick={() => setPage("offers")}>Offers</button>
           <button onClick={() => setPage("guide")}>Guide</button>
           <button onClick={() => setPage("help")}>Help</button>
@@ -423,7 +423,7 @@ export default function App() {
       )}
 
       {page === "guide" && <GuidePage setPage={setPage} place={guidePlace || city || "your destination"} />}
-      {page === "destinations" && <DestinationsPage setPage={setPage} destinations={destinations} />}
+      {page === "destinations" && <CustomerInfoPage setPage={setPage} />}
       {page === "offers" && <OffersPage setPage={setPage} />}
       {page === "help" && <HelpPage setPage={setPage} />}
       {page === "partnerForm" && <PartnerForm setPage={setPage} />}
@@ -479,7 +479,7 @@ function DestinationsPage({ setPage, destinations }) {
     <main style={styles.main}>
       <button style={styles.backButton} onClick={() => setPage("home")}>Back</button>
       <section style={styles.panel}>
-        <h1>Destinations</h1>
+        <h1>About & Support</h1>
         <p>
           Choose a country and city on the main search page. Destination pages help customers plan accommodation,
           airport transfers, local transport, nearby food, attractions and emergency services before booking.
@@ -583,6 +583,117 @@ function PartnerLogin({ setPage }) {
   );
 }
 
+
+function CustomerInfoPage({ setPage }) {
+  return (
+    <main style={styles.main}>
+      <button style={styles.backButton} onClick={() => setPage("home")}>
+        Back
+      </button>
+
+      <section style={styles.panel}>
+        <h1>About MySpace Hotel</h1>
+        <p>
+          MySpace Hotel helps travellers discover accommodation with clearer
+          booking information, destination guidance and secure reservation support.
+          We focus on customer clarity, safer travel preparation and professional
+          hotel partnerships.
+        </p>
+      </section>
+
+      <div style={styles.guideGrid}>
+
+        <section style={styles.guideCard}>
+          <h2>Frequently Asked Questions</h2>
+
+          <div style={styles.faqItem}>
+            <strong>How do I pay for my booking?</strong>
+            <p>
+              Payments are processed securely through Stripe checkout after you
+              select your hotel and confirm your stay details.
+            </p>
+          </div>
+
+          <div style={styles.faqItem}>
+            <strong>Can I contact the hotel directly?</strong>
+            <p>
+              Yes. Many hotels provide direct contact support after reservation
+              confirmation.
+            </p>
+          </div>
+
+          <div style={styles.faqItem}>
+            <strong>Do prices include multiple rooms?</strong>
+            <p>
+              Yes. Total pricing reflects the selected number of rooms and nights.
+            </p>
+          </div>
+        </section>
+
+        <section style={styles.guideCard}>
+          <h2>Terms & Conditions</h2>
+
+          <ul style={styles.termsList}>
+            <li>Rates and availability may change until payment is completed.</li>
+            <li>Some hotels may apply local tourism or city taxes separately.</li>
+            <li>Cancellation policies vary by property and rate type.</li>
+            <li>Travellers are responsible for passports, visas and travel compliance.</li>
+            <li>Guests should review destination safety and local regulations before travel.</li>
+          </ul>
+        </section>
+
+        <section style={styles.guideCard}>
+          <h2>Guest Satisfaction</h2>
+
+          <p>
+            We aim to provide:
+          </p>
+
+          <ul style={styles.termsList}>
+            <li>Clear accommodation pricing</li>
+            <li>Simple country and city selection</li>
+            <li>Helpful travel guidance</li>
+            <li>Reliable hotel information</li>
+            <li>Professional reservation support</li>
+          </ul>
+
+          <p>
+            Support: reservations@myspace-hotel.com
+          </p>
+        </section>
+
+        <section style={styles.guideCard}>
+          <h2>Post-Stay Testimonials</h2>
+
+          <div style={styles.testimonial}>
+            <strong>United Kingdom traveller</strong>
+            <p>
+              “The destination guide helped us plan airport transfers and local
+              attractions before arrival.”
+            </p>
+          </div>
+
+          <div style={styles.testimonial}>
+            <strong>Dubai family stay</strong>
+            <p>
+              “The room totals and currency conversion made pricing much easier
+              to understand.”
+            </p>
+          </div>
+
+          <div style={styles.testimonial}>
+            <strong>Business traveller</strong>
+            <p>
+              “Simple booking process and useful destination information.”
+            </p>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  );
+}
+
 const styles = {
   page: { minHeight: "100vh", background: "#f5f8fd", color: "#07142f", fontFamily: "Arial, sans-serif" },
   header: { minHeight: 100, background: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 52px", boxShadow: "0 2px 18px rgba(15,23,42,.08)", gap: 16 },
@@ -623,5 +734,9 @@ const styles = {
   guideCard: { background: "#fff", borderRadius: 22, padding: 24, boxShadow: "0 14px 36px rgba(15,23,42,.08)" },
   linkGrid: { display: "grid", gap: 10, marginTop: 16 },
   destinationList: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 18, marginTop: 22 },
-  formGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 14, margin: "22px 0" }
+  formGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 14, margin: "22px 0" },
+faqItem: { marginBottom: 20, paddingBottom: 14, borderBottom: "1px solid #e2e8f0" },
+termsList: { paddingLeft: 20, lineHeight: 1.9 },
+testimonial: { background: "#f8fafc", borderRadius: 14, padding: 16, marginBottom: 14 }
 };
+
