@@ -293,8 +293,8 @@ export default function App() {
             <h2>Need help? We are here for you.</h2>
             <p>For reservations, hotel onboarding and travel support, use the options below.</p>
             <div style={styles.helpGrid}>
-              <Info title="Call us" text="+44 20 4577 3800. Mon to Fri, 9am to 6pm GMT." />
-              <Info title="Email us" text="support@myspace-hotel.com. We reply within 24 hours." />
+              <Info title="Reservations email" text="reservations@myspace-hotel.com. For booking support, reservation questions and payment help." />
+              <Info title="Email us" text="reservations@myspace-hotel.com. We reply within 24 hours." />
               <Info title="Travel guide" text="Maps, airports, hospitals, restaurants and attractions." />
             </div>
           </section>
@@ -428,7 +428,7 @@ function HelpPage({ setPage }) {
         <p>Contact MySpace Hotel for booking support, payment questions, travel guidance and partner onboarding.</p>
       </section>
       <div style={styles.guideGrid}>
-        <Info title="Reservations" text="Email support@myspace-hotel.com for reservation help and payment issues." />
+        <Info title="Reservations" text="Email reservations@myspace-hotel.com for reservation help and payment issues." />
         <Info title="Travel support" text="Use the guide page for maps, hospitals, transport, food and attractions." />
         <Info title="Hotels" text="Hotels should complete the partner application form before requesting login access." />
       </div>
@@ -518,3 +518,4 @@ const styles = {
   destinationList: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 18 },
   formGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 14, margin: "22px 0" }
 };
+
