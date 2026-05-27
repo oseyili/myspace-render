@@ -66,6 +66,36 @@ function hotelAddress(hotel) {
   return clean(hotel?.address || hotel?.area || "Destination stay");
 }
 
+function isHotelOnly(hotel) {
+  const text = [
+    hotel?.property_type,
+    hotel?.type,
+    hotel?.category,
+    hotel?.name,
+    hotel?.hotel_name
+  ].map(clean).join(" ").toLowerCase();
+
+  if (!text) return true;
+
+  const blockedTypes = [
+    "apartment",
+    "apartments",
+    "villa",
+    "villas",
+    "residence",
+    "residences",
+    "hostel",
+    "guest house",
+    "guesthouse",
+    "homestay",
+    "private rental"
+  ];
+
+  if (blockedTypes.some((x) => text.includes(x))) return false;
+
+  return true;
+}
+
 function rateShape(liveRate, selectedHotel) {
   const rate =
     liveRate?.rate ||
@@ -95,6 +125,65 @@ function rateShape(liveRate, selectedHotel) {
       clean(liveRate?.customer_message) ||
       "Price shown for your selected dates, guests and rooms."
   };
+}
+
+
+const SANCTIONED_COUNTRY_NAMES = new Set([
+  "Afghanistan",
+  "Belarus",
+  "Burundi",
+  "Central African Republic",
+  "Chad",
+  "Congo Republic",
+  "Cuba",
+  "Democratic Republic of the Congo",
+  "Eritrea",
+  "Iraq",
+  "Iran",
+  "Libya",
+  "Myanmar",
+  "North Korea",
+  "Somalia",
+  "South Sudan",
+  "Sudan",
+  "Syria",
+  "Russia",
+  "Venezuela",
+  "Yemen"
+]);
+
+function isSanctionedCountryName(country) {
+  return SANCTIONED_COUNTRY_NAMES.has(clean(country));
+}
+
+
+function isHotelOnlyNameSafe(hotel) {
+  const text = [
+    hotel?.name,
+    hotel?.hotel_name,
+    hotel?.property_type,
+    hotel?.type,
+    hotel?.category,
+    hotel?.address,
+    hotel?.area
+  ].map(clean).join(" ").toLowerCase();
+
+  const blocked = [
+    "apartment",
+    "apartments",
+    "villa",
+    "villas",
+    "residence",
+    "residences",
+    "hostel",
+    "guest house",
+    "guesthouse",
+    "homestay",
+    "studio",
+    "private rental"
+  ];
+
+  return !blocked.some((x) => text.includes(x));
 }
 
 function mapsLink(type, query) {
@@ -166,46 +255,59 @@ export default function App() {
   async function loadDestinations() {
     setNotice("");
 
-    try {
-      const res = await fetch(`${API_BASE}/api/destinations`);
-      const data = await res.json();
-      const raw = data?.countries || [];
+    const urls = [
+      "http://127.0.0.1:5050/api/destinations",
+      "http://localhost:5050/api/destinations",
+      API_BASE + "/api/destinations"
+    ];
 
-      const cleaned = raw
-        .filter((x) => clean(x.country))
-        .map((x) => {
-          const citySource = Array.isArray(x.cities)
-            ? x.cities
-            : Array.isArray(x.cities_full)
-              ? x.cities_full.map((c) => c.city)
-              : [];
+    for (const url of urls) {
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        const data = await res.json();
+        const raw = Array.isArray(data?.countries) ? data.countries : [];
 
-          const seen = new Map();
+        const cleaned = raw
+          .filter((x) => clean(x.country))
+          .filter((x) => !isSanctionedCountryName(x.country))
+          .map((x) => {
+            const citySource = Array.isArray(x.cities)
+              ? x.cities
+              : Array.isArray(x.cities_full)
+                ? x.cities_full.map((c) => c.city)
+                : [];
 
-          citySource.forEach((c) => {
-            const name = clean(c);
-            if (!name) return;
-            const key = normalizeKey(name);
-            if (!seen.has(key)) seen.set(key, name);
-          });
+            const seen = new Map();
 
-          return {
-            country: clean(x.country),
-            cities: Array.from(seen.values()).sort((a, b) => a.localeCompare(b))
-          };
-        })
-        .filter((x) => x.country && x.cities.length)
-        .sort((a, b) => a.country.localeCompare(b.country));
+            citySource.forEach((c) => {
+              const name = clean(c);
+              if (!name) return;
 
-      setDestinations(cleaned);
+              const key = normalizeKey(name);
+              if (!seen.has(key)) seen.set(key, name);
+            });
 
-      if (!cleaned.length) {
-        setNotice("Destinations are loading. Please refresh the page shortly.");
+            return {
+              country: clean(x.country),
+              cities: Array.from(seen.values()).sort((a, b) => a.localeCompare(b))
+            };
+          })
+          .filter((x) => x.country && x.cities.length)
+          .sort((a, b) => a.country.localeCompare(b.country));
+
+        if (cleaned.length) {
+          setDestinations(cleaned);
+          setNotice("");
+          console.log("Loaded destinations:", cleaned.length, "from", url);
+          return;
+        }
+      } catch (err) {
+        console.log("Destination load failed:", url, err);
       }
-    } catch (err) {
-      console.log(err);
-      setNotice("We could not load destinations. Please check your connection and refresh.");
     }
+
+    setDestinations([]);
+    setNotice("Destinations could not be loaded. Please make sure the backend is running on port 5050.");
   }
 
   async function searchHotels() {
@@ -238,11 +340,10 @@ export default function App() {
       const res = await fetch(`${API_BASE}/api/hotels/search?${params}`);
       const data = await res.json();
       const found = Array.isArray(data?.hotels) ? data.hotels : [];
-
       setHotels(found);
 
-      if (!found.length) {
-        setNotice("No stays were returned for this search. Try another city or different dates.");
+      if (!cleanFound.length) {
+        setNotice("No matching results were returned for this search. Try another city or different dates.");
       }
     } catch (err) {
       console.log(err);
@@ -310,8 +411,8 @@ export default function App() {
       return;
     }
 
-    if (!rate.liveAvailable || !rate.amount || !rate.rateKey) {
-      setCheckoutMessage("This stay needs a live price before secure payment can continue.");
+    if (!rate.liveAvailable || !rate.amount) {
+      setCheckoutMessage("This hotel needs a live available price before secure payment can continue.");
       return;
     }
 
@@ -485,7 +586,7 @@ export default function App() {
   }
 
   function ReservePanel() {
-    const canPay = selectedHotel && rate.liveAvailable && rate.amount && rate.rateKey;
+    const canPay = selectedHotel && rate.liveAvailable && rate.amount && stayTotal > 0;
 
     return (
       <ComplianceGate billingCountry="" ipCountry={ipCountry} cardCountry="">
@@ -727,7 +828,7 @@ export default function App() {
   }
 
   function CheckoutPage() {
-    const canPay = selectedHotel && rate.liveAvailable && rate.amount && rate.rateKey && stayTotal > 0;
+    const canPay = selectedHotel && rate.liveAvailable && rate.amount && stayTotal > 0;
 
     return (
       <PageShell title="Secure Payment" subtitle="Review your stay and continue to secure checkout.">

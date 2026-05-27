@@ -343,6 +343,36 @@ function buildDestinations() {
   return destinationsCache;
 }
 
+
+function isHotelOnlyNameSafe(h) {
+  const text = [
+    h.name,
+    h.hotel_name,
+    h.property_type,
+    h.type,
+    h.category,
+    h.address,
+    h.area
+  ].map(clean).join(" ").toLowerCase();
+
+  const blocked = [
+    "apartment",
+    "apartments",
+    "villa",
+    "villas",
+    "residence",
+    "residences",
+    "hostel",
+    "guest house",
+    "guesthouse",
+    "homestay",
+    "studio",
+    "private rental"
+  ];
+
+  return !blocked.some((x) => text.includes(x));
+}
+
 function customerSearch(country, city, area, keyword, propertyType, limit) {
   let hotels = getHotelsLazy()
     .filter((h) => !isSanctionedCountryName(h.country) && clean(h.country) === clean(country) && clean(h.city) === clean(city))
