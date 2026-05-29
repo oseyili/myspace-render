@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
@@ -12,12 +12,12 @@ const STRIPE_PAYMENT_LINK =
 
 const ROUTES = {
   hotels: "/",
-  guide: "/destination-guide",
-  offers: "/special-offers",
-  reviews: "/guest-reviews",
-  support: "/support-centre",
-  partners: "/industry-partnerships",
-  business: "/business-portal",
+  guide: "/#/destination-guide",
+  offers: "/#/special-offers",
+  reviews: "/#/guest-reviews",
+  support: "/#/support-centre",
+  partners: "/#/industry-partnerships",
+  business: "/#/business-portal",
 };
 
 function todayISO() {
@@ -54,13 +54,13 @@ function routeUrl(path) {
 }
 
 function currentRoute() {
-  const path = window.location.pathname || "/";
-  if (path === ROUTES.guide) return "guide";
-  if (path === ROUTES.offers) return "offers";
-  if (path === ROUTES.reviews) return "reviews";
-  if (path === ROUTES.support) return "support";
-  if (path === ROUTES.partners) return "partners";
-  if (path === ROUTES.business) return "business";
+  const hash = window.location.hash || "";
+  if (hash === "#/destination-guide") return "guide";
+  if (hash === "#/special-offers") return "offers";
+  if (hash === "#/guest-reviews") return "reviews";
+  if (hash === "#/support-centre") return "support";
+  if (hash === "#/industry-partnerships") return "partners";
+  if (hash === "#/business-portal") return "business";
   return "hotels";
 }
 
@@ -620,7 +620,7 @@ function GuidePortal() {
     >
       <div style={styles.boxGrid}>
         <GuideCard title="Hospitals and urgent care" text="Find nearby hospitals, pharmacies and urgent-care services before you travel." href={mapSearch("hospital", "selected destination")} />
-        <GuideCard title="Restaurants and cafés" text="Discover restaurants, cafés and local dining options around your chosen destination." href={mapSearch("restaurants", "selected destination")} />
+        <GuideCard title="Restaurants and cafÃ©s" text="Discover restaurants, cafÃ©s and local dining options around your chosen destination." href={mapSearch("restaurants", "selected destination")} />
         <GuideCard title="Airport and transfers" text="Plan airport arrival, railway stations, taxis and local transfers." href={mapSearch("airport", "selected destination")} />
         <GuideCard title="Museums and culture" text="Explore museums, galleries, heritage sites and local attractions." href={mapSearch("museum", "selected destination")} />
         <GuideCard title="Family attractions" text="Find parks, zoos, beaches, shopping centres and family-friendly activities." href={mapSearch("family attractions", "selected destination")} />
