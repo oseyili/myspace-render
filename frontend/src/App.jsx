@@ -104,7 +104,15 @@ export default function App() {
   const [fxFrom, setFxFrom] = useState("GBP");
   const [fxTo, setFxTo] = useState("USD");
 
-  const route = currentRoute();
+  const [route, setRoute] = useState(currentRoute());
+
+  useEffect(() => {
+    const updateRoute = () => setRoute(currentRoute());
+    window.addEventListener("hashchange", updateRoute);
+    updateRoute();
+    return () => window.removeEventListener("hashchange", updateRoute);
+  }, []);
+
   const nights = useMemo(() => nightsBetween(checkIn, checkOut), [checkIn, checkOut]);
 
   useEffect(() => {
@@ -952,3 +960,4 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 900, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
