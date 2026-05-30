@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
@@ -345,19 +345,19 @@ export default function App() {
 function Header() {
   return (
     <header style={styles.header}>
-      <a style={styles.brandButton} href={routeUrl("/")} target="_blank" rel="noopener noreferrer">
+      <a style={styles.brandButton} href={routeUrl("/")}>
         <div style={styles.logo}>MYSPACE HOTEL</div>
         <div style={styles.tagline}>Hotels, Resorts, Serviced Apartments, Worldwide Travel</div>
       </a>
 
       <nav style={styles.nav}>
-        <a style={styles.navLink} href={routeUrl(ROUTES.hotels)} target="_blank" rel="noopener noreferrer">Hotels</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.guide)} target="_blank" rel="noopener noreferrer">Destination Guide</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.offers)} target="_blank" rel="noopener noreferrer">Special Offers</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.reviews)} target="_blank" rel="noopener noreferrer">Guest Reviews</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.support)} target="_blank" rel="noopener noreferrer">Support Centre</a>
-        <a style={styles.partnerLink} href={routeUrl(ROUTES.partners)} target="_blank" rel="noopener noreferrer">Industry Partnerships</a>
-        <a style={styles.loginLink} href={routeUrl(ROUTES.business)} target="_blank" rel="noopener noreferrer">Business Portal</a>
+        <a style={styles.navLink} href={routeUrl(ROUTES.hotels)}>Hotels</a>
+        <a style={styles.navLink} href={routeUrl(ROUTES.guide)}>Destination Guide</a>
+        <a style={styles.navLink} href={routeUrl(ROUTES.offers)}>Special Offers</a>
+        <a style={styles.navLink} href={routeUrl(ROUTES.reviews)}>Guest Reviews</a>
+        <a style={styles.navLink} href={routeUrl(ROUTES.support)}>Support Centre</a>
+        <a style={styles.partnerLink} href={routeUrl(ROUTES.partners)}>Industry Partnerships</a>
+        <a style={styles.loginLink} href={routeUrl(ROUTES.business)}>Business Portal</a>
       </nav>
     </header>
   );
@@ -555,7 +555,7 @@ function HotelsPage(props) {
                 {props.paying ? "Opening Secure Payment..." : "Continue to Secure Checkout"}
               </button>
 
-              <a style={styles.secondaryLink} href={mapSearch("things to do", props.destinationQuery)} target="_blank" rel="noreferrer">
+              <a style={styles.secondaryLink} href={mapSearch("things to do", props.destinationQuery)}>
                 Explore This Destination
               </a>
             </>
@@ -627,7 +627,7 @@ function GuidePortal() {
     <PortalShell title="Destination Guide" subtitle="Plan safer and more enjoyable trips with practical destination support." badge="Travel planning">
       <div style={styles.boxGrid}>
         <GuideCard title="Hospitals and urgent care" text="Find nearby hospitals, pharmacies and urgent-care services before you travel." href={mapSearch("hospital", "selected destination")} />
-        <GuideCard title="Restaurants and cafés" text="Discover restaurants, cafés and local dining options around your chosen destination." href={mapSearch("restaurants", "selected destination")} />
+        <GuideCard title="Restaurants and cafÃ©s" text="Discover restaurants, cafÃ©s and local dining options around your chosen destination." href={mapSearch("restaurants", "selected destination")} />
         <GuideCard title="Airport and transfers" text="Plan airport arrival, railway stations, taxis and local transfers." href={mapSearch("airport", "selected destination")} />
         <GuideCard title="Museums and culture" text="Explore museums, galleries, heritage sites and local attractions." href={mapSearch("museum", "selected destination")} />
         <GuideCard title="Family attractions" text="Find parks, zoos, beaches, shopping centres and family-friendly activities." href={mapSearch("family attractions", "selected destination")} />
@@ -763,7 +763,7 @@ function BusinessPortal() {
 
           {portalNotice ? <div style={styles.loginNotice}>{portalNotice}</div> : null}
 
-          <a style={styles.loginHelp} href={routeUrl(ROUTES.partners)} target="_blank" rel="noopener noreferrer">
+          <a style={styles.loginHelp} href={routeUrl(ROUTES.partners)}>
             Need access? Apply through Industry Partnerships
           </a>
         </form>
@@ -779,7 +779,7 @@ function PortalShell({ title, subtitle, badge, children }) {
         <div style={styles.heroBadge}>{badge}</div>
         <h1 style={styles.portalTitle}>{title}</h1>
         <p style={styles.portalSubtitle}>{subtitle}</p>
-        <a style={styles.portalButton} href={routeUrl(ROUTES.hotels)} target="_blank" rel="noopener noreferrer">Open Hotel Search</a>
+        <a style={styles.portalButton} href={routeUrl(ROUTES.hotels)}>Open Hotel Search</a>
       </section>
 
       <section style={styles.portalContent}>{children}</section>
@@ -807,7 +807,7 @@ function InfoCard({ title, text }) {
 
 function GuideCard({ title, text, href }) {
   return (
-    <a style={styles.guideCard} href={href} target="_blank" rel="noreferrer">
+    <a style={styles.guideCard} href={href}>
       <h3 style={styles.cardTitle}>{title}</h3>
       <p style={styles.cardText}>{text}</p>
       <span style={styles.guideAction}>Open guide</span>
