@@ -4,8 +4,16 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 
-const app = express();
+try {
+  require("dotenv").config();
+} catch {}
 
+let nodemailer = null;
+try {
+  nodemailer = require("nodemailer");
+} catch {}
+
+const app = express();
 const PORT = process.env.PORT || 5050;
 
 app.use(cors({ origin: true, credentials: true }));
@@ -21,9 +29,7 @@ const SERVICE_ACTIVITY_FILE = path.join(DATA_DIR, "service_activity.json");
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 function ensureFile(file, fallback) {
-  if (!fs.existsSync(file)) {
-    fs.writeFileSync(file, JSON.stringify(fallback, null, 2), "utf8");
-  }
+  if (!fs.existsSync(file)) fs.writeFileSync(file, JSON.stringify(fallback, null, 2), "utf8");
 }
 
 ensureFile(BOOKINGS_FILE, []);
@@ -31,67 +37,11 @@ ensureFile(PARTNERS_FILE, []);
 ensureFile(FEEDBACK_FILE, []);
 ensureFile(SERVICE_ACTIVITY_FILE, []);
 
-const SANCTIONED_COUNTRIES = new Set([
-  "Afghanistan",
-  "Belarus",
-  "Burundi",
-  "Central African Republic",
-  "Chad",
-  "Congo Republic",
-  "Cuba",
-  "Democratic Republic of the Congo",
-  "Eritrea",
-  "Iraq",
-  "Iran",
-  "Libya",
-  "Myanmar",
-  "North Korea",
-  "Somalia",
-  "South Sudan",
-  "Sudan",
-  "Syria",
-  "Russia",
-  "Venezuela",
-  "Yemen"
-]);
-
-const FALLBACK_DESTINATIONS = [
-  ["United Kingdom", ["London", "Manchester", "Birmingham", "Edinburgh", "Glasgow"]],
-  ["United Arab Emirates", ["Dubai", "Abu Dhabi", "Sharjah"]],
-  ["France", ["Paris", "Nice", "Lyon", "Marseille"]],
-  ["Spain", ["Madrid", "Barcelona", "Valencia", "Seville"]],
-  ["Italy", ["Rome", "Milan", "Venice", "Florence"]],
-  ["United States", ["New York", "Los Angeles", "Miami", "Orlando", "Chicago"]],
-  ["Canada", ["Toronto", "Vancouver", "Montreal"]],
-  ["Australia", ["Sydney", "Melbourne", "Brisbane"]],
-  ["Nigeria", ["Lagos", "Abuja", "Benin City", "Port Harcourt"]],
-  ["South Africa", ["Cape Town", "Johannesburg", "Durban"]],
-  ["Ghana", ["Accra", "Kumasi"]],
-  ["Kenya", ["Nairobi", "Mombasa"]],
-  ["Turkey", ["Istanbul", "Antalya", "Ankara"]],
-  ["Portugal", ["Lisbon", "Porto", "Faro"]],
-  ["Greece", ["Athens", "Santorini", "Mykonos"]],
-  ["Germany", ["Berlin", "Munich", "Frankfurt", "Hamburg"]],
-  ["Netherlands", ["Amsterdam", "Rotterdam", "The Hague"]],
-  ["Belgium", ["Brussels", "Antwerp"]],
-  ["Switzerland", ["Zurich", "Geneva", "Basel"]],
-  ["Austria", ["Vienna", "Salzburg"]],
-  ["Ireland", ["Dublin", "Cork"]],
-  ["Qatar", ["Doha"]],
-  ["Saudi Arabia", ["Riyadh", "Jeddah", "Makkah", "Madinah"]],
-  ["Japan", ["Tokyo", "Osaka", "Kyoto"]],
-  ["Singapore", ["Singapore"]],
-  ["Malaysia", ["Kuala Lumpur", "Penang"]],
-  ["Thailand", ["Bangkok", "Phuket", "Chiang Mai"]],
-  ["India", ["Mumbai", "Delhi", "Bengaluru", "Goa"]],
-  ["Brazil", ["Rio de Janeiro", "Sao Paulo"]],
-  ["Mexico", ["Mexico City", "Cancun"]]
-];
-
 function readJSON(file, fallback = []) {
   try {
     if (!fs.existsSync(file)) return fallback;
-    return JSON.parse(fs.readFileSync(file, "utf8"));
+    const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
+    return parsed;
   } catch {
     return fallback;
   }
@@ -125,6 +75,164 @@ function nowISO() {
 function makeRef(prefix) {
   return `${prefix}-${Date.now()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
 }
+
+function recordActivity(action, payload, response) {
+  const logs = readJSON(SERVICE_ACTIVITY_FILE, []);
+  logs.unshift({
+    id: crypto.randomUUID(),
+    created_at: nowISO(),
+    action,
+    payload,
+    response
+  });
+  writeJSON(SERVICE_ACTIVITY_FILE, logs.slice(0, 3000));
+}
+
+function mailTo() {
+  return clean(process.env.MAIL_TO || "reservations@myspace-hotel.com");
+}
+
+function mailFrom() {
+  return clean(
+    process.env.MAIL_FROM ||
+      process.env.SMTP_FROM ||
+      process.env.RESEND_FROM ||
+      "MySpace Hotel <reservations@myspace-hotel.com>"
+  );
+}
+
+function htmlEscape(v) {
+  return clean(v)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function buildEmailHtml(title, rows) {
+  const body = rows
+    .map(
+      ([label, value]) => `
+        <tr>
+          <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-weight:700;color:#0b1d51;width:180px;">${htmlEscape(label)}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;color:#111827;">${htmlEscape(value)}</td>
+        </tr>`
+    )
+    .join("");
+
+  return `
+    <div style="font-family:Arial,sans-serif;background:#f4f7fb;padding:24px;">
+      <div style="max-width:760px;margin:auto;background:#ffffff;border-radius:18px;overflow:hidden;border:1px solid #dbe4f0;">
+        <div style="background:#0b1d51;color:#ffffff;padding:22px 26px;">
+          <div style="font-size:26px;font-weight:900;">MYSPACE HOTEL</div>
+          <div style="font-size:15px;margin-top:6px;">${htmlEscape(title)}</div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:15px;">
+          ${body}
+        </table>
+        <div style="padding:18px 26px;color:#64748b;font-size:13px;">
+          Sent automatically from MySpace Hotel booking platform.
+        </div>
+      </div>
+    </div>`;
+}
+
+async function sendEmailNotification(subject, rows) {
+  const to = mailTo();
+  const from = mailFrom();
+  const html = buildEmailHtml(subject, rows);
+  const text = rows.map(([label, value]) => `${label}: ${value}`).join("\n");
+
+  if (!to) {
+    recordActivity("email_skipped", { subject }, { reason: "MAIL_TO missing" });
+    return { ok: false, skipped: true, reason: "MAIL_TO missing" };
+  }
+
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          from,
+          to,
+          subject,
+          html,
+          text
+        })
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      recordActivity("email_resend", { subject, to }, { ok: res.ok, status: res.status, data });
+
+      return { ok: res.ok, provider: "resend", status: res.status, data };
+    } catch (err) {
+      recordActivity("email_resend_error", { subject, to }, { error: err.message });
+      return { ok: false, provider: "resend", error: err.message };
+    }
+  }
+
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS && nodemailer) {
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT || 587),
+        secure: String(process.env.SMTP_SECURE || "").toLowerCase() === "true",
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
+        }
+      });
+
+      const info = await transporter.sendMail({
+        from,
+        to,
+        subject,
+        html,
+        text
+      });
+
+      recordActivity("email_smtp", { subject, to }, { ok: true, messageId: info.messageId });
+
+      return { ok: true, provider: "smtp", messageId: info.messageId };
+    } catch (err) {
+      recordActivity("email_smtp_error", { subject, to }, { error: err.message });
+      return { ok: false, provider: "smtp", error: err.message };
+    }
+  }
+
+  recordActivity("email_skipped", { subject, to }, { reason: "No RESEND_API_KEY or SMTP configuration available" });
+  return { ok: false, skipped: true, reason: "No email provider configured" };
+}
+
+const SANCTIONED_COUNTRIES = new Set([
+  "Afghanistan",
+  "Belarus",
+  "Burundi",
+  "Central African Republic",
+  "Chad",
+  "Congo Republic",
+  "Cuba",
+  "Democratic Republic of the Congo",
+  "Eritrea",
+  "Iraq",
+  "Iran",
+  "Libya",
+  "Myanmar",
+  "North Korea",
+  "Somalia",
+  "South Sudan",
+  "Sudan",
+  "Syria",
+  "Russia",
+  "Venezuela",
+  "Yemen"
+]);
 
 function isBlockedCountry(country) {
   return SANCTIONED_COUNTRIES.has(clean(country));
@@ -168,9 +276,10 @@ function normalizeHotel(h, requestedCurrency = "") {
     : money(h.price || h.amount || h.nightly_rate || 0);
 
   const currency = clean(requestedCurrency || firstRate?.currency || h.currency || "GBP").toUpperCase();
+
   const hotelId = clean(h.hotel_id || h.hotelId || h.id || h.code || h.hotel_code);
 
-  const roomList = rates.length
+  const rooms = rates.length
     ? rates.slice(0, 8).map((r, index) => ({
         roomCode: clean(r.rate_id || r.rate_key || r.room_code || `ROOM-${index + 1}`),
         roomName: clean(r.room_name || r.roomName || r.rate_name || "Available room"),
@@ -206,7 +315,7 @@ function normalizeHotel(h, requestedCurrency = "") {
     stars: clean(h.stars || h.rating || h.category || ""),
     image: firstImage(h),
     facilities: Array.isArray(h.facilities) ? h.facilities.slice(0, 8) : [],
-    rooms: roomList,
+    rooms,
     availableToBook: amount > 0,
     price: amount,
     currency
@@ -214,10 +323,9 @@ function normalizeHotel(h, requestedCurrency = "") {
 }
 
 function buildDestinations() {
-  const hotels = readHotels();
   const map = new Map();
 
-  for (const h of hotels) {
+  for (const h of readHotels()) {
     const country = clean(h.country);
     const city = clean(h.city);
 
@@ -226,14 +334,6 @@ function buildDestinations() {
 
     if (!map.has(country)) map.set(country, new Set());
     map.get(country).add(city);
-  }
-
-  if (map.size < 20) {
-    for (const [country, cities] of FALLBACK_DESTINATIONS) {
-      if (isBlockedCountry(country)) continue;
-      if (!map.has(country)) map.set(country, new Set());
-      for (const city of cities) map.get(country).add(city);
-    }
   }
 
   return [...map.entries()]
@@ -264,16 +364,6 @@ function fallbackHotels(country, city, currency) {
           displayCurrency: currency,
           cancellation: "Cancellation information is shown before you complete your booking.",
           taxes: "Applicable taxes and fees are shown before you complete your booking."
-        },
-        {
-          roomCode: "DELUXE",
-          roomName: "Deluxe Room",
-          board: "Breakfast available",
-          price: 165,
-          convertedPrice: 165,
-          displayCurrency: currency,
-          cancellation: "Cancellation information is shown before you complete your booking.",
-          taxes: "Applicable taxes and fees are shown before you complete your booking."
         }
       ],
       availableToBook: true,
@@ -292,34 +382,17 @@ function searchHotels(query) {
     .filter((h) => !isBlockedCountry(h.country))
     .filter((h) => !country || lower(h.country) === lower(country))
     .filter((h) => !city || lower(h.city) === lower(city))
-    .map((h) => normalizeHotel(h, currency));
-
-  hotels = hotels.filter((h) => h.name && h.country && h.city);
+    .map((h) => normalizeHotel(h, currency))
+    .filter((h) => h.name && h.country && h.city);
 
   hotels.sort((a, b) => {
-    if (b.availableToBook !== a.availableToBook) {
-      return Number(b.availableToBook) - Number(a.availableToBook);
-    }
+    if (b.availableToBook !== a.availableToBook) return Number(b.availableToBook) - Number(a.availableToBook);
     return a.name.localeCompare(b.name);
   });
 
-  if (!hotels.length && country && city) {
-    hotels = fallbackHotels(country, city, currency);
-  }
+  if (!hotels.length && country && city) hotels = fallbackHotels(country, city, currency);
 
   return hotels.slice(0, 120);
-}
-
-function recordActivity(action, payload, response) {
-  const logs = readJSON(SERVICE_ACTIVITY_FILE, []);
-  logs.unshift({
-    id: crypto.randomUUID(),
-    created_at: nowISO(),
-    action,
-    payload,
-    response
-  });
-  writeJSON(SERVICE_ACTIVITY_FILE, logs.slice(0, 2000));
 }
 
 function getBaseUrl(req) {
@@ -331,10 +404,7 @@ function getBaseUrl(req) {
     "";
 
   if (envBase) return envBase.replace(/\/$/, "");
-
-  const origin = req.headers.origin;
-  if (origin) return String(origin).replace(/\/$/, "");
-
+  if (req.headers.origin) return String(req.headers.origin).replace(/\/$/, "");
   return "http://localhost:5173";
 }
 
@@ -362,6 +432,7 @@ async function createStripeCheckout(req, res) {
     const currency = clean(req.body.currency || "GBP").toUpperCase();
     const hotelName = clean(req.body.hotelName || req.body.hotel || "MySpace Hotel Reservation");
     const customerEmail = clean(req.body.customerEmail || req.body.email || "");
+    const customerName = clean(req.body.customerName || "");
     const bookingRef = clean(req.body.bookingRef || makeRef("MSH"));
 
     if (secretKey) {
@@ -378,11 +449,10 @@ async function createStripeCheckout(req, res) {
       body.append("line_items[0][price_data][product_data][description]", "MySpace Hotel reservation");
       body.append("metadata[booking_reference]", bookingRef);
       body.append("metadata[hotel_name]", hotelName);
+      body.append("metadata[customer_name]", customerName);
       body.append("metadata[source]", "myspace-hotel");
 
-      if (customerEmail) {
-        body.append("customer_email", customerEmail);
-      }
+      if (customerEmail) body.append("customer_email", customerEmail);
 
       const stripeRes = await fetch("https://api.stripe.com/v1/checkout/sessions", {
         method: "POST",
@@ -419,12 +489,6 @@ async function createStripeCheckout(req, res) {
     }
 
     if (paymentLink) {
-      recordActivity("stripe_payment_link_started", req.body, {
-        bookingRef,
-        amount,
-        currency
-      });
-
       return res.json({
         ok: true,
         url: paymentLink,
@@ -435,7 +499,7 @@ async function createStripeCheckout(req, res) {
 
     return res.status(400).json({
       ok: false,
-      message: "Stripe is not configured yet. Add STRIPE_SECRET_KEY or STRIPE_PAYMENT_LINK to your environment."
+      message: "Stripe is not configured yet. Add STRIPE_SECRET_KEY to your environment."
     });
   } catch (err) {
     console.error("Stripe checkout error:", err);
@@ -457,83 +521,48 @@ app.get("/", (req, res) => {
 
 app.get("/status", (req, res) => {
   const destinations = buildDestinations();
-
   res.json({
     ok: true,
     service: "MySpace Hotel",
-    message: "MySpace Hotel is ready to help customers search and book stays.",
     hotelsAvailable: readHotels().length,
     destinationCountries: destinations.length,
     destinationCities: destinations.reduce((sum, x) => sum + x.cities.length, 0),
     confirmedBookings: readJSON(BOOKINGS_FILE, []).length,
     stripeReady: Boolean(process.env.STRIPE_SECRET_KEY || process.env.STRIPE_PAYMENT_LINK),
+    mailReady: Boolean(process.env.RESEND_API_KEY || (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS)),
+    mailTo: mailTo(),
     timestamp: nowISO()
   });
 });
 
 app.get("/api/status", (req, res) => {
   const destinations = buildDestinations();
-
   res.json({
     ok: true,
     service: "MySpace Hotel",
-    message: "MySpace Hotel is ready to help customers search and book stays.",
     hotelsAvailable: readHotels().length,
     destinationCountries: destinations.length,
     destinationCities: destinations.reduce((sum, x) => sum + x.cities.length, 0),
     confirmedBookings: readJSON(BOOKINGS_FILE, []).length,
     stripeReady: Boolean(process.env.STRIPE_SECRET_KEY || process.env.STRIPE_PAYMENT_LINK),
+    mailReady: Boolean(process.env.RESEND_API_KEY || (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS)),
+    mailTo: mailTo(),
     timestamp: nowISO()
   });
 });
 
-app.get("/api/destinations", (req, res) => {
-  res.json(buildDestinations());
-});
-
-app.get("/destinations", (req, res) => {
-  res.json(buildDestinations());
-});
+app.get("/api/destinations", (req, res) => res.json(buildDestinations()));
+app.get("/destinations", (req, res) => res.json(buildDestinations()));
 
 app.get("/api/hotels/search", (req, res) => {
   const hotels = searchHotels(req.query);
-
-  const response = {
-    ok: true,
-    hotels,
-    count: hotels.length,
-    country: clean(req.query.country),
-    city: clean(req.query.city),
-    message: hotels.length
-      ? "Recommended hotels are ready for review."
-      : "No hotels were found for this destination. Please try another city or adjust your search."
-  };
-
-  recordActivity("hotel_search", req.query, {
-    count: hotels.length,
-    sample: hotels[0]
-      ? {
-          hotelId: hotels[0].hotelId,
-          name: hotels[0].name,
-          city: hotels[0].city,
-          country: hotels[0].country
-        }
-      : null
-  });
-
-  res.json(response);
+  recordActivity("hotel_search", req.query, { count: hotels.length });
+  res.json({ ok: true, hotels, count: hotels.length, country: clean(req.query.country), city: clean(req.query.city) });
 });
 
 app.get("/search", (req, res) => {
   const hotels = searchHotels(req.query);
-  res.json({
-    ok: true,
-    hotels,
-    count: hotels.length,
-    message: hotels.length
-      ? "Recommended hotels are ready for review."
-      : "No hotels were found for this destination. Please try another city or adjust your search."
-  });
+  res.json({ ok: true, hotels, count: hotels.length });
 });
 
 app.post("/api/prebook", (req, res) => {
@@ -544,11 +573,7 @@ app.post("/api/prebook", (req, res) => {
   const hotel =
     hotels.find((h) => h.hotelId === hotelId) ||
     hotels[0] ||
-    fallbackHotels(
-      clean(req.body.country || "United Kingdom"),
-      clean(req.body.city || "London"),
-      clean(req.body.currency || "GBP")
-    )[0];
+    fallbackHotels(clean(req.body.country || "United Kingdom"), clean(req.body.city || "London"), clean(req.body.currency || "GBP"))[0];
 
   const room = hotel.rooms.find((r) => r.roomCode === roomCode) || hotel.rooms[0];
 
@@ -560,8 +585,8 @@ app.post("/api/prebook", (req, res) => {
     roomCode: room.roomCode,
     roomName: room.roomName,
     board: room.board,
-    cancellationPolicy: room.cancellation || "Cancellation information is shown before you complete your booking.",
-    taxesAndFees: room.taxes || "Applicable taxes and fees are shown before you complete your booking.",
+    cancellationPolicy: room.cancellation,
+    taxesAndFees: room.taxes,
     amount: room.convertedPrice || room.price,
     currency: room.displayCurrency || clean(req.body.currency || "GBP").toUpperCase(),
     expiresInSeconds: 900,
@@ -572,7 +597,7 @@ app.post("/api/prebook", (req, res) => {
   res.json(response);
 });
 
-app.post("/api/book", (req, res) => {
+app.post("/api/book", async (req, res) => {
   const bookingRef = makeRef("MSH");
   const confirmationRef = makeRef("CONF");
 
@@ -584,6 +609,8 @@ app.post("/api/book", (req, res) => {
     hotelId: clean(req.body.hotelId),
     hotelName: clean(req.body.hotelName),
     roomName: clean(req.body.roomName),
+    country: clean(req.body.country),
+    city: clean(req.body.city),
     checkIn: clean(req.body.checkIn || req.body.checkin),
     checkOut: clean(req.body.checkOut || req.body.checkout),
     guests: number(req.body.guests),
@@ -592,6 +619,7 @@ app.post("/api/book", (req, res) => {
     currency: clean(req.body.currency || "GBP").toUpperCase(),
     customerName: clean(req.body.customerName),
     customerEmail: clean(req.body.customerEmail),
+    customerPhone: clean(req.body.customerPhone),
     specialRequests: clean(req.body.specialRequests)
   };
 
@@ -599,11 +627,28 @@ app.post("/api/book", (req, res) => {
   bookings.unshift(booking);
   writeJSON(BOOKINGS_FILE, bookings);
 
+  const emailResult = await sendEmailNotification("New booking prepared - MySpace Hotel", [
+    ["Booking reference", booking.bookingRef],
+    ["Hotel", booking.hotelName],
+    ["Destination", `${booking.city}, ${booking.country}`],
+    ["Check-in", booking.checkIn],
+    ["Check-out", booking.checkOut],
+    ["Guests", String(booking.guests)],
+    ["Rooms", String(booking.rooms)],
+    ["Amount", `${booking.currency} ${booking.amount}`],
+    ["Customer name", booking.customerName],
+    ["Customer email", booking.customerEmail],
+    ["Customer phone", booking.customerPhone],
+    ["Special requests", booking.specialRequests],
+    ["Created", booking.createdAt]
+  ]);
+
   const response = {
     ok: true,
     bookingRef,
     confirmationReference: confirmationRef,
     status: "PENDING_PAYMENT",
+    emailSent: Boolean(emailResult.ok),
     message: "Your reservation has been prepared for secure payment."
   };
 
@@ -617,41 +662,24 @@ app.post("/create-checkout-session", createStripeCheckout);
 
 app.get("/api/bookings", (req, res) => {
   const bookings = readJSON(BOOKINGS_FILE, []);
-  res.json({
-    ok: true,
-    total: bookings.length,
-    bookings
-  });
+  res.json({ ok: true, total: bookings.length, bookings });
 });
 
 app.get("/api/bookings/:reference", (req, res) => {
   const bookings = readJSON(BOOKINGS_FILE, []);
   const booking = bookings.find((b) => b.bookingRef === req.params.reference);
 
-  if (!booking) {
-    return res.status(404).json({
-      ok: false,
-      message: "We could not find a booking with that reference."
-    });
-  }
+  if (!booking) return res.status(404).json({ ok: false, message: "We could not find a booking with that reference." });
 
-  res.json({
-    ok: true,
-    booking
-  });
+  res.json({ ok: true, booking });
 });
 
-app.post("/api/cancel-booking", (req, res) => {
+app.post("/api/cancel-booking", async (req, res) => {
   const bookingRef = clean(req.body.bookingRef || req.body.booking_reference);
   const bookings = readJSON(BOOKINGS_FILE, []);
   const booking = bookings.find((b) => b.bookingRef === bookingRef);
 
-  if (!booking) {
-    return res.status(404).json({
-      ok: false,
-      message: "We could not find a booking with that reference."
-    });
-  }
+  if (!booking) return res.status(404).json({ ok: false, message: "We could not find a booking with that reference." });
 
   booking.status = "CANCELLED";
   booking.cancelledAt = nowISO();
@@ -659,18 +687,19 @@ app.post("/api/cancel-booking", (req, res) => {
 
   writeJSON(BOOKINGS_FILE, bookings);
 
-  const response = {
-    ok: true,
-    bookingRef,
-    status: "CANCELLED",
-    message: "Your booking has been cancelled."
-  };
+  await sendEmailNotification("Booking cancelled - MySpace Hotel", [
+    ["Booking reference", booking.bookingRef],
+    ["Hotel", booking.hotelName],
+    ["Customer", booking.customerName],
+    ["Customer email", booking.customerEmail],
+    ["Reason", booking.cancellationReason],
+    ["Cancelled at", booking.cancelledAt]
+  ]);
 
-  recordActivity("booking_cancelled", req.body, response);
-  res.json(response);
+  res.json({ ok: true, bookingRef, status: "CANCELLED", message: "Your booking has been cancelled." });
 });
 
-app.post("/api/partner-applications", (req, res) => {
+app.post("/api/partner-applications", async (req, res) => {
   const rows = readJSON(PARTNERS_FILE, []);
   const row = {
     id: crypto.randomUUID(),
@@ -689,26 +718,53 @@ app.post("/api/partner-applications", (req, res) => {
   rows.unshift(row);
   writeJSON(PARTNERS_FILE, rows.slice(0, 3000));
 
+  const reference = `PARTNER-${row.id.slice(0, 8).toUpperCase()}`;
+
+  const emailResult = await sendEmailNotification("New partnership enquiry - MySpace Hotel", [
+    ["Reference", reference],
+    ["Partner type", row.partner_type],
+    ["Business name", row.business_name],
+    ["Contact name", row.contact_name],
+    ["Contact email", row.contact_email],
+    ["Phone", row.phone],
+    ["Country", row.country],
+    ["City", row.city],
+    ["Website", row.website],
+    ["Message", row.message],
+    ["Received", row.created_at]
+  ]);
+
   res.json({
     ok: true,
+    emailSent: Boolean(emailResult.ok),
     message: "Thank you. Your partnership enquiry has been received by MySpace Hotel.",
-    reference: `PARTNER-${row.id.slice(0, 8).toUpperCase()}`
+    reference
   });
 });
 
-app.post("/api/feedback", (req, res) => {
+app.post("/api/feedback", async (req, res) => {
   const rows = readJSON(FEEDBACK_FILE, []);
-  rows.unshift({
+  const row = {
     id: crypto.randomUUID(),
     created_at: nowISO(),
     name: clean(req.body.name),
     email: clean(req.body.email),
     message: clean(req.body.message)
-  });
+  };
+
+  rows.unshift(row);
   writeJSON(FEEDBACK_FILE, rows.slice(0, 3000));
+
+  const emailResult = await sendEmailNotification("New guest review - MySpace Hotel", [
+    ["Name", row.name],
+    ["Email", row.email],
+    ["Message", row.message],
+    ["Received", row.created_at]
+  ]);
 
   res.json({
     ok: true,
+    emailSent: Boolean(emailResult.ok),
     message: "Thank you. Your message has been received by MySpace Hotel."
   });
 });
@@ -731,6 +787,8 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("COUNTRIES:", destinations.length);
   console.log("CITIES:", destinations.reduce((sum, x) => sum + x.cities.length, 0));
   console.log("STRIPE:", process.env.STRIPE_SECRET_KEY || process.env.STRIPE_PAYMENT_LINK ? "READY" : "NOT CONFIGURED");
+  console.log("MAIL:", process.env.RESEND_API_KEY || (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) ? "READY" : "NOT CONFIGURED");
+  console.log("MAIL TO:", mailTo());
   console.log("BOOKING SERVICE: READY");
   console.log("PARTNERSHIP ENQUIRIES: READY");
   console.log("CUSTOMER SUPPORT: READY");
