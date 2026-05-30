@@ -659,6 +659,47 @@ function OffersPortal() {
 }
 
 function ReviewsPortal({ reviewSent, setReviewSent }) {
+  const [reviewName, setReviewName] = useState("");
+  const [reviewEmail, setReviewEmail] = useState("");
+  const [reviewMessage, setReviewMessage] = useState("");
+  const [reviewNotice, setReviewNotice] = useState("");
+
+  async function submitReview(e) {
+    e.preventDefault();
+    setReviewNotice("");
+
+    if (!reviewName.trim() || !reviewEmail.trim() || !reviewMessage.trim()) {
+      setReviewNotice("Please complete your name, email address and message.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/feedback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: reviewName,
+          email: reviewEmail,
+          message: reviewMessage,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        setReviewNotice(data.message || "We could not send your review right now. Please try again.");
+        return;
+      }
+
+      setReviewSent(true);
+      setReviewName("");
+      setReviewEmail("");
+      setReviewMessage("");
+    } catch {
+      setReviewNotice("We could not send your review right now. Please try again.");
+    }
+  }
+
   return (
     <PortalShell title="Guest Reviews" subtitle="MySpace Hotel is built around confident travel decisions, helpful guidance and clear accommodation choices." badge="Guest experience">
       <div style={styles.boxGrid}>
@@ -668,12 +709,13 @@ function ReviewsPortal({ reviewSent, setReviewSent }) {
       </div>
 
       {reviewSent ? (
-        <div style={styles.success}>Thank you. Your review has been received.</div>
+        <div style={styles.success}>Thank you. Your review has been received by MySpace Hotel.</div>
       ) : (
-        <form style={styles.form} onSubmit={(e) => { e.preventDefault(); setReviewSent(true); }}>
-          <input style={styles.input} placeholder="Your name" />
-          <input style={styles.input} placeholder="Email address" type="email" />
-          <textarea style={styles.textarea} placeholder="Tell us about your booking or travel experience." />
+        <form style={styles.form} onSubmit={submitReview}>
+          <input style={styles.input} placeholder="Your name" value={reviewName} onChange={(e) => setReviewName(e.target.value)} />
+          <input style={styles.input} placeholder="Email address" type="email" value={reviewEmail} onChange={(e) => setReviewEmail(e.target.value)} />
+          <textarea style={styles.textarea} placeholder="Tell us about your booking or travel experience." value={reviewMessage} onChange={(e) => setReviewMessage(e.target.value)} />
+          {reviewNotice ? <div style={styles.loginNotice}>{reviewNotice}</div> : null}
           <button style={styles.formBtn}>Share Your Experience</button>
         </form>
       )}
@@ -960,4 +1002,5 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 900, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
