@@ -730,7 +730,7 @@ function SupportPortal() {
         <InfoCard title="Before your trip" text="Get help reviewing destinations, accommodation options, dates, room choices and travel needs before booking." />
         <InfoCard title="During your stay" text="Access helpful guidance for local services, destination support and stay-related questions." />
         <InfoCard title="After your journey" text="Share your experience, request support and help us improve future guest journeys." />
-        <InfoCard title="Contact MySpace Hotel" text="Email reservations@myspace-hotel.com for customer support and booking assistance." />
+        <InfoCard title="Contact MySpace Hotel" text="Reservations: reservations@myspace-hotel.com | General: info@myspace-hotel.com | Sales and partnerships: sales@myspace-hotel.com | Accounts: accounts@myspace-hotel.com | Director: christopher@myspace-hotel.com" />
       </div>
     </PortalShell>
   );
@@ -950,8 +950,13 @@ function Footer() {
         </div>
 
         <div>
-          <div style={styles.footerTitle}>Customer Support</div>
-          <div style={styles.footerText}>reservations@myspace-hotel.com</div>
+          <div style={styles.footerTitle}>Contact Directory</div>
+          <div style={styles.footerText}>Reservations: reservations@myspace-hotel.com</div>
+          <div style={styles.footerText}>General: info@myspace-hotel.com</div>
+          <div style={styles.footerText}>Sales: sales@myspace-hotel.com</div>
+          <div style={styles.footerText}>Accounts: accounts@myspace-hotel.com</div>
+          <div style={styles.footerText}>Director: christopher@myspace-hotel.com</div>
+          <div style={styles.footerText}>Phone: +44 7707836674</div>
         </div>
       </div>
     </footer>
@@ -1064,6 +1069,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 900, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
