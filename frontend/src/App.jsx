@@ -737,32 +737,94 @@ function SupportPortal() {
 }
 
 function PartnersPortal({ partnerSent, setPartnerSent }) {
+  const [partnerType, setPartnerType] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [website, setWebsite] = useState("");
+  const [message, setMessage] = useState("");
+  const [notice, setNotice] = useState("");
+
+  async function submitPartner(e) {
+    e.preventDefault();
+    setNotice("");
+
+    if (!partnerType.trim() || !businessName.trim() || !contactName.trim() || !contactEmail.trim() || !message.trim()) {
+      setNotice("Please complete partnership type, business name, contact name, email and message.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/partner-applications`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          partner_type: partnerType,
+          business_name: businessName,
+          contact_name: contactName,
+          contact_email: contactEmail,
+          phone,
+          country,
+          city,
+          website,
+          message,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        setNotice(data.message || "We could not send your partnership enquiry right now. Please try again.");
+        return;
+      }
+
+      setPartnerSent(true);
+      setPartnerType("");
+      setBusinessName("");
+      setContactName("");
+      setContactEmail("");
+      setPhone("");
+      setCountry("");
+      setCity("");
+      setWebsite("");
+      setMessage("");
+    } catch {
+      setNotice("We could not send your partnership enquiry right now. Please try again.");
+    }
+  }
+
   return (
-    <PortalShell title="Industry Partnerships" subtitle="MySpace Hotel welcomes partnership enquiries from accommodation and travel technology partners." badge="Partnerships">
-      <div style={styles.partnerGrid}>
-        <InfoCard title="Hotels and accommodation" text="Work with MySpace Hotel to present trusted stays to guests seeking global accommodation." />
-        <InfoCard title="PMS and channel managers" text="Connect property availability, rates and booking information through professional partnership workflows." />
-        <InfoCard title="Travel technology partners" text="Collaborate on better travel experiences, destination support and improved guest journeys." />
+    <PortalShell title="Industry Partnerships" subtitle="Connect with MySpace Hotel for trusted accommodation, travel technology and service partnerships." badge="Partnerships">
+      <div style={styles.boxGrid}>
+        <ReviewCard title="Hotels and accommodation" text="Work with MySpace Hotel to present trusted stays to guests seeking global accommodation." />
+        <ReviewCard title="PMS and channel managers" text="Connect property availability, rates and booking information through professional partnership workflows." />
+        <ReviewCard title="Travel technology partners" text="Collaborate on better travel experiences, destination support and improved guest journeys." />
       </div>
 
       {partnerSent ? (
-        <div style={styles.partnerSuccess}>Thank you. Your partnership enquiry has been received.</div>
+        <div style={styles.success}>Thank you. Your partnership enquiry has been received.</div>
       ) : (
-        <form style={styles.partnerForm} onSubmit={(e) => { e.preventDefault(); setPartnerSent(true); }}>
-          <input style={styles.input} placeholder="Business or property name" required />
-          <input style={styles.input} placeholder="Contact name" required />
-          <input style={styles.input} placeholder="Email address" type="email" required />
-          <input style={styles.input} placeholder="Country" required />
-          <input style={styles.input} placeholder="City" required />
-          <select style={styles.select} defaultValue="">
-            <option value="" disabled>Partnership type</option>
-            <option>Hotel or accommodation provider</option>
-            <option>PMS provider</option>
-            <option>Channel manager</option>
-            <option>Travel technology partner</option>
-            <option>Other hospitality partner</option>
+        <form style={styles.form} onSubmit={submitPartner}>
+          <select style={styles.input} value={partnerType} onChange={(e) => setPartnerType(e.target.value)}>
+            <option value="">Partnership type</option>
+            <option value="Hotel or accommodation provider">Hotel or accommodation provider</option>
+            <option value="PMS or channel manager">PMS or channel manager</option>
+            <option value="Travel technology partner">Travel technology partner</option>
+            <option value="Corporate or business travel partner">Corporate or business travel partner</option>
+            <option value="Other partnership">Other partnership</option>
           </select>
-          <textarea style={styles.textarea} placeholder="Tell us how you would like to work with MySpace Hotel." required />
+          <input style={styles.input} placeholder="Business name" value={businessName} onChange={(e) => setBusinessName(e.target.value)} />
+          <input style={styles.input} placeholder="Contact name" value={contactName} onChange={(e) => setContactName(e.target.value)} />
+          <input style={styles.input} placeholder="Contact email" type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
+          <input style={styles.input} placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <input style={styles.input} placeholder="Country" value={country} onChange={(e) => setCountry(e.target.value)} />
+          <input style={styles.input} placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
+          <input style={styles.input} placeholder="Website" value={website} onChange={(e) => setWebsite(e.target.value)} />
+          <textarea style={styles.textarea} placeholder="Tell us how you would like to work with MySpace Hotel." value={message} onChange={(e) => setMessage(e.target.value)} />
+          {notice ? <div style={styles.loginNotice}>{notice}</div> : null}
           <button style={styles.formBtn}>Submit Partnership Enquiry</button>
         </form>
       )}
@@ -1002,5 +1064,6 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 900, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
