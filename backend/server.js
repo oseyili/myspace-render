@@ -632,7 +632,7 @@ function stripeCurrency(currency) {
 function stripeAmount(amount) {
   const n = number(amount);
   const safe = n > 0 ? n : 1;
-  return Math.max(100, Math.round(safe * 100));
+  return Math.max(50, Math.round(safe * 100));
 }
 
 async function createStripeCheckout(req, res) {
@@ -3325,6 +3325,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
