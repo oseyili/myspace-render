@@ -2660,6 +2660,124 @@ app.get("/api/affiliate-portal/dashboard-v2", (req, res) => {
 });
 // MSH AFFILIATE PORTAL BOOKING FALLBACK END
 
+
+// MSH AFFILIATE PAYOUT CENTRE START
+const AFFILIATE_PAYOUTS_FILE = path.join(DATA_DIR, "affiliate_payouts.json");
+ensureFile(AFFILIATE_PAYOUTS_FILE, []);
+
+function affiliatePayoutSummary(affiliateCode) {
+  const code = clean(affiliateCode).toUpperCase();
+  const payouts = readJSON(AFFILIATE_PAYOUTS_FILE, []).filter((x) => clean(x.affiliateCode).toUpperCase() === code);
+  const paidTotal = money(payouts.filter((x) => clean(x.status).toUpperCase() === "PAID").reduce((sum, x) => sum + number(x.amount), 0));
+  const pendingPayoutTotal = money(payouts.filter((x) => clean(x.status).toUpperCase() !== "PAID").reduce((sum, x) => sum + number(x.amount), 0));
+
+  return {
+    paidTotal,
+    pendingPayoutTotal,
+    payouts: payouts.slice(0, 100)
+  };
+}
+
+app.get("/api/affiliate-portal/payout-centre", (req, res) => {
+  const email = clean(req.query.email).toLowerCase();
+  const affiliateCode = clean(req.query.affiliateCode || req.query.code).toUpperCase();
+
+  const affiliate = readAffiliates().find((x) =>
+    clean(x.email).toLowerCase() === email &&
+    clean(x.affiliateCode).toUpperCase() === affiliateCode
+  );
+
+  if (!affiliate) {
+    return res.status(401).json({ ok: false, message: "Affiliate account not found." });
+  }
+
+  if (clean(affiliate.status).toUpperCase() !== "APPROVED") {
+    return res.status(403).json({ ok: false, message: "Affiliate account is not approved yet." });
+  }
+
+  const dashboard = buildAffiliatePortalDashboard(affiliate);
+  const payout = affiliatePayoutSummary(affiliateCode);
+  const available = money(dashboard.summary.payableCommission - payout.pendingPayoutTotal - payout.paidTotal);
+  const minimumPayout = 50;
+
+  res.json({
+    ok: true,
+    generatedAt: nowISO(),
+    affiliate: dashboard.affiliate,
+    payoutCentre: {
+      availableCommission: available,
+      minimumPayout,
+      amountNeededForPayout: money(Math.max(0, minimumPayout - available)),
+      eligibleForPayout: available >= minimumPayout,
+      nextScheduledPayout: "Monthly payout review",
+      paymentMethod: "Bank transfer after approval",
+      paidTotal: payout.paidTotal,
+      pendingPayoutTotal: payout.pendingPayoutTotal,
+      payoutHistory: payout.payouts
+    }
+  });
+});
+
+app.post("/api/internal/affiliate-payouts/create", (req, res) => {
+  const affiliateCode = clean(req.body.affiliateCode).toUpperCase();
+  const amount = money(req.body.amount);
+  const currency = clean(req.body.currency || "GBP").toUpperCase();
+  const note = clean(req.body.note || "Affiliate payout review");
+
+  if (!affiliateCode || amount <= 0) {
+    return res.status(400).json({ ok: false, message: "affiliateCode and amount are required." });
+  }
+
+  const affiliate = readAffiliates().find((x) => clean(x.affiliateCode).toUpperCase() === affiliateCode);
+
+  if (!affiliate) {
+    return res.status(404).json({ ok: false, message: "Affiliate not found." });
+  }
+
+  const payouts = readJSON(AFFILIATE_PAYOUTS_FILE, []);
+  const payout = {
+    id: crypto.randomUUID(),
+    createdAt: nowISO(),
+    affiliateCode,
+    businessName: affiliate.businessName,
+    contactName: affiliate.contactName,
+    email: affiliate.email,
+    amount,
+    currency,
+    status: "PENDING_REVIEW",
+    note
+  };
+
+  payouts.unshift(payout);
+  writeJSON(AFFILIATE_PAYOUTS_FILE, payouts);
+
+  res.json({ ok: true, payout });
+});
+
+app.post("/api/internal/affiliate-payouts/mark-paid", (req, res) => {
+  const payoutId = clean(req.body.payoutId);
+  const paymentReference = clean(req.body.paymentReference || "MANUAL-PAYOUT");
+
+  const payouts = readJSON(AFFILIATE_PAYOUTS_FILE, []);
+  const index = payouts.findIndex((x) => clean(x.id) === payoutId);
+
+  if (index < 0) {
+    return res.status(404).json({ ok: false, message: "Payout not found." });
+  }
+
+  payouts[index] = {
+    ...payouts[index],
+    status: "PAID",
+    paidAt: nowISO(),
+    paymentReference
+  };
+
+  writeJSON(AFFILIATE_PAYOUTS_FILE, payouts);
+
+  res.json({ ok: true, payout: payouts[index] });
+});
+// MSH AFFILIATE PAYOUT CENTRE END
+
 app.get("/api/internal/affiliate-dashboard", (req, res) => {
   const affiliates = readAffiliates();
   const clicks = readJSON(AFFILIATE_CLICKS_FILE, []);
@@ -2880,6 +2998,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 

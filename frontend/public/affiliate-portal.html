@@ -65,6 +65,20 @@
     </div>
 
     <div class="box" style="margin-top:22px">
+      <h2>Payout Centre</h2>
+      <div class="grid">
+        <div class="card"><h3>Available Commission</h3><div id="availableCommission" class="metric">£0.00</div></div>
+        <div class="card"><h3>Minimum Payout</h3><div id="minimumPayoutBox" class="metric">£50.00</div></div>
+        <div class="card"><h3>Remaining Until Payout</h3><div id="remainingPayout" class="metric">£50.00</div></div>
+        <div class="card"><h3>Payout Status</h3><div id="payoutStatus" class="metric" style="font-size:24px">Not ready</div></div>
+      </div>
+      <p><strong>Payment method:</strong> <span id="paymentMethod">Bank transfer after approval</span></p>
+      <p><strong>Next payout:</strong> <span id="nextPayout">Monthly payout review</span></p>
+      <h3>Payout History</h3>
+      <div id="payoutHistory">No payouts yet.</div>
+    </div>
+
+    <div class="box" style="margin-top:22px">
       <h2>Commission Policy</h2>
       <p>Standard affiliate rate: <strong>3%</strong> of qualifying completed bookings.</p>
       <p>Commission is payable only after bookings are successfully paid. Cancelled, refunded or unpaid bookings do not qualify.</p>
@@ -138,6 +152,28 @@ async function loadDashboard(email, affiliateCode){
   document.getElementById("paidBookings").textContent=data.summary.paidBookings;
   document.getElementById("pendingBookings").textContent=data.summary.pendingBookings;
   document.getElementById("payableCommission").textContent=money(data.summary.payableCommission);
+
+  try {
+    const payoutRes = await fetch(API_BASE + "/api/affiliate-portal/payout-centre?email=" + encodeURIComponent(email) + "&affiliateCode=" + encodeURIComponent(affiliateCode));
+    const payoutData = await payoutRes.json();
+
+    if (payoutRes.ok && payoutData.ok) {
+      const p = payoutData.payoutCentre;
+      document.getElementById("availableCommission").textContent = money(p.availableCommission);
+      document.getElementById("minimumPayoutBox").textContent = money(p.minimumPayout);
+      document.getElementById("remainingPayout").textContent = money(p.amountNeededForPayout);
+      document.getElementById("payoutStatus").textContent = p.eligibleForPayout ? "Ready" : "Building";
+      document.getElementById("paymentMethod").textContent = p.paymentMethod;
+      document.getElementById("nextPayout").textContent = p.nextScheduledPayout;
+
+      const history = document.getElementById("payoutHistory");
+      if (!p.payoutHistory || !p.payoutHistory.length) {
+        history.textContent = "No payouts yet.";
+      } else {
+        history.innerHTML = p.payoutHistory.map(x => `${x.createdAt.slice(0,10)} — ${x.currency} ${Number(x.amount || 0).toFixed(2)} — ${x.status}`).join("<br>");
+      }
+    }
+  } catch (e) {}
 }
 
 function copyLink(){
@@ -147,5 +183,6 @@ function copyLink(){
 </script>
 </body>
 </html>
+
 
 
