@@ -2346,6 +2346,157 @@ app.get("/api/internal/affiliate-dashboard", (req, res) => {
 });
 // MSH AFFILIATE NETWORK END
 
+
+// MSH BOOKING FINANCE DASHBOARD START
+function estimateStripeFee(amount, currency) {
+  const value = money(amount);
+  const ccy = clean(currency || "GBP").toUpperCase();
+
+  // Conservative UK card estimate. Replace with exact Stripe balance transaction later.
+  const percent = ccy === "GBP" ? 0.015 : 0.025;
+  const fixed = ccy === "GBP" ? 0.20 : 0.25;
+
+  return money((value * percent) + fixed);
+}
+
+function estimateSupplierCost(booking) {
+  const customerAmount = money(booking.amount);
+
+  // Temporary conservative estimate until supplier net-rate settlement is added.
+  // Assumes MySpace gross markup around 15%.
+  const supplierCost = money(customerAmount * 0.85);
+
+  return supplierCost;
+}
+
+function affiliateCommissionForBooking(booking, conversions) {
+  const ref = clean(booking.bookingRef);
+  const conversion = conversions.find((x) => clean(x.bookingRef) === ref);
+
+  if (!conversion) {
+    return {
+      affiliateCode: "",
+      status: "NONE",
+      commissionRate: 0,
+      commissionAmount: 0,
+      payableCommission: 0,
+      pendingCommission: 0
+    };
+  }
+
+  const status = clean(conversion.status).toUpperCase();
+  const amount = money(conversion.commissionAmount);
+
+  return {
+    affiliateCode: clean(conversion.affiliateCode),
+    status,
+    commissionRate: number(conversion.commissionRate),
+    commissionAmount: amount,
+    payableCommission: status === "PAID" ? amount : 0,
+    pendingCommission: status === "PAID" ? 0 : amount
+  };
+}
+
+function supplierForBooking(booking) {
+  const tracking = booking.internalSupplierTracking || {};
+  const supplier = typeof resolveSupplierForAdmin === "function"
+    ? resolveSupplierForAdmin(tracking)
+    : {
+        supplier_code: clean(tracking.supplier_code || tracking.supplier_name || "UNKNOWN"),
+        supplier_name: clean(tracking.supplier_name || tracking.supplier_code || "Unknown"),
+        supplier_type: "unknown",
+        status: "unknown"
+      };
+
+  return supplier;
+}
+
+app.get("/api/internal/booking-finance-dashboard", (req, res) => {
+  const bookings = readJSON(BOOKINGS_FILE, []);
+  const conversions = readJSON(AFFILIATE_CONVERSIONS_FILE, []);
+
+  const rows = bookings.map((booking) => {
+    const customerPaid = money(booking.amount);
+    const currency = clean(booking.currency || "GBP").toUpperCase();
+    const supplierCost = estimateSupplierCost(booking);
+    const stripeFee = estimateStripeFee(customerPaid, currency);
+    const affiliate = affiliateCommissionForBooking(booking, conversions);
+    const payableAffiliate = money(affiliate.payableCommission);
+    const estimatedMargin = money(customerPaid - supplierCost - stripeFee - payableAffiliate);
+    const supplier = supplierForBooking(booking);
+
+    return {
+      bookingRef: booking.bookingRef,
+      confirmationReference: booking.confirmationReference,
+      status: booking.status,
+      createdAt: booking.createdAt,
+      paidAt: booking.paidAt || "",
+      hotelId: booking.hotelId,
+      hotelName: booking.hotelName,
+      country: booking.country,
+      city: booking.city,
+      customerEmail: booking.customerEmail,
+
+      currency,
+      customerPaid,
+      supplierCostEstimate: supplierCost,
+      stripeFeeEstimate: stripeFee,
+
+      affiliateCode: affiliate.affiliateCode,
+      affiliateStatus: affiliate.status,
+      affiliateCommissionRate: affiliate.commissionRate,
+      affiliateCommissionTotal: affiliate.commissionAmount,
+      affiliateCommissionPayable: affiliate.payableCommission,
+      affiliateCommissionPending: affiliate.pendingCommission,
+
+      myspaceEstimatedMargin: estimatedMargin,
+      myspaceEstimatedMarginPercent: customerPaid > 0 ? money((estimatedMargin / customerPaid) * 100) : 0,
+
+      supplier,
+      rate_source_id: booking.rate_source_id || booking.internalSupplierTracking?.rate_source_id || "",
+      rate_source_timestamp: booking.rate_source_timestamp || booking.internalSupplierTracking?.rate_source_timestamp || ""
+    };
+  });
+
+  const totals = rows.reduce((acc, row) => {
+    acc.bookings += 1;
+    acc.customerPaid += row.customerPaid;
+    acc.supplierCostEstimate += row.supplierCostEstimate;
+    acc.stripeFeeEstimate += row.stripeFeeEstimate;
+    acc.affiliateCommissionPayable += row.affiliateCommissionPayable;
+    acc.affiliateCommissionPending += row.affiliateCommissionPending;
+    acc.myspaceEstimatedMargin += row.myspaceEstimatedMargin;
+    if (row.status === "PAID") acc.paidBookings += 1;
+    if (row.status === "PENDING_PAYMENT") acc.pendingBookings += 1;
+    if (row.status === "CANCELLED") acc.cancelledBookings += 1;
+    return acc;
+  }, {
+    bookings: 0,
+    paidBookings: 0,
+    pendingBookings: 0,
+    cancelledBookings: 0,
+    customerPaid: 0,
+    supplierCostEstimate: 0,
+    stripeFeeEstimate: 0,
+    affiliateCommissionPayable: 0,
+    affiliateCommissionPending: 0,
+    myspaceEstimatedMargin: 0
+  });
+
+  for (const key of Object.keys(totals)) {
+    if (typeof totals[key] === "number") totals[key] = money(totals[key]);
+  }
+
+  res.json({
+    ok: true,
+    generatedAt: nowISO(),
+    rule: "Finance dashboard estimates margin. Replace supplier cost and Stripe fee with exact settlement values when available.",
+    totals,
+    bookings: rows.slice(0, 200)
+  });
+});
+// MSH BOOKING FINANCE DASHBOARD END
+
 app.get("/api/certification/logs", (req, res) => {
   res.json({
     ok: true,
@@ -2373,6 +2524,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
