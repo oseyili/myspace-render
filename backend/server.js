@@ -17,7 +17,10 @@ const app = express();
 const PORT = process.env.PORT || 5050;
 
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json({ limit: "25mb" }));
+app.use((req, res, next) => {
+  if (req.originalUrl === "/api/stripe/webhook") return next();
+  return express.json({ limit: "25mb" })(req, res, next);
+});
 
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
 const HOTELS_FILE = path.join(DATA_DIR, "live_hotels.json");
@@ -3322,6 +3325,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
