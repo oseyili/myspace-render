@@ -772,6 +772,7 @@ app.get("/api/status", (req, res) => {
 app.get("/api/destinations", (req, res) => res.json(buildDestinations()));
 app.get("/destinations", (req, res) => res.json(buildDestinations()));
 
+
 app.get("/api/hotels/search", (req, res) => {
   const internalHotels = internalSearchHotels(req.query);
   const hotels = internalHotels.map(publicHotel);
@@ -843,6 +844,281 @@ app.post("/api/prebook", (req, res) => {
   recordActivity("booking_review", req.body, response);
   res.json(response);
 });
+
+// MSH SUPPLIER TRACKING OVERRIDE START
+function mshAuditFile() {
+  return typeof SUPPLIER_AUDIT_FILE !== "undefined"
+    ? SUPPLIER_AUDIT_FILE
+    : path.join(DATA_DIR, "supplier_rate_audit.json");
+}
+
+function mshSupplierDefault() {
+  return clean(process.env.DEFAULT_SUPPLIER_NAME || "HOTELBEDS").toUpperCase() || "HOTELBEDS";
+}
+
+function mshSupplierCode(name) {
+  return clean(name || mshSupplierDefault()).toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "HOTELBEDS";
+}
+
+function mshAppendSupplierAudit(action, payload) {
+  const file = mshAuditFile();
+  ensureFile(file, []);
+  const rows = readJSON(file, []);
+  rows.unshift({
+    id: crypto.randomUUID(),
+    created_at: nowISO(),
+    action,
+    ...payload
+  });
+  writeJSON(file, rows.slice(0, 10000));
+}
+
+function mshFindPublicOffer(payload) {
+  const hotelId = clean(payload.hotelId || payload.hotel_id);
+  const rateSourceId = clean(payload.rate_source_id || payload.rateSourceId);
+  const roomCode = clean(payload.roomCode || payload.room_code);
+
+  const offers = searchHotels({
+    country: payload.country,
+    city: payload.city,
+    currency: payload.currency || "GBP"
+  });
+
+  const hotel =
+    offers.find((h) => clean(h.hotelId) === hotelId || clean(h.hotel_id) === hotelId) ||
+    offers.find((h) => clean(h.rate_source_id) === rateSourceId) ||
+    offers[0] ||
+    {};
+
+  const rooms = Array.isArray(hotel.rooms) ? hotel.rooms : [];
+  const room =
+    rooms.find((r) => clean(r.rate_source_id) === rateSourceId) ||
+    rooms.find((r) => clean(r.roomCode) === roomCode) ||
+    rooms[0] ||
+    {};
+
+  return { hotel, room };
+}
+
+function mshSupplierTrackingFromPayload(payload) {
+  const found = mshFindPublicOffer(payload);
+  const hotel = found.hotel || {};
+  const room = found.room || {};
+
+  const rateSourceId = clean(
+    payload.rate_source_id ||
+    payload.rateSourceId ||
+    room.rate_source_id ||
+    hotel.rate_source_id ||
+    makeRef("RATE")
+  );
+
+  const rateTimestamp = clean(
+    payload.rate_source_timestamp ||
+    payload.rateSourceTimestamp ||
+    room.rate_source_timestamp ||
+    hotel.rate_source_timestamp ||
+    nowISO()
+  );
+
+  const supplierName = clean(
+    payload.supplier_name ||
+    payload.supplier ||
+    payload.source ||
+    process.env.DEFAULT_SUPPLIER_NAME ||
+    "HOTELBEDS"
+  ).toUpperCase();
+
+  const supplierCode = clean(
+    payload.supplier_code ||
+    payload.source_code ||
+    mshSupplierCode(supplierName)
+  ).toUpperCase();
+
+  return {
+    supplier_name: supplierName,
+    supplier_code: supplierCode,
+    supplier_hotel_id: clean(payload.supplier_hotel_id || payload.supplierHotelId || payload.hotelId || payload.hotel_id || hotel.hotelId || hotel.hotel_id),
+    supplier_rate_id: rateSourceId,
+    supplier_rate_key: clean(payload.supplier_rate_key || payload.rate_key || payload.roomCode || payload.room_code || room.roomCode),
+    supplier_booking_reference: clean(payload.supplier_booking_reference || ""),
+    rate_source_id: rateSourceId,
+    rate_source_timestamp: rateTimestamp,
+    source_health: clean(payload.source_health || room.source_health || hotel.source_health || "verified"),
+    selected_room_code: clean(payload.roomCode || payload.room_code || room.roomCode || "STANDARD"),
+    selected_room_name: clean(payload.roomName || payload.room_name || room.roomName || "Available room")
+  };
+}
+
+function mshSearchAuditMiddleware(req, res, next) {
+  const originalJson = res.json.bind(res);
+
+  res.json = function patchedJson(body) {
+    try {
+      const hotels = Array.isArray(body && body.hotels) ? body.hotels : [];
+      hotels.slice(0, 120).forEach((hotel) => {
+        const rooms = Array.isArray(hotel.rooms) ? hotel.rooms : [];
+        const room = rooms[0] || {};
+        const tracking = mshSupplierTrackingFromPayload({
+          ...req.query,
+          hotelId: hotel.hotelId || hotel.hotel_id,
+          hotelName: hotel.name || hotel.hotel_name,
+          roomCode: room.roomCode,
+          rate_source_id: room.rate_source_id || hotel.rate_source_id,
+          rate_source_timestamp: room.rate_source_timestamp || hotel.rate_source_timestamp,
+          source_health: room.source_health || hotel.source_health
+        });
+
+        mshAppendSupplierAudit("rate_returned_to_search", {
+          hotelId: hotel.hotelId || hotel.hotel_id,
+          hotelName: hotel.name || hotel.hotel_name,
+          country: hotel.country,
+          city: hotel.city,
+          price: hotel.price,
+          currency: hotel.currency,
+          supplier_name: tracking.supplier_name,
+          supplier_code: tracking.supplier_code,
+          supplier_hotel_id: tracking.supplier_hotel_id,
+          supplier_rate_id: tracking.supplier_rate_id,
+          rate_source_id: tracking.rate_source_id,
+          rate_source_timestamp: tracking.rate_source_timestamp,
+          source_health: tracking.source_health
+        });
+      });
+    } catch (err) {
+      recordActivity("supplier_search_audit_error", { url: req.originalUrl }, { error: err.message });
+    }
+
+    return originalJson(body);
+  };
+
+  next();
+}
+
+app.use("/search", mshSearchAuditMiddleware);
+app.use("/api/hotels/search", mshSearchAuditMiddleware);
+
+app.post("/api/book", async (req, res) => {
+  const bookingRef = makeRef("MSH");
+  const confirmationRef = makeRef("CONF");
+  const tracking = mshSupplierTrackingFromPayload(req.body);
+  const found = mshFindPublicOffer(req.body);
+  const foundHotel = found.hotel || {};
+  const foundRoom = found.room || {};
+
+  const booking = {
+    bookingRef,
+    confirmationReference: confirmationRef,
+    status: "PENDING_PAYMENT",
+    createdAt: nowISO(),
+
+    hotelId: clean(req.body.hotelId || req.body.hotel_id || foundHotel.hotelId || foundHotel.hotel_id),
+    hotelName: clean(req.body.hotelName || req.body.hotel || foundHotel.name || foundHotel.hotel_name),
+    roomCode: tracking.selected_room_code,
+    roomName: tracking.selected_room_name,
+
+    country: clean(req.body.country || foundHotel.country),
+    city: clean(req.body.city || foundHotel.city),
+    checkIn: clean(req.body.checkIn || req.body.checkin),
+    checkOut: clean(req.body.checkOut || req.body.checkout),
+    guests: number(req.body.guests),
+    rooms: number(req.body.rooms),
+    amount: money(req.body.amount || req.body.total || foundRoom.convertedPrice || foundRoom.price || foundHotel.price),
+    currency: clean(req.body.currency || foundRoom.displayCurrency || foundHotel.currency || "GBP").toUpperCase(),
+
+    customerName: clean(req.body.customerName),
+    customerEmail: clean(req.body.customerEmail),
+    customerPhone: clean(req.body.customerPhone),
+    specialRequests: clean(req.body.specialRequests),
+
+    rate_source_id: tracking.rate_source_id,
+    rate_source_timestamp: tracking.rate_source_timestamp,
+    source_health: tracking.source_health,
+
+    internalSupplierTracking: {
+      supplier_name: tracking.supplier_name,
+      supplier_code: tracking.supplier_code,
+      supplier_hotel_id: tracking.supplier_hotel_id,
+      supplier_rate_id: tracking.supplier_rate_id,
+      supplier_rate_key: tracking.supplier_rate_key,
+      supplier_booking_reference: tracking.supplier_booking_reference,
+      rate_source_id: tracking.rate_source_id,
+      rate_source_timestamp: tracking.rate_source_timestamp
+    },
+
+    selected_supplier_offer: {
+      supplier_code: tracking.supplier_code,
+      supplier_hotel_id: tracking.supplier_hotel_id,
+      supplier_rate_id: tracking.supplier_rate_id,
+      rate_source_id: tracking.rate_source_id,
+      rate_source_timestamp: tracking.rate_source_timestamp
+    }
+  };
+
+  const bookings = readJSON(BOOKINGS_FILE, []);
+  bookings.unshift(booking);
+  writeJSON(BOOKINGS_FILE, bookings);
+
+  mshAppendSupplierAudit("booking_prepared_supplier_source", {
+    bookingRef,
+    confirmationReference: confirmationRef,
+    hotelId: booking.hotelId,
+    hotelName: booking.hotelName,
+    roomCode: booking.roomCode,
+    roomName: booking.roomName,
+    country: booking.country,
+    city: booking.city,
+    amount: booking.amount,
+    currency: booking.currency,
+    customerEmail: booking.customerEmail,
+    supplier_name: tracking.supplier_name,
+    supplier_code: tracking.supplier_code,
+    supplier_hotel_id: tracking.supplier_hotel_id,
+    supplier_rate_id: tracking.supplier_rate_id,
+    supplier_rate_key: tracking.supplier_rate_key,
+    rate_source_id: tracking.rate_source_id,
+    rate_source_timestamp: tracking.rate_source_timestamp,
+    source_health: tracking.source_health
+  });
+
+  const emailResult = await sendEmailNotification("New booking prepared - MySpace Hotel", [
+    ["Booking reference", booking.bookingRef],
+    ["Hotel", booking.hotelName],
+    ["Destination", `${booking.city}, ${booking.country}`],
+    ["Check-in", booking.checkIn],
+    ["Check-out", booking.checkOut],
+    ["Guests", String(booking.guests)],
+    ["Rooms", String(booking.rooms)],
+    ["Amount", `${booking.currency} ${booking.amount}`],
+    ["Customer name", booking.customerName],
+    ["Customer email", booking.customerEmail],
+    ["Customer phone", booking.customerPhone],
+    ["Special requests", booking.specialRequests],
+    ["Internal supplier", tracking.supplier_name],
+    ["Supplier code", tracking.supplier_code],
+    ["Supplier hotel ID", tracking.supplier_hotel_id],
+    ["Supplier rate ID", tracking.supplier_rate_id],
+    ["Rate source ID", tracking.rate_source_id],
+    ["Rate timestamp", tracking.rate_source_timestamp],
+    ["Created", booking.createdAt]
+  ]);
+
+  const response = {
+    ok: true,
+    bookingRef,
+    confirmationReference: confirmationRef,
+    status: "PENDING_PAYMENT",
+    rate_source_id: tracking.rate_source_id,
+    rate_source_timestamp: tracking.rate_source_timestamp,
+    source_health: tracking.source_health,
+    emailSent: Boolean(emailResult.ok),
+    message: "Your reservation has been prepared for secure payment."
+  };
+
+  recordActivity("booking_prepared", req.body, response);
+  res.json(response);
+});
+// MSH SUPPLIER TRACKING OVERRIDE END
 
 app.post("/api/book", async (req, res) => {
   const bookingRef = makeRef("MSH");
@@ -1110,3 +1386,4 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+

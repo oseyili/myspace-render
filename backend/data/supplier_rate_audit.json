@@ -1,0 +1,26 @@
+[
+  {
+    "id": "8c34da68-a772-42d2-91eb-b4c3be746bf5",
+    "created_at": "2026-05-31T02:19:02.131Z",
+    "action": "booking_prepared_supplier_source",
+    "bookingRef": "MSH-1780193939194-A78C01",
+    "confirmationReference": "CONF-1780193939194-AE0039",
+    "hotelId": "180527",
+    "hotelName": "Axiom Park Hotel",
+    "roomCode": "ROOM ONLY",
+    "roomName": "ROOM ONLY",
+    "country": "United Kingdom",
+    "city": "London",
+    "amount": 82.89,
+    "currency": "GBP",
+    "customerEmail": "test@example.com",
+    "supplier_name": "HOTELBEDS",
+    "supplier_code": "HOTELBEDS",
+    "supplier_hotel_id": "180527",
+    "supplier_rate_id": "TEST-RATE-SOURCE-12345",
+    "supplier_rate_key": "ROOM ONLY",
+    "rate_source_id": "TEST-RATE-SOURCE-12345",
+    "rate_source_timestamp": "2026-05-31T02:04:46.205Z",
+    "source_health": "verified"
+  }
+]

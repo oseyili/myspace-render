@@ -1,5 +1,47 @@
 [
   {
+    "bookingRef": "MSH-1780193939194-A78C01",
+    "confirmationReference": "CONF-1780193939194-AE0039",
+    "status": "PENDING_PAYMENT",
+    "createdAt": "2026-05-31T02:19:02.126Z",
+    "hotelId": "180527",
+    "hotelName": "Axiom Park Hotel",
+    "roomCode": "ROOM ONLY",
+    "roomName": "ROOM ONLY",
+    "country": "United Kingdom",
+    "city": "London",
+    "checkIn": "2026-06-10",
+    "checkOut": "2026-06-11",
+    "guests": 2,
+    "rooms": 1,
+    "amount": 82.89,
+    "currency": "GBP",
+    "customerName": "Supplier Tracking Test",
+    "customerEmail": "test@example.com",
+    "customerPhone": "0000000000",
+    "specialRequests": "Supplier tracking verification only",
+    "rate_source_id": "TEST-RATE-SOURCE-12345",
+    "rate_source_timestamp": "2026-05-31T02:04:46.205Z",
+    "source_health": "verified",
+    "internalSupplierTracking": {
+      "supplier_name": "HOTELBEDS",
+      "supplier_code": "HOTELBEDS",
+      "supplier_hotel_id": "180527",
+      "supplier_rate_id": "TEST-RATE-SOURCE-12345",
+      "supplier_rate_key": "ROOM ONLY",
+      "supplier_booking_reference": "",
+      "rate_source_id": "TEST-RATE-SOURCE-12345",
+      "rate_source_timestamp": "2026-05-31T02:04:46.205Z"
+    },
+    "selected_supplier_offer": {
+      "supplier_code": "HOTELBEDS",
+      "supplier_hotel_id": "180527",
+      "supplier_rate_id": "TEST-RATE-SOURCE-12345",
+      "rate_source_id": "TEST-RATE-SOURCE-12345",
+      "rate_source_timestamp": "2026-05-31T02:04:46.205Z"
+    }
+  },
+  {
     "bookingRef": "MSH-1780094160932-E0C6C7",
     "confirmationReference": "CONF-1780094160933-46E0B3",
     "status": "PENDING_PAYMENT",
