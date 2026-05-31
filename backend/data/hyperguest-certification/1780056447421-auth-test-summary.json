@@ -1,0 +1,175 @@
+{
+  "created_at": "2026-05-29T12:07:27.421Z",
+  "total": 24,
+  "passed": [],
+  "failedStatuses": [
+    {
+      "authVariant": "bearer-token",
+      "payloadVariant": "camel-case-property",
+      "status": 400,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "bearer-token",
+      "payloadVariant": "snake-case-property",
+      "status": 400,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "bearer-token",
+      "payloadVariant": "hotel-id-occupancy",
+      "status": 400,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "raw-token-authorization",
+      "payloadVariant": "camel-case-property",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "raw-token-authorization",
+      "payloadVariant": "snake-case-property",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "raw-token-authorization",
+      "payloadVariant": "hotel-id-occupancy",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "x-auth-token",
+      "payloadVariant": "camel-case-property",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "x-auth-token",
+      "payloadVariant": "snake-case-property",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "x-auth-token",
+      "payloadVariant": "hotel-id-occupancy",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "token-header",
+      "payloadVariant": "camel-case-property",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "token-header",
+      "payloadVariant": "snake-case-property",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "token-header",
+      "payloadVariant": "hotel-id-occupancy",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "api-key-header",
+      "payloadVariant": "camel-case-property",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "api-key-header",
+      "payloadVariant": "snake-case-property",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "api-key-header",
+      "payloadVariant": "hotel-id-occupancy",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "basic-only",
+      "payloadVariant": "camel-case-property",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "basic-only",
+      "payloadVariant": "snake-case-property",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "basic-only",
+      "payloadVariant": "hotel-id-occupancy",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "basic-plus-x-auth-token",
+      "payloadVariant": "camel-case-property",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "basic-plus-x-auth-token",
+      "payloadVariant": "snake-case-property",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "basic-plus-x-auth-token",
+      "payloadVariant": "hotel-id-occupancy",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "username-password-token",
+      "payloadVariant": "camel-case-property",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "username-password-token",
+      "payloadVariant": "snake-case-property",
+      "status": 401,
+      "ok": false,
+      "error": null
+    },
+    {
+      "authVariant": "username-password-token",
+      "payloadVariant": "hotel-id-occupancy",
+      "status": 401,
+      "ok": false,
+      "error": null
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "step": "static-without-auth",
+  "status": 500,
+  "ok": false,
+  "propertyFound": false,
+  "responsePreview": "{\"error\":\"Invalid authorization\",\"errorDetails\":[],\"errorCode\":\"MP.401\"}"
+}

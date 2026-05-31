@@ -1,0 +1,30 @@
+{
+  "authVariant": "x-auth-token",
+  "payloadVariant": "snake-case-property",
+  "status": 401,
+  "ok": false,
+  "ms": 38,
+  "requestHeaders": {
+    "Accept": "application/json",
+    "Content-Type": "application/json",
+    "Accept-Encoding": "gzip, deflate",
+    "x-auth-token": "REDACTED"
+  },
+  "requestBody": {
+    "property_id": 19912,
+    "hotel_ids": [
+      19912
+    ],
+    "check_in": "2026-05-30",
+    "check_out": "2026-05-31",
+    "currency": "USD",
+    "nationality": "GB",
+    "rooms": [
+      {
+        "adults": 1,
+        "children": []
+      }
+    ]
+  },
+  "responsePreview": "{\"error\":\"Invalid authorization\",\"errorCode\":\"SN.401\",\"errorDetails\":[]}"
+}

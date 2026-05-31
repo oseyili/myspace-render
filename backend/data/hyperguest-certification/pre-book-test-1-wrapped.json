@@ -1,0 +1,38 @@
+{
+  "step": "pre-book-test-1-wrapped",
+  "url": "https://book-api.hyperguest.com/2.0/booking/pre-book",
+  "status": 400,
+  "ok": false,
+  "request": {
+    "search": {
+      "hotelIds": [
+        19912
+      ],
+      "checkIn": "2026-05-30",
+      "nights": 1,
+      "guests": "1",
+      "currency": "USD",
+      "nationality": "GB"
+    },
+    "rooms": [
+      {
+        "roomId": 122708,
+        "roomTypeCode": "SUITER",
+        "roomName": "Suite room ",
+        "ratePlanId": 865906,
+        "ratePlanCode": "FLEX-AI",
+        "ratePlanName": "Flexible - All Inclusive",
+        "board": "AI"
+      }
+    ],
+    "leadGuest": {
+      "firstName": "Certification",
+      "lastName": "PreBook",
+      "email": "reservations@myspace-hotel.com",
+      "phone": "+447707836674",
+      "nationality": "GB"
+    },
+    "specialRequests": "HyperGuest certification pre-book test."
+  },
+  "response": "{\"error\":\"Validation Error\",\"errorDetails\":[{\"message\":\"required validation failed on search.dates\",\"validation\":\"required\",\"field\":\"search.dates\"},{\"message\":\"required validation failed on search.pax\",\"validation\":\"required\",\"field\":\"search.pax\"},{\"message\":\"required validation failed on search.propertyId\",\"validation\":\"required\",\"field\":\"search.propertyId\"},{\"message\":\"required validation failed on rooms.0.expectedPrice\",\"validation\":\"required\",\"field\":\"rooms.0.expectedPrice\"}],\"errorCode\":\"BN.400\"}"
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "partner_id": "oracle-ohip",
+    "name": "Oracle OHIP",
+    "status": "connected",
+    "last_sync": "2026-05-27T03:05:00.221Z"
+  },
+  {
+    "partner_id": "siteminder",
+    "name": "SiteMinder",
+    "status": "connected",
+    "last_sync": "2026-05-27T03:05:00.221Z"
+  },
+  {
+    "partner_id": "cloudbeds",
+    "name": "Cloudbeds",
+    "status": "connected",
+    "last_sync": "2026-05-27T03:05:00.221Z"
+  },
+  {
+    "partner_id": "mews",
+    "name": "Mews",
+    "status": "connected",
+    "last_sync": "2026-05-27T03:05:00.222Z"
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "step": "static-property-check",
+  "url": "https://hg-static.hyperguest.com/hotels.json",
+  "status": 500,
+  "ok": false,
+  "propertyId": "19912",
+  "propertyFound": false,
+  "requestHeaders": {
+    "Accept": "application/json",
+    "Content-Type": "application/json",
+    "Accept-Encoding": "gzip, deflate",
+    "Authorization": "REDACTED",
+    "x-auth-token": "REDACTED"
+  },
+  "sample": "{\"error\":\"Invalid authorization\",\"errorDetails\":[],\"errorCode\":\"MP.401\"}"
+}

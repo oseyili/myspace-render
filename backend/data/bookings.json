@@ -1,0 +1,56 @@
+[
+  {
+    "bookingRef": "MSH-1780094160932-E0C6C7",
+    "confirmationReference": "CONF-1780094160933-46E0B3",
+    "status": "PENDING_PAYMENT",
+    "createdAt": "2026-05-29T22:36:00.933Z",
+    "hotelId": "180527",
+    "hotelName": "Axiom Park Hotel",
+    "roomName": "",
+    "checkIn": "2026-05-30",
+    "checkOut": "2026-05-31",
+    "guests": 2,
+    "rooms": 1,
+    "amount": 82.89,
+    "currency": "GBP",
+    "customerName": "",
+    "customerEmail": "",
+    "specialRequests": ""
+  },
+  {
+    "bookingRef": "MSH-1780094156808-6E8675",
+    "confirmationReference": "CONF-1780094156809-FC48F8",
+    "status": "PENDING_PAYMENT",
+    "createdAt": "2026-05-29T22:35:56.809Z",
+    "hotelId": "180527",
+    "hotelName": "Axiom Park Hotel",
+    "roomName": "",
+    "checkIn": "2026-05-30",
+    "checkOut": "2026-05-31",
+    "guests": 2,
+    "rooms": 1,
+    "amount": 82.89,
+    "currency": "GBP",
+    "customerName": "",
+    "customerEmail": "",
+    "specialRequests": ""
+  },
+  {
+    "booking_reference": "MSH-FSO4XR-32133",
+    "created_at": "2026-05-23T01:57:12.133Z",
+    "status": "CANCELLED",
+    "hotel_id": "998021",
+    "room_id": "DLX-KING",
+    "rate_id": "BAR-RO",
+    "checkin": "2026-06-02",
+    "checkout": "2026-06-04",
+    "guests": 2,
+    "rooms": 1,
+    "customer": {
+      "email": "test@example.com",
+      "name": "Test Guest"
+    },
+    "modified_at": "2026-05-23T01:57:12.278Z",
+    "cancelled_at": "2026-05-23T01:57:12.340Z"
+  }
+]

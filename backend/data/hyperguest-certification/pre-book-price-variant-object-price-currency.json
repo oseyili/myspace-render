@@ -1,0 +1,44 @@
+{
+  "step": "pre-book-price-variant-object-price-currency",
+  "url": "https://book-api.hyperguest.com/2.0/booking/pre-book",
+  "status": 400,
+  "ok": false,
+  "request": {
+    "search": {
+      "propertyId": 19912,
+      "dates": {
+        "from": "2026-05-30",
+        "to": "2026-05-31"
+      },
+      "pax": [
+        {
+          "adults": 1,
+          "children": []
+        }
+      ],
+      "nationality": "GB",
+      "currency": "USD"
+    },
+    "rooms": [
+      {
+        "roomId": 122708,
+        "roomTypeCode": "SUITER",
+        "ratePlanId": 865906,
+        "ratePlanCode": "FLEX-AI",
+        "expectedPrice": {
+          "price": 132.41,
+          "currency": "USD"
+        }
+      }
+    ],
+    "leadGuest": {
+      "firstName": "Certification",
+      "lastName": "PreBook",
+      "email": "reservations@myspace-hotel.com",
+      "phone": "+447707836674",
+      "nationality": "GB"
+    },
+    "specialRequests": "HyperGuest certification pre-book test."
+  },
+  "response": "{\"error\":\"Validation Error\",\"errorDetails\":[{\"message\":\"required validation failed on rooms.0.expectedPrice.amount\",\"validation\":\"required\",\"field\":\"rooms.0.expectedPrice.amount\"}],\"errorCode\":\"BN.400\"}"
+}

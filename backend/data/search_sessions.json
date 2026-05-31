@@ -1,0 +1,44 @@
+[
+  {
+    "sessionId": "SESSION-1780004875412-256EC1",
+    "createdAt": "2026-05-28T21:47:55.418Z",
+    "query": {
+      "country": "United Kingdom",
+      "city": "London",
+      "currency": "GBP",
+      "nationality": "GB",
+      "checkin": "2026-05-29",
+      "checkout": "2026-05-30",
+      "guests": "2",
+      "rooms": "1"
+    }
+  },
+  {
+    "sessionId": "SESSION-1780044859915-A49F25",
+    "createdAt": "2026-05-29T08:54:19.933Z",
+    "query": {
+      "country": "United Kingdom",
+      "city": "London",
+      "currency": "GBP",
+      "nationality": "GB",
+      "checkin": "2026-05-30",
+      "checkout": "2026-05-31",
+      "guests": "2",
+      "rooms": "1"
+    }
+  },
+  {
+    "sessionId": "SESSION-1780045012869-300C6D",
+    "createdAt": "2026-05-29T08:56:52.870Z",
+    "query": {
+      "country": "United Arab Emirates",
+      "city": "Dubai",
+      "currency": "GBP",
+      "nationality": "GB",
+      "checkin": "2026-05-30",
+      "checkout": "2026-05-31",
+      "guests": "2",
+      "rooms": "1"
+    }
+  }
+]

@@ -1,0 +1,35 @@
+﻿from connectors.base_connector import BaseConnector
+
+
+class RoomRaccoonConnector(BaseConnector):
+
+    async def search_hotels(
+        self,
+        country,
+        city,
+        checkin,
+        checkout,
+        adults=2,
+        children=0
+    ):
+        return []
+
+    async def create_booking(
+        self,
+        hotel_id,
+        rate_key,
+        guest
+    ):
+        return {
+            "ok": False,
+            "message": "RoomRaccoon booking flow not connected yet"
+        }
+
+    async def cancel_booking(
+        self,
+        booking_reference
+    ):
+        return {
+            "ok": False,
+            "message": "RoomRaccoon cancellation flow not connected yet"
+        }

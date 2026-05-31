@@ -1,0 +1,7646 @@
+[
+  {
+    "time": "2026-05-24T00:00:54.890Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-24T00:00:54.739Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-24T00:00:54.588Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-24T00:00:54.461Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:59:54.733Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:59:54.651Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:59:54.552Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:59:54.454Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:58:54.676Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:58:54.605Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:58:54.519Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:58:54.444Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:57:54.955Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:57:54.801Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:57:54.642Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:57:54.470Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:56:54.679Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:56:54.602Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:56:54.506Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:56:54.427Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:55:54.647Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:55:54.575Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:55:54.498Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:55:54.406Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:54:54.680Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:54:54.588Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:54:54.503Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:54:54.412Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:53:54.602Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:53:54.536Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:53:54.455Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:53:54.385Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:52:54.558Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:52:54.504Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:52:54.443Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:52:54.381Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:51:54.603Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:51:54.530Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:51:54.453Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:51:54.374Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:50:54.595Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:50:54.523Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:50:54.436Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:50:54.368Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:49:54.616Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:49:54.543Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:49:54.452Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:49:54.366Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:48:54.582Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:48:54.510Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:48:54.428Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:48:54.354Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:47:54.581Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:47:54.509Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:47:54.431Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:47:54.361Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:46:54.595Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:46:54.519Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:46:54.427Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:46:54.344Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:45:54.556Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:45:54.477Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:45:54.409Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:45:54.323Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:44:54.556Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:44:54.481Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:44:54.402Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:44:54.323Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:43:54.545Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:43:54.472Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:43:54.391Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:43:54.327Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:42:54.481Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:42:54.439Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:42:54.373Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:42:54.318Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:41:54.558Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:41:54.506Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:41:54.408Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:41:54.306Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:40:54.541Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:40:54.467Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:40:54.385Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:40:54.312Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:39:54.520Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:39:54.456Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:39:54.377Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:39:54.305Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:38:54.531Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:38:54.462Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:38:54.372Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:38:54.291Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:37:54.514Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:37:54.446Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:37:54.363Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:37:54.292Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:36:54.483Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:36:54.409Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:36:54.341Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:36:54.271Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:35:54.518Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:35:54.438Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:35:54.352Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:35:54.272Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:34:54.524Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:34:54.442Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:34:54.349Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:34:54.260Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:33:54.482Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:33:54.404Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:33:54.333Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:33:54.259Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:32:54.485Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:32:54.414Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:32:54.328Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:32:54.260Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:31:54.457Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:31:54.390Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:31:54.322Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:31:54.247Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:30:54.471Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:30:54.397Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:30:54.326Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:30:54.235Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:29:54.489Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:29:54.414Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:29:54.334Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:29:54.265Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:28:54.449Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:28:54.378Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:28:54.299Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:28:54.221Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:27:54.432Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:27:54.349Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:27:54.273Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:27:54.208Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:26:54.444Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:26:54.376Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:26:54.286Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:26:54.209Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:25:54.433Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:25:54.361Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:25:54.285Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:25:54.205Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:24:54.403Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:24:54.341Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:24:54.269Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:24:54.198Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:23:54.434Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:23:54.354Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:23:54.265Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:23:54.191Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:22:54.373Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:22:54.310Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:22:54.240Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:22:54.166Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:21:54.382Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:21:54.315Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:21:54.236Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:21:54.166Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:20:54.430Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:20:54.345Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:20:54.261Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:20:54.167Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:19:54.420Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:19:54.336Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:19:54.243Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:19:54.151Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:18:54.341Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:18:54.274Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:18:54.211Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:18:54.145Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:17:54.342Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:17:54.281Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:17:54.209Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:17:54.137Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:16:54.342Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:16:54.291Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:16:54.211Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:16:54.128Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:15:54.363Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:15:54.299Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:15:54.237Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:15:54.132Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:14:54.337Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:14:54.262Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:14:54.190Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:14:54.116Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:13:54.370Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:13:54.303Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:13:54.212Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:13:54.123Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:12:54.460Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:12:54.359Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:12:54.214Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:12:54.130Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:11:54.356Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:11:54.279Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:11:54.188Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:11:54.094Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:10:54.340Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:10:54.255Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:10:54.158Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:10:54.084Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:09:54.338Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:09:54.258Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:09:54.173Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:09:54.083Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:08:54.355Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:08:54.265Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:08:54.167Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:08:54.083Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:07:54.307Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:07:54.231Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:07:54.142Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:07:54.063Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:06:54.319Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:06:54.241Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:06:54.153Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:06:54.066Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:05:54.281Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:05:54.209Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:05:54.134Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:05:54.070Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:04:54.274Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:04:54.201Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:04:54.130Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:04:54.056Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:03:54.252Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:03:54.192Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:03:54.127Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:03:54.043Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:02:54.251Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:02:54.181Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:02:54.105Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:02:54.030Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:01:54.241Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:01:54.180Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:01:54.105Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:01:54.035Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:00:54.246Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:00:54.187Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:00:54.116Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T23:00:54.033Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:59:54.244Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:59:54.180Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:59:54.104Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:59:54.020Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:58:54.230Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:58:54.160Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:58:54.090Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:58:54.030Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:57:54.245Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:57:54.184Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:57:54.109Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:57:54.031Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:56:54.263Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:56:54.199Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:56:54.121Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:56:54.034Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:55:54.224Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:55:54.165Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:55:54.088Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:55:54.016Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:54:54.207Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:54:54.150Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:54:54.082Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:54:54.013Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:53:54.227Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:53:54.163Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:53:54.074Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:53:54.002Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:52:54.214Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:52:54.150Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:52:54.073Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:52:53.994Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:51:54.208Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:51:54.143Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:51:54.072Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:51:53.995Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:50:54.184Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:50:54.120Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:50:54.045Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:50:53.980Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:49:54.199Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:49:54.131Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:49:54.055Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:49:53.980Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:48:54.202Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:48:54.116Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:48:54.064Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:48:53.980Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:47:54.177Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:47:54.110Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:47:54.035Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:47:53.963Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:46:54.180Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:46:54.117Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:46:54.032Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:46:53.963Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:45:54.191Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:45:54.122Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:45:54.046Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:45:53.969Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:44:54.156Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:44:54.089Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:44:54.017Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:44:53.947Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:43:54.172Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:43:54.113Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:43:54.027Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:43:53.955Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:42:54.122Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:42:54.066Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:42:53.996Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:42:53.932Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:41:54.117Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:41:54.061Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:41:53.992Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:41:53.926Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:40:54.116Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:40:54.060Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:40:53.988Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:40:53.919Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:39:54.104Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:39:54.035Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:39:53.972Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:39:53.910Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:38:54.095Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:38:54.034Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:38:53.970Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:38:53.907Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:37:54.081Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:37:54.026Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:37:53.961Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:37:53.894Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:36:54.069Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:36:54.013Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:36:53.949Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:36:53.889Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:35:54.069Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:35:54.009Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:35:53.946Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:35:53.880Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:34:54.105Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:34:54.040Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:34:53.957Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:34:53.881Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:33:53.934Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:33:53.911Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:33:53.887Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:33:53.865Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:32:54.054Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:32:54.002Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:32:53.942Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:32:53.871Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:31:54.030Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:31:53.976Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:31:53.916Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:31:53.857Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:30:54.082Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:30:53.989Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:30:53.911Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:30:53.838Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:29:54.012Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:29:53.962Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:29:53.902Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:29:53.839Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:28:54.139Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:28:54.047Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:28:53.946Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:28:53.842Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:27:54.108Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:27:54.022Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:27:53.923Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:27:53.827Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:26:54.042Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:26:53.978Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:26:53.900Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:26:53.823Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:25:54.029Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:25:53.961Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:25:53.889Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:25:53.815Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:24:54.011Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:24:53.940Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:24:53.870Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:24:53.790Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:23:54.036Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:23:53.951Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:23:53.865Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:23:53.782Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:22:54.049Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:22:53.966Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:22:53.878Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:22:53.772Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:21:54.042Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:21:53.931Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:21:53.836Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:21:53.758Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:20:54.033Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:20:53.948Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:20:53.848Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:20:53.761Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:19:53.947Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:19:53.887Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:19:53.821Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:19:53.756Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:18:53.946Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:18:53.886Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:18:53.815Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:18:53.749Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:17:53.928Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:17:53.857Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:17:53.785Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:17:53.732Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:16:53.879Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:16:53.832Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:16:53.781Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:16:53.731Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:15:53.934Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:15:53.866Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:15:53.796Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:15:53.721Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:14:53.916Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:14:53.854Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:14:53.783Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:14:53.719Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:13:53.905Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:13:53.851Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:13:53.782Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:13:53.718Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:12:53.919Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:12:53.861Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:12:53.793Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:12:53.717Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:11:53.899Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:11:53.838Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:11:53.769Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:11:53.708Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:10:53.895Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:10:53.835Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:10:53.767Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:10:53.702Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:09:53.906Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:09:53.837Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:09:53.768Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:09:53.702Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:08:53.877Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:08:53.811Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:08:53.744Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:08:53.683Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:07:53.874Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:07:53.807Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:07:53.746Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:07:53.686Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:06:53.917Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:06:53.853Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:06:53.786Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:06:53.682Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:05:53.844Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:05:53.781Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:05:53.719Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:05:53.666Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:04:53.842Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:04:53.785Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:04:53.728Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:04:53.661Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:03:53.840Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:03:53.780Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:03:53.719Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:03:53.654Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:02:53.817Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:02:53.761Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:02:53.701Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:02:53.637Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:01:53.850Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:01:53.761Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:01:53.701Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:01:53.640Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:00:53.902Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:00:53.809Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:00:53.710Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T22:00:53.623Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:59:53.895Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:59:53.810Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:59:53.717Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:59:53.622Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:58:53.911Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:58:53.791Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:58:53.692Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:58:53.609Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:57:53.866Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:57:53.784Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:57:53.691Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:57:53.604Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:56:53.865Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:56:53.777Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:56:53.684Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:56:53.602Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:55:53.874Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:55:53.791Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:55:53.702Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:55:53.610Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:54:53.868Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:54:53.780Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:54:53.686Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:54:53.605Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:53:53.875Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:53:53.771Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:53:53.681Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:53:53.595Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:52:53.912Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:52:53.811Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:52:53.702Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:52:53.591Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:51:53.963Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:51:53.846Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:51:53.727Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:51:53.592Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:50:53.818Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:50:53.737Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:50:53.642Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:50:53.570Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:49:53.862Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:49:53.762Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:49:53.674Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:49:53.585Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:48:53.823Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:48:53.742Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:48:53.649Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:48:53.566Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:47:53.873Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:47:53.796Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:47:53.689Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:47:53.563Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:46:53.717Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:46:53.662Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:46:53.603Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:46:53.539Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:45:53.766Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:45:53.685Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:45:53.595Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:45:53.524Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:44:53.750Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:44:53.664Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:44:53.578Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:44:53.519Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:43:53.782Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:43:53.702Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:43:53.610Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:43:53.525Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:42:53.694Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:42:53.641Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:42:53.592Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:42:53.516Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:41:53.659Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:41:53.608Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:41:53.553Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:41:53.501Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:40:53.675Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:40:53.620Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:40:53.568Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:40:53.516Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:39:53.670Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:39:53.611Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:39:53.546Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:39:53.481Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:38:53.640Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:38:53.586Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:38:53.532Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:38:53.478Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:37:53.671Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:37:53.609Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:37:53.543Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:37:53.473Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:36:53.616Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:36:53.568Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:36:53.514Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:36:53.461Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:35:53.639Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:35:53.568Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:35:53.515Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:35:53.462Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:34:53.639Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:34:53.584Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:34:53.520Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:34:53.454Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:33:53.665Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:33:53.607Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:33:53.507Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:33:53.446Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:32:53.631Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:32:53.555Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:32:53.489Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:32:53.430Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:31:53.638Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:31:53.541Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:31:53.479Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:31:53.420Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:30:53.610Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:30:53.545Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:30:53.476Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:30:53.414Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:29:53.588Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:29:53.522Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:29:53.459Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:29:53.399Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:28:53.555Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:28:53.502Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:28:53.451Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:28:53.393Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:27:53.488Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:27:53.453Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:27:53.416Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:27:53.385Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:26:53.523Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:26:53.477Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:26:53.428Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:26:53.376Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:25:53.501Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:25:53.454Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:25:53.407Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:25:53.364Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:24:53.496Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:24:53.451Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:24:53.404Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:24:53.358Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:23:53.469Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:23:53.427Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:23:53.383Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:23:53.338Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:22:53.514Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:22:53.468Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:22:53.388Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:22:53.342Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:21:53.496Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:21:53.442Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:21:53.389Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:21:53.343Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:20:53.463Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:20:53.417Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:20:53.370Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:20:53.330Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:19:53.527Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:19:53.466Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:19:53.389Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:19:53.325Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:18:53.532Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:18:53.464Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:18:53.370Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:18:53.316Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:17:53.522Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:17:53.454Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:17:53.382Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:17:53.312Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:16:53.458Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:16:53.371Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:16:53.327Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:16:53.285Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:15:53.485Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:15:53.414Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:15:53.350Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:15:53.284Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:14:53.480Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:14:53.416Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:14:53.346Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:14:53.280Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:13:53.473Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:13:53.409Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:13:53.340Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:13:53.274Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:12:53.471Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:12:53.405Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:12:53.345Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:12:53.274Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:11:53.484Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:11:53.429Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:11:53.321Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:11:53.257Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:10:53.474Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:10:53.408Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:10:53.333Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:10:53.257Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:09:53.459Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:09:53.382Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:09:53.311Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:09:53.241Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:08:53.440Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:08:53.371Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:08:53.306Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:08:53.241Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:07:53.381Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:07:53.315Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:07:53.257Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:07:53.223Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:06:53.543Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:06:53.430Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:06:53.335Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:06:53.237Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:05:53.527Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:05:53.423Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:05:53.318Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:05:53.228Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:04:53.499Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:04:53.421Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:04:53.330Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:04:53.234Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:03:53.381Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:03:53.316Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:03:53.249Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:03:53.212Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:02:53.309Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:02:53.274Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:02:53.237Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:02:53.202Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:01:53.327Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:01:53.286Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:01:53.244Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:01:53.202Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:00:53.414Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:00:53.339Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:00:53.271Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T21:00:53.202Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:59:53.382Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:59:53.322Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:59:53.259Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:59:53.193Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:58:53.363Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:58:53.303Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:58:53.242Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:58:53.177Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:57:53.327Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:57:53.286Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:57:53.217Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:57:53.173Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:56:53.278Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:56:53.237Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:56:53.196Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:56:53.154Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:55:53.272Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:55:53.231Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:55:53.192Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:55:53.152Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:54:53.308Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:54:53.232Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:54:53.192Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:54:53.152Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:53:53.303Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:53:53.257Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:53:53.182Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:53:53.135Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:52:53.246Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:52:53.207Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:52:53.170Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:52:53.134Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:51:53.231Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:51:53.196Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:51:53.161Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:51:53.119Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:50:53.383Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:50:53.295Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:50:53.209Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:50:53.127Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:49:53.345Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:49:53.271Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:49:53.193Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:49:53.117Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:48:53.252Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:48:53.204Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:48:53.152Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:48:53.102Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:47:53.213Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:47:53.182Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:47:53.120Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:47:53.088Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:46:53.117Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:46:53.102Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:46:53.088Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T20:46:53.067Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:35:28.183Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:35:28.098Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:35:28.009Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:35:27.950Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:34:28.114Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:34:28.053Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:34:27.996Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:34:27.944Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:33:28.027Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:33:27.996Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:33:27.961Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:33:27.925Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:32:28.002Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:32:27.965Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:32:27.937Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:32:27.909Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:31:28.024Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:31:27.994Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:31:27.949Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:31:27.909Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:30:27.982Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:30:27.959Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:30:27.933Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:30:27.907Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:29:28.013Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:29:27.980Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:29:27.941Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:29:27.903Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:28:27.984Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:28:27.958Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:28:27.931Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:28:27.900Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:27:27.997Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:27:27.965Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:27:27.933Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:27:27.896Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:26:27.971Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:26:27.941Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:26:27.916Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:26:27.886Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:25:27.984Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:25:27.947Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:25:27.911Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:25:27.878Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:24:27.975Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:24:27.942Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:24:27.907Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:24:27.874Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:23:27.971Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:23:27.942Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:23:27.913Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:23:27.882Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:22:27.980Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:22:27.944Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:22:27.910Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:22:27.877Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:21:27.983Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:21:27.945Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:21:27.914Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:21:27.877Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:20:27.949Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:20:27.918Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:20:27.887Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:20:27.856Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:19:27.959Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:19:27.924Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:19:27.888Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:19:27.855Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:18:27.965Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:18:27.930Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:18:27.895Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:18:27.861Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:17:27.938Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:17:27.910Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:17:27.875Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:17:27.844Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:16:27.919Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:16:27.892Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:16:27.861Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:16:27.829Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:15:27.917Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:15:27.888Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:15:27.858Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:15:27.828Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:14:27.906Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:14:27.880Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:14:27.851Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:14:27.819Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:13:27.894Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:13:27.866Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:13:27.838Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:13:27.809Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:12:27.890Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:12:27.853Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:12:27.824Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:12:27.793Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:11:27.849Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:11:27.823Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:11:27.797Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:11:27.777Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:10:27.833Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:10:27.810Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:10:27.788Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:10:27.763Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:09:27.790Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:09:27.777Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:09:27.763Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:09:27.747Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:08:27.805Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:08:27.786Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:08:27.767Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:08:27.738Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:07:27.799Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:07:27.777Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:07:27.754Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:07:27.734Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:06:27.753Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:06:27.743Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:06:27.733Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:06:27.724Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:05:27.783Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:05:27.760Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:05:27.738Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:05:27.720Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:04:27.782Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:04:27.759Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:04:27.741Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:04:27.720Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:03:27.785Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:03:27.764Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:03:27.737Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:03:27.709Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:02:27.745Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:02:27.725Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:02:27.705Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:02:27.689Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:01:27.767Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:01:27.736Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:01:27.713Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:01:27.688Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:00:27.777Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:00:27.756Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:00:27.725Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T11:00:27.689Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:59:27.737Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:59:27.719Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:59:27.703Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:59:27.688Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:58:27.820Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:58:27.790Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:58:27.730Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:58:27.694Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:57:27.744Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:57:27.722Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:57:27.701Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:57:27.667Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:56:27.725Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:56:27.706Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:56:27.686Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:56:27.669Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:55:27.731Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:55:27.711Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:55:27.693Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:55:27.673Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:54:27.756Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:54:27.730Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:54:27.705Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:54:27.677Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:53:27.728Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:53:27.708Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:53:27.685Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:53:27.659Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:52:27.725Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:52:27.703Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:52:27.680Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:52:27.658Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:51:27.731Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:51:27.704Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:51:27.681Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:51:27.656Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:50:27.711Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:50:27.687Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:50:27.665Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:50:27.641Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:49:27.693Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:49:27.672Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:49:27.647Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:49:27.625Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:48:27.684Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:48:27.665Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:48:27.644Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:48:27.622Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:47:27.686Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:47:27.663Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:47:27.641Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:47:27.621Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:46:27.674Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:46:27.657Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:46:27.637Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:46:27.622Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:45:27.655Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:45:27.641Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:45:27.625Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:45:27.613Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:44:27.630Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:44:27.620Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:44:27.610Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:44:27.601Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:43:27.650Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:43:27.630Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:43:27.613Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:43:27.597Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:42:27.626Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:42:27.612Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:42:27.599Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:42:27.583Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:41:27.624Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:41:27.610Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:41:27.596Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:41:27.581Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:40:27.611Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:40:27.598Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:40:27.585Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:40:27.569Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:39:27.622Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:39:27.603Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:39:27.584Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:39:27.564Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:38:27.596Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:38:27.580Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:38:27.566Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:38:27.552Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:37:27.594Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:37:27.579Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:37:27.564Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:37:27.551Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:36:27.571Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:36:27.560Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:36:27.552Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:36:27.547Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:35:27.588Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:35:27.574Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:35:27.560Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:35:27.547Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:34:27.583Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:34:27.571Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:34:27.558Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:34:27.540Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:33:27.557Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:33:27.547Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:33:27.536Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:33:27.527Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:32:27.578Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:32:27.559Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:32:27.537Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:32:27.520Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:31:27.538Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:31:27.527Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:31:27.516Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:31:27.507Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:30:27.529Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:30:27.520Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:30:27.510Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:30:27.502Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:29:27.509Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:29:27.505Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:29:27.500Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:29:27.490Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:28:27.518Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:28:27.506Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:28:27.496Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:28:27.484Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:27:27.498Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:27:27.488Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:27:27.478Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:27:27.469Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:26:27.511Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:26:27.500Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:26:27.487Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:26:27.474Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:25:27.490Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:25:27.482Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:25:27.472Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:25:27.463Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:24:27.453Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:24:27.450Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:24:27.448Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:24:27.446Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:22:57.798Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:22:57.796Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:22:57.793Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:22:57.791Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:21:57.802Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:21:57.795Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:21:57.788Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:21:57.781Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:20:57.797Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:20:57.791Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:20:57.786Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:20:57.781Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:19:57.796Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:19:57.788Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:19:57.781Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:19:57.773Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:18:57.779Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:18:57.772Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:18:57.765Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:18:57.756Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:17:57.751Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:17:57.749Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:17:57.748Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  },
+  {
+    "time": "2026-05-23T10:17:57.746Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "available": 12,
+    "stop_sell": false
+  }
+]

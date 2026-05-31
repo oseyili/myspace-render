@@ -1,0 +1,7646 @@
+[
+  {
+    "time": "2026-05-24T00:00:54.934Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-24T00:00:54.802Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-24T00:00:54.637Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-24T00:00:54.497Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:59:54.761Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:59:54.677Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:59:54.583Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:59:54.482Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:58:54.701Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:58:54.626Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:58:54.547Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:58:54.466Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:57:55.005Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:57:54.846Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:57:54.695Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:57:54.533Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:56:54.710Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:56:54.624Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:56:54.538Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:56:54.449Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:55:54.668Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:55:54.601Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:55:54.525Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:55:54.437Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:54:54.707Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:54:54.621Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:54:54.533Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:54:54.442Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:53:54.624Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:53:54.562Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:53:54.481Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:53:54.408Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:52:54.571Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:52:54.517Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:52:54.462Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:52:54.404Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:51:54.628Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:51:54.551Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:51:54.477Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:51:54.399Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:50:54.616Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:50:54.547Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:50:54.464Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:50:54.384Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:49:54.637Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:49:54.567Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:49:54.480Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:49:54.393Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:48:54.607Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:48:54.534Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:48:54.456Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:48:54.377Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:47:54.603Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:47:54.535Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:47:54.459Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:47:54.384Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:46:54.622Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:46:54.544Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:46:54.462Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:46:54.371Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:45:54.583Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:45:54.509Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:45:54.434Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:45:54.351Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:44:54.579Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:44:54.506Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:44:54.427Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:44:54.348Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:43:54.572Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:43:54.494Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:43:54.417Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:43:54.346Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:42:54.496Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:42:54.454Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:42:54.397Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:42:54.333Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:41:54.574Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:41:54.523Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:41:54.451Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:41:54.333Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:40:54.563Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:40:54.494Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:40:54.409Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:40:54.336Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:39:54.542Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:39:54.475Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:39:54.404Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:39:54.326Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:38:54.553Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:38:54.485Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:38:54.415Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:38:54.319Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:37:54.535Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:37:54.470Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:37:54.389Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:37:54.315Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:36:54.507Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:36:54.433Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:36:54.370Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:36:54.294Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:35:54.539Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:35:54.464Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:35:54.383Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:35:54.296Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:34:54.549Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:34:54.471Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:34:54.381Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:34:54.289Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:33:54.501Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:33:54.428Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:33:54.358Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:33:54.283Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:32:54.509Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:32:54.439Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:32:54.354Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:32:54.281Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:31:54.477Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:31:54.412Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:31:54.347Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:31:54.269Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:30:54.497Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:30:54.422Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:30:54.353Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:30:54.269Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:29:54.512Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:29:54.440Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:29:54.357Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:29:54.291Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:28:54.465Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:28:54.402Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:28:54.328Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:28:54.243Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:27:54.455Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:27:54.377Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:27:54.297Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:27:54.229Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:26:54.471Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:26:54.397Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:26:54.314Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:26:54.235Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:25:54.458Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:25:54.386Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:25:54.313Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:25:54.225Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:24:54.423Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:24:54.360Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:24:54.297Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:24:54.224Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:23:54.458Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:23:54.384Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:23:54.293Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:23:54.216Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:22:54.390Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:22:54.333Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:22:54.264Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:22:54.188Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:21:54.403Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:21:54.337Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:21:54.264Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:21:54.189Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:20:54.457Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:20:54.376Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:20:54.291Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:20:54.197Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:19:54.446Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:19:54.366Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:19:54.272Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:19:54.183Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:18:54.359Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:18:54.294Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:18:54.233Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:18:54.164Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:17:54.363Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:17:54.301Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:17:54.235Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:17:54.156Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:16:54.353Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:16:54.309Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:16:54.241Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:16:54.148Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:15:54.384Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:15:54.320Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:15:54.254Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:15:54.172Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:14:54.358Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:14:54.288Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:14:54.215Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:14:54.137Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:13:54.391Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:13:54.326Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:13:54.243Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:13:54.149Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:12:54.486Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:12:54.391Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:12:54.290Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:12:54.153Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:11:54.379Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:11:54.305Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:11:54.220Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:11:54.122Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:10:54.365Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:10:54.285Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:10:54.189Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:10:54.107Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:09:54.362Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:09:54.283Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:09:54.202Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:09:54.107Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:08:54.381Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:08:54.298Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:08:54.199Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:08:54.106Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:07:54.334Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:07:54.256Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:07:54.171Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:07:54.078Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:06:54.344Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:06:54.267Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:06:54.182Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:06:54.090Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:05:54.304Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:05:54.233Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:05:54.161Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:05:54.090Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:04:54.296Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:04:54.222Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:04:54.155Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:04:54.076Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:03:54.272Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:03:54.211Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:03:54.149Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:03:54.075Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:02:54.273Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:02:54.207Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:02:54.131Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:02:54.049Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:01:54.262Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:01:54.202Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:01:54.131Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:01:54.048Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:00:54.266Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:00:54.207Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:00:54.138Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T23:00:54.055Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:59:54.263Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:59:54.201Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:59:54.128Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:59:54.052Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:58:54.251Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:58:54.179Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:58:54.112Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:58:54.041Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:57:54.265Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:57:54.202Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:57:54.135Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:57:54.057Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:56:54.283Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:56:54.220Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:56:54.147Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:56:54.060Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:55:54.245Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:55:54.182Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:55:54.113Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:55:54.035Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:54:54.226Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:54:54.169Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:54:54.105Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:54:54.031Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:53:54.247Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:53:54.184Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:53:54.121Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:53:54.022Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:52:54.235Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:52:54.171Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:52:54.102Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:52:54.014Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:51:54.232Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:51:54.165Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:51:54.096Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:51:54.013Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:50:54.205Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:50:54.140Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:50:54.071Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:50:54.000Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:49:54.222Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:49:54.153Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:49:54.079Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:49:54.006Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:48:54.225Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:48:54.152Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:48:54.081Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:48:54.007Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:47:54.200Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:47:54.134Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:47:54.061Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:47:53.985Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:46:54.201Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:46:54.137Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:46:54.058Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:46:53.982Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:45:54.212Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:45:54.147Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:45:54.073Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:45:53.990Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:44:54.176Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:44:54.112Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:44:54.043Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:44:53.965Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:43:54.189Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:43:54.132Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:43:54.051Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:43:53.979Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:42:54.138Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:42:54.086Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:42:54.021Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:42:53.950Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:41:54.134Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:41:54.082Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:41:54.015Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:41:53.943Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:40:54.136Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:40:54.078Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:40:54.013Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:40:53.937Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:39:54.122Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:39:54.056Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:39:53.995Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:39:53.927Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:38:54.113Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:38:54.052Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:38:53.991Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:38:53.925Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:37:54.100Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:37:54.044Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:37:53.983Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:37:53.914Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:36:54.087Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:36:54.030Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:36:53.972Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:36:53.906Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:35:54.085Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:35:54.026Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:35:53.966Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:35:53.893Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:34:54.128Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:34:54.063Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:34:53.987Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:34:53.906Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:33:53.941Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:33:53.919Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:33:53.896Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:33:53.870Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:32:54.073Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:32:54.019Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:32:53.965Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:32:53.889Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:31:54.047Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:31:53.994Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:31:53.938Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:31:53.874Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:30:54.108Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:30:54.013Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:30:53.937Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:30:53.857Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:29:54.030Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:29:53.978Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:29:53.922Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:29:53.856Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:28:54.166Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:28:54.076Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:28:53.979Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:28:53.871Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:27:54.161Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:27:54.051Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:27:53.956Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:27:53.854Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:26:54.062Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:26:53.998Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:26:53.926Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:26:53.847Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:25:54.052Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:25:53.982Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:25:53.913Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:25:53.837Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:24:54.034Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:24:53.964Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:24:53.894Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:24:53.816Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:23:54.058Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:23:53.982Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:23:53.890Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:23:53.805Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:22:54.076Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:22:53.997Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:22:53.906Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:22:53.795Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:21:54.068Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:21:53.981Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:21:53.867Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:21:53.782Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:20:54.064Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:20:53.980Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:20:53.882Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:20:53.786Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:19:53.969Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:19:53.907Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:19:53.843Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:19:53.777Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:18:53.975Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:18:53.906Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:18:53.841Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:18:53.768Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:17:53.948Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:17:53.890Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:17:53.807Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:17:53.747Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:16:53.896Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:16:53.849Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:16:53.798Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:16:53.746Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:15:53.956Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:15:53.890Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:15:53.818Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:15:53.745Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:14:53.935Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:14:53.874Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:14:53.805Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:14:53.738Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:13:53.922Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:13:53.868Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:13:53.804Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:13:53.738Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:12:53.937Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:12:53.878Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:12:53.815Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:12:53.736Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:11:53.919Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:11:53.860Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:11:53.789Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:11:53.727Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:10:53.916Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:10:53.855Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:10:53.789Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:10:53.720Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:09:53.926Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:09:53.855Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:09:53.789Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:09:53.725Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:08:53.897Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:08:53.836Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:08:53.766Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:08:53.701Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:07:53.892Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:07:53.826Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:07:53.766Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:07:53.708Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:06:53.934Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:06:53.874Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:06:53.807Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:06:53.737Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:05:53.861Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:05:53.800Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:05:53.738Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:05:53.684Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:04:53.860Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:04:53.803Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:04:53.748Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:04:53.683Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:03:53.904Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:03:53.797Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:03:53.739Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:03:53.676Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:02:53.834Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:02:53.779Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:02:53.722Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:02:53.660Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:01:53.876Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:01:53.779Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:01:53.722Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:01:53.659Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:00:53.931Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:00:53.843Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:00:53.741Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T22:00:53.642Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:59:53.922Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:59:53.838Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:59:53.750Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:59:53.650Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:58:53.939Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:58:53.822Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:58:53.728Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:58:53.627Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:57:53.892Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:57:53.812Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:57:53.723Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:57:53.629Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:56:53.894Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:56:53.810Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:56:53.716Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:56:53.624Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:55:53.901Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:55:53.818Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:55:53.732Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:55:53.639Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:54:53.895Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:54:53.811Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:54:53.717Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:54:53.629Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:53:53.911Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:53:53.794Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:53:53.710Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:53:53.622Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:52:53.946Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:52:53.845Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:52:53.739Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:52:53.625Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:51:53.999Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:51:53.877Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:51:53.765Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:51:53.631Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:50:53.844Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:50:53.763Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:50:53.672Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:50:53.585Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:49:53.879Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:49:53.788Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:49:53.706Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:49:53.613Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:48:53.849Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:48:53.771Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:48:53.676Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:48:53.589Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:47:53.898Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:47:53.820Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:47:53.718Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:47:53.624Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:46:53.737Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:46:53.682Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:46:53.622Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:46:53.556Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:45:53.828Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:45:53.711Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:45:53.624Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:45:53.538Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:44:53.775Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:44:53.693Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:44:53.604Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:44:53.531Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:43:53.807Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:43:53.730Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:43:53.642Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:43:53.549Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:42:53.708Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:42:53.658Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:42:53.608Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:42:53.532Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:41:53.674Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:41:53.625Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:41:53.571Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:41:53.520Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:40:53.692Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:40:53.638Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:40:53.582Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:40:53.531Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:39:53.689Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:39:53.630Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:39:53.568Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:39:53.504Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:38:53.657Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:38:53.604Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:38:53.549Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:38:53.493Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:37:53.716Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:37:53.631Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:37:53.562Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:37:53.494Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:36:53.632Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:36:53.583Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:36:53.532Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:36:53.479Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:35:53.655Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:35:53.583Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:35:53.532Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:35:53.481Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:34:53.659Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:34:53.603Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:34:53.542Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:34:53.473Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:33:53.682Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:33:53.625Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:33:53.526Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:33:53.466Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:32:53.655Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:32:53.592Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:32:53.510Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:32:53.449Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:31:53.655Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:31:53.560Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:31:53.500Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:31:53.437Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:30:53.671Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:30:53.569Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:30:53.496Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:30:53.433Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:29:53.608Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:29:53.543Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:29:53.478Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:29:53.419Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:28:53.573Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:28:53.521Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:28:53.468Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:28:53.413Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:27:53.498Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:27:53.466Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:27:53.427Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:27:53.394Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:26:53.535Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:26:53.491Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:26:53.447Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:26:53.395Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:25:53.515Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:25:53.471Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:25:53.422Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:25:53.377Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:24:53.509Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:24:53.467Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:24:53.419Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:24:53.373Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:23:53.482Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:23:53.440Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:23:53.397Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:23:53.353Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:22:53.528Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:22:53.484Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:22:53.434Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:22:53.356Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:21:53.516Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:21:53.461Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:21:53.404Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:21:53.358Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:20:53.478Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:20:53.433Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:20:53.387Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:20:53.342Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:19:53.549Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:19:53.486Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:19:53.413Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:19:53.346Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:18:53.553Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:18:53.488Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:18:53.416Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:18:53.329Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:17:53.542Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:17:53.479Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:17:53.406Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:17:53.332Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:16:53.476Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:16:53.401Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:16:53.341Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:16:53.297Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:15:53.505Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:15:53.437Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:15:53.371Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:15:53.303Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:14:53.499Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:14:53.438Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:14:53.370Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:14:53.302Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:13:53.492Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:13:53.432Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:13:53.362Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:13:53.292Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:12:53.494Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:12:53.430Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:12:53.359Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:12:53.316Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:11:53.504Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:11:53.443Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:11:53.345Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:11:53.273Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:10:53.494Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:10:53.430Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:10:53.358Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:10:53.274Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:09:53.477Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:09:53.420Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:09:53.335Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:09:53.262Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:08:53.461Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:08:53.396Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:08:53.327Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:08:53.261Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:07:53.402Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:07:53.339Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:07:53.271Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:07:53.232Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:06:53.568Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:06:53.492Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:06:53.369Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:06:53.267Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:05:53.554Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:05:53.453Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:05:53.354Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:05:53.252Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:04:53.524Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:04:53.448Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:04:53.358Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:04:53.262Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:03:53.400Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:03:53.335Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:03:53.268Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:03:53.222Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:02:53.321Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:02:53.285Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:02:53.247Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:02:53.212Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:01:53.339Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:01:53.299Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:01:53.258Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:01:53.217Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:00:53.426Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:00:53.360Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:00:53.291Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T21:00:53.221Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:59:53.400Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:59:53.339Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:59:53.278Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:59:53.218Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:58:53.381Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:58:53.321Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:58:53.260Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:58:53.196Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:57:53.339Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:57:53.299Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:57:53.254Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:57:53.186Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:56:53.289Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:56:53.249Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:56:53.209Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:56:53.167Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:55:53.284Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:55:53.243Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:55:53.203Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:55:53.167Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:54:53.320Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:54:53.280Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:54:53.206Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:54:53.164Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:53:53.318Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:53:53.272Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:53:53.195Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:53:53.147Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:52:53.256Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:52:53.220Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:52:53.181Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:52:53.145Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:51:53.242Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:51:53.208Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:51:53.173Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:51:53.132Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:50:53.405Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:50:53.324Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:50:53.236Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:50:53.153Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:49:53.367Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:49:53.296Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:49:53.217Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:49:53.144Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:48:53.269Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:48:53.219Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:48:53.170Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:48:53.120Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:47:53.222Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:47:53.194Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:47:53.157Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:47:53.101Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:46:53.121Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:46:53.107Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:46:53.093Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T20:46:53.075Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:35:28.203Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:35:28.137Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:35:28.055Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:35:27.970Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:34:28.133Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:34:28.073Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:34:28.013Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:34:27.960Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:33:28.034Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:33:28.006Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:33:27.973Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:33:27.935Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:32:28.012Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:32:27.981Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:32:27.946Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:32:27.917Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:31:28.036Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:31:28.003Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:31:27.960Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:31:27.924Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:30:27.986Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:30:27.967Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:30:27.942Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:30:27.913Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:29:28.022Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:29:27.991Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:29:27.952Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:29:27.914Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:28:27.993Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:28:27.966Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:28:27.941Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:28:27.911Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:27:28.007Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:27:27.975Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:27:27.943Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:27:27.908Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:26:27.982Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:26:27.951Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:26:27.925Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:26:27.897Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:25:27.992Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:25:27.961Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:25:27.921Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:25:27.888Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:24:27.985Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:24:27.954Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:24:27.918Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:24:27.885Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:23:27.982Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:23:27.951Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:23:27.924Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:23:27.891Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:22:27.991Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:22:27.954Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:22:27.921Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:22:27.886Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:21:27.993Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:21:27.957Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:21:27.925Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:21:27.887Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:20:27.957Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:20:27.927Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:20:27.898Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:20:27.868Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:19:27.969Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:19:27.934Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:19:27.900Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:19:27.866Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:18:27.976Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:18:27.943Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:18:27.907Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:18:27.872Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:17:27.947Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:17:27.920Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:17:27.885Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:17:27.853Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:16:27.928Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:16:27.900Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:16:27.872Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:16:27.840Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:15:27.928Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:15:27.897Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:15:27.866Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:15:27.839Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:14:27.914Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:14:27.889Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:14:27.860Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:14:27.830Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:13:27.904Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:13:27.876Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:13:27.847Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:13:27.819Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:12:27.902Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:12:27.867Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:12:27.832Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:12:27.805Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:11:27.857Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:11:27.831Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:11:27.805Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:11:27.784Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:10:27.840Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:10:27.819Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:10:27.796Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:10:27.773Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:09:27.795Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:09:27.782Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:09:27.768Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:09:27.753Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:08:27.812Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:08:27.792Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:08:27.773Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:08:27.750Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:07:27.807Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:07:27.785Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:07:27.762Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:07:27.739Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:06:27.759Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:06:27.746Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:06:27.736Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:06:27.727Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:05:27.792Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:05:27.767Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:05:27.745Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:05:27.726Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:04:27.790Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:04:27.767Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:04:27.747Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:04:27.726Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:03:27.794Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:03:27.772Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:03:27.747Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:03:27.719Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:02:27.752Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:02:27.732Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:02:27.712Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:02:27.690Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:01:27.775Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:01:27.748Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:01:27.721Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:01:27.698Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:00:27.783Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:00:27.763Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:00:27.736Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T11:00:27.701Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:59:27.742Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:59:27.725Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:59:27.708Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:59:27.693Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:58:27.827Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:58:27.806Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:58:27.743Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:58:27.704Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:57:27.750Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:57:27.729Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:57:27.708Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:57:27.689Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:56:27.730Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:56:27.712Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:56:27.693Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:56:27.671Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:55:27.737Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:55:27.718Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:55:27.699Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:55:27.679Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:54:27.763Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:54:27.737Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:54:27.713Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:54:27.685Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:53:27.737Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:53:27.715Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:53:27.693Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:53:27.670Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:52:27.731Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:52:27.710Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:52:27.688Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:52:27.666Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:51:27.738Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:51:27.713Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:51:27.690Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:51:27.662Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:50:27.716Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:50:27.696Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:50:27.674Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:50:27.648Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:49:27.699Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:49:27.677Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:49:27.657Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:49:27.632Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:48:27.690Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:48:27.672Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:48:27.652Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:48:27.628Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:47:27.692Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:47:27.671Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:47:27.646Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:47:27.628Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:46:27.679Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:46:27.662Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:46:27.644Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:46:27.626Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:45:27.660Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:45:27.645Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:45:27.631Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:45:27.617Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:44:27.634Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:44:27.623Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:44:27.614Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:44:27.604Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:43:27.654Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:43:27.635Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:43:27.618Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:43:27.602Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:42:27.630Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:42:27.617Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:42:27.603Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:42:27.589Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:41:27.629Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:41:27.615Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:41:27.600Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:41:27.586Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:40:27.615Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:40:27.603Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:40:27.589Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:40:27.575Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:39:27.628Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:39:27.609Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:39:27.591Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:39:27.568Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:38:27.601Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:38:27.585Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:38:27.571Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:38:27.557Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:37:27.600Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:37:27.584Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:37:27.570Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:37:27.555Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:36:27.576Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:36:27.564Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:36:27.555Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:36:27.548Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:35:27.591Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:35:27.579Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:35:27.564Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:35:27.551Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:34:27.587Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:34:27.575Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:34:27.562Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:34:27.544Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:33:27.560Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:33:27.549Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:33:27.539Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:33:27.530Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:32:27.586Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:32:27.565Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:32:27.544Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:32:27.524Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:31:27.542Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:31:27.530Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:31:27.520Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:31:27.510Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:30:27.532Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:30:27.523Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:30:27.513Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:30:27.504Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:29:27.510Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:29:27.506Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:29:27.501Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:29:27.493Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:28:27.524Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:28:27.510Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:28:27.499Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:28:27.488Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:27:27.500Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:27:27.491Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:27:27.482Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:27:27.472Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:26:27.514Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:26:27.503Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:26:27.491Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:26:27.478Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:25:27.493Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:25:27.485Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:25:27.474Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:25:27.466Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:24:27.453Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:24:27.451Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:24:27.449Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:24:27.447Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:22:57.799Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:22:57.796Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:22:57.794Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:22:57.792Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:21:57.804Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:21:57.797Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:21:57.790Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:21:57.783Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:20:57.798Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:20:57.792Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:20:57.788Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:20:57.783Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:19:57.798Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:19:57.791Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:19:57.784Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:19:57.775Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:18:57.781Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:18:57.774Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:18:57.767Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:18:57.759Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:17:57.751Z",
+    "partner": "mews",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:17:57.750Z",
+    "partner": "cloudbeds",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:17:57.748Z",
+    "partner": "siteminder",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  },
+  {
+    "time": "2026-05-23T10:17:57.746Z",
+    "partner": "oracle-ohip",
+    "hotel": "MySpace Live Sync Hotel",
+    "rate_plan": "BAR",
+    "amount": "GBP 215"
+  }
+]

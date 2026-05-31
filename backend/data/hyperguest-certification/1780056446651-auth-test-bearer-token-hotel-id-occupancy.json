@@ -1,0 +1,30 @@
+{
+  "authVariant": "bearer-token",
+  "payloadVariant": "hotel-id-occupancy",
+  "status": 400,
+  "ok": false,
+  "ms": 62,
+  "requestHeaders": {
+    "Accept": "application/json",
+    "Content-Type": "application/json",
+    "Accept-Encoding": "gzip, deflate",
+    "Authorization": "REDACTED"
+  },
+  "requestBody": {
+    "hotels": [
+      19912
+    ],
+    "checkIn": "2026-05-30",
+    "checkOut": "2026-05-31",
+    "currency": "USD",
+    "nationality": "GB",
+    "occupancies": [
+      {
+        "rooms": 1,
+        "adults": 1,
+        "children": []
+      }
+    ]
+  },
+  "responsePreview": "{\"error\":\"Validation Error\",\"errorCode\":\"SN.400\",\"errorDetails\":[{\"message\":\"Hotel list is missing\",\"validation\":\"required\",\"field\":\"hotelIds\"}]}"
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "681039ac-0358-4905-a267-0a10987868bf",
+    "created_at": "2026-05-29T10:16:20.527Z",
+    "step": "search",
+    "payload": {
+      "country": "United Kingdom",
+      "city": "london",
+      "currency": "GBP",
+      "nationality": "GB",
+      "checkin": "2026-05-30",
+      "checkout": "2026-05-31",
+      "guests": "2",
+      "rooms": "1"
+    },
+    "response": {
+      "count": 120,
+      "sample": {
+        "hotelId": "180527",
+        "name": "Axiom Park Hotel",
+        "city": "London",
+        "country": "United Kingdom"
+      }
+    }
+  },
+  {
+    "id": "5757fb7d-71d9-4e94-8b1e-db617a3de532",
+    "created_at": "2026-05-29T10:15:54.151Z",
+    "step": "search",
+    "payload": {
+      "country": "United Kingdom",
+      "city": "london",
+      "currency": "GBP",
+      "nationality": "GB",
+      "checkin": "2026-05-30",
+      "checkout": "2026-05-31",
+      "guests": "2",
+      "rooms": "1"
+    },
+    "response": {
+      "count": 120,
+      "sample": {
+        "hotelId": "180527",
+        "name": "Axiom Park Hotel",
+        "city": "London",
+        "country": "United Kingdom"
+      }
+    }
+  }
+]

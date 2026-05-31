@@ -1,0 +1,30 @@
+{
+  "step": "search-test-1",
+  "url": "https://search-api.hyperguest.io/2.0/",
+  "status": 401,
+  "ok": false,
+  "requestHeaders": {
+    "Accept": "application/json",
+    "Content-Type": "application/json",
+    "Accept-Encoding": "gzip, deflate",
+    "Authorization": "REDACTED",
+    "x-auth-token": "REDACTED"
+  },
+  "requestBody": {
+    "propertyId": 19912,
+    "hotelIds": [
+      19912
+    ],
+    "checkIn": "2026-05-30",
+    "checkOut": "2026-05-31",
+    "currency": "USD",
+    "nationality": "GB",
+    "rooms": [
+      {
+        "adults": 1,
+        "children": []
+      }
+    ]
+  },
+  "responseText": "{\"error\":\"Invalid authorization\",\"errorCode\":\"SN.401\",\"errorDetails\":[]}"
+}
