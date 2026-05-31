@@ -1,5 +1,37 @@
 [
   {
+    "id": "78c27dd9-4dcb-4222-b454-5fe10bc7b30c",
+    "created_at": "2026-05-31T05:24:58.507Z",
+    "action": "email_resend",
+    "payload": {
+      "subject": "Affiliate approved - MySpace Hotel",
+      "to": "reservations@myspace-hotel.com"
+    },
+    "response": {
+      "ok": true,
+      "status": 200,
+      "data": {
+        "id": "8b55327d-f1cd-42a9-841e-3abf545b92fa"
+      }
+    }
+  },
+  {
+    "id": "ea4b2571-da35-451e-bc34-8152ac90de25",
+    "created_at": "2026-05-31T05:04:03.482Z",
+    "action": "email_resend",
+    "payload": {
+      "subject": "New affiliate application - MySpace Hotel",
+      "to": "reservations@myspace-hotel.com"
+    },
+    "response": {
+      "ok": true,
+      "status": 200,
+      "data": {
+        "id": "e77b7839-35a6-4630-b3dd-5b7877dbb382"
+      }
+    }
+  },
+  {
     "id": "8df5cfae-fef4-4fc5-9906-f254e6287424",
     "created_at": "2026-05-30T15:19:31.050Z",
     "action": "email_resend",

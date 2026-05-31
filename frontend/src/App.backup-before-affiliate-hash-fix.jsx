@@ -57,7 +57,7 @@ function nightsBetween(a, b) {
 }
 
 function routeUrl(path) {
-  return path;
+  return `${window.location.origin}${path}`;
 }
 
 function mapSearch(type, query) {
@@ -300,7 +300,6 @@ export default function App() {
       if (ref) {
         localStorage.setItem("msh_affiliate_code", ref);
         setAffiliateCode(ref);
-        window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
       } else {
         const savedRef = String(localStorage.getItem("msh_affiliate_code") || "").trim().toUpperCase();
         if (savedRef) setAffiliateCode(savedRef);
@@ -334,15 +333,6 @@ export default function App() {
   const selectedRateSourceTimestamp = hotelRateSourceTimestamp(selectedHotel);
   const totalPrice = selectedNightPrice * Math.max(1, Number(rooms || 1)) * nights;
   const destinationQuery = [selectedHotel?.name, city, country].filter(Boolean).join(", ") || "London";
-  useEffect(() => {
-    try {
-      if (selectedHotel) {
-        localStorage.setItem("msh_selected_hotel", JSON.stringify(selectedHotel));
-      }
-    } catch {}
-  }, [selectedHotel]);
-
-  // msh_selected_hotel_auto_save
   useEffect(() => {
     try {
       if (selectedHotel) {
@@ -837,18 +827,7 @@ function BookingSummary(props) {
 }
 
 function ComparePanel(props) {
-  if (!props.selectedHotel) {
-    try {
-      const saved = localStorage.getItem("msh_selected_hotel");
-      if (saved) {
-        const hotel = JSON.parse(saved);
-        if (hotel) {
-          return <ComparePanel {...props} selectedHotel={hotel} />;
-        }
-      }
-    } catch {}
-    return null;
-  }
+  if (!props.selectedHotel) return null;
 
   return (
     <section style={styles.panel}>
@@ -983,7 +962,7 @@ function ComparePortal(props) {
   return (
     <PortalShell
       title="Compare Prices"
-      subtitle="Review your selected stay clearly before continuing to secure checkout."
+      subtitle="Review the Review your selected stay clearly before continuing to secure checkout."
       badge="Best price check"
     >
       {!selected ? (
@@ -1547,12 +1526,6 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
-
-
-
-
-
-
 
 
 

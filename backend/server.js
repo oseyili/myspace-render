@@ -1103,6 +1103,8 @@ app.post("/api/book", async (req, res) => {
     ["Created", booking.createdAt]
   ]);
 
+  const affiliateConversion = recordAffiliateConversionIfPresent({ ...booking, affiliateCode: req.body.affiliateCode || req.body.affiliate_code || req.body.ref });
+
   const response = {
     ok: true,
     bookingRef,
@@ -1112,6 +1114,8 @@ app.post("/api/book", async (req, res) => {
     rate_source_timestamp: tracking.rate_source_timestamp,
     source_health: tracking.source_health,
     emailSent: Boolean(emailResult.ok),
+    affiliateTracked: Boolean(affiliateConversion),
+    affiliateCode: affiliateConversion?.affiliateCode || "",
     message: "Your reservation has been prepared for secure payment."
   };
 
@@ -1211,6 +1215,8 @@ app.post("/api/book", async (req, res) => {
     ["Created", booking.createdAt]
   ]);
 
+  const affiliateConversion = recordAffiliateConversionIfPresent({ ...booking, affiliateCode: req.body.affiliateCode || req.body.affiliate_code || req.body.ref });
+
   const response = {
     ok: true,
     bookingRef,
@@ -1219,6 +1225,8 @@ app.post("/api/book", async (req, res) => {
     rate_source_id: supplierSnapshot.supplier_rate_id,
     rate_source_timestamp: supplierSnapshot.rate_source_timestamp,
     emailSent: Boolean(emailResult.ok),
+    affiliateTracked: Boolean(affiliateConversion),
+    affiliateCode: affiliateConversion?.affiliateCode || "",
     message: "Your reservation has been prepared for secure payment."
   };
 
@@ -1800,6 +1808,313 @@ app.get("/api/internal/supplier-dashboard", (req, res) => {
 });
 // MSH SUPPLIER REGISTRY END
 
+
+// MSH AFFILIATE NETWORK START
+const AFFILIATES_FILE = path.join(DATA_DIR, "affiliates.json");
+const AFFILIATE_CLICKS_FILE = path.join(DATA_DIR, "affiliate_clicks.json");
+const AFFILIATE_CONVERSIONS_FILE = path.join(DATA_DIR, "affiliate_conversions.json");
+
+ensureFile(AFFILIATES_FILE, []);
+ensureFile(AFFILIATE_CLICKS_FILE, []);
+ensureFile(AFFILIATE_CONVERSIONS_FILE, []);
+
+function makeAffiliateCode(name) {
+  const base = clean(name)
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "")
+    .slice(0, 10) || "AFFILIATE";
+
+  return `${base}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
+}
+
+function readAffiliates() {
+  const rows = readJSON(AFFILIATES_FILE, []);
+  return Array.isArray(rows) ? rows : [];
+}
+
+function publicAffiliate(row) {
+  return {
+    affiliateCode: row.affiliateCode,
+    status: row.status,
+    businessName: row.businessName,
+    contactName: row.contactName,
+    website: row.website,
+    referralLink: row.referralLink,
+    commissionRate: row.commissionRate,
+    createdAt: row.createdAt
+  };
+}
+
+app.post("/api/affiliates/apply", async (req, res) => {
+  const businessName = clean(req.body.businessName || req.body.business_name);
+  const contactName = clean(req.body.contactName || req.body.contact_name);
+  const email = clean(req.body.email || req.body.contactEmail || req.body.contact_email);
+  const phone = clean(req.body.phone);
+  const website = clean(req.body.website);
+  const audience = clean(req.body.audience);
+  const promotionPlan = clean(req.body.promotionPlan || req.body.promotion_plan);
+
+  if (!businessName || !contactName || !email) {
+    return res.status(400).json({
+      ok: false,
+      message: "Please provide business name, contact name and email address."
+    });
+  }
+
+  const rows = readAffiliates();
+  const affiliateCode = makeAffiliateCode(businessName);
+  const frontendBase = clean(process.env.FRONTEND_URL || process.env.CLIENT_URL || process.env.PUBLIC_SITE_URL || "http://localhost:5173").replace(/\/$/, "");
+
+  const row = {
+    id: crypto.randomUUID(),
+    affiliateCode,
+    status: "PENDING_REVIEW",
+    businessName,
+    contactName,
+    email,
+    phone,
+    website,
+    audience,
+    promotionPlan,
+    commissionRate: 5,
+    referralLink: `${frontendBase}/?ref=${encodeURIComponent(affiliateCode)}`,
+    createdAt: nowISO(),
+    approvedAt: "",
+    notes: ""
+  };
+
+  rows.unshift(row);
+  writeJSON(AFFILIATES_FILE, rows.slice(0, 5000));
+
+  await sendEmailNotification("New affiliate application - MySpace Hotel", [
+    ["Affiliate code", affiliateCode],
+    ["Business name", businessName],
+    ["Contact name", contactName],
+    ["Email", email],
+    ["Phone", phone],
+    ["Website", website],
+    ["Audience", audience],
+    ["Promotion plan", promotionPlan],
+    ["Status", row.status],
+    ["Referral link", row.referralLink],
+    ["Received", row.createdAt]
+  ]);
+
+  res.json({
+    ok: true,
+    message: "Thank you. Your affiliate application has been received by MySpace Hotel.",
+    affiliate: publicAffiliate(row)
+  });
+});
+
+app.get("/api/affiliates/validate/:code", (req, res) => {
+  const code = clean(req.params.code).toUpperCase();
+  const affiliate = readAffiliates().find((x) => clean(x.affiliateCode).toUpperCase() === code);
+
+  if (!affiliate) {
+    return res.status(404).json({ ok: false, message: "Affiliate code was not found." });
+  }
+
+  res.json({
+    ok: true,
+    affiliate: publicAffiliate(affiliate)
+  });
+});
+
+app.get("/r/:code", (req, res) => {
+  const code = clean(req.params.code).toUpperCase();
+  const rows = readAffiliates();
+  const affiliate = rows.find((x) => clean(x.affiliateCode).toUpperCase() === code);
+
+  const clicks = readJSON(AFFILIATE_CLICKS_FILE, []);
+  clicks.unshift({
+    id: crypto.randomUUID(),
+    createdAt: nowISO(),
+    affiliateCode: code,
+    foundAffiliate: Boolean(affiliate),
+    ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress || "",
+    userAgent: req.headers["user-agent"] || "",
+    referrer: req.headers.referer || ""
+  });
+  writeJSON(AFFILIATE_CLICKS_FILE, clicks.slice(0, 20000));
+
+  const frontendBase = clean(process.env.FRONTEND_URL || process.env.CLIENT_URL || process.env.PUBLIC_SITE_URL || "http://localhost:5173").replace(/\/$/, "");
+  res.redirect(`${frontendBase}/?ref=${encodeURIComponent(code)}`);
+});
+
+function recordAffiliateConversionIfPresent(booking) {
+  const affiliateCode = clean(booking.affiliateCode || booking.affiliate_code || booking.ref || "").toUpperCase();
+  if (!affiliateCode) return null;
+
+  const affiliate = readAffiliates().find((x) => clean(x.affiliateCode).toUpperCase() === affiliateCode);
+  const commissionRate = number(affiliate?.commissionRate || 5);
+  const amount = money(booking.amount);
+  const commissionAmount = money((amount * commissionRate) / 100);
+
+  const conversion = {
+    id: crypto.randomUUID(),
+    createdAt: nowISO(),
+    affiliateCode,
+    affiliateFound: Boolean(affiliate),
+    affiliateStatus: affiliate?.status || "UNKNOWN",
+    bookingRef: booking.bookingRef,
+    hotelName: booking.hotelName,
+    customerEmail: booking.customerEmail,
+    amount,
+    currency: booking.currency,
+    commissionRate,
+    commissionAmount,
+    status: "PENDING_PAYMENT"
+  };
+
+  const rows = readJSON(AFFILIATE_CONVERSIONS_FILE, []);
+  rows.unshift(conversion);
+  writeJSON(AFFILIATE_CONVERSIONS_FILE, rows.slice(0, 20000));
+
+  return conversion;
+}
+
+
+// MSH AFFILIATE APPROVAL EMAIL START
+app.post("/api/internal/affiliates/:code/approve", async (req, res) => {
+  const code = clean(req.params.code).toUpperCase();
+  const affiliates = readAffiliates();
+  const index = affiliates.findIndex((x) => clean(x.affiliateCode).toUpperCase() === code);
+
+  if (index < 0) {
+    return res.status(404).json({ ok: false, message: "Affiliate was not found." });
+  }
+
+  affiliates[index] = {
+    ...affiliates[index],
+    status: "APPROVED",
+    approvedAt: nowISO(),
+    notes: clean(req.body.notes || affiliates[index].notes || "")
+  };
+
+  writeJSON(AFFILIATES_FILE, affiliates);
+
+  const affiliate = affiliates[index];
+
+  await sendEmailNotification(
+    "Affiliate approved - MySpace Hotel",
+    [
+      ["Business name", affiliate.businessName],
+      ["Contact name", affiliate.contactName],
+      ["Email", affiliate.email],
+      ["Affiliate code", affiliate.affiliateCode],
+      ["Referral link", affiliate.referralLink],
+      ["Status", affiliate.status],
+      ["Approved", affiliate.approvedAt]
+    ],
+    affiliate.email
+  );
+
+  res.json({
+    ok: true,
+    message: "Affiliate approved and approval email sent.",
+    affiliate: publicAffiliate(affiliate)
+  });
+});
+
+app.post("/api/internal/affiliates/:code/reject", async (req, res) => {
+  const code = clean(req.params.code).toUpperCase();
+  const affiliates = readAffiliates();
+  const index = affiliates.findIndex((x) => clean(x.affiliateCode).toUpperCase() === code);
+
+  if (index < 0) {
+    return res.status(404).json({ ok: false, message: "Affiliate was not found." });
+  }
+
+  affiliates[index] = {
+    ...affiliates[index],
+    status: "REJECTED",
+    rejectedAt: nowISO(),
+    notes: clean(req.body.notes || affiliates[index].notes || "")
+  };
+
+  writeJSON(AFFILIATES_FILE, affiliates);
+
+  res.json({
+    ok: true,
+    message: "Affiliate application rejected.",
+    affiliate: publicAffiliate(affiliates[index])
+  });
+});
+
+app.post("/api/internal/affiliates/:code/resend-welcome", async (req, res) => {
+  const code = clean(req.params.code).toUpperCase();
+  const affiliate = readAffiliates().find((x) => clean(x.affiliateCode).toUpperCase() === code);
+
+  if (!affiliate) {
+    return res.status(404).json({ ok: false, message: "Affiliate was not found." });
+  }
+
+  await sendEmailNotification(
+    "Welcome to the MySpace Hotel Affiliate Network",
+    [
+      ["Hello", affiliate.contactName],
+      ["Status", affiliate.status],
+      ["Affiliate code", affiliate.affiliateCode],
+      ["Your referral link", affiliate.referralLink],
+      ["How to use it", "Share your referral link with customers, followers, travel groups, businesses, communities and social media audiences."],
+      ["Commission", `${affiliate.commissionRate || 5}% on qualifying completed stays, subject to approval and programme terms.`],
+      ["Support", "reservations@myspace-hotel.com"],
+      ["Website", "myspace-hotel.com"]
+    ],
+    affiliate.email
+  );
+
+  res.json({
+    ok: true,
+    message: "Affiliate welcome email sent.",
+    affiliate: publicAffiliate(affiliate)
+  });
+});
+// MSH AFFILIATE APPROVAL EMAIL END
+
+app.get("/api/internal/affiliate-dashboard", (req, res) => {
+  const affiliates = readAffiliates();
+  const clicks = readJSON(AFFILIATE_CLICKS_FILE, []);
+  const conversions = readJSON(AFFILIATE_CONVERSIONS_FILE, []);
+
+  const stats = affiliates.map((affiliate) => {
+    const code = clean(affiliate.affiliateCode).toUpperCase();
+    const affiliateClicks = clicks.filter((x) => clean(x.affiliateCode).toUpperCase() === code);
+    const affiliateConversions = conversions.filter((x) => clean(x.affiliateCode).toUpperCase() === code);
+
+    return {
+      affiliateCode: affiliate.affiliateCode,
+      businessName: affiliate.businessName,
+      contactName: affiliate.contactName,
+      email: affiliate.email,
+      status: affiliate.status,
+      referralLink: affiliate.referralLink,
+      clicks: affiliateClicks.length,
+      conversions: affiliateConversions.length,
+      totalBookingValue: money(affiliateConversions.reduce((sum, x) => sum + number(x.amount), 0)),
+      totalCommission: money(affiliateConversions.reduce((sum, x) => sum + number(x.commissionAmount), 0)),
+      currency: affiliateConversions[0]?.currency || "GBP",
+      createdAt: affiliate.createdAt
+    };
+  });
+
+  res.json({
+    ok: true,
+    generatedAt: nowISO(),
+    totals: {
+      affiliates: affiliates.length,
+      clicks: clicks.length,
+      conversions: conversions.length,
+      pendingApplications: affiliates.filter((x) => x.status === "PENDING_REVIEW").length
+    },
+    stats,
+    recentClicks: clicks.slice(0, 50),
+    recentConversions: conversions.slice(0, 50)
+  });
+});
+// MSH AFFILIATE NETWORK END
+
 app.get("/api/certification/logs", (req, res) => {
   res.json({
     ok: true,
@@ -1827,6 +2142,8 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
+
 
 
 

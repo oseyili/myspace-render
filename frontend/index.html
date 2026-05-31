@@ -45,5 +45,52 @@
     <div id="root"></div>
 
     <script type="module" src="/src/main.jsx"></script>
-  </body>
+  
+<!-- MSH AFFILIATE VISIT BADGE START -->
+<script>
+(function () {
+  try {
+    var params = new URLSearchParams(window.location.search || "");
+    var ref = String(params.get("ref") || "").trim().toUpperCase();
+
+    if (ref) {
+      localStorage.setItem("msh_affiliate_code", ref);
+      window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+    }
+
+    function showAffiliateBadge() {
+      var saved = String(localStorage.getItem("msh_affiliate_code") || "").trim().toUpperCase();
+      if (!saved) return;
+      if (document.getElementById("msh-affiliate-badge")) return;
+
+      var badge = document.createElement("div");
+      badge.id = "msh-affiliate-badge";
+      badge.textContent = "Referral applied to this visit.";
+      badge.style.position = "sticky";
+      badge.style.top = "0";
+      badge.style.zIndex = "999999";
+      badge.style.margin = "0";
+      badge.style.padding = "12px 34px";
+      badge.style.background = "#ecfdf3";
+      badge.style.color = "#166534";
+      badge.style.borderBottom = "1px solid #bbf7d0";
+      badge.style.fontFamily = "Arial, sans-serif";
+      badge.style.fontWeight = "900";
+      badge.style.fontSize = "15px";
+
+      document.body.insertBefore(badge, document.body.firstChild);
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", showAffiliateBadge);
+    } else {
+      showAffiliateBadge();
+    }
+  } catch (e) {}
+})();
+</script>
+<!-- MSH AFFILIATE VISIT BADGE END -->
+
+</body>
 </html>
+

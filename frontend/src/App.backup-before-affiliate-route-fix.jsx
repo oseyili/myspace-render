@@ -57,7 +57,7 @@ function nightsBetween(a, b) {
 }
 
 function routeUrl(path) {
-  return path;
+  return `${window.location.origin}${path}`;
 }
 
 function mapSearch(type, query) {
@@ -254,7 +254,6 @@ function selectedHotelWithRoom(hotel) {
 
 export default function App() {
   const [route, setRoute] = useState(currentRoute());
-  const [affiliateCode, setAffiliateCode] = useState("");
   const [countries, setCountries] = useState([]);
   const [cities, setCities] = useState([]);
   const [country, setCountry] = useState("");
@@ -265,14 +264,7 @@ export default function App() {
   const [rooms, setRooms] = useState(1);
   const [currency, setCurrency] = useState("GBP");
   const [hotels, setHotels] = useState([]);
-  const [selectedHotel, setSelectedHotel] = useState(() => {
-    try {
-      const saved = localStorage.getItem("msh_selected_hotel");
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [selectedHotel, setSelectedHotel] = useState(null);
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
   const [paying, setPaying] = useState(false);
@@ -293,20 +285,6 @@ export default function App() {
   const [compareNotice, setCompareNotice] = useState("");
 
   useEffect(() => {
-    try {
-      const params = new URLSearchParams(window.location.search || "");
-      const ref = String(params.get("ref") || "").trim().toUpperCase();
-
-      if (ref) {
-        localStorage.setItem("msh_affiliate_code", ref);
-        setAffiliateCode(ref);
-        window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
-      } else {
-        const savedRef = String(localStorage.getItem("msh_affiliate_code") || "").trim().toUpperCase();
-        if (savedRef) setAffiliateCode(savedRef);
-      }
-    } catch {}
-
     const onHashChange = () => setRoute(currentRoute());
     window.addEventListener("hashchange", onHashChange);
     onHashChange();
@@ -334,23 +312,6 @@ export default function App() {
   const selectedRateSourceTimestamp = hotelRateSourceTimestamp(selectedHotel);
   const totalPrice = selectedNightPrice * Math.max(1, Number(rooms || 1)) * nights;
   const destinationQuery = [selectedHotel?.name, city, country].filter(Boolean).join(", ") || "London";
-  useEffect(() => {
-    try {
-      if (selectedHotel) {
-        localStorage.setItem("msh_selected_hotel", JSON.stringify(selectedHotel));
-      }
-    } catch {}
-  }, [selectedHotel]);
-
-  // msh_selected_hotel_auto_save
-  useEffect(() => {
-    try {
-      if (selectedHotel) {
-        localStorage.setItem("msh_selected_hotel", JSON.stringify(selectedHotel));
-      }
-    } catch {}
-  }, [selectedHotel]);
-
   const comparisons = useMemo(
     () => buildComparisons(selectedHotel, hotels, nights, rooms, currency),
     [selectedHotel, hotels, nights, rooms, currency]
@@ -451,9 +412,6 @@ export default function App() {
         specialRequests,
         rate_source_id: selectedRateSourceId,
         rate_source_timestamp: selectedRateSourceTimestamp,
-        affiliateCode,
-        affiliate_code: affiliateCode,
-        ref: affiliateCode,
       };
 
       const bookingRes = await fetch(`${API_BASE}/api/book`, {
@@ -562,7 +520,7 @@ export default function App() {
       {route === "reviews" && <ReviewsPortal reviewSent={reviewSent} setReviewSent={setReviewSent} />}
       {route === "support" && <SupportPortal />}
       {route === "partners" && <PartnersPortal partnerSent={partnerSent} setPartnerSent={setPartnerSent} />}
-      {route === "affiliates" && <AffiliateNetworkUltraSafe />}
+      {route === "affiliates" && <AffiliatePortal />}
       {route === "business" && <BusinessPortal />}
       <Footer />
     </div>
@@ -586,7 +544,7 @@ function Header() {
         <a style={styles.navLink} href={routeUrl(ROUTES.reviews)}>Guest Reviews</a>
         <a style={styles.navLink} href={routeUrl(ROUTES.support)}>Support</a>
         <a style={styles.goldLink} href={routeUrl(ROUTES.partners)}>Partnerships</a>
-        <a style={styles.navLink} href="/affiliate-network.html">Affiliate Network</a>
+        <a style={styles.navLink} href={routeUrl(ROUTES.affiliates)}>Affiliate Network</a>
         <a style={styles.darkLink} href={routeUrl(ROUTES.business)}>Business Portal</a>
       </nav>
     </header>
@@ -818,12 +776,6 @@ function BookingSummary(props) {
             <textarea style={styles.textareaSmall} placeholder="Special requests, optional" value={props.specialRequests} onChange={(e) => props.setSpecialRequests(e.target.value)} />
           </div>
 
-          {props.affiliateCode ? (
-            <div style={styles.referralNote}>
-              Referral applied for this booking.
-            </div>
-          ) : null}
-
           <button style={styles.payBtn} disabled={props.paying} onClick={props.secureReservation}>
             {props.paying ? "Opening Secure Payment..." : "Continue to Secure Checkout"}
           </button>
@@ -837,18 +789,7 @@ function BookingSummary(props) {
 }
 
 function ComparePanel(props) {
-  if (!props.selectedHotel) {
-    try {
-      const saved = localStorage.getItem("msh_selected_hotel");
-      if (saved) {
-        const hotel = JSON.parse(saved);
-        if (hotel) {
-          return <ComparePanel {...props} selectedHotel={hotel} />;
-        }
-      }
-    } catch {}
-    return null;
-  }
+  if (!props.selectedHotel) return null;
 
   return (
     <section style={styles.panel}>
@@ -983,12 +924,12 @@ function ComparePortal(props) {
   return (
     <PortalShell
       title="Compare Prices"
-      subtitle="Review your selected stay clearly before continuing to secure checkout."
+      subtitle="Review the Recommended stay option for your selected hotel. Compare available prices clearly before continuing."
       badge="Best price check"
     >
       {!selected ? (
         <div style={styles.empty}>
-          Select a hotel from the Hotels page first, then return here to Compare today's best available price for that exact property.
+          Select a hotel from the Hotels page first, then return here to compare the Today's Best Available Pricethat exact property.
         </div>
       ) : (
         <>
@@ -1505,7 +1446,6 @@ const styles = {
   totalPrice: { marginTop: 8, fontSize: 34, fontWeight: 950 },
   customerBox: { marginTop: 18, display: "grid", gap: 12, background: "#f8fafc", borderRadius: 20, padding: 18, border: "1px solid #d9e4f2" },
   customerTitle: { margin: 0, fontSize: 20, fontWeight: 950 },
-  referralNote: { marginTop: 16, background: "#ecfdf3", color: "#166534", borderRadius: 16, padding: 14, fontWeight: 900, lineHeight: 1.4 },
   textareaSmall: { padding: 15, borderRadius: 15, border: "1px solid #d8e0ef", minHeight: 85, fontSize: 15, fontFamily: "Arial, sans-serif" },
   textarea: { padding: 15, borderRadius: 15, border: "1px solid #d8e0ef", minHeight: 130, fontSize: 15, fontFamily: "Arial, sans-serif" },
   panel: { marginTop: 30, background: "#fff", borderRadius: 28, padding: 28, boxShadow: "0 8px 25px rgba(0,0,0,.06)" },
@@ -1547,20 +1487,6 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -57,7 +57,7 @@ function nightsBetween(a, b) {
 }
 
 function routeUrl(path) {
-  return path;
+  return `${window.location.origin}${path}`;
 }
 
 function mapSearch(type, query) {
@@ -265,14 +265,7 @@ export default function App() {
   const [rooms, setRooms] = useState(1);
   const [currency, setCurrency] = useState("GBP");
   const [hotels, setHotels] = useState([]);
-  const [selectedHotel, setSelectedHotel] = useState(() => {
-    try {
-      const saved = localStorage.getItem("msh_selected_hotel");
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [selectedHotel, setSelectedHotel] = useState(null);
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
   const [paying, setPaying] = useState(false);
@@ -300,7 +293,6 @@ export default function App() {
       if (ref) {
         localStorage.setItem("msh_affiliate_code", ref);
         setAffiliateCode(ref);
-        window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
       } else {
         const savedRef = String(localStorage.getItem("msh_affiliate_code") || "").trim().toUpperCase();
         if (savedRef) setAffiliateCode(savedRef);
@@ -334,23 +326,6 @@ export default function App() {
   const selectedRateSourceTimestamp = hotelRateSourceTimestamp(selectedHotel);
   const totalPrice = selectedNightPrice * Math.max(1, Number(rooms || 1)) * nights;
   const destinationQuery = [selectedHotel?.name, city, country].filter(Boolean).join(", ") || "London";
-  useEffect(() => {
-    try {
-      if (selectedHotel) {
-        localStorage.setItem("msh_selected_hotel", JSON.stringify(selectedHotel));
-      }
-    } catch {}
-  }, [selectedHotel]);
-
-  // msh_selected_hotel_auto_save
-  useEffect(() => {
-    try {
-      if (selectedHotel) {
-        localStorage.setItem("msh_selected_hotel", JSON.stringify(selectedHotel));
-      }
-    } catch {}
-  }, [selectedHotel]);
-
   const comparisons = useMemo(
     () => buildComparisons(selectedHotel, hotels, nights, rooms, currency),
     [selectedHotel, hotels, nights, rooms, currency]
@@ -837,18 +812,7 @@ function BookingSummary(props) {
 }
 
 function ComparePanel(props) {
-  if (!props.selectedHotel) {
-    try {
-      const saved = localStorage.getItem("msh_selected_hotel");
-      if (saved) {
-        const hotel = JSON.parse(saved);
-        if (hotel) {
-          return <ComparePanel {...props} selectedHotel={hotel} />;
-        }
-      }
-    } catch {}
-    return null;
-  }
+  if (!props.selectedHotel) return null;
 
   return (
     <section style={styles.panel}>
@@ -983,12 +947,12 @@ function ComparePortal(props) {
   return (
     <PortalShell
       title="Compare Prices"
-      subtitle="Review your selected stay clearly before continuing to secure checkout."
+      subtitle="Review the Recommended stay option for your selected hotel. Compare available prices clearly before continuing."
       badge="Best price check"
     >
       {!selected ? (
         <div style={styles.empty}>
-          Select a hotel from the Hotels page first, then return here to Compare today's best available price for that exact property.
+          Select a hotel from the Hotels page first, then return here to compare the Today's Best Available Pricethat exact property.
         </div>
       ) : (
         <>
@@ -1547,13 +1511,6 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
-
-
-
-
-
-
-
 
 
 
