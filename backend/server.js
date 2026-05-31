@@ -1355,6 +1355,93 @@ app.post("/api/internal/stripe-webhook-test-paid", (req, res) => {
 });
 // MSH STRIPE WEBHOOK AFFILIATE PAID END
 
+
+// MSH AFFILIATE TEST BOOKING MODE START
+app.post("/api/internal/affiliate-test-booking-checkout", async (req, res) => {
+  try {
+    const affiliateCode = clean(req.body.affiliateCode || req.body.ref || "LUKAKA-91F16B").toUpperCase();
+    const customerEmail = clean(req.body.customerEmail || "reservations@myspace-hotel.com");
+    const customerName = clean(req.body.customerName || "Affiliate Test Guest");
+
+    const affiliates = readAffiliates();
+    const affiliate = affiliates.find((x) => clean(x.affiliateCode).toUpperCase() === affiliateCode);
+
+    if (!affiliate || clean(affiliate.status).toUpperCase() !== "APPROVED") {
+      return res.status(400).json({
+        ok: false,
+        message: "Approved affiliate code was not found."
+      });
+    }
+
+    const bookingRef = `AFF-TEST-${Date.now()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
+    const amount = 0.5;
+    const currency = "GBP";
+    const commissionRate = 3;
+    const commissionAmount = money(amount * commissionRate / 100);
+
+    const booking = {
+      id: crypto.randomUUID(),
+      bookingRef,
+      confirmationReference: `TEST-${Date.now()}`,
+      status: "PENDING_PAYMENT",
+      createdAt: nowISO(),
+      hotelId: "AFFILIATE-TEST-HOTEL",
+      hotelName: "Affiliate Test Booking",
+      country: "United Kingdom",
+      city: "London",
+      customerName,
+      customerEmail,
+      amount,
+      currency,
+      affiliateCode,
+      testMode: true,
+      note: "Internal low-value affiliate test booking."
+    };
+
+    const bookings = readJSON(BOOKINGS_FILE, []);
+    bookings.unshift(booking);
+    writeJSON(BOOKINGS_FILE, bookings);
+
+    const conversions = readJSON(AFFILIATE_CONVERSIONS_FILE, []);
+    conversions.unshift({
+      id: crypto.randomUUID(),
+      createdAt: nowISO(),
+      affiliateCode,
+      affiliateFound: true,
+      affiliateStatus: "APPROVED",
+      bookingRef,
+      hotelName: booking.hotelName,
+      customerEmail,
+      amount,
+      currency,
+      commissionRate,
+      commissionAmount,
+      status: "PENDING_PAYMENT",
+      testMode: true
+    });
+    writeJSON(AFFILIATE_CONVERSIONS_FILE, conversions);
+
+    req.body = {
+      bookingRef,
+      hotelName: booking.hotelName,
+      customerEmail,
+      amount,
+      currency,
+      affiliateCode,
+      testMode: true
+    };
+
+    return createStripeCheckout(req, res);
+  } catch (err) {
+    console.error("Affiliate test checkout error:", err);
+    return res.status(500).json({
+      ok: false,
+      message: "Affiliate test checkout could not be created."
+    });
+  }
+});
+// MSH AFFILIATE TEST BOOKING MODE END
+
 app.post("/api/create-checkout-session", createStripeCheckout);
 app.post("/api/stripe/checkout", createStripeCheckout);
 app.post("/create-checkout-session", createStripeCheckout);
@@ -2793,6 +2880,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
