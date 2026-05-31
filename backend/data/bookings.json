@@ -1,5 +1,47 @@
 [
   {
+    "bookingRef": "MSH-1780215127089-243DC9",
+    "confirmationReference": "CONF-1780215127089-159664",
+    "status": "PENDING_PAYMENT",
+    "createdAt": "2026-05-31T08:12:10.189Z",
+    "hotelId": "314794",
+    "hotelName": "Elmwood Hotel",
+    "roomCode": "20260525|20260526|W|164|314794|DBL.ST|NRF RO|RO||1~2~0||N@07~~2195b~-319760055~N~~~NRF~~C70986FC989F47D177785988127105AAUK011400000000012054d",
+    "roomName": "ROOM ONLY",
+    "country": "United Kingdom",
+    "city": "London",
+    "checkIn": "2026-06-04",
+    "checkOut": "2026-06-05",
+    "guests": 2,
+    "rooms": 1,
+    "amount": 77.05,
+    "currency": "GBP",
+    "customerName": "Christopher Iyobhebhe",
+    "customerEmail": "reservations@myspace-hotel.com",
+    "customerPhone": "07707836674",
+    "specialRequests": "",
+    "rate_source_id": "ED2B3D00F8D8BF291E83CA7B",
+    "rate_source_timestamp": "2026-05-31T08:11:28.587Z",
+    "source_health": "verified",
+    "internalSupplierTracking": {
+      "supplier_name": "HOTELBEDS",
+      "supplier_code": "HOTELBEDS",
+      "supplier_hotel_id": "314794",
+      "supplier_rate_id": "ED2B3D00F8D8BF291E83CA7B",
+      "supplier_rate_key": "20260525|20260526|W|164|314794|DBL.ST|NRF RO|RO||1~2~0||N@07~~2195b~-319760055~N~~~NRF~~C70986FC989F47D177785988127105AAUK011400000000012054d",
+      "supplier_booking_reference": "",
+      "rate_source_id": "ED2B3D00F8D8BF291E83CA7B",
+      "rate_source_timestamp": "2026-05-31T08:11:28.587Z"
+    },
+    "selected_supplier_offer": {
+      "supplier_code": "HOTELBEDS",
+      "supplier_hotel_id": "314794",
+      "supplier_rate_id": "ED2B3D00F8D8BF291E83CA7B",
+      "rate_source_id": "ED2B3D00F8D8BF291E83CA7B",
+      "rate_source_timestamp": "2026-05-31T08:11:28.587Z"
+    }
+  },
+  {
     "bookingRef": "MSH-1780193939194-A78C01",
     "confirmationReference": "CONF-1780193939194-AE0039",
     "status": "PENDING_PAYMENT",
