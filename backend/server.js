@@ -2073,6 +2073,116 @@ app.post("/api/internal/affiliates/:code/resend-welcome", async (req, res) => {
 });
 // MSH AFFILIATE APPROVAL EMAIL END
 
+
+// MSH AFFILIATE DIRECT CONVERSION START
+app.post("/api/internal/affiliate-conversion-test", (req, res) => {
+  const affiliateCode = clean(req.body.affiliateCode || req.body.affiliate_code || req.body.ref).toUpperCase();
+
+  if (!affiliateCode) {
+    return res.status(400).json({
+      ok: false,
+      message: "affiliateCode is required."
+    });
+  }
+
+  const conversion = recordAffiliateConversionIfPresent({
+    affiliateCode,
+    bookingRef: clean(req.body.bookingRef || makeRef("AFFTEST")),
+    hotelName: clean(req.body.hotelName || "Affiliate Test Booking"),
+    customerEmail: clean(req.body.customerEmail || "test@example.com"),
+    amount: money(req.body.amount || 100),
+    currency: clean(req.body.currency || "GBP").toUpperCase()
+  });
+
+  res.json({
+    ok: true,
+    conversion
+  });
+});
+// MSH AFFILIATE DIRECT CONVERSION END
+
+
+// MSH PAID AFFILIATE COMMISSION OVERRIDE START
+app.post("/api/internal/affiliate-conversions/:bookingRef/confirm-paid", (req, res) => {
+  const bookingRef = clean(req.params.bookingRef);
+  const paymentReference = clean(req.body.paymentReference || req.body.stripePaymentIntent || req.body.stripeSessionId || "");
+
+  const rows = readJSON(AFFILIATE_CONVERSIONS_FILE, []);
+  const index = rows.findIndex((x) => clean(x.bookingRef) === bookingRef);
+
+  if (index < 0) {
+    return res.status(404).json({ ok: false, message: "Affiliate conversion was not found." });
+  }
+
+  rows[index] = {
+    ...rows[index],
+    status: "PAID",
+    paidAt: nowISO(),
+    paymentReference
+  };
+
+  writeJSON(AFFILIATE_CONVERSIONS_FILE, rows);
+
+  res.json({
+    ok: true,
+    message: "Affiliate conversion marked as paid.",
+    conversion: rows[index]
+  });
+});
+
+app.get("/api/internal/affiliate-dashboard-paid", (req, res) => {
+  const affiliates = readAffiliates();
+  const clicks = readJSON(AFFILIATE_CLICKS_FILE, []);
+  const conversions = readJSON(AFFILIATE_CONVERSIONS_FILE, []);
+
+  const stats = affiliates.map((affiliate) => {
+    const code = clean(affiliate.affiliateCode).toUpperCase();
+    const affiliateClicks = clicks.filter((x) => clean(x.affiliateCode).toUpperCase() === code);
+    const affiliateConversions = conversions.filter((x) => clean(x.affiliateCode).toUpperCase() === code);
+    const paidConversions = affiliateConversions.filter((x) => clean(x.status).toUpperCase() === "PAID");
+    const pendingConversions = affiliateConversions.filter((x) => clean(x.status).toUpperCase() !== "PAID");
+
+    return {
+      affiliateCode: affiliate.affiliateCode,
+      businessName: affiliate.businessName,
+      contactName: affiliate.contactName,
+      email: affiliate.email,
+      status: affiliate.status,
+      referralLink: affiliate.referralLink,
+      clicks: affiliateClicks.length,
+
+      conversions: paidConversions.length,
+      pendingConversions: pendingConversions.length,
+
+      paidBookingValue: money(paidConversions.reduce((sum, x) => sum + number(x.amount), 0)),
+      payableCommission: money(paidConversions.reduce((sum, x) => sum + number(x.commissionAmount), 0)),
+
+      pendingBookingValue: money(pendingConversions.reduce((sum, x) => sum + number(x.amount), 0)),
+      pendingCommission: money(pendingConversions.reduce((sum, x) => sum + number(x.commissionAmount), 0)),
+
+      currency: affiliateConversions[0]?.currency || "GBP",
+      createdAt: affiliate.createdAt
+    };
+  });
+
+  res.json({
+    ok: true,
+    generatedAt: nowISO(),
+    rule: "Only PAID affiliate conversions count as payable commission.",
+    totals: {
+      affiliates: affiliates.length,
+      clicks: clicks.length,
+      paidConversions: conversions.filter((x) => clean(x.status).toUpperCase() === "PAID").length,
+      pendingConversions: conversions.filter((x) => clean(x.status).toUpperCase() !== "PAID").length,
+      pendingApplications: affiliates.filter((x) => x.status === "PENDING_REVIEW").length
+    },
+    stats,
+    recentPaidConversions: conversions.filter((x) => clean(x.status).toUpperCase() === "PAID").slice(0, 50),
+    recentPendingConversions: conversions.filter((x) => clean(x.status).toUpperCase() !== "PAID").slice(0, 50)
+  });
+});
+// MSH PAID AFFILIATE COMMISSION OVERRIDE END
+
 app.get("/api/internal/affiliate-dashboard", (req, res) => {
   const affiliates = readAffiliates();
   const clicks = readJSON(AFFILIATE_CLICKS_FILE, []);
@@ -2142,6 +2252,8 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
+
 
 
 

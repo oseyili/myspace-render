@@ -46,6 +46,9 @@
 
     <script type="module" src="/src/main.jsx"></script>
   
+
+
+
 <!-- MSH AFFILIATE VISIT BADGE START -->
 <script>
 (function () {
@@ -53,22 +56,16 @@
     var params = new URLSearchParams(window.location.search || "");
     var ref = String(params.get("ref") || "").trim().toUpperCase();
 
-    if (ref) {
-      localStorage.setItem("msh_affiliate_code", ref);
-      window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
-    }
+    if (!ref) return;
+
+    localStorage.setItem("msh_affiliate_code", ref);
 
     function showAffiliateBadge() {
-      var saved = String(localStorage.getItem("msh_affiliate_code") || "").trim().toUpperCase();
-      if (!saved) return;
       if (document.getElementById("msh-affiliate-badge")) return;
 
       var badge = document.createElement("div");
       badge.id = "msh-affiliate-badge";
       badge.textContent = "Referral applied to this visit.";
-      badge.style.position = "sticky";
-      badge.style.top = "0";
-      badge.style.zIndex = "999999";
       badge.style.margin = "0";
       badge.style.padding = "12px 34px";
       badge.style.background = "#ecfdf3";
@@ -79,6 +76,10 @@
       badge.style.fontSize = "15px";
 
       document.body.insertBefore(badge, document.body.firstChild);
+
+      window.setTimeout(function () {
+        if (badge && badge.parentNode) badge.parentNode.removeChild(badge);
+      }, 7000);
     }
 
     if (document.readyState === "loading") {
@@ -86,11 +87,47 @@
     } else {
       showAffiliateBadge();
     }
+
+    window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
   } catch (e) {}
 })();
 </script>
 <!-- MSH AFFILIATE VISIT BADGE END -->
 
+
+
+
+
+<!-- MSH AFFILIATE FETCH INJECT START -->
+<script>
+(function () {
+  try {
+    var originalFetch = window.fetch;
+    window.fetch = function (input, init) {
+      try {
+        var url = typeof input === "string" ? input : (input && input.url) || "";
+        var isBooking = url.indexOf("/api/book") !== -1;
+        var ref = String(localStorage.getItem("msh_affiliate_code") || "").trim().toUpperCase();
+
+        if (isBooking && ref && init && init.body && typeof init.body === "string") {
+          var body = JSON.parse(init.body);
+          body.affiliateCode = body.affiliateCode || ref;
+          body.affiliate_code = body.affiliate_code || ref;
+          body.ref = body.ref || ref;
+          init = Object.assign({}, init, { body: JSON.stringify(body) });
+        }
+      } catch (e) {}
+
+      return originalFetch.call(this, input, init);
+    };
+  } catch (e) {}
+})();
+</script>
+<!-- MSH AFFILIATE FETCH INJECT END -->
+
 </body>
 </html>
+
+
+
 

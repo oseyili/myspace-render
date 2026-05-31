@@ -432,6 +432,14 @@ export default function App() {
     try {
       setPaying(true);
 
+      const savedAffiliateCode = (() => {
+        try {
+          return String(localStorage.getItem("msh_affiliate_code") || affiliateCode || "").trim().toUpperCase();
+        } catch {
+          return String(affiliateCode || "").trim().toUpperCase();
+        }
+      })();
+
       const payload = {
         hotelId: selectedHotel.hotelId || selectedHotel.hotel_id || selectedHotel.id || "",
         hotelName: selectedHotel.name || "MySpace Hotel Reservation",
@@ -450,10 +458,9 @@ export default function App() {
         customerPhone,
         specialRequests,
         rate_source_id: selectedRateSourceId,
-        rate_source_timestamp: selectedRateSourceTimestamp,
-        affiliateCode,
-        affiliate_code: affiliateCode,
-        ref: affiliateCode,
+        rate_source_timestamp: selectedRateSourceTimestamp,        affiliateCode: savedAffiliateCode,
+        affiliate_code: savedAffiliateCode,
+        ref: savedAffiliateCode,
       };
 
       const bookingRes = await fetch(`${API_BASE}/api/book`, {
@@ -1547,6 +1554,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
