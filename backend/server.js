@@ -2444,6 +2444,135 @@ app.get("/api/affiliate-portal/dashboard", (req, res) => {
 });
 // MSH AFFILIATE PORTAL API END
 
+
+// MSH AFFILIATE PORTAL BOOKING FALLBACK START
+function buildAffiliatePortalDashboard(affiliate) {
+  const code = clean(affiliate.affiliateCode).toUpperCase();
+  const rate = 3;
+  const minimumPayout = 50;
+
+  const clicks = readJSON(AFFILIATE_CLICKS_FILE, []).filter((x) => clean(x.affiliateCode).toUpperCase() === code);
+  const conversionRows = readJSON(AFFILIATE_CONVERSIONS_FILE, []).filter((x) => clean(x.affiliateCode).toUpperCase() === code);
+  const bookingRows = readJSON(BOOKINGS_FILE, []).filter((booking) => {
+    const bookingAffiliate =
+      clean(booking.affiliateCode) ||
+      clean(booking.affiliate_code) ||
+      clean(booking.ref) ||
+      clean(booking.referralCode) ||
+      clean(booking.referral_code);
+
+    return bookingAffiliate.toUpperCase() === code;
+  });
+
+  const merged = [];
+
+  for (const x of conversionRows) {
+    merged.push({
+      source: "conversion",
+      createdAt: x.createdAt || "",
+      bookingRef: clean(x.bookingRef),
+      hotelName: clean(x.hotelName),
+      customerEmail: clean(x.customerEmail),
+      amount: money(x.amount),
+      currency: clean(x.currency || "GBP").toUpperCase(),
+      commissionRate: number(x.commissionRate || rate),
+      commissionAmount: money(x.commissionAmount || (number(x.amount) * rate / 100)),
+      status: clean(x.status || "PENDING_PAYMENT").toUpperCase(),
+      paidAt: x.paidAt || ""
+    });
+  }
+
+  for (const booking of bookingRows) {
+    const existing = merged.find((x) => clean(x.bookingRef) === clean(booking.bookingRef));
+    if (existing) continue;
+
+    const status = clean(booking.status || "PENDING_PAYMENT").toUpperCase();
+    const amount = money(booking.amount);
+    merged.push({
+      source: "booking",
+      createdAt: booking.createdAt || "",
+      bookingRef: clean(booking.bookingRef),
+      hotelName: clean(booking.hotelName),
+      customerEmail: clean(booking.customerEmail),
+      amount,
+      currency: clean(booking.currency || "GBP").toUpperCase(),
+      commissionRate: rate,
+      commissionAmount: money(amount * rate / 100),
+      status,
+      paidAt: booking.paidAt || ""
+    });
+  }
+
+  const paidConversions = merged.filter((x) => clean(x.status).toUpperCase() === "PAID");
+  const pendingConversions = merged.filter((x) => {
+    const status = clean(x.status).toUpperCase();
+    return status !== "PAID" && status !== "CANCELLED" && status !== "REFUNDED";
+  });
+
+  const payableCommission = money(paidConversions.reduce((sum, x) => sum + number(x.commissionAmount), 0));
+  const pendingCommission = money(pendingConversions.reduce((sum, x) => sum + number(x.commissionAmount), 0));
+  const paidBookingValue = money(paidConversions.reduce((sum, x) => sum + number(x.amount), 0));
+  const pendingBookingValue = money(pendingConversions.reduce((sum, x) => sum + number(x.amount), 0));
+  const conversionRate = clicks.length > 0 ? money((paidConversions.length / clicks.length) * 100) : 0;
+
+  return {
+    affiliate: {
+      affiliateCode: affiliate.affiliateCode,
+      businessName: affiliate.businessName,
+      contactName: affiliate.contactName,
+      email: affiliate.email,
+      status: affiliate.status,
+      referralLink: affiliate.referralLink,
+      commissionRate: rate,
+      minimumPayout,
+      payoutSchedule: "Monthly",
+      createdAt: affiliate.createdAt
+    },
+    summary: {
+      clicks: clicks.length,
+      paidBookings: paidConversions.length,
+      pendingBookings: pendingConversions.length,
+      conversionRatePercent: conversionRate,
+      paidBookingValue,
+      pendingBookingValue,
+      payableCommission,
+      pendingCommission,
+      lifetimeCommission: money(payableCommission + pendingCommission),
+      nextPayoutThreshold: minimumPayout,
+      amountNeededForPayout: money(Math.max(0, minimumPayout - payableCommission))
+    },
+    recentClicks: clicks.slice(0, 25),
+    bookings: merged.slice(0, 100)
+  };
+}
+
+app.get("/api/affiliate-portal/dashboard-v2", (req, res) => {
+  const email = clean(req.query.email).toLowerCase();
+  const affiliateCode = clean(req.query.affiliateCode || req.query.code).toUpperCase();
+
+  const affiliate = readAffiliates().find((x) =>
+    clean(x.email).toLowerCase() === email &&
+    clean(x.affiliateCode).toUpperCase() === affiliateCode
+  );
+
+  if (!affiliate) {
+    return res.status(401).json({ ok: false, message: "Affiliate account not found." });
+  }
+
+  if (clean(affiliate.status).toUpperCase() !== "APPROVED") {
+    return res.status(403).json({ ok: false, message: "Affiliate account is not approved yet." });
+  }
+
+  const dashboard = buildAffiliatePortalDashboard(affiliate);
+
+  res.json({
+    ok: true,
+    generatedAt: nowISO(),
+    ...dashboard
+  });
+});
+// MSH AFFILIATE PORTAL BOOKING FALLBACK END
+
 app.get("/api/internal/affiliate-dashboard", (req, res) => {
   const affiliates = readAffiliates();
   const clicks = readJSON(AFFILIATE_CLICKS_FILE, []);
@@ -2664,6 +2793,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 

@@ -119,7 +119,7 @@ async function login(){
 }
 
 async function loadDashboard(email, affiliateCode){
-  const res=await fetch(API_BASE + "/api/affiliate-portal/dashboard?email=" + encodeURIComponent(email) + "&affiliateCode=" + encodeURIComponent(affiliateCode));
+  const res=await fetch(API_BASE + "/api/affiliate-portal/dashboard-v2?email=" + encodeURIComponent(email) + "&affiliateCode=" + encodeURIComponent(affiliateCode));
   const data=await res.json();
 
   if(!res.ok || !data.ok){
@@ -147,4 +147,5 @@ function copyLink(){
 </script>
 </body>
 </html>
+
 
