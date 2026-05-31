@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
@@ -208,8 +208,36 @@ function validHotelImage(hotel) {
   return typeof image === "string" && image.startsWith("http") ? image : "";
 }
 
+
+// MSH LIVE COMPARE PRICE HELPERS START
+async function fetchBestCustomerPrice({ country, city, hotelId, hotelName, currency }) {
+  if (!country || !city || (!hotelId && !hotelName)) return null;
+
+  const params = new URLSearchParams({
+    country: country || "",
+    city: city || "",
+    hotelId: hotelId || "",
+    hotelName: hotelName || "",
+    currency: currency || "GBP",
+  });
+
+  const res = await fetch(`${API_BASE}/api/compare-prices?${params.toString()}`, {
+    cache: "no-store",
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || !data.ok) {
+    throw new Error(data.message || "Could not compare prices right now.");
+  }
+
+  return data;
+}
+// MSH LIVE COMPARE PRICE HELPERS END
+
 function selectedHotelWithRoom(hotel) {
   const firstRoom = Array.isArray(hotel?.rooms) && hotel.rooms.length ? hotel.rooms[0] : null;
+
   return {
     ...hotel,
     selectedRoom: firstRoom,
@@ -250,6 +278,9 @@ export default function App() {
 
   const [reviewSent, setReviewSent] = useState(false);
   const [partnerSent, setPartnerSent] = useState(false);
+  const [compareLoading, setCompareLoading] = useState(false);
+  const [compareResult, setCompareResult] = useState(null);
+  const [compareNotice, setCompareNotice] = useState("");
 
   useEffect(() => {
     const onHashChange = () => setRoute(currentRoute());
@@ -575,7 +606,7 @@ function HotelsPage(props) {
 
       <section style={styles.contentGrid}>
         <main>
-          <h2 style={styles.title}>Recommended Hotels</h2>
+          <h2 style={styles.title}>MORE STAY OPTIONS</h2>
           <p style={styles.sectionText}>
             Select a hotel to refresh the booking summary, comparison box and alternative hotel options immediately.
           </p>
@@ -725,7 +756,7 @@ function BookingSummary(props) {
         <>
           <h3 style={styles.selectedName}>{props.selectedHotel.name}</h3>
           <div style={styles.muted}>{props.selectedHotel.city || props.city}, {props.selectedHotel.country || props.country}</div>
-          <div style={styles.small}>Room: {props.selectedRoomName}</div>
+          <div style={styles.small}>Board Basis: {props.selectedRoomName}</div>
 
           <div style={styles.totalBox}>
             <div style={styles.totalLabel}>Estimated stay total</div>
@@ -762,7 +793,7 @@ function ComparePanel(props) {
         <div>
           <div style={styles.kicker}>Compare Prices</div>
           <h2 style={styles.titleSmall}>Compare your selected stay</h2>
-          <p style={styles.sectionText}>Review stay choices and nearby alternatives before continuing.</p>
+          <p style={styles.sectionText}>Review stay choices and MORE STAY OPTIONS before continuing.</p>
         </div>
         <a style={styles.primaryLink} href={routeUrl(ROUTES.compare)}>Open Compare Page</a>
       </div>
@@ -792,8 +823,8 @@ function AlternativeHotels(props) {
 
   return (
     <section style={styles.panel}>
-      <div style={styles.kicker}>Nearby alternatives</div>
-      <h2 style={styles.titleSmall}>Other hotels in {props.city || "this destination"}</h2>
+      <div style={styles.kicker}>MORE STAY OPTIONS</div>
+      <h2 style={styles.titleSmall}>Other accommodation options in {props.city || "this destination"}</h2>
 
       <div style={styles.altGrid}>
         {alternatives.map((hotel, idx) => {
@@ -810,7 +841,7 @@ function AlternativeHotels(props) {
                 <div style={styles.muted}>{hotel.city || props.city}, {hotel.country || props.country}</div>
                 <div style={styles.priceLine}>{curr} {money(price)}</div>
                 <button style={styles.darkBtn} onClick={() => props.setSelectedHotel(selectedReadyHotel)}>
-                  Select Alternative
+                  View This Stay
                 </button>
               </div>
             </article>
@@ -822,13 +853,201 @@ function AlternativeHotels(props) {
 }
 
 function ComparePortal(props) {
+  const [liveCompare, setLiveCompare] = useState(null);
+  const [liveLoading, setLiveLoading] = useState(false);
+  const [liveNotice, setLiveNotice] = useState("");
+
+  const selected = props.selectedHotel;
+  const selectedHotelId = selected?.hotelId || selected?.hotel_id || "";
+  const selectedHotelName = selected?.name || selected?.hotel_name || "";
+  const selectedCountry = selected?.country || props.country || "";
+  const selectedCity = selected?.city || props.city || "";
+  const selectedCurrency = props.selectedCurrency || props.currency || "GBP";
+
+  async function refreshLiveCompare() {
+    setLiveNotice("");
+
+    if (!selected) {
+      setLiveCompare(null);
+      setLiveNotice("Select a hotel from the Hotels page first. The Today's Best Available Price check will appear here.");
+      return;
+    }
+
+    try {
+      setLiveLoading(true);
+
+      const params = new URLSearchParams({
+        country: selectedCountry,
+        city: selectedCity,
+        hotelId: selectedHotelId,
+        hotelName: selectedHotelName,
+        currency: selectedCurrency,
+      });
+
+      const res = await fetch(`${API_BASE}/api/compare-prices?${params.toString()}`, {
+        cache: "no-store",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        throw new Error(data.message || "Price comparison could not be refreshed.");
+      }
+
+      setLiveCompare(data);
+      setLiveNotice("");
+    } catch (err) {
+      setLiveCompare(null);
+      setLiveNotice("The live price comparison could not be refreshed right now. Please try again.");
+    } finally {
+      setLiveLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    refreshLiveCompare();
+  }, [selectedHotelId, selectedHotelName, selectedCountry, selectedCity, selectedCurrency]);
+
+  const customerOffer = liveCompare?.customer_offer || null;
+  const summary = liveCompare?.comparison_summary || null;
+  const bestAmount = Number(customerOffer?.amount || summary?.best_amount || props.totalPrice || 0);
+  const bestCurrency = customerOffer?.currency || summary?.currency || selectedCurrency || "GBP";
+  const checkedCount = Number(summary?.compared_options || 0);
+  const hotelName = customerOffer?.hotelName || selectedHotelName || "Selected hotel";
+  const roomName = customerOffer?.roomName || props.selectedRoomName || "Available room";
+  const updatedAt = customerOffer?.rate_source_timestamp || "";
+
   return (
-    <PortalShell title="Compare Prices" subtitle="Compare your selected hotel with stay options and nearby alternatives before booking." badge="Clear hotel comparison">
-      {!props.selectedHotel ? (
-        <div style={styles.empty}>Select a hotel from the hotel search page first, then return here to compare prices and nearby alternatives.</div>
+    <PortalShell
+      title="Compare Prices"
+      subtitle="Review the Recommended stay option for your selected hotel. Compare available prices clearly before continuing."
+      badge="Best price check"
+    >
+      {!selected ? (
+        <div style={styles.empty}>
+          Select a hotel from the Hotels page first, then return here to compare the Today's Best Available Pricethat exact property.
+        </div>
       ) : (
         <>
-          <ComparePanel {...props} />
+          <section style={{
+            background: "#ffffff",
+            borderRadius: 30,
+            padding: 30,
+            boxShadow: "0 8px 25px rgba(0,0,0,.06)",
+            border: "1px solid #dce6f3",
+            marginBottom: 28
+          }}>
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 20,
+              alignItems: "flex-start",
+              flexWrap: "wrap"
+            }}>
+              <div>
+                <div style={styles.kicker}>Price comparison</div>
+                <h2 style={styles.titleSmall}>Today's Best Available Price{hotelName}</h2>
+                <p style={styles.sectionText}>
+                  Review your selected stay clearly before continuing to secure checkout.
+                </p>
+              </div>
+
+              
+            </div>
+
+            {liveNotice ? <div style={styles.notice}>{liveNotice}</div> : null}
+
+            <div style={{
+              marginTop: 24,
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1.4fr) 330px",
+              gap: 22,
+              alignItems: "stretch"
+            }}>
+              <div style={{
+                background: "#ecfdf3",
+                border: "1px solid #bbf7d0",
+                borderRadius: 24,
+                padding: 26
+              }}>
+                <div style={styles.greenBadge}>
+                  {liveLoading ? "Checking current rates" : "Recommended stay option"}
+                </div>
+
+                <h3 style={{
+                  fontSize: 30,
+                  lineHeight: 1.15,
+                  margin: "12px 0 10px",
+                  fontWeight: 950,
+                  color: "#0b1d51"
+                }}>
+                  {hotelName}
+                </h3>
+
+                <div style={styles.muted}>
+                  {selectedCity}, {selectedCountry}
+                </div>
+
+                <div style={{
+                  marginTop: 16,
+                  display: "grid",
+                  gap: 8,
+                  color: "#30466e",
+                  fontWeight: 850
+                }}>
+                  <div>Board Basis: {roomName}</div>
+                  <div></div>
+                </div>
+
+                <p style={{
+                  marginTop: 18,
+                  color: "#365943",
+                  fontWeight: 800,
+                  lineHeight: 1.6
+                }}>
+                  You can review this stay with confidence before continuing to secure checkout.
+                </p>
+              </div>
+
+              <div style={{
+                background: "#0b1d51",
+                color: "#ffffff",
+                borderRadius: 24,
+                padding: 26,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                textAlign: "center"
+              }}>
+                <div style={{
+                  fontSize: 16,
+                  fontWeight: 900,
+                  color: "#dbe7ff",
+                  marginBottom: 12
+                }}>
+                  Today's Best Available Price
+                </div>
+
+                <div style={{
+                  fontSize: 44,
+                  lineHeight: 1,
+                  fontWeight: 950,
+                  letterSpacing: "-1px"
+                }}>
+                  {bestCurrency} {money(bestAmount)}
+                </div>
+
+                <div style={{
+                  marginTop: 12,
+                  color: "#dbe7ff",
+                  fontWeight: 800,
+                  lineHeight: 1.4
+                }}>
+                  Reviewed before secure checkout
+                </div>
+              </div>
+            </div>
+          </section>
           <AlternativeHotels {...props} />
         </>
       )}
@@ -872,7 +1091,7 @@ function FaqPortal() {
       <div style={styles.faqList}>
         <FaqItem q="How do I search for a hotel?" a="Select your country, city, dates, guests and rooms, then choose Find Hotels. Available hotel options will appear below the search box." />
         <FaqItem q="When is the final price confirmed?" a="The stay total is shown before checkout. Final payment details are confirmed securely before payment is completed." />
-        <FaqItem q="Can I compare hotels in the same destination?" a="Yes. After selecting a hotel, MySpace Hotel shows comparison choices and nearby alternatives where available." />
+        <FaqItem q="Can I compare hotels in the same destination?" a="Yes. After selecting a hotel, MySpace Hotel shows comparison choices and MORE STAY OPTIONS where available." />
         <FaqItem q="Can I request support before travelling?" a="Yes. The Support Centre and Destination Guide help customers review important travel and local service information." />
         <FaqItem q="Can hotels or partners work with MySpace Hotel?" a="Yes. Accommodation providers and travel technology partners can use the Industry Partnerships page to contact MySpace Hotel." />
       </div>
@@ -1234,6 +1453,10 @@ const styles = {
   strong: { fontWeight: 950, color: "#30466e" },
   cardText: { color: "#445b82", lineHeight: 1.65, fontSize: 16, fontWeight: 650 },
   comparePrice: { marginTop: 14, color: "#2750db", fontSize: 24, fontWeight: 950 },
+  liveCompareBox: { marginTop: 22, background: "#ecfdf3", border: "1px solid #bbf7d0", borderRadius: 24, padding: 24, display: "grid", gridTemplateColumns: "minmax(0,1.4fr) 260px", gap: 20, alignItems: "center" },
+  liveComparePrice: { background: "#fff", color: "#0b1d51", borderRadius: 20, padding: 22, fontSize: 30, fontWeight: 950, textAlign: "center", boxShadow: "0 8px 20px rgba(0,0,0,.05)" },
+  compareMiniGrid: { gridColumn: "1 / -1", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 12 },
+  compareMini: { background: "#fff", borderRadius: 18, padding: 16, display: "grid", gap: 6, color: "#30466e", fontWeight: 850 },
   altGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))", gap: 18, marginTop: 18 },
   altCard: { background: "#fff", border: "1px solid #dce6f3", borderRadius: 22, overflow: "hidden" },
   altImage: { width: "100%", height: 145, objectFit: "cover" },
@@ -1260,3 +1483,15 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
+
+
+
+
+
+
+
+
+
+
+

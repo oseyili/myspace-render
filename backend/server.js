@@ -1359,6 +1359,447 @@ app.post("/api/feedback", async (req, res) => {
   });
 });
 
+
+// MSH SUPPLIER REGISTRY START
+const SUPPLIER_REGISTRY_FILE = path.join(DATA_DIR, "supplier_registry.json");
+
+ensureFile(SUPPLIER_REGISTRY_FILE, [
+  {
+    supplier_code: "HOTELBEDS",
+    supplier_name: "Hotelbeds",
+    supplier_type: "bedbank",
+    status: "active",
+    priority: 1,
+    customer_visible: false,
+    notes: "Primary hotel inventory and rate source."
+  },
+  {
+    supplier_code: "WEBBEDS",
+    supplier_name: "WebBeds",
+    supplier_type: "bedbank",
+    status: "contracted_pending_integration",
+    priority: 2,
+    customer_visible: false,
+    notes: "Contract signed. Integration pending."
+  },
+  {
+    supplier_code: "HYPERGUEST",
+    supplier_name: "HyperGuest",
+    supplier_type: "direct_connectivity",
+    status: "contracted_pending_integration",
+    priority: 3,
+    customer_visible: false,
+    notes: "Direct hotel connectivity partner."
+  },
+  {
+    supplier_code: "HOTELRUNNER",
+    supplier_name: "HotelRunner",
+    supplier_type: "channel_connectivity",
+    status: "onboarding",
+    priority: 4,
+    customer_visible: false,
+    notes: "Partner onboarding requested."
+  },
+  {
+    supplier_code: "SITEMINDER",
+    supplier_name: "SiteMinder",
+    supplier_type: "channel_manager",
+    status: "onboarding",
+    priority: 5,
+    customer_visible: false,
+    notes: "Channel manager partnership in progress."
+  },
+  {
+    supplier_code: "DIRECT_CONTRACT",
+    supplier_name: "Direct Hotel Contract",
+    supplier_type: "direct_contract",
+    status: "planned",
+    priority: 6,
+    customer_visible: false,
+    notes: "For direct hotel agreements."
+  },
+  {
+    supplier_code: "MYSPACE_INTERNAL",
+    supplier_name: "MySpace Internal",
+    supplier_type: "internal",
+    status: "active",
+    priority: 99,
+    customer_visible: false,
+    notes: "Internal fallback or manually controlled inventory."
+  }
+]);
+
+function readSupplierRegistry() {
+  const rows = readJSON(SUPPLIER_REGISTRY_FILE, []);
+  return Array.isArray(rows) ? rows : [];
+}
+
+function supplierRegistryMap() {
+  const map = new Map();
+  for (const supplier of readSupplierRegistry()) {
+    const code = clean(supplier.supplier_code).toUpperCase();
+    if (code) map.set(code, supplier);
+  }
+  return map;
+}
+
+function resolveSupplierForAdmin(tracking) {
+  const registry = supplierRegistryMap();
+  const code = clean(
+    tracking?.supplier_code ||
+    tracking?.supplier_name ||
+    "HOTELBEDS"
+  ).toUpperCase();
+
+  const supplier = registry.get(code) || registry.get("HOTELBEDS") || {
+    supplier_code: code || "HOTELBEDS",
+    supplier_name: code || "Hotelbeds",
+    supplier_type: "unknown",
+    status: "unknown",
+    priority: 99,
+    customer_visible: false
+  };
+
+  return {
+    supplier_code: clean(supplier.supplier_code || code).toUpperCase(),
+    supplier_name: clean(supplier.supplier_name || supplier.supplier_code || code),
+    supplier_type: clean(supplier.supplier_type || "unknown"),
+    status: clean(supplier.status || "unknown"),
+    priority: number(supplier.priority || 99),
+    customer_visible: Boolean(supplier.customer_visible),
+    notes: clean(supplier.notes)
+  };
+}
+
+app.get("/api/internal/supplier-registry", (req, res) => {
+  const suppliers = readSupplierRegistry().sort((a, b) => number(a.priority) - number(b.priority));
+  res.json({
+    ok: true,
+    total: suppliers.length,
+    suppliers
+  });
+});
+
+app.post("/api/internal/supplier-registry", (req, res) => {
+  const rows = readSupplierRegistry();
+  const supplierCode = clean(req.body.supplier_code || req.body.supplierCode).toUpperCase();
+
+  if (!supplierCode) {
+    return res.status(400).json({
+      ok: false,
+      message: "supplier_code is required."
+    });
+  }
+
+  const incoming = {
+    supplier_code: supplierCode,
+    supplier_name: clean(req.body.supplier_name || req.body.supplierName || supplierCode),
+    supplier_type: clean(req.body.supplier_type || req.body.supplierType || "unknown"),
+    status: clean(req.body.status || "active"),
+    priority: number(req.body.priority || 99),
+    customer_visible: Boolean(req.body.customer_visible),
+    notes: clean(req.body.notes)
+  };
+
+  const index = rows.findIndex((x) => clean(x.supplier_code).toUpperCase() === supplierCode);
+
+  if (index >= 0) rows[index] = { ...rows[index], ...incoming, updated_at: nowISO() };
+  else rows.unshift({ ...incoming, created_at: nowISO() });
+
+  writeJSON(SUPPLIER_REGISTRY_FILE, rows);
+
+  res.json({
+    ok: true,
+    supplier: index >= 0 ? rows[index] : rows[0],
+    message: "Supplier registry updated."
+  });
+});
+
+
+// MSH MULTI SUPPLIER COMPARE START
+function mshComparableHotelName(v) {
+  return clean(v).toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function mshBuildSupplierCompareOffers(query) {
+  const country = clean(query.country);
+  const city = clean(query.city);
+  const currency = clean(query.currency || "GBP").toUpperCase();
+  const requestedHotelId = clean(query.hotelId || query.hotel_id);
+  const requestedHotelName = mshComparableHotelName(query.hotelName || query.hotel_name);
+
+  const hotels = searchHotels({ country, city, currency });
+
+  const selected =
+    hotels.find((h) => clean(h.hotelId) === requestedHotelId || clean(h.hotel_id) === requestedHotelId) ||
+    hotels.find((h) => mshComparableHotelName(h.name || h.hotel_name) === requestedHotelName) ||
+    hotels[0];
+
+  if (!selected) {
+    return {
+      selected_hotel: null,
+      winning_offer: null,
+      competing_offers: [],
+      customer_offer: null
+    };
+  }
+
+  const selectedName = mshComparableHotelName(selected.name || selected.hotel_name);
+
+  const sameHotelOffers = hotels
+    .filter((hotel) => {
+      const nameMatch = mshComparableHotelName(hotel.name || hotel.hotel_name) === selectedName;
+      const idMatch = clean(hotel.hotelId) === clean(selected.hotelId) || clean(hotel.hotel_id) === clean(selected.hotel_id);
+      return nameMatch || idMatch;
+    })
+    .flatMap((hotel) => {
+      const rooms = Array.isArray(hotel.rooms) && hotel.rooms.length ? hotel.rooms : [{}];
+
+      return rooms.map((room, index) => {
+        const price = money(room.convertedPrice || room.price || hotel.price);
+        const rateSourceId = clean(room.rate_source_id || hotel.rate_source_id || makeRef("RATE"));
+        const timestamp = clean(room.rate_source_timestamp || hotel.rate_source_timestamp || nowISO());
+
+        const tracking = mshSupplierTrackingFromPayload({
+          ...query,
+          hotelId: hotel.hotelId || hotel.hotel_id,
+          hotelName: hotel.name || hotel.hotel_name,
+          roomCode: room.roomCode || `ROOM-${index + 1}`,
+          roomName: room.roomName || "Available room",
+          rate_source_id: rateSourceId,
+          rate_source_timestamp: timestamp,
+          source_health: room.source_health || hotel.source_health || "verified"
+        });
+
+        const supplier = resolveSupplierForAdmin(tracking);
+
+        return {
+          compare_offer_id: makeRef("OFFER"),
+          hotelId: hotel.hotelId || hotel.hotel_id,
+          hotelName: hotel.name || hotel.hotel_name,
+          country: hotel.country,
+          city: hotel.city,
+          roomCode: room.roomCode || `ROOM-${index + 1}`,
+          roomName: room.roomName || "Available room",
+          board: room.board || "Room only",
+          amount: price,
+          currency: clean(room.displayCurrency || hotel.currency || currency).toUpperCase(),
+          cancellation: room.cancellation || "",
+          taxes: room.taxes || "",
+          rate_source_id: rateSourceId,
+          rate_source_timestamp: timestamp,
+          source_health: room.source_health || hotel.source_health || "verified",
+          supplier,
+          internal_supplier_tracking: {
+            supplier_code: supplier.supplier_code,
+            supplier_name: supplier.supplier_name,
+            supplier_hotel_id: tracking.supplier_hotel_id,
+            supplier_rate_id: tracking.supplier_rate_id,
+            rate_source_id: tracking.rate_source_id,
+            rate_source_timestamp: tracking.rate_source_timestamp
+          }
+        };
+      });
+    })
+    .filter((offer) => offer.amount > 0)
+    .sort((a, b) => a.amount - b.amount);
+
+  const winning = sameHotelOffers[0] || null;
+
+  const customerOffer = winning
+    ? {
+        hotelId: winning.hotelId,
+        hotelName: winning.hotelName,
+        country: winning.country,
+        city: winning.city,
+        roomCode: winning.roomCode,
+        roomName: winning.roomName,
+        board: winning.board,
+        amount: winning.amount,
+        currency: winning.currency,
+        rate_source_id: winning.rate_source_id,
+        rate_source_timestamp: winning.rate_source_timestamp,
+        source_health: winning.source_health,
+        message: "Best available stay option selected for review."
+      }
+    : null;
+
+  return {
+    selected_hotel: {
+      hotelId: selected.hotelId || selected.hotel_id,
+      hotelName: selected.name || selected.hotel_name,
+      country: selected.country,
+      city: selected.city
+    },
+    winning_offer: winning,
+    competing_offers: sameHotelOffers,
+    customer_offer: customerOffer
+  };
+}
+
+app.get("/api/internal/compare-supplier-rates", (req, res) => {
+  const result = mshBuildSupplierCompareOffers(req.query);
+
+  if (!result.selected_hotel) {
+    return res.status(404).json({
+      ok: false,
+      message: "No comparable hotel offers were found."
+    });
+  }
+
+  mshAppendSupplierAudit("supplier_rate_comparison_requested", {
+    country: clean(req.query.country),
+    city: clean(req.query.city),
+    hotelId: result.selected_hotel.hotelId,
+    hotelName: result.selected_hotel.hotelName,
+    winning_supplier_code: result.winning_offer?.supplier?.supplier_code || "",
+    winning_supplier_name: result.winning_offer?.supplier?.supplier_name || "",
+    winning_amount: result.winning_offer?.amount || 0,
+    winning_currency: result.winning_offer?.currency || "",
+    competing_offer_count: result.competing_offers.length,
+    rate_source_id: result.winning_offer?.rate_source_id || "",
+    rate_source_timestamp: result.winning_offer?.rate_source_timestamp || ""
+  });
+
+  res.json({
+    ok: true,
+    generated_at: nowISO(),
+    selected_hotel: result.selected_hotel,
+    winning_offer: result.winning_offer,
+    competing_offers: result.competing_offers,
+    customer_offer: result.customer_offer
+  });
+});
+
+app.get("/api/compare-prices", (req, res) => {
+  const result = mshBuildSupplierCompareOffers(req.query);
+
+  if (!result.selected_hotel) {
+    return res.status(404).json({
+      ok: false,
+      message: "No comparable hotel offers were found."
+    });
+  }
+
+  res.json({
+    ok: true,
+    selected_hotel: result.selected_hotel,
+    customer_offer: result.customer_offer,
+    comparison_summary: {
+      compared_options: result.competing_offers.length,
+      best_amount: result.customer_offer?.amount || 0,
+      currency: result.customer_offer?.currency || clean(req.query.currency || "GBP").toUpperCase(),
+      message: "Best available stay option selected for review."
+    }
+  });
+});
+// MSH MULTI SUPPLIER COMPARE END
+
+app.get("/api/internal/supplier-dashboard", (req, res) => {
+  const bookings = readJSON(BOOKINGS_FILE, []);
+  const audit = readJSON(SUPPLIER_AUDIT_FILE, []);
+  const suppliers = readSupplierRegistry();
+  const supplierStats = new Map();
+
+  for (const supplier of suppliers) {
+    const code = clean(supplier.supplier_code).toUpperCase();
+    if (!code) continue;
+
+    supplierStats.set(code, {
+      ...supplier,
+      supplier_code: code,
+      searches: 0,
+      bookings: 0,
+      pending_payment: 0,
+      cancelled: 0,
+      total_amount: 0,
+      currencies: {}
+    });
+  }
+
+  function ensureSupplierStat(code, tracking) {
+    const resolved = resolveSupplierForAdmin({
+      supplier_code: code,
+      supplier_name: tracking?.supplier_name
+    });
+
+    const finalCode = resolved.supplier_code || "UNKNOWN";
+
+    if (!supplierStats.has(finalCode)) {
+      supplierStats.set(finalCode, {
+        ...resolved,
+        searches: 0,
+        bookings: 0,
+        pending_payment: 0,
+        cancelled: 0,
+        total_amount: 0,
+        currencies: {}
+      });
+    }
+
+    return supplierStats.get(finalCode);
+  }
+
+  for (const item of audit) {
+    const code = clean(item.supplier_code || item.supplier_name || "HOTELBEDS").toUpperCase();
+    const stat = ensureSupplierStat(code, item);
+    if (String(item.action || "").includes("rate_returned")) stat.searches += 1;
+  }
+
+  for (const booking of bookings) {
+    const tracking = booking.internalSupplierTracking || {};
+    const code = clean(tracking.supplier_code || tracking.supplier_name || "HOTELBEDS").toUpperCase();
+    const stat = ensureSupplierStat(code, tracking);
+
+    stat.bookings += 1;
+    if (booking.status === "PENDING_PAYMENT") stat.pending_payment += 1;
+    if (booking.status === "CANCELLED") stat.cancelled += 1;
+
+    const amount = money(booking.amount);
+    const currency = clean(booking.currency || "GBP").toUpperCase();
+
+    stat.total_amount += amount;
+    stat.currencies[currency] = money((stat.currencies[currency] || 0) + amount);
+  }
+
+  const newestBookings = bookings.slice(0, 50).map((booking) => {
+    const tracking = booking.internalSupplierTracking || {};
+    const supplier = resolveSupplierForAdmin(tracking);
+
+    return {
+      bookingRef: booking.bookingRef,
+      confirmationReference: booking.confirmationReference,
+      status: booking.status,
+      createdAt: booking.createdAt,
+      hotelId: booking.hotelId,
+      hotelName: booking.hotelName,
+      roomCode: booking.roomCode,
+      roomName: booking.roomName,
+      country: booking.country,
+      city: booking.city,
+      amount: booking.amount,
+      currency: booking.currency,
+      customerEmail: booking.customerEmail,
+      rate_source_id: booking.rate_source_id || tracking.rate_source_id,
+      rate_source_timestamp: booking.rate_source_timestamp || tracking.rate_source_timestamp,
+      supplier
+    };
+  });
+
+  res.json({
+    ok: true,
+    generated_at: nowISO(),
+    totals: {
+      suppliers: suppliers.length,
+      bookings: bookings.length,
+      audit_records: audit.length
+    },
+    supplier_stats: Array.from(supplierStats.values()).sort((a, b) => number(a.priority) - number(b.priority)),
+    newest_bookings: newestBookings
+  });
+});
+// MSH SUPPLIER REGISTRY END
+
 app.get("/api/certification/logs", (req, res) => {
   res.json({
     ok: true,
@@ -1386,4 +1827,6 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
+
 
