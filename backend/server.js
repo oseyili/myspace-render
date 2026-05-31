@@ -1234,6 +1234,127 @@ app.post("/api/book", async (req, res) => {
   res.json(response);
 });
 
+
+// MSH STRIPE WEBHOOK AFFILIATE PAID START
+function markBookingPaidFromStripe(bookingRef, stripePayload) {
+  const ref = clean(bookingRef);
+  if (!ref) return { ok: false, reason: "Missing booking reference" };
+
+  const bookings = readJSON(BOOKINGS_FILE, []);
+  const index = bookings.findIndex((b) => clean(b.bookingRef) === ref);
+
+  if (index >= 0) {
+    bookings[index] = {
+      ...bookings[index],
+      status: "PAID",
+      paidAt: nowISO(),
+      stripeSessionId: clean(stripePayload.stripeSessionId),
+      stripePaymentIntent: clean(stripePayload.stripePaymentIntent),
+      stripePaymentStatus: clean(stripePayload.stripePaymentStatus || "paid"),
+      paymentReference: clean(stripePayload.paymentReference || stripePayload.stripePaymentIntent || stripePayload.stripeSessionId)
+    };
+
+    writeJSON(BOOKINGS_FILE, bookings);
+  }
+
+  const conversions = readJSON(AFFILIATE_CONVERSIONS_FILE, []);
+  const conversionIndex = conversions.findIndex((x) => clean(x.bookingRef) === ref);
+
+  if (conversionIndex >= 0) {
+    conversions[conversionIndex] = {
+      ...conversions[conversionIndex],
+      status: "PAID",
+      paidAt: nowISO(),
+      paymentReference: clean(stripePayload.paymentReference || stripePayload.stripePaymentIntent || stripePayload.stripeSessionId),
+      stripeSessionId: clean(stripePayload.stripeSessionId),
+      stripePaymentIntent: clean(stripePayload.stripePaymentIntent)
+    };
+
+    writeJSON(AFFILIATE_CONVERSIONS_FILE, conversions);
+  }
+
+  recordActivity("stripe_payment_confirmed", { bookingRef: ref }, {
+    bookingUpdated: index >= 0,
+    affiliateConversionUpdated: conversionIndex >= 0,
+    stripeSessionId: clean(stripePayload.stripeSessionId),
+    stripePaymentIntent: clean(stripePayload.stripePaymentIntent)
+  });
+
+  return {
+    ok: true,
+    bookingUpdated: index >= 0,
+    affiliateConversionUpdated: conversionIndex >= 0
+  };
+}
+
+app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async (req, res) => {
+  try {
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY || "";
+    const signature = req.headers["stripe-signature"];
+
+    let event;
+
+    if (webhookSecret && stripeSecretKey && signature) {
+      const verifyRes = await fetch("https://api.stripe.com/v1/webhook_endpoints", {
+        headers: { Authorization: `Bearer ${stripeSecretKey}` }
+      }).catch(() => null);
+
+      try {
+        const Stripe = require("stripe");
+        const stripe = Stripe(stripeSecretKey);
+        event = stripe.webhooks.constructEvent(req.body, signature, webhookSecret);
+      } catch (err) {
+        recordActivity("stripe_webhook_signature_failed", {}, { error: err.message });
+        return res.status(400).json({ ok: false, message: "Invalid Stripe webhook signature." });
+      }
+    } else {
+      const raw = Buffer.isBuffer(req.body) ? req.body.toString("utf8") : JSON.stringify(req.body || {});
+      event = JSON.parse(raw || "{}");
+    }
+
+    if (event.type === "checkout.session.completed") {
+      const session = event.data && event.data.object ? event.data.object : {};
+      const bookingRef =
+        clean(session.metadata?.booking_reference) ||
+        clean(session.client_reference_id) ||
+        clean(session.metadata?.bookingRef);
+
+      const result = markBookingPaidFromStripe(bookingRef, {
+        stripeSessionId: session.id,
+        stripePaymentIntent: session.payment_intent,
+        stripePaymentStatus: session.payment_status,
+        paymentReference: session.payment_intent || session.id
+      });
+
+      return res.json({ ok: true, handled: true, event: event.type, result });
+    }
+
+    return res.json({ ok: true, handled: false, event: event.type || "unknown" });
+  } catch (err) {
+    recordActivity("stripe_webhook_error", {}, { error: err.message });
+    return res.status(500).json({ ok: false, message: "Stripe webhook could not be processed." });
+  }
+});
+
+app.post("/api/internal/stripe-webhook-test-paid", (req, res) => {
+  const bookingRef = clean(req.body.bookingRef || req.body.booking_reference);
+
+  if (!bookingRef) {
+    return res.status(400).json({ ok: false, message: "bookingRef is required." });
+  }
+
+  const result = markBookingPaidFromStripe(bookingRef, {
+    stripeSessionId: clean(req.body.stripeSessionId || "LOCAL-TEST-SESSION"),
+    stripePaymentIntent: clean(req.body.stripePaymentIntent || "LOCAL-TEST-PI"),
+    stripePaymentStatus: "paid",
+    paymentReference: clean(req.body.paymentReference || "LOCAL-TEST-PAYMENT")
+  });
+
+  res.json({ ok: true, result });
+});
+// MSH STRIPE WEBHOOK AFFILIATE PAID END
+
 app.post("/api/create-checkout-session", createStripeCheckout);
 app.post("/api/stripe/checkout", createStripeCheckout);
 app.post("/create-checkout-session", createStripeCheckout);
@@ -2252,6 +2373,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
