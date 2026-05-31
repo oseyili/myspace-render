@@ -92,7 +92,9 @@ function hotelKey(hotel) {
 
 function hotelPrice(hotel) {
   return safeNumber(
-    hotel?.price ||
+    hotel?.selectedRoom?.convertedPrice ||
+      hotel?.selectedRoom?.price ||
+      hotel?.price ||
       hotel?.amount ||
       hotel?.nightly_rate ||
       hotel?.rate ||
@@ -103,7 +105,39 @@ function hotelPrice(hotel) {
 }
 
 function hotelCurrency(hotel, fallback = "GBP") {
-  return hotel?.currency || hotel?.displayCurrency || hotel?.rooms?.[0]?.displayCurrency || fallback;
+  return (
+    hotel?.selectedRoom?.displayCurrency ||
+    hotel?.currency ||
+    hotel?.displayCurrency ||
+    hotel?.rooms?.[0]?.displayCurrency ||
+    fallback
+  );
+}
+
+function hotelRoomCode(hotel) {
+  return hotel?.selectedRoom?.roomCode || hotel?.rooms?.[0]?.roomCode || hotel?.roomCode || "STANDARD";
+}
+
+function hotelRoomName(hotel) {
+  return hotel?.selectedRoom?.roomName || hotel?.rooms?.[0]?.roomName || hotel?.roomName || "Available room";
+}
+
+function hotelRateSourceId(hotel) {
+  return (
+    hotel?.selectedRoom?.rate_source_id ||
+    hotel?.rate_source_id ||
+    hotel?.rooms?.[0]?.rate_source_id ||
+    ""
+  );
+}
+
+function hotelRateSourceTimestamp(hotel) {
+  return (
+    hotel?.selectedRoom?.rate_source_timestamp ||
+    hotel?.rate_source_timestamp ||
+    hotel?.rooms?.[0]?.rate_source_timestamp ||
+    ""
+  );
 }
 
 function cleanList(list) {
@@ -174,6 +208,20 @@ function validHotelImage(hotel) {
   return typeof image === "string" && image.startsWith("http") ? image : "";
 }
 
+function selectedHotelWithRoom(hotel) {
+  const firstRoom = Array.isArray(hotel?.rooms) && hotel.rooms.length ? hotel.rooms[0] : null;
+  return {
+    ...hotel,
+    selectedRoom: firstRoom,
+    price: safeNumber(firstRoom?.convertedPrice || firstRoom?.price || hotel?.price || 0),
+    currency: firstRoom?.displayCurrency || hotel?.currency || "GBP",
+    roomCode: firstRoom?.roomCode || hotel?.roomCode || "STANDARD",
+    roomName: firstRoom?.roomName || hotel?.roomName || "Available room",
+    rate_source_id: firstRoom?.rate_source_id || hotel?.rate_source_id || "",
+    rate_source_timestamp: firstRoom?.rate_source_timestamp || hotel?.rate_source_timestamp || "",
+  };
+}
+
 export default function App() {
   const [route, setRoute] = useState(currentRoute());
   const [countries, setCountries] = useState([]);
@@ -225,6 +273,10 @@ export default function App() {
   const nights = useMemo(() => nightsBetween(checkIn, checkOut), [checkIn, checkOut]);
   const selectedNightPrice = hotelPrice(selectedHotel);
   const selectedCurrency = hotelCurrency(selectedHotel, currency);
+  const selectedRoomCode = hotelRoomCode(selectedHotel);
+  const selectedRoomName = hotelRoomName(selectedHotel);
+  const selectedRateSourceId = hotelRateSourceId(selectedHotel);
+  const selectedRateSourceTimestamp = hotelRateSourceTimestamp(selectedHotel);
   const totalPrice = selectedNightPrice * Math.max(1, Number(rooms || 1)) * nights;
   const destinationQuery = [selectedHotel?.name, city, country].filter(Boolean).join(", ") || "London";
   const comparisons = useMemo(
@@ -311,6 +363,8 @@ export default function App() {
       const payload = {
         hotelId: selectedHotel.hotelId || selectedHotel.hotel_id || selectedHotel.id || "",
         hotelName: selectedHotel.name || "MySpace Hotel Reservation",
+        roomCode: selectedRoomCode,
+        roomName: selectedRoomName,
         country: selectedHotel.country || country,
         city: selectedHotel.city || city,
         checkIn,
@@ -323,6 +377,8 @@ export default function App() {
         customerEmail,
         customerPhone,
         specialRequests,
+        rate_source_id: selectedRateSourceId,
+        rate_source_timestamp: selectedRateSourceTimestamp,
       };
 
       const bookingRes = await fetch(`${API_BASE}/api/book`, {
@@ -337,7 +393,12 @@ export default function App() {
       const checkoutRes = await fetch(`${API_BASE}/api/create-checkout-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...payload, bookingRef }),
+        body: JSON.stringify({
+          ...payload,
+          bookingRef,
+          rate_source_id: bookingData?.rate_source_id || selectedRateSourceId,
+          rate_source_timestamp: bookingData?.rate_source_timestamp || selectedRateSourceTimestamp,
+        }),
       });
 
       const checkoutData = await checkoutRes.json();
@@ -381,6 +442,10 @@ export default function App() {
     paying,
     nights,
     selectedCurrency,
+    selectedRoomCode,
+    selectedRoomName,
+    selectedRateSourceId,
+    selectedRateSourceTimestamp,
     totalPrice,
     comparisons,
     destinationQuery,
@@ -606,8 +671,9 @@ function Field({ label, children }) {
 }
 
 function HotelCard({ hotel, selectedHotel, setSelectedHotel, rooms, nights, currency, city, country }) {
-  const price = hotelPrice(hotel);
-  const curr = hotelCurrency(hotel, currency);
+  const selectedReadyHotel = selectedHotelWithRoom(hotel);
+  const price = hotelPrice(selectedReadyHotel);
+  const curr = hotelCurrency(selectedReadyHotel, currency);
   const total = price * Math.max(1, Number(rooms || 1)) * Math.max(1, Number(nights || 1));
   const selected = hotelKey(hotel) === hotelKey(selectedHotel);
   const image = validHotelImage(hotel);
@@ -636,7 +702,7 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, rooms, nights, curr
 
         <button
           style={styles.darkBtn}
-          onClick={() => setSelectedHotel({ ...hotel, price, currency: curr })}
+          onClick={() => setSelectedHotel(selectedReadyHotel)}
         >
           Select Hotel
         </button>
@@ -659,6 +725,7 @@ function BookingSummary(props) {
         <>
           <h3 style={styles.selectedName}>{props.selectedHotel.name}</h3>
           <div style={styles.muted}>{props.selectedHotel.city || props.city}, {props.selectedHotel.country || props.country}</div>
+          <div style={styles.small}>Room: {props.selectedRoomName}</div>
 
           <div style={styles.totalBox}>
             <div style={styles.totalLabel}>Estimated stay total</div>
@@ -730,8 +797,9 @@ function AlternativeHotels(props) {
 
       <div style={styles.altGrid}>
         {alternatives.map((hotel, idx) => {
-          const price = hotelPrice(hotel);
-          const curr = hotelCurrency(hotel, props.currency);
+          const selectedReadyHotel = selectedHotelWithRoom(hotel);
+          const price = hotelPrice(selectedReadyHotel);
+          const curr = hotelCurrency(selectedReadyHotel, props.currency);
           const image = validHotelImage(hotel);
 
           return (
@@ -741,7 +809,7 @@ function AlternativeHotels(props) {
                 <h3 style={styles.altName}>{hotel.name || "Nearby hotel"}</h3>
                 <div style={styles.muted}>{hotel.city || props.city}, {hotel.country || props.country}</div>
                 <div style={styles.priceLine}>{curr} {money(price)}</div>
-                <button style={styles.darkBtn} onClick={() => props.setSelectedHotel({ ...hotel, price, currency: curr })}>
+                <button style={styles.darkBtn} onClick={() => props.setSelectedHotel(selectedReadyHotel)}>
                   Select Alternative
                 </button>
               </div>
@@ -950,7 +1018,7 @@ function PartnersPortal({ partnerSent, setPartnerSent }) {
     <PortalShell title="Industry Partnerships" subtitle="Connect with MySpace Hotel for trusted accommodation, travel technology and service partnerships." badge="Partnerships">
       <div style={styles.cardGrid}>
         <InfoCard title="Hotels and accommodation" text="Work with MySpace Hotel to present trusted stays to guests seeking global accommodation." />
-        <InfoCard title="Property systems" text="Connect availability, rates and booking information through professional partnership workflows." />
+        <InfoCard title="Property or channel technology" text="Connect availability, rates and booking information through professional partnership workflows." />
         <InfoCard title="Travel technology partners" text="Collaborate on better travel experiences, destination support and improved guest journeys." />
       </div>
 

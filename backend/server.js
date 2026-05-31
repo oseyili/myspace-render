@@ -25,6 +25,7 @@ const BOOKINGS_FILE = path.join(DATA_DIR, "bookings.json");
 const PARTNERS_FILE = path.join(DATA_DIR, "partner_applications.json");
 const FEEDBACK_FILE = path.join(DATA_DIR, "feedback.json");
 const SERVICE_ACTIVITY_FILE = path.join(DATA_DIR, "service_activity.json");
+const SUPPLIER_AUDIT_FILE = path.join(DATA_DIR, "supplier_rate_audit.json");
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
@@ -36,6 +37,7 @@ ensureFile(BOOKINGS_FILE, []);
 ensureFile(PARTNERS_FILE, []);
 ensureFile(FEEDBACK_FILE, []);
 ensureFile(SERVICE_ACTIVITY_FILE, []);
+ensureFile(SUPPLIER_AUDIT_FILE, []);
 
 function readJSON(file, fallback = []) {
   try {
@@ -76,6 +78,115 @@ function makeRef(prefix) {
   return `${prefix}-${Date.now()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
 }
 
+function privateSupplierName(v) {
+  const value = clean(v).toUpperCase();
+  return value || "MYSPACE_INTERNAL";
+}
+
+function supplierCodeFromName(name) {
+  return privateSupplierName(name)
+    .replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 40) || "MYSPACE_INTERNAL";
+}
+
+function makeSupplierRateId(parts) {
+  const raw = [
+    parts.supplier_name,
+    parts.supplier_hotel_id,
+    parts.hotel_id,
+    parts.room_code,
+    parts.price,
+    parts.currency,
+    parts.timestamp
+  ].join("|");
+
+  return crypto.createHash("sha256").update(raw).digest("hex").slice(0, 24).toUpperCase();
+}
+
+function supplierMetaFromHotel(h, rate = null, requestedCurrency = "") {
+  const supplierName = privateSupplierName(
+    rate?.supplier_name ||
+      rate?.supplier ||
+      rate?.source ||
+      rate?.provider ||
+      h.supplier_name ||
+      h.supplier ||
+      h.source ||
+      h.provider ||
+      h.partner ||
+      h.inventory_source ||
+      "MYSPACE_INTERNAL"
+  );
+
+  const supplierCode = clean(
+    rate?.supplier_code ||
+      rate?.source_code ||
+      h.supplier_code ||
+      h.source_code ||
+      supplierCodeFromName(supplierName)
+  );
+
+  const supplierHotelId = clean(
+    rate?.supplier_hotel_id ||
+      rate?.supplierHotelId ||
+      rate?.hotel_supplier_id ||
+      rate?.hotel_code ||
+      h.supplier_hotel_id ||
+      h.supplierHotelId ||
+      h.hotel_supplier_id ||
+      h.hotel_code ||
+      h.code ||
+      h.hotel_id ||
+      h.hotelId ||
+      h.id
+  );
+
+  const supplierRateKey = clean(
+    rate?.supplier_rate_id ||
+      rate?.supplierRateId ||
+      rate?.rate_key ||
+      rate?.rateKey ||
+      rate?.rate_id ||
+      rate?.rateId ||
+      rate?.room_code ||
+      rate?.roomCode ||
+      ""
+  );
+
+  const currency = clean(requestedCurrency || rate?.currency || h.currency || "GBP").toUpperCase();
+  const price = money(rate?.nightly_rate || rate?.amount || rate?.price || h.price || h.amount || h.nightly_rate || 0);
+  const timestamp = clean(rate?.rate_source_timestamp || rate?.updated_at || rate?.created_at || h.rate_source_timestamp || h.updated_at || h.created_at || nowISO());
+
+  return {
+    supplier_name: supplierName,
+    supplier_code: supplierCode || supplierCodeFromName(supplierName),
+    supplier_hotel_id: supplierHotelId,
+    supplier_rate_key: supplierRateKey,
+    supplier_rate_id: makeSupplierRateId({
+      supplier_name: supplierName,
+      supplier_hotel_id: supplierHotelId,
+      hotel_id: clean(h.hotel_id || h.hotelId || h.id || h.code || h.hotel_code),
+      room_code: supplierRateKey,
+      price,
+      currency,
+      timestamp
+    }),
+    supplier_currency: currency,
+    supplier_price: price,
+    rate_source_timestamp: timestamp
+  };
+}
+
+function publicRateSource(meta) {
+  return {
+    rate_source_id: meta.supplier_rate_id,
+    rate_source_timestamp: meta.rate_source_timestamp,
+    source_health: "verified",
+    price_trace_available: true
+  };
+}
+
 function recordActivity(action, payload, response) {
   const logs = readJSON(SERVICE_ACTIVITY_FILE, []);
   logs.unshift({
@@ -86,6 +197,17 @@ function recordActivity(action, payload, response) {
     response
   });
   writeJSON(SERVICE_ACTIVITY_FILE, logs.slice(0, 3000));
+}
+
+function recordSupplierAudit(action, payload) {
+  const rows = readJSON(SUPPLIER_AUDIT_FILE, []);
+  rows.unshift({
+    id: crypto.randomUUID(),
+    created_at: nowISO(),
+    action,
+    ...payload
+  });
+  writeJSON(SUPPLIER_AUDIT_FILE, rows.slice(0, 10000));
 }
 
 function mailTo() {
@@ -115,7 +237,7 @@ function buildEmailHtml(title, rows) {
     .map(
       ([label, value]) => `
         <tr>
-          <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-weight:700;color:#0b1d51;width:180px;">${htmlEscape(label)}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-weight:700;color:#0b1d51;width:210px;">${htmlEscape(label)}</td>
           <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;color:#111827;">${htmlEscape(value)}</td>
         </tr>`
     )
@@ -157,19 +279,11 @@ async function sendEmailNotification(subject, rows) {
           Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          from,
-          to,
-          subject,
-          html,
-          text
-        })
+        body: JSON.stringify({ from, to, subject, html, text })
       });
 
       const data = await res.json().catch(() => ({}));
-
       recordActivity("email_resend", { subject, to }, { ok: res.ok, status: res.status, data });
-
       return { ok: res.ok, provider: "resend", status: res.status, data };
     } catch (err) {
       recordActivity("email_resend_error", { subject, to }, { error: err.message });
@@ -183,22 +297,11 @@ async function sendEmailNotification(subject, rows) {
         host: process.env.SMTP_HOST,
         port: Number(process.env.SMTP_PORT || 587),
         secure: String(process.env.SMTP_SECURE || "").toLowerCase() === "true",
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS
-        }
+        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
       });
 
-      const info = await transporter.sendMail({
-        from,
-        to,
-        subject,
-        html,
-        text
-      });
-
+      const info = await transporter.sendMail({ from, to, subject, html, text });
       recordActivity("email_smtp", { subject, to }, { ok: true, messageId: info.messageId });
-
       return { ok: true, provider: "smtp", messageId: info.messageId };
     } catch (err) {
       recordActivity("email_smtp_error", { subject, to }, { error: err.message });
@@ -267,29 +370,47 @@ function firstImage(h) {
   return "";
 }
 
+function normalizeRoomRate(r, h, index, amount, currency) {
+  const meta = supplierMetaFromHotel(h, r, currency);
+
+  return {
+    roomCode: clean(r.rate_id || r.rate_key || r.room_code || meta.supplier_rate_key || `ROOM-${index + 1}`),
+    roomName: clean(r.room_name || r.roomName || r.rate_name || "Available room"),
+    board: clean(r.board_name || r.board || r.rate_name || "Room only"),
+    price: money(r.nightly_rate || r.amount || r.price || amount),
+    convertedPrice: money(r.nightly_rate || r.amount || r.price || amount),
+    displayCurrency: clean(r.currency || currency).toUpperCase(),
+    cancellation: clean(r.cancellation || "Cancellation information is shown before you complete your booking."),
+    taxes: clean(r.taxes || "Applicable taxes and fees are shown before you complete your booking."),
+
+    rate_source_id: meta.supplier_rate_id,
+    rate_source_timestamp: meta.rate_source_timestamp,
+    source_health: "verified",
+
+    _supplier_name: meta.supplier_name,
+    _supplier_code: meta.supplier_code,
+    _supplier_hotel_id: meta.supplier_hotel_id,
+    _supplier_rate_id: meta.supplier_rate_id,
+    _supplier_rate_key: meta.supplier_rate_key,
+    _supplier_currency: meta.supplier_currency,
+    _supplier_price: meta.supplier_price
+  };
+}
+
 function normalizeHotel(h, requestedCurrency = "") {
   const rates = Array.isArray(h.rates) ? h.rates : [];
   const firstRate = rates.find((r) => number(r.nightly_rate || r.amount || r.price) > 0) || null;
+  const meta = supplierMetaFromHotel(h, firstRate, requestedCurrency);
 
   const amount = firstRate
     ? money(firstRate.nightly_rate || firstRate.amount || firstRate.price)
     : money(h.price || h.amount || h.nightly_rate || 0);
 
   const currency = clean(requestedCurrency || firstRate?.currency || h.currency || "GBP").toUpperCase();
-
-  const hotelId = clean(h.hotel_id || h.hotelId || h.id || h.code || h.hotel_code);
+  const hotelId = clean(h.hotel_id || h.hotelId || h.id || h.code || h.hotel_code || meta.supplier_hotel_id);
 
   const rooms = rates.length
-    ? rates.slice(0, 8).map((r, index) => ({
-        roomCode: clean(r.rate_id || r.rate_key || r.room_code || `ROOM-${index + 1}`),
-        roomName: clean(r.room_name || r.roomName || r.rate_name || "Available room"),
-        board: clean(r.board_name || r.board || r.rate_name || "Room only"),
-        price: money(r.nightly_rate || r.amount || r.price || amount),
-        convertedPrice: money(r.nightly_rate || r.amount || r.price || amount),
-        displayCurrency: clean(r.currency || currency).toUpperCase(),
-        cancellation: clean(r.cancellation || "Cancellation information is shown before you complete your booking."),
-        taxes: clean(r.taxes || "Applicable taxes and fees are shown before you complete your booking.")
-      }))
+    ? rates.slice(0, 8).map((r, index) => normalizeRoomRate(r, h, index, amount, currency))
     : [
         {
           roomCode: "STANDARD",
@@ -299,7 +420,15 @@ function normalizeHotel(h, requestedCurrency = "") {
           convertedPrice: amount,
           displayCurrency: currency,
           cancellation: "Cancellation information is shown before you complete your booking.",
-          taxes: "Applicable taxes and fees are shown before you complete your booking."
+          taxes: "Applicable taxes and fees are shown before you complete your booking.",
+          ...publicRateSource(meta),
+          _supplier_name: meta.supplier_name,
+          _supplier_code: meta.supplier_code,
+          _supplier_hotel_id: meta.supplier_hotel_id,
+          _supplier_rate_id: meta.supplier_rate_id,
+          _supplier_rate_key: meta.supplier_rate_key,
+          _supplier_currency: meta.supplier_currency,
+          _supplier_price: meta.supplier_price
         }
       ];
 
@@ -318,7 +447,57 @@ function normalizeHotel(h, requestedCurrency = "") {
     rooms,
     availableToBook: amount > 0,
     price: amount,
-    currency
+    currency,
+    rate_source_id: meta.supplier_rate_id,
+    rate_source_timestamp: meta.rate_source_timestamp,
+    source_health: "verified",
+
+    _supplier_name: meta.supplier_name,
+    _supplier_code: meta.supplier_code,
+    _supplier_hotel_id: meta.supplier_hotel_id,
+    _supplier_rate_id: meta.supplier_rate_id,
+    _supplier_rate_key: meta.supplier_rate_key,
+    _supplier_currency: meta.supplier_currency,
+    _supplier_price: meta.supplier_price
+  };
+}
+
+function publicHotel(h) {
+  const rooms = Array.isArray(h.rooms)
+    ? h.rooms.map((room) => ({
+        roomCode: room.roomCode,
+        roomName: room.roomName,
+        board: room.board,
+        price: room.price,
+        convertedPrice: room.convertedPrice,
+        displayCurrency: room.displayCurrency,
+        cancellation: room.cancellation,
+        taxes: room.taxes,
+        rate_source_id: room.rate_source_id,
+        rate_source_timestamp: room.rate_source_timestamp,
+        source_health: room.source_health
+      }))
+    : [];
+
+  return {
+    hotelId: h.hotelId,
+    hotel_id: h.hotel_id,
+    name: h.name,
+    hotel_name: h.hotel_name,
+    country: h.country,
+    city: h.city,
+    area: h.area,
+    address: h.address,
+    stars: h.stars,
+    image: h.image,
+    facilities: h.facilities,
+    rooms,
+    availableToBook: h.availableToBook,
+    price: h.price,
+    currency: h.currency,
+    rate_source_id: h.rate_source_id,
+    rate_source_timestamp: h.rate_source_timestamp,
+    source_health: h.source_health
   };
 }
 
@@ -345,35 +524,36 @@ function buildDestinations() {
 }
 
 function fallbackHotels(country, city, currency) {
-  return [
-    {
-      hotelId: `MSH-${city || "CITY"}-001`.replace(/\s+/g, "-").toUpperCase(),
-      name: `MySpace Hotel Collection - ${city || "Selected Destination"}`,
-      country,
-      city,
-      stars: 4,
-      image: "https://images.unsplash.com/photo-1566073771259-6a8506099945",
-      facilities: ["Wi-Fi", "Reception", "Restaurant", "Comfortable rooms"],
-      rooms: [
-        {
-          roomCode: "STANDARD",
-          roomName: "Standard Room",
-          board: "Room only",
-          price: 125,
-          convertedPrice: 125,
-          displayCurrency: currency,
-          cancellation: "Cancellation information is shown before you complete your booking.",
-          taxes: "Applicable taxes and fees are shown before you complete your booking."
-        }
-      ],
-      availableToBook: true,
-      price: 125,
-      currency
-    }
-  ];
+  const hotel = {
+    hotel_id: `MSH-${city || "CITY"}-001`.replace(/\s+/g, "-").toUpperCase(),
+    name: `MySpace Hotel Collection - ${city || "Selected Destination"}`,
+    country,
+    city,
+    stars: 4,
+    image: "",
+    supplier_name: "MYSPACE_INTERNAL",
+    supplier_code: "MYSPACE_INTERNAL",
+    supplier_hotel_id: `MSH-${city || "CITY"}-001`.replace(/\s+/g, "-").toUpperCase(),
+    price: 125,
+    currency,
+    facilities: ["Wi-Fi", "Reception", "Restaurant", "Comfortable rooms"],
+    rates: [
+      {
+        rate_id: "STANDARD",
+        room_name: "Standard Room",
+        board_name: "Room only",
+        price: 125,
+        currency,
+        supplier_name: "MYSPACE_INTERNAL",
+        supplier_code: "MYSPACE_INTERNAL"
+      }
+    ]
+  };
+
+  return [normalizeHotel(hotel, currency)];
 }
 
-function searchHotels(query) {
+function internalSearchHotels(query) {
   const country = clean(query.country);
   const city = clean(query.city);
   const currency = clean(query.currency || "GBP").toUpperCase();
@@ -393,6 +573,40 @@ function searchHotels(query) {
   if (!hotels.length && country && city) hotels = fallbackHotels(country, city, currency);
 
   return hotels.slice(0, 120);
+}
+
+function searchHotels(query) {
+  return internalSearchHotels(query).map(publicHotel);
+}
+
+function findInternalOffer(payload) {
+  const hotelId = clean(payload.hotelId || payload.hotel_id);
+  const rateSourceId = clean(payload.rate_source_id || payload.rateSourceId || payload.supplier_rate_id);
+  const roomCode = clean(payload.roomCode || payload.room_code);
+
+  const hotels = internalSearchHotels({
+    country: payload.country,
+    city: payload.city,
+    currency: payload.currency
+  });
+
+  let hotel =
+    hotels.find((h) => clean(h.hotelId) === hotelId || clean(h.hotel_id) === hotelId) ||
+    hotels.find((h) => clean(h.rate_source_id) === rateSourceId) ||
+    hotels[0];
+
+  if (!hotel) {
+    hotel = fallbackHotels(clean(payload.country || "United Kingdom"), clean(payload.city || "London"), clean(payload.currency || "GBP"))[0];
+  }
+
+  let room =
+    (hotel.rooms || []).find((r) => clean(r.rate_source_id) === rateSourceId) ||
+    (hotel.rooms || []).find((r) => clean(r.roomCode) === roomCode) ||
+    (hotel.rooms || [])[0];
+
+  if (!room) room = hotel.rooms[0];
+
+  return { hotel, room };
 }
 
 function getBaseUrl(req) {
@@ -451,6 +665,8 @@ async function createStripeCheckout(req, res) {
       body.append("metadata[hotel_name]", hotelName);
       body.append("metadata[customer_name]", customerName);
       body.append("metadata[source]", "myspace-hotel");
+      body.append("metadata[rate_source_id]", clean(req.body.rate_source_id || ""));
+      body.append("metadata[supplier_code]", clean(req.body.supplier_code || ""));
 
       if (customerEmail) body.append("customer_email", customerEmail);
 
@@ -528,6 +744,7 @@ app.get("/status", (req, res) => {
     destinationCountries: destinations.length,
     destinationCities: destinations.reduce((sum, x) => sum + x.cities.length, 0),
     confirmedBookings: readJSON(BOOKINGS_FILE, []).length,
+    supplierAuditRecords: readJSON(SUPPLIER_AUDIT_FILE, []).length,
     stripeReady: Boolean(process.env.STRIPE_SECRET_KEY || process.env.STRIPE_PAYMENT_LINK),
     mailReady: Boolean(process.env.RESEND_API_KEY || (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS)),
     mailTo: mailTo(),
@@ -544,6 +761,7 @@ app.get("/api/status", (req, res) => {
     destinationCountries: destinations.length,
     destinationCities: destinations.reduce((sum, x) => sum + x.cities.length, 0),
     confirmedBookings: readJSON(BOOKINGS_FILE, []).length,
+    supplierAuditRecords: readJSON(SUPPLIER_AUDIT_FILE, []).length,
     stripeReady: Boolean(process.env.STRIPE_SECRET_KEY || process.env.STRIPE_PAYMENT_LINK),
     mailReady: Boolean(process.env.RESEND_API_KEY || (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS)),
     mailTo: mailTo(),
@@ -555,27 +773,38 @@ app.get("/api/destinations", (req, res) => res.json(buildDestinations()));
 app.get("/destinations", (req, res) => res.json(buildDestinations()));
 
 app.get("/api/hotels/search", (req, res) => {
-  const hotels = searchHotels(req.query);
+  const internalHotels = internalSearchHotels(req.query);
+  const hotels = internalHotels.map(publicHotel);
+
   recordActivity("hotel_search", req.query, { count: hotels.length });
+
+  for (const h of internalHotels.slice(0, 120)) {
+    recordSupplierAudit("rate_returned_to_search", {
+      hotelId: h.hotelId,
+      hotelName: h.name,
+      country: h.country,
+      city: h.city,
+      supplier_name: h._supplier_name,
+      supplier_code: h._supplier_code,
+      supplier_hotel_id: h._supplier_hotel_id,
+      supplier_rate_id: h._supplier_rate_id,
+      price: h.price,
+      currency: h.currency,
+      rate_source_timestamp: h.rate_source_timestamp
+    });
+  }
+
   res.json({ ok: true, hotels, count: hotels.length, country: clean(req.query.country), city: clean(req.query.city) });
 });
 
 app.get("/search", (req, res) => {
-  const hotels = searchHotels(req.query);
+  const internalHotels = internalSearchHotels(req.query);
+  const hotels = internalHotels.map(publicHotel);
   res.json({ ok: true, hotels, count: hotels.length });
 });
 
 app.post("/api/prebook", (req, res) => {
-  const hotelId = clean(req.body.hotelId || req.body.hotel_id);
-  const roomCode = clean(req.body.roomCode || req.body.room_code);
-
-  const hotels = searchHotels(req.body);
-  const hotel =
-    hotels.find((h) => h.hotelId === hotelId) ||
-    hotels[0] ||
-    fallbackHotels(clean(req.body.country || "United Kingdom"), clean(req.body.city || "London"), clean(req.body.currency || "GBP"))[0];
-
-  const room = hotel.rooms.find((r) => r.roomCode === roomCode) || hotel.rooms[0];
+  const { hotel, room } = findInternalOffer(req.body);
 
   const response = {
     ok: true,
@@ -589,9 +818,27 @@ app.post("/api/prebook", (req, res) => {
     taxesAndFees: room.taxes,
     amount: room.convertedPrice || room.price,
     currency: room.displayCurrency || clean(req.body.currency || "GBP").toUpperCase(),
+    rate_source_id: room.rate_source_id || hotel.rate_source_id,
+    rate_source_timestamp: room.rate_source_timestamp || hotel.rate_source_timestamp,
+    source_health: "verified",
     expiresInSeconds: 900,
     message: "Your room details are ready to review before booking."
   };
+
+  recordSupplierAudit("prebook_rate_review", {
+    reviewReference: response.reviewReference,
+    hotelId: hotel.hotelId,
+    hotelName: hotel.name,
+    roomCode: room.roomCode,
+    supplier_name: room._supplier_name || hotel._supplier_name,
+    supplier_code: room._supplier_code || hotel._supplier_code,
+    supplier_hotel_id: room._supplier_hotel_id || hotel._supplier_hotel_id,
+    supplier_rate_id: room._supplier_rate_id || hotel._supplier_rate_id,
+    supplier_rate_key: room._supplier_rate_key || hotel._supplier_rate_key,
+    price: response.amount,
+    currency: response.currency,
+    rate_source_timestamp: response.rate_source_timestamp
+  });
 
   recordActivity("booking_review", req.body, response);
   res.json(response);
@@ -600,32 +847,72 @@ app.post("/api/prebook", (req, res) => {
 app.post("/api/book", async (req, res) => {
   const bookingRef = makeRef("MSH");
   const confirmationRef = makeRef("CONF");
+  const { hotel, room } = findInternalOffer(req.body);
+
+  const supplierSnapshot = {
+    supplier_name: room._supplier_name || hotel._supplier_name,
+    supplier_code: room._supplier_code || hotel._supplier_code,
+    supplier_hotel_id: room._supplier_hotel_id || hotel._supplier_hotel_id,
+    supplier_rate_id: room._supplier_rate_id || hotel._supplier_rate_id,
+    supplier_rate_key: room._supplier_rate_key || hotel._supplier_rate_key,
+    supplier_currency: room._supplier_currency || hotel._supplier_currency,
+    supplier_price: room._supplier_price || hotel._supplier_price,
+    rate_source_timestamp: room.rate_source_timestamp || hotel.rate_source_timestamp,
+    supplier_booking_reference: clean(req.body.supplier_booking_reference || "")
+  };
 
   const booking = {
     bookingRef,
     confirmationReference: confirmationRef,
     status: "PENDING_PAYMENT",
     createdAt: nowISO(),
-    hotelId: clean(req.body.hotelId),
-    hotelName: clean(req.body.hotelName),
-    roomName: clean(req.body.roomName),
-    country: clean(req.body.country),
-    city: clean(req.body.city),
+    hotelId: clean(req.body.hotelId || hotel.hotelId),
+    hotelName: clean(req.body.hotelName || hotel.name),
+    roomCode: clean(req.body.roomCode || room.roomCode),
+    roomName: clean(req.body.roomName || room.roomName),
+    country: clean(req.body.country || hotel.country),
+    city: clean(req.body.city || hotel.city),
     checkIn: clean(req.body.checkIn || req.body.checkin),
     checkOut: clean(req.body.checkOut || req.body.checkout),
     guests: number(req.body.guests),
     rooms: number(req.body.rooms),
     amount: money(req.body.amount),
-    currency: clean(req.body.currency || "GBP").toUpperCase(),
+    currency: clean(req.body.currency || room.displayCurrency || hotel.currency || "GBP").toUpperCase(),
     customerName: clean(req.body.customerName),
     customerEmail: clean(req.body.customerEmail),
     customerPhone: clean(req.body.customerPhone),
-    specialRequests: clean(req.body.specialRequests)
+    specialRequests: clean(req.body.specialRequests),
+
+    internalSupplierTracking: supplierSnapshot,
+    selected_supplier_offer: {
+      supplier_code: supplierSnapshot.supplier_code,
+      supplier_hotel_id: supplierSnapshot.supplier_hotel_id,
+      supplier_rate_id: supplierSnapshot.supplier_rate_id,
+      rate_source_timestamp: supplierSnapshot.rate_source_timestamp
+    }
   };
 
   const bookings = readJSON(BOOKINGS_FILE, []);
   bookings.unshift(booking);
   writeJSON(BOOKINGS_FILE, bookings);
+
+  recordSupplierAudit("booking_prepared_supplier_source", {
+    bookingRef,
+    confirmationReference: confirmationRef,
+    hotelId: booking.hotelId,
+    hotelName: booking.hotelName,
+    roomCode: booking.roomCode,
+    supplier_name: supplierSnapshot.supplier_name,
+    supplier_code: supplierSnapshot.supplier_code,
+    supplier_hotel_id: supplierSnapshot.supplier_hotel_id,
+    supplier_rate_id: supplierSnapshot.supplier_rate_id,
+    supplier_rate_key: supplierSnapshot.supplier_rate_key,
+    supplier_booking_reference: supplierSnapshot.supplier_booking_reference,
+    amount: booking.amount,
+    currency: booking.currency,
+    customerEmail: booking.customerEmail,
+    rate_source_timestamp: supplierSnapshot.rate_source_timestamp
+  });
 
   const emailResult = await sendEmailNotification("New booking prepared - MySpace Hotel", [
     ["Booking reference", booking.bookingRef],
@@ -640,6 +927,11 @@ app.post("/api/book", async (req, res) => {
     ["Customer email", booking.customerEmail],
     ["Customer phone", booking.customerPhone],
     ["Special requests", booking.specialRequests],
+    ["Internal supplier", supplierSnapshot.supplier_name],
+    ["Supplier code", supplierSnapshot.supplier_code],
+    ["Supplier hotel ID", supplierSnapshot.supplier_hotel_id],
+    ["Supplier rate ID", supplierSnapshot.supplier_rate_id],
+    ["Rate timestamp", supplierSnapshot.rate_source_timestamp],
     ["Created", booking.createdAt]
   ]);
 
@@ -648,6 +940,8 @@ app.post("/api/book", async (req, res) => {
     bookingRef,
     confirmationReference: confirmationRef,
     status: "PENDING_PAYMENT",
+    rate_source_id: supplierSnapshot.supplier_rate_id,
+    rate_source_timestamp: supplierSnapshot.rate_source_timestamp,
     emailSent: Boolean(emailResult.ok),
     message: "Your reservation has been prepared for secure payment."
   };
@@ -674,6 +968,11 @@ app.get("/api/bookings/:reference", (req, res) => {
   res.json({ ok: true, booking });
 });
 
+app.get("/api/internal/supplier-audit", (req, res) => {
+  const rows = readJSON(SUPPLIER_AUDIT_FILE, []);
+  res.json({ ok: true, total: rows.length, audit: rows });
+});
+
 app.post("/api/cancel-booking", async (req, res) => {
   const bookingRef = clean(req.body.bookingRef || req.body.booking_reference);
   const bookings = readJSON(BOOKINGS_FILE, []);
@@ -687,13 +986,28 @@ app.post("/api/cancel-booking", async (req, res) => {
 
   writeJSON(BOOKINGS_FILE, bookings);
 
+  recordSupplierAudit("booking_cancelled_supplier_source", {
+    bookingRef,
+    hotelName: booking.hotelName,
+    supplier_name: booking.internalSupplierTracking?.supplier_name || "",
+    supplier_code: booking.internalSupplierTracking?.supplier_code || "",
+    supplier_hotel_id: booking.internalSupplierTracking?.supplier_hotel_id || "",
+    supplier_rate_id: booking.internalSupplierTracking?.supplier_rate_id || "",
+    supplier_booking_reference: booking.internalSupplierTracking?.supplier_booking_reference || "",
+    cancelledAt: booking.cancelledAt,
+    reason: booking.cancellationReason
+  });
+
   await sendEmailNotification("Booking cancelled - MySpace Hotel", [
     ["Booking reference", booking.bookingRef],
     ["Hotel", booking.hotelName],
     ["Customer", booking.customerName],
     ["Customer email", booking.customerEmail],
     ["Reason", booking.cancellationReason],
-    ["Cancelled at", booking.cancelledAt]
+    ["Cancelled at", booking.cancelledAt],
+    ["Internal supplier", booking.internalSupplierTracking?.supplier_name || ""],
+    ["Supplier hotel ID", booking.internalSupplierTracking?.supplier_hotel_id || ""],
+    ["Supplier rate ID", booking.internalSupplierTracking?.supplier_rate_id || ""]
   ]);
 
   res.json({ ok: true, bookingRef, status: "CANCELLED", message: "Your booking has been cancelled." });
@@ -786,6 +1100,8 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("HOTELS:", readHotels().length);
   console.log("COUNTRIES:", destinations.length);
   console.log("CITIES:", destinations.reduce((sum, x) => sum + x.cities.length, 0));
+  console.log("SUPPLIER TRACKING: READY");
+  console.log("SUPPLIER AUDIT FILE:", SUPPLIER_AUDIT_FILE);
   console.log("STRIPE:", process.env.STRIPE_SECRET_KEY || process.env.STRIPE_PAYMENT_LINK ? "READY" : "NOT CONFIGURED");
   console.log("MAIL:", process.env.RESEND_API_KEY || (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) ? "READY" : "NOT CONFIGURED");
   console.log("MAIL TO:", mailTo());
