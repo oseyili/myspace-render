@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Affiliate Login | MySpace Hotel</title>
+  <title>Affiliate Portal | MySpace Hotel</title>
   <style>
     *{box-sizing:border-box}
     body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#071b4d}
@@ -13,28 +13,50 @@
     nav{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap}
     nav a{padding:11px 15px;border-radius:14px;border:1px solid #d5dff1;color:#071b4d;background:#fff;text-decoration:none;font-weight:900}
     .gold{background:#f1bf22;border-color:#f1bf22}
-    main{max-width:1100px;margin:0 auto;padding:55px 28px}
-    .box{background:#fff;border-radius:30px;padding:38px;box-shadow:0 10px 30px rgba(0,0,0,.07)}
+    main{max-width:1350px;margin:0 auto;padding:42px 24px}
+    .box{background:#fff;border-radius:30px;padding:32px;box-shadow:0 10px 30px rgba(0,0,0,.07);margin-bottom:22px}
     h1{font-size:52px;margin:0 0 14px;font-weight:950}
+    h2{font-size:32px;margin:0 0 12px;font-weight:950}
+    h3{margin:0 0 10px;font-size:19px;font-weight:950}
     p{font-weight:750;color:#28436f;line-height:1.55}
-    input{width:100%;padding:17px;border-radius:15px;border:1px solid #d8e0ef;font-size:16px;margin:10px 0}
-    button{background:#2750db;color:white;border:0;border-radius:15px;padding:17px 22px;font-size:18px;font-weight:950;cursor:pointer;width:100%;margin-top:10px}
+    input,select,textarea{width:100%;padding:15px;border-radius:15px;border:1px solid #d8e0ef;font-size:16px;margin:8px 0;background:#fff}
+    textarea{min-height:90px;resize:vertical}
+    button{background:#2750db;color:white;border:0;border-radius:15px;padding:15px 18px;font-size:16px;font-weight:950;cursor:pointer;width:100%;margin-top:10px}
+    button.secondary{background:#071b4d}
+    button.success{background:#10b981}
+    button.warn{background:#f1bf22;color:#071b4d}
+    button:disabled{opacity:.55;cursor:not-allowed}
     .notice{display:none;border-radius:16px;padding:14px 16px;font-weight:900;margin:14px 0}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:22px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:18px}
+    .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;margin-top:18px}
     .card{background:#f8fafc;border:1px solid #dce6f3;border-radius:22px;padding:22px}
     .metric{font-size:34px;font-weight:950;color:#2750db}
+    .metricSmall{font-size:22px;font-weight:950;color:#071b4d}
     .hidden{display:none}
     .ref{background:#ecfdf3;border:1px solid #bbf7d0;border-radius:16px;padding:16px;font-weight:900;word-break:break-all}
+    .badge{display:inline-block;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:950}
+    .paid{background:#dcfce7;color:#166534}
+    .pending{background:#fff7ed;color:#9a3412}
+    .rejected{background:#fee2e2;color:#991b1b}
+    .tableWrap{overflow:auto;border:1px solid #dce6f3;border-radius:20px;background:#fff}
+    table{width:100%;border-collapse:collapse;min-width:850px}
+    th,td{text-align:left;padding:14px;border-bottom:1px solid #e5edf8;font-weight:750;vertical-align:top}
+    th{color:#51678d;font-size:13px;text-transform:uppercase}
+    .small{font-size:13px;color:#60708a;font-weight:800}
+    .tabs{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+    .tab{width:auto;padding:11px 15px;background:#fff;color:#071b4d;border:1px solid #d5dff1}
+    .tab.active{background:#071b4d;color:#fff}
+    @media(max-width:760px){h1{font-size:38px}.brand{font-size:34px}main{padding:24px 14px}.box{padding:22px}}
   </style>
 </head>
 <body>
 <header>
   <div class="brand">MYSPACE HOTEL</div>
-  <div class="tagline">Affiliate Login Portal</div>
+  <div class="tagline">Affiliate Partner Portal</div>
   <nav>
     <a href="/">Hotels</a>
     <a href="/affiliate-network.html">Affiliate Network</a>
-    <a class="gold" href="/affiliate-portal.html">Affiliate Login</a>
+    <a class="gold" href="/affiliate-portal.html">Affiliate Portal</a>
   </nav>
 </header>
 
@@ -55,34 +77,148 @@
       <h3>Your referral link</h3>
       <div id="referral" class="ref"></div>
       <button onclick="copyLink()">Copy Referral Link</button>
-    </div>
 
-    <div class="grid">
-      <div class="card"><h3>Clicks</h3><div id="clicks" class="metric">0</div></div>
-      <div class="card"><h3>Paid Bookings</h3><div id="paidBookings" class="metric">0</div></div>
-      <div class="card"><h3>Pending Bookings</h3><div id="pendingBookings" class="metric">0</div></div>
-      <div class="card"><h3>Payable Commission</h3><div id="payableCommission" class="metric">£0.00</div></div>
-    </div>
-
-    <div class="box" style="margin-top:22px">
-      <h2>Payout Centre</h2>
-      <div class="grid">
-        <div class="card"><h3>Available Commission</h3><div id="availableCommission" class="metric">£0.00</div></div>
-        <div class="card"><h3>Minimum Payout</h3><div id="minimumPayoutBox" class="metric">£50.00</div></div>
-        <div class="card"><h3>Remaining Until Payout</h3><div id="remainingPayout" class="metric">£50.00</div></div>
-        <div class="card"><h3>Payout Status</h3><div id="payoutStatus" class="metric" style="font-size:24px">Not ready</div></div>
+      <div class="tabs">
+        <button class="tab active" onclick="showSection('overview', this)">Overview</button>
+        <button class="tab" onclick="showSection('bookings', this)">Bookings</button>
+        <button class="tab" onclick="showSection('payouts', this)">Payouts</button>
+        <button class="tab" onclick="showSection('payment', this)">Payment Details</button>
+        <button class="tab" onclick="showSection('resources', this)">Marketing Resources</button>
       </div>
-      <p><strong>Payment method:</strong> <span id="paymentMethod">Bank transfer after approval</span></p>
-      <p><strong>Next payout:</strong> <span id="nextPayout">Monthly payout review</span></p>
-      <h3>Payout History</h3>
-      <div id="payoutHistory">No payouts yet.</div>
     </div>
 
-    <div class="box" style="margin-top:22px">
-      <h2>Commission Policy</h2>
-      <p>Standard affiliate rate: <strong>3%</strong> of qualifying completed bookings.</p>
-      <p>Commission is payable only after bookings are successfully paid. Cancelled, refunded or unpaid bookings do not qualify.</p>
-      <p>Minimum payout: <strong>£50</strong>. Payouts are processed monthly.</p>
+    <div id="section-overview">
+      <div class="grid">
+        <div class="card"><h3>Clicks</h3><div id="clicks" class="metric">0</div></div>
+        <div class="card"><h3>Paid Bookings</h3><div id="paidBookings" class="metric">0</div></div>
+        <div class="card"><h3>Pending Bookings</h3><div id="pendingBookings" class="metric">0</div></div>
+        <div class="card"><h3>Conversion Rate</h3><div id="conversionRate" class="metric">0%</div></div>
+      </div>
+
+      <div class="grid">
+        <div class="card"><h3>Payable Commission</h3><div id="payableCommission" class="metric">£0.00</div></div>
+        <div class="card"><h3>Pending Commission</h3><div id="pendingCommission" class="metric">£0.00</div></div>
+        <div class="card"><h3>Lifetime Earnings</h3><div id="lifetimeCommission" class="metric">£0.00</div></div>
+        <div class="card"><h3>Booking Value Generated</h3><div id="paidBookingValue" class="metric">£0.00</div></div>
+      </div>
+
+      <div class="box">
+        <h2>Performance Analytics</h2>
+        <div class="grid">
+          <div class="card"><h3>Average Paid Booking Value</h3><div id="averageBookingValue" class="metricSmall">£0.00</div></div>
+          <div class="card"><h3>Standard Commission Rate</h3><div id="commissionRate" class="metricSmall">3%</div></div>
+          <div class="card"><h3>Minimum Payout</h3><div id="minimumPayoutAnalytics" class="metricSmall">£50.00</div></div>
+          <div class="card"><h3>Affiliate Status</h3><div id="affiliateStatusBox" class="metricSmall">APPROVED</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="section-bookings" class="hidden">
+      <div class="box">
+        <h2>Booking History</h2>
+        <p>These are bookings attributed to your affiliate code. Commission becomes payable only after successful payment.</p>
+        <div class="tableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Booking Ref</th>
+                <th>Hotel</th>
+                <th>Customer</th>
+                <th>Booking Value</th>
+                <th>Commission</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="bookingRows">
+              <tr><td colspan="7">No bookings yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="section-payouts" class="hidden">
+      <div class="box">
+        <h2>Payout Centre</h2>
+        <div id="payoutNotice" class="notice"></div>
+        <div class="grid">
+          <div class="card"><h3>Available Commission</h3><div id="availableCommission" class="metric">£0.00</div></div>
+          <div class="card"><h3>Minimum Payout</h3><div id="minimumPayoutBox" class="metric">£50.00</div></div>
+          <div class="card"><h3>Remaining Until Payout</h3><div id="remainingPayout" class="metric">£50.00</div></div>
+          <div class="card"><h3>Payout Status</h3><div id="payoutStatus" class="metricSmall">Building</div></div>
+        </div>
+
+        <p><strong>Payment method:</strong> <span id="paymentMethod">Bank transfer after approval</span></p>
+        <p><strong>Next payout:</strong> <span id="nextPayout">Monthly payout review</span></p>
+
+        <textarea id="payoutNote" placeholder="Optional payout note"></textarea>
+        <button id="requestPayoutBtn" class="success" onclick="requestPayout()">Request Payout</button>
+
+        <h3 style="margin-top:26px">Payout Request History</h3>
+        <div class="tableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Request Ref</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Payment Method</th>
+              </tr>
+            </thead>
+            <tbody id="payoutRequestRows">
+              <tr><td colspan="5">No payout requests yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="margin-top:26px">Paid Payout History</h3>
+        <div id="payoutHistory">No payouts yet.</div>
+      </div>
+    </div>
+
+    <div id="section-payment" class="hidden">
+      <div class="box">
+        <h2>Payment Details</h2>
+        <p>Save payment details so MySpace Hotel can process approved monthly affiliate payouts.</p>
+        <div id="paymentNotice" class="notice"></div>
+
+        <select id="paymentMethodInput">
+          <option value="BANK_TRANSFER">Bank Transfer</option>
+          <option value="PAYPAL">PayPal</option>
+        </select>
+
+        <div class="grid2">
+          <input id="accountName" placeholder="Account name" />
+          <input id="bankName" placeholder="Bank name" />
+          <input id="sortCode" placeholder="Sort code" />
+          <input id="accountNumber" placeholder="Account number" />
+          <input id="paypalEmail" type="email" placeholder="PayPal email, optional" />
+        </div>
+
+        <button onclick="savePaymentDetails()">Save Payment Details</button>
+        <p class="small" id="savedPaymentDetails">No saved payment details yet.</p>
+      </div>
+    </div>
+
+    <div id="section-resources" class="hidden">
+      <div class="box">
+        <h2>Marketing Resources</h2>
+        <div class="grid">
+          <div class="card"><h3>Social Post</h3><p>Share your referral link with travellers, communities and business customers planning hotel stays.</p></div>
+          <div class="card"><h3>Email Promotion</h3><p>Add your referral link to newsletters, client travel messages and accommodation recommendations.</p></div>
+          <div class="card"><h3>Business Referrals</h3><p>Refer staff travel, group trips, relocation stays and business accommodation enquiries.</p></div>
+          <div class="card"><h3>Support</h3><p>Contact reservations@myspace-hotel.com for affiliate support.</p></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>Commission Policy</h2>
+        <p>Standard affiliate rate: <strong>3%</strong> of qualifying completed bookings.</p>
+        <p>Commission is payable only after bookings are successfully paid. Cancelled, refunded or unpaid bookings do not qualify.</p>
+        <p>Minimum payout: <strong>£50</strong>. Payouts are reviewed monthly.</p>
+      </div>
     </div>
   </section>
 </main>
@@ -90,15 +226,36 @@
 <script>
 const API_BASE = location.hostname === "localhost" ? "http://127.0.0.1:5050" : "https://myspace-hotel-backend.onrender.com";
 let referralLink = "";
+let currentEmail = "";
+let currentCode = "";
+let latestDashboard = null;
+let latestPayout = null;
 
-function money(v){ const n=Number(v||0); return "£" + (Number.isFinite(n)?n.toFixed(2):"0.00"); }
+function money(v){
+  const n=Number(v||0);
+  return "£" + (Number.isFinite(n)?n.toFixed(2):"0.00");
+}
 
-function showNotice(msg, ok){
-  const n=document.getElementById("notice");
+function statusBadge(status){
+  const s=String(status||"").toUpperCase();
+  const cls=s==="PAID" || s==="APPROVED" ? "paid" : s==="REJECTED" ? "rejected" : "pending";
+  return `<span class="badge ${cls}">${s || "PENDING"}</span>`;
+}
+
+function showNotice(id,msg,ok){
+  const n=document.getElementById(id);
   n.textContent=msg;
   n.style.display="block";
   n.style.background=ok ? "#ecfdf3" : "#fff7ed";
   n.style.color=ok ? "#166534" : "#9a3412";
+}
+
+function showSection(name, btn){
+  ["overview","bookings","payouts","payment","resources"].forEach(x=>{
+    document.getElementById("section-"+x).classList.toggle("hidden", x!==name);
+  });
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  if(btn) btn.classList.add("active");
 }
 
 async function login(){
@@ -106,7 +263,7 @@ async function login(){
   const affiliateCode=document.getElementById("code").value.trim().toUpperCase();
 
   if(!email || !affiliateCode){
-    showNotice("Enter your email and affiliate code.", false);
+    showNotice("notice","Enter your email and affiliate code.",false);
     return;
   }
 
@@ -119,27 +276,35 @@ async function login(){
     const data=await res.json();
 
     if(!res.ok || !data.ok){
-      showNotice(data.message || "Login failed.", false);
+      showNotice("notice",data.message || "Login failed.",false);
       return;
     }
 
     localStorage.setItem("msh_affiliate_portal_email", email);
     localStorage.setItem("msh_affiliate_portal_code", affiliateCode);
 
+    currentEmail=email;
+    currentCode=affiliateCode;
+
     await loadDashboard(email, affiliateCode);
   }catch(e){
-    showNotice("Could not log in right now.", false);
+    showNotice("notice","Could not log in right now.",false);
   }
 }
 
 async function loadDashboard(email, affiliateCode){
-  const res=await fetch(API_BASE + "/api/affiliate-portal/dashboard-v2?email=" + encodeURIComponent(email) + "&affiliateCode=" + encodeURIComponent(affiliateCode));
+  currentEmail=email;
+  currentCode=affiliateCode;
+
+  const res=await fetch(API_BASE + "/api/affiliate-portal/dashboard-v2?email=" + encodeURIComponent(email) + "&affiliateCode=" + encodeURIComponent(affiliateCode), {cache:"no-store"});
   const data=await res.json();
 
   if(!res.ok || !data.ok){
-    showNotice(data.message || "Could not load dashboard.", false);
+    showNotice("notice",data.message || "Could not load dashboard.",false);
     return;
   }
+
+  latestDashboard=data;
 
   document.getElementById("loginBox").classList.add("hidden");
   document.getElementById("dashboard").classList.remove("hidden");
@@ -148,41 +313,182 @@ async function loadDashboard(email, affiliateCode){
   document.getElementById("welcome").textContent="Welcome, " + (data.affiliate.contactName || data.affiliate.businessName || "Affiliate");
   document.getElementById("status").textContent="Status: " + data.affiliate.status + " | Affiliate Code: " + data.affiliate.affiliateCode;
   document.getElementById("referral").textContent=referralLink;
+
   document.getElementById("clicks").textContent=data.summary.clicks;
   document.getElementById("paidBookings").textContent=data.summary.paidBookings;
   document.getElementById("pendingBookings").textContent=data.summary.pendingBookings;
+  document.getElementById("conversionRate").textContent=Number(data.summary.conversionRatePercent || 0).toFixed(0) + "%";
   document.getElementById("payableCommission").textContent=money(data.summary.payableCommission);
+  document.getElementById("pendingCommission").textContent=money(data.summary.pendingCommission);
+  document.getElementById("lifetimeCommission").textContent=money(data.summary.lifetimeCommission);
+  document.getElementById("paidBookingValue").textContent=money(data.summary.paidBookingValue);
 
-  try {
-    const payoutRes = await fetch(API_BASE + "/api/affiliate-portal/payout-centre?email=" + encodeURIComponent(email) + "&affiliateCode=" + encodeURIComponent(affiliateCode));
-    const payoutData = await payoutRes.json();
+  const avg=Number(data.summary.paidBookings||0)>0 ? Number(data.summary.paidBookingValue||0)/Number(data.summary.paidBookings||1) : 0;
+  document.getElementById("averageBookingValue").textContent=money(avg);
+  document.getElementById("commissionRate").textContent=Number(data.affiliate.commissionRate || 3) + "%";
+  document.getElementById("minimumPayoutAnalytics").textContent=money(data.affiliate.minimumPayout || 50);
+  document.getElementById("affiliateStatusBox").textContent=data.affiliate.status || "APPROVED";
 
-    if (payoutRes.ok && payoutData.ok) {
-      const p = payoutData.payoutCentre;
-      document.getElementById("availableCommission").textContent = money(p.availableCommission);
-      document.getElementById("minimumPayoutBox").textContent = money(p.minimumPayout);
-      document.getElementById("remainingPayout").textContent = money(p.amountNeededForPayout);
-      document.getElementById("payoutStatus").textContent = p.eligibleForPayout ? "Ready" : "Building";
-      document.getElementById("paymentMethod").textContent = p.paymentMethod;
-      document.getElementById("nextPayout").textContent = p.nextScheduledPayout;
+  renderBookingRows(data.bookings || []);
 
-      const history = document.getElementById("payoutHistory");
-      if (!p.payoutHistory || !p.payoutHistory.length) {
-        history.textContent = "No payouts yet.";
-      } else {
-        history.innerHTML = p.payoutHistory.map(x => `${x.createdAt.slice(0,10)} — ${x.currency} ${Number(x.amount || 0).toFixed(2)} — ${x.status}`).join("<br>");
+  await loadPayoutCentre(email, affiliateCode);
+  await loadPaymentDetails(email, affiliateCode);
+  await loadPayoutRequests(email, affiliateCode);
+}
+
+function renderBookingRows(bookings){
+  const rows=document.getElementById("bookingRows");
+  if(!bookings.length){
+    rows.innerHTML='<tr><td colspan="7">No bookings yet.</td></tr>';
+    return;
+  }
+
+  rows.innerHTML=bookings.map(b=>`
+    <tr>
+      <td>${String(b.createdAt || "").slice(0,10)}</td>
+      <td>${b.bookingRef || ""}</td>
+      <td>${b.hotelName || ""}</td>
+      <td>${b.customerEmail || ""}</td>
+      <td>${b.currency || "GBP"} ${Number(b.amount || 0).toFixed(2)}</td>
+      <td>${b.currency || "GBP"} ${Number(b.commissionAmount || 0).toFixed(2)}</td>
+      <td>${statusBadge(b.status)}</td>
+    </tr>
+  `).join("");
+}
+
+async function loadPayoutCentre(email, affiliateCode){
+  try{
+    const payoutRes=await fetch(API_BASE + "/api/affiliate-portal/payout-centre?email=" + encodeURIComponent(email) + "&affiliateCode=" + encodeURIComponent(affiliateCode), {cache:"no-store"});
+    const payoutData=await payoutRes.json();
+
+    if(payoutRes.ok && payoutData.ok){
+      const p=payoutData.payoutCentre;
+      latestPayout=p;
+
+      document.getElementById("availableCommission").textContent=money(p.availableCommission);
+      document.getElementById("minimumPayoutBox").textContent=money(p.minimumPayout);
+      document.getElementById("remainingPayout").textContent=money(p.amountNeededForPayout);
+      document.getElementById("payoutStatus").textContent=p.eligibleForPayout ? "Ready" : "Building";
+      document.getElementById("paymentMethod").textContent=p.paymentMethod;
+      document.getElementById("nextPayout").textContent=p.nextScheduledPayout;
+      document.getElementById("requestPayoutBtn").disabled=!p.eligibleForPayout;
+
+      const history=document.getElementById("payoutHistory");
+      if(!p.payoutHistory || !p.payoutHistory.length){
+        history.textContent="No payouts yet.";
+      }else{
+        history.innerHTML=p.payoutHistory.map(x=>`${String(x.createdAt||"").slice(0,10)} — ${x.currency || "GBP"} ${Number(x.amount || 0).toFixed(2)} — ${x.status}`).join("<br>");
       }
     }
-  } catch (e) {}
+  }catch(e){}
+}
+
+async function loadPaymentDetails(email, affiliateCode){
+  try{
+    const res=await fetch(API_BASE + "/api/affiliate-portal/payment-details?email=" + encodeURIComponent(email) + "&affiliateCode=" + encodeURIComponent(affiliateCode), {cache:"no-store"});
+    const data=await res.json();
+    const label=document.getElementById("savedPaymentDetails");
+
+    if(res.ok && data.ok && data.paymentDetails){
+      const d=data.paymentDetails;
+      label.textContent=`Saved: ${d.paymentMethod} | ${d.bankName || "PayPal"} | Account ending ${d.accountNumberLast4 || d.paypalEmail || "saved"} | Updated ${String(d.updatedAt||"").slice(0,10)}`;
+    }else{
+      label.textContent="No saved payment details yet.";
+    }
+  }catch(e){}
+}
+
+async function savePaymentDetails(){
+  const payload={
+    email:currentEmail,
+    affiliateCode:currentCode,
+    paymentMethod:document.getElementById("paymentMethodInput").value,
+    accountName:document.getElementById("accountName").value.trim(),
+    bankName:document.getElementById("bankName").value.trim(),
+    sortCode:document.getElementById("sortCode").value.trim(),
+    accountNumber:document.getElementById("accountNumber").value.trim(),
+    paypalEmail:document.getElementById("paypalEmail").value.trim()
+  };
+
+  try{
+    const res=await fetch(API_BASE + "/api/affiliate-portal/payment-details", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(payload)
+    });
+    const data=await res.json();
+
+    if(!res.ok || !data.ok){
+      showNotice("paymentNotice",data.message || "Payment details could not be saved.",false);
+      return;
+    }
+
+    showNotice("paymentNotice","Payment details saved.",true);
+    await loadPaymentDetails(currentEmail,currentCode);
+  }catch(e){
+    showNotice("paymentNotice","Payment details could not be saved.",false);
+  }
+}
+
+async function requestPayout(){
+  try{
+    const res=await fetch(API_BASE + "/api/affiliate-portal/request-payout", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        email:currentEmail,
+        affiliateCode:currentCode,
+        note:document.getElementById("payoutNote").value.trim()
+      })
+    });
+    const data=await res.json();
+
+    if(!res.ok || !data.ok){
+      showNotice("payoutNotice",data.message || "Payout request could not be submitted.",false);
+      return;
+    }
+
+    showNotice("payoutNotice","Payout request submitted for MySpace Hotel review.",true);
+    await loadPayoutRequests(currentEmail,currentCode);
+    await loadPayoutCentre(currentEmail,currentCode);
+  }catch(e){
+    showNotice("payoutNotice","Payout request could not be submitted.",false);
+  }
+}
+
+async function loadPayoutRequests(email, affiliateCode){
+  try{
+    const res=await fetch(API_BASE + "/api/affiliate-portal/payout-requests?email=" + encodeURIComponent(email) + "&affiliateCode=" + encodeURIComponent(affiliateCode), {cache:"no-store"});
+    const data=await res.json();
+    const rows=document.getElementById("payoutRequestRows");
+
+    if(!res.ok || !data.ok || !data.payoutRequests.length){
+      rows.innerHTML='<tr><td colspan="5">No payout requests yet.</td></tr>';
+      return;
+    }
+
+    rows.innerHTML=data.payoutRequests.map(x=>`
+      <tr>
+        <td>${String(x.createdAt || "").slice(0,10)}</td>
+        <td>${x.requestReference || ""}</td>
+        <td>${x.currency || "GBP"} ${Number(x.amount || 0).toFixed(2)}</td>
+        <td>${statusBadge(x.status)}</td>
+        <td>${x.paymentMethod || ""}</td>
+      </tr>
+    `).join("");
+  }catch(e){}
 }
 
 function copyLink(){
   if(referralLink) navigator.clipboard.writeText(referralLink);
   alert("Referral link copied.");
 }
+
+window.addEventListener("load",()=>{
+  const email=localStorage.getItem("msh_affiliate_portal_email") || "";
+  const code=localStorage.getItem("msh_affiliate_portal_code") || "";
+  if(email && code) loadDashboard(email,code);
+});
 </script>
 </body>
 </html>
-
-
-

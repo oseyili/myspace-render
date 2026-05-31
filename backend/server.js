@@ -2778,6 +2778,330 @@ app.post("/api/internal/affiliate-payouts/mark-paid", (req, res) => {
 });
 // MSH AFFILIATE PAYOUT CENTRE END
 
+
+// MSH AFFILIATE PHASE 2 START
+const AFFILIATE_PAYMENT_DETAILS_FILE = path.join(DATA_DIR, "affiliate_payment_details.json");
+const AFFILIATE_PAYOUT_REQUESTS_FILE = path.join(DATA_DIR, "affiliate_payout_requests.json");
+
+ensureFile(AFFILIATE_PAYMENT_DETAILS_FILE, []);
+ensureFile(AFFILIATE_PAYOUT_REQUESTS_FILE, []);
+
+function findApprovedAffiliateByLogin(email, affiliateCode) {
+  const mail = clean(email).toLowerCase();
+  const code = clean(affiliateCode).toUpperCase();
+
+  const affiliate = readAffiliates().find((x) =>
+    clean(x.email).toLowerCase() === mail &&
+    clean(x.affiliateCode).toUpperCase() === code
+  );
+
+  if (!affiliate) return null;
+  if (clean(affiliate.status).toUpperCase() !== "APPROVED") return null;
+
+  return affiliate;
+}
+
+app.get("/api/affiliate-portal/payment-details", (req, res) => {
+  const email = clean(req.query.email).toLowerCase();
+  const affiliateCode = clean(req.query.affiliateCode || req.query.code).toUpperCase();
+  const affiliate = findApprovedAffiliateByLogin(email, affiliateCode);
+
+  if (!affiliate) {
+    return res.status(401).json({ ok: false, message: "Approved affiliate account not found." });
+  }
+
+  const rows = readJSON(AFFILIATE_PAYMENT_DETAILS_FILE, []);
+  const details = rows.find((x) => clean(x.affiliateCode).toUpperCase() === affiliateCode) || null;
+
+  res.json({
+    ok: true,
+    affiliateCode,
+    paymentDetails: details
+      ? {
+          paymentMethod: details.paymentMethod,
+          accountName: details.accountName,
+          bankName: details.bankName,
+          sortCodeLast2: clean(details.sortCode).slice(-2),
+          accountNumberLast4: clean(details.accountNumber).slice(-4),
+          paypalEmail: details.paypalEmail,
+          updatedAt: details.updatedAt || details.createdAt
+        }
+      : null
+  });
+});
+
+app.post("/api/affiliate-portal/payment-details", (req, res) => {
+  const email = clean(req.body.email).toLowerCase();
+  const affiliateCode = clean(req.body.affiliateCode || req.body.code).toUpperCase();
+  const affiliate = findApprovedAffiliateByLogin(email, affiliateCode);
+
+  if (!affiliate) {
+    return res.status(401).json({ ok: false, message: "Approved affiliate account not found." });
+  }
+
+  const paymentMethod = clean(req.body.paymentMethod || "BANK_TRANSFER").toUpperCase();
+  const accountName = clean(req.body.accountName);
+  const bankName = clean(req.body.bankName);
+  const sortCode = clean(req.body.sortCode);
+  const accountNumber = clean(req.body.accountNumber);
+  const paypalEmail = clean(req.body.paypalEmail);
+
+  if (paymentMethod === "BANK_TRANSFER" && (!accountName || !bankName || !sortCode || !accountNumber)) {
+    return res.status(400).json({
+      ok: false,
+      message: "Please provide account name, bank name, sort code and account number."
+    });
+  }
+
+  if (paymentMethod === "PAYPAL" && !paypalEmail) {
+    return res.status(400).json({
+      ok: false,
+      message: "Please provide PayPal email address."
+    });
+  }
+
+  const rows = readJSON(AFFILIATE_PAYMENT_DETAILS_FILE, []);
+  const index = rows.findIndex((x) => clean(x.affiliateCode).toUpperCase() === affiliateCode);
+
+  const row = {
+    id: index >= 0 ? rows[index].id : crypto.randomUUID(),
+    affiliateCode,
+    businessName: affiliate.businessName,
+    contactName: affiliate.contactName,
+    email: affiliate.email,
+    paymentMethod,
+    accountName,
+    bankName,
+    sortCode,
+    accountNumber,
+    paypalEmail,
+    updatedAt: nowISO(),
+    createdAt: index >= 0 ? rows[index].createdAt : nowISO()
+  };
+
+  if (index >= 0) rows[index] = row;
+  else rows.unshift(row);
+
+  writeJSON(AFFILIATE_PAYMENT_DETAILS_FILE, rows.slice(0, 5000));
+
+  res.json({
+    ok: true,
+    message: "Payment details saved.",
+    paymentDetails: {
+      paymentMethod: row.paymentMethod,
+      accountName: row.accountName,
+      bankName: row.bankName,
+      sortCodeLast2: row.sortCode.slice(-2),
+      accountNumberLast4: row.accountNumber.slice(-4),
+      paypalEmail: row.paypalEmail,
+      updatedAt: row.updatedAt
+    }
+  });
+});
+
+app.post("/api/affiliate-portal/request-payout", (req, res) => {
+  const email = clean(req.body.email).toLowerCase();
+  const affiliateCode = clean(req.body.affiliateCode || req.body.code).toUpperCase();
+  const affiliate = findApprovedAffiliateByLogin(email, affiliateCode);
+
+  if (!affiliate) {
+    return res.status(401).json({ ok: false, message: "Approved affiliate account not found." });
+  }
+
+  const dashboard = buildAffiliatePortalDashboard(affiliate);
+  const payout = affiliatePayoutSummary(affiliateCode);
+  const availableCommission = money(dashboard.summary.payableCommission - payout.pendingPayoutTotal - payout.paidTotal);
+  const minimumPayout = 50;
+
+  if (availableCommission < minimumPayout) {
+    return res.status(400).json({
+      ok: false,
+      message: `Payout can be requested once available commission reaches GBP ${minimumPayout}.`,
+      availableCommission,
+      minimumPayout
+    });
+  }
+
+  const paymentRows = readJSON(AFFILIATE_PAYMENT_DETAILS_FILE, []);
+  const paymentDetails = paymentRows.find((x) => clean(x.affiliateCode).toUpperCase() === affiliateCode);
+
+  if (!paymentDetails) {
+    return res.status(400).json({
+      ok: false,
+      message: "Please save payment details before requesting payout."
+    });
+  }
+
+  const requests = readJSON(AFFILIATE_PAYOUT_REQUESTS_FILE, []);
+  const openRequest = requests.find((x) =>
+    clean(x.affiliateCode).toUpperCase() === affiliateCode &&
+    ["PENDING_REVIEW", "APPROVED"].includes(clean(x.status).toUpperCase())
+  );
+
+  if (openRequest) {
+    return res.status(400).json({
+      ok: false,
+      message: "You already have an open payout request.",
+      payoutRequest: openRequest
+    });
+  }
+
+  const payoutRequest = {
+    id: crypto.randomUUID(),
+    requestReference: makeRef("PAYOUT"),
+    createdAt: nowISO(),
+    affiliateCode,
+    businessName: affiliate.businessName,
+    contactName: affiliate.contactName,
+    email: affiliate.email,
+    amount: availableCommission,
+    currency: "GBP",
+    status: "PENDING_REVIEW",
+    paymentMethod: paymentDetails.paymentMethod,
+    note: clean(req.body.note || "Affiliate payout requested from portal.")
+  };
+
+  requests.unshift(payoutRequest);
+  writeJSON(AFFILIATE_PAYOUT_REQUESTS_FILE, requests.slice(0, 5000));
+
+  res.json({
+    ok: true,
+    message: "Payout request submitted for review.",
+    payoutRequest
+  });
+});
+
+app.get("/api/affiliate-portal/payout-requests", (req, res) => {
+  const email = clean(req.query.email).toLowerCase();
+  const affiliateCode = clean(req.query.affiliateCode || req.query.code).toUpperCase();
+  const affiliate = findApprovedAffiliateByLogin(email, affiliateCode);
+
+  if (!affiliate) {
+    return res.status(401).json({ ok: false, message: "Approved affiliate account not found." });
+  }
+
+  const requests = readJSON(AFFILIATE_PAYOUT_REQUESTS_FILE, [])
+    .filter((x) => clean(x.affiliateCode).toUpperCase() === affiliateCode)
+    .slice(0, 100);
+
+  res.json({
+    ok: true,
+    affiliateCode,
+    payoutRequests: requests
+  });
+});
+
+app.get("/api/internal/affiliate-payout-requests", (req, res) => {
+  const requests = readJSON(AFFILIATE_PAYOUT_REQUESTS_FILE, []);
+  res.json({
+    ok: true,
+    generatedAt: nowISO(),
+    total: requests.length,
+    pending: requests.filter((x) => clean(x.status).toUpperCase() === "PENDING_REVIEW").length,
+    approved: requests.filter((x) => clean(x.status).toUpperCase() === "APPROVED").length,
+    paid: requests.filter((x) => clean(x.status).toUpperCase() === "PAID").length,
+    rejected: requests.filter((x) => clean(x.status).toUpperCase() === "REJECTED").length,
+    payoutRequests: requests.slice(0, 300)
+  });
+});
+
+app.post("/api/internal/affiliate-payout-requests/:id/approve", (req, res) => {
+  const id = clean(req.params.id);
+  const requests = readJSON(AFFILIATE_PAYOUT_REQUESTS_FILE, []);
+  const index = requests.findIndex((x) => clean(x.id) === id || clean(x.requestReference) === id);
+
+  if (index < 0) {
+    return res.status(404).json({ ok: false, message: "Payout request not found." });
+  }
+
+  requests[index] = {
+    ...requests[index],
+    status: "APPROVED",
+    approvedAt: nowISO(),
+    adminNote: clean(req.body.note || "")
+  };
+
+  writeJSON(AFFILIATE_PAYOUT_REQUESTS_FILE, requests);
+
+  res.json({
+    ok: true,
+    message: "Payout request approved.",
+    payoutRequest: requests[index]
+  });
+});
+
+app.post("/api/internal/affiliate-payout-requests/:id/mark-paid", (req, res) => {
+  const id = clean(req.params.id);
+  const paymentReference = clean(req.body.paymentReference || "MANUAL-PAYOUT");
+  const requests = readJSON(AFFILIATE_PAYOUT_REQUESTS_FILE, []);
+  const index = requests.findIndex((x) => clean(x.id) === id || clean(x.requestReference) === id);
+
+  if (index < 0) {
+    return res.status(404).json({ ok: false, message: "Payout request not found." });
+  }
+
+  requests[index] = {
+    ...requests[index],
+    status: "PAID",
+    paidAt: nowISO(),
+    paymentReference,
+    adminNote: clean(req.body.note || requests[index].adminNote || "")
+  };
+
+  writeJSON(AFFILIATE_PAYOUT_REQUESTS_FILE, requests);
+
+  const payouts = readJSON(AFFILIATE_PAYOUTS_FILE, []);
+  payouts.unshift({
+    id: crypto.randomUUID(),
+    createdAt: nowISO(),
+    affiliateCode: requests[index].affiliateCode,
+    businessName: requests[index].businessName,
+    contactName: requests[index].contactName,
+    email: requests[index].email,
+    amount: money(requests[index].amount),
+    currency: requests[index].currency || "GBP",
+    status: "PAID",
+    paidAt: nowISO(),
+    paymentReference,
+    sourceRequestId: requests[index].id,
+    sourceRequestReference: requests[index].requestReference,
+    note: "Paid from affiliate payout request."
+  });
+  writeJSON(AFFILIATE_PAYOUTS_FILE, payouts.slice(0, 5000));
+
+  res.json({
+    ok: true,
+    message: "Payout request marked as paid.",
+    payoutRequest: requests[index]
+  });
+});
+
+app.post("/api/internal/affiliate-payout-requests/:id/reject", (req, res) => {
+  const id = clean(req.params.id);
+  const requests = readJSON(AFFILIATE_PAYOUT_REQUESTS_FILE, []);
+  const index = requests.findIndex((x) => clean(x.id) === id || clean(x.requestReference) === id);
+
+  if (index < 0) {
+    return res.status(404).json({ ok: false, message: "Payout request not found." });
+  }
+
+  requests[index] = {
+    ...requests[index],
+    status: "REJECTED",
+    rejectedAt: nowISO(),
+    adminNote: clean(req.body.note || "Rejected after review.")
+  };
+
+  writeJSON(AFFILIATE_PAYOUT_REQUESTS_FILE, requests);
+
+  res.json({
+    ok: true,
+    message: "Payout request rejected.",
+    payoutRequest: requests[index]
+  });
+});
+// MSH AFFILIATE PHASE 2 END
+
 app.get("/api/internal/affiliate-dashboard", (req, res) => {
   const affiliates = readAffiliates();
   const clicks = readJSON(AFFILIATE_CLICKS_FILE, []);
@@ -2998,6 +3322,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
