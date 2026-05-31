@@ -2304,6 +2304,146 @@ app.get("/api/internal/affiliate-dashboard-paid", (req, res) => {
 });
 // MSH PAID AFFILIATE COMMISSION OVERRIDE END
 
+
+
+
+// MSH AFFILIATE PORTAL API START
+function affiliatePublicCommissionRate(affiliate) {
+  const custom = number(affiliate.commissionRate);
+  if (custom > 0 && custom < 3) return custom;
+  if (custom > 3 && clean(affiliate.tier).toUpperCase() === "STRATEGIC") return custom;
+  return 3;
+}
+
+app.post("/api/affiliate-portal/login", (req, res) => {
+  const email = clean(req.body.email).toLowerCase();
+  const affiliateCode = clean(req.body.affiliateCode || req.body.code).toUpperCase();
+
+  const affiliates = readAffiliates();
+  const affiliate = affiliates.find((x) =>
+    clean(x.email).toLowerCase() === email &&
+    clean(x.affiliateCode).toUpperCase() === affiliateCode
+  );
+
+  if (!affiliate) {
+    return res.status(401).json({
+      ok: false,
+      message: "We could not find an approved affiliate account with those details."
+    });
+  }
+
+  if (clean(affiliate.status).toUpperCase() !== "APPROVED") {
+    return res.status(403).json({
+      ok: false,
+      message: "Your affiliate account is not approved yet."
+    });
+  }
+
+  res.json({
+    ok: true,
+    message: "Affiliate login successful.",
+    affiliate: {
+      affiliateCode: affiliate.affiliateCode,
+      businessName: affiliate.businessName,
+      contactName: affiliate.contactName,
+      email: affiliate.email,
+      status: affiliate.status,
+      referralLink: affiliate.referralLink,
+      commissionRate: affiliatePublicCommissionRate(affiliate),
+      minimumPayout: 50,
+      payoutSchedule: "Monthly"
+    }
+  });
+});
+
+app.get("/api/affiliate-portal/dashboard", (req, res) => {
+  const email = clean(req.query.email).toLowerCase();
+  const affiliateCode = clean(req.query.affiliateCode || req.query.code).toUpperCase();
+
+  const affiliates = readAffiliates();
+  const affiliate = affiliates.find((x) =>
+    clean(x.email).toLowerCase() === email &&
+    clean(x.affiliateCode).toUpperCase() === affiliateCode
+  );
+
+  if (!affiliate) {
+    return res.status(401).json({
+      ok: false,
+      message: "Affiliate account not found."
+    });
+  }
+
+  if (clean(affiliate.status).toUpperCase() !== "APPROVED") {
+    return res.status(403).json({
+      ok: false,
+      message: "Affiliate account is not approved yet."
+    });
+  }
+
+  const code = clean(affiliate.affiliateCode).toUpperCase();
+  const clicks = readJSON(AFFILIATE_CLICKS_FILE, []).filter((x) => clean(x.affiliateCode).toUpperCase() === code);
+
+  const allConversions = readJSON(AFFILIATE_CONVERSIONS_FILE, []);
+  const conversions = allConversions.filter((x) => clean(x.affiliateCode).toUpperCase() === code);
+
+  const paidConversions = conversions.filter((x) => clean(x.status).toUpperCase() === "PAID");
+  const pendingConversions = conversions.filter((x) => {
+    const status = clean(x.status).toUpperCase();
+    return status !== "PAID" && status !== "CANCELLED" && status !== "REFUNDED";
+  });
+
+  const payableCommission = money(paidConversions.reduce((sum, x) => sum + number(x.commissionAmount), 0));
+  const pendingCommission = money(pendingConversions.reduce((sum, x) => sum + number(x.commissionAmount), 0));
+  const paidBookingValue = money(paidConversions.reduce((sum, x) => sum + number(x.amount), 0));
+  const pendingBookingValue = money(pendingConversions.reduce((sum, x) => sum + number(x.amount), 0));
+  const conversionRate = clicks.length > 0 ? money((paidConversions.length / clicks.length) * 100) : 0;
+  const minimumPayout = 50;
+
+  res.json({
+    ok: true,
+    generatedAt: nowISO(),
+    affiliate: {
+      affiliateCode: affiliate.affiliateCode,
+      businessName: affiliate.businessName,
+      contactName: affiliate.contactName,
+      email: affiliate.email,
+      status: affiliate.status,
+      referralLink: affiliate.referralLink,
+      commissionRate: affiliatePublicCommissionRate(affiliate),
+      minimumPayout,
+      payoutSchedule: "Monthly",
+      createdAt: affiliate.createdAt
+    },
+    summary: {
+      clicks: clicks.length,
+      paidBookings: paidConversions.length,
+      pendingBookings: pendingConversions.length,
+      conversionRatePercent: conversionRate,
+      paidBookingValue,
+      pendingBookingValue,
+      payableCommission,
+      pendingCommission,
+      lifetimeCommission: money(payableCommission + pendingCommission),
+      nextPayoutThreshold: minimumPayout,
+      amountNeededForPayout: money(Math.max(0, minimumPayout - payableCommission))
+    },
+    recentClicks: clicks.slice(0, 25),
+    bookings: conversions.slice(0, 100).map((x) => ({
+      createdAt: x.createdAt,
+      bookingRef: x.bookingRef,
+      hotelName: x.hotelName,
+      customerEmail: x.customerEmail,
+      amount: money(x.amount),
+      currency: x.currency || "GBP",
+      commissionRate: number(x.commissionRate || affiliatePublicCommissionRate(affiliate)),
+      commissionAmount: money(x.commissionAmount),
+      status: x.status,
+      paidAt: x.paidAt || ""
+    }))
+  });
+});
+// MSH AFFILIATE PORTAL API END
+
 app.get("/api/internal/affiliate-dashboard", (req, res) => {
   const affiliates = readAffiliates();
   const clicks = readJSON(AFFILIATE_CLICKS_FILE, []);
@@ -2524,6 +2664,9 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
+
+
 
 
 

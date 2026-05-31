@@ -1,0 +1,149 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Affiliate Login | MySpace Hotel</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#071b4d}
+    header{background:#fff;padding:28px 34px;border-bottom:1px solid #dfe6f3}
+    .brand{font-size:42px;font-weight:950}
+    .tagline{margin-top:6px;color:#51678d;font-weight:800}
+    nav{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap}
+    nav a{padding:11px 15px;border-radius:14px;border:1px solid #d5dff1;color:#071b4d;background:#fff;text-decoration:none;font-weight:900}
+    .gold{background:#f1bf22;border-color:#f1bf22}
+    main{max-width:1100px;margin:0 auto;padding:55px 28px}
+    .box{background:#fff;border-radius:30px;padding:38px;box-shadow:0 10px 30px rgba(0,0,0,.07)}
+    h1{font-size:52px;margin:0 0 14px;font-weight:950}
+    p{font-weight:750;color:#28436f;line-height:1.55}
+    input{width:100%;padding:17px;border-radius:15px;border:1px solid #d8e0ef;font-size:16px;margin:10px 0}
+    button{background:#2750db;color:white;border:0;border-radius:15px;padding:17px 22px;font-size:18px;font-weight:950;cursor:pointer;width:100%;margin-top:10px}
+    .notice{display:none;border-radius:16px;padding:14px 16px;font-weight:900;margin:14px 0}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:22px}
+    .card{background:#f8fafc;border:1px solid #dce6f3;border-radius:22px;padding:22px}
+    .metric{font-size:34px;font-weight:950;color:#2750db}
+    .hidden{display:none}
+    .ref{background:#ecfdf3;border:1px solid #bbf7d0;border-radius:16px;padding:16px;font-weight:900;word-break:break-all}
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand">MYSPACE HOTEL</div>
+  <div class="tagline">Affiliate Login Portal</div>
+  <nav>
+    <a href="/">Hotels</a>
+    <a href="/affiliate-network.html">Affiliate Network</a>
+    <a class="gold" href="/affiliate-portal.html">Affiliate Login</a>
+  </nav>
+</header>
+
+<main>
+  <section id="loginBox" class="box">
+    <h1>Affiliate Login</h1>
+    <p>Approved affiliates can log in with their email address and affiliate code.</p>
+    <div id="notice" class="notice"></div>
+    <input id="email" type="email" placeholder="Affiliate email address" />
+    <input id="code" placeholder="Affiliate code, example LUKAKA-91F16B" />
+    <button onclick="login()">Log In</button>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <div class="box">
+      <h1 id="welcome">Affiliate Dashboard</h1>
+      <p id="status"></p>
+      <h3>Your referral link</h3>
+      <div id="referral" class="ref"></div>
+      <button onclick="copyLink()">Copy Referral Link</button>
+    </div>
+
+    <div class="grid">
+      <div class="card"><h3>Clicks</h3><div id="clicks" class="metric">0</div></div>
+      <div class="card"><h3>Paid Bookings</h3><div id="paidBookings" class="metric">0</div></div>
+      <div class="card"><h3>Pending Bookings</h3><div id="pendingBookings" class="metric">0</div></div>
+      <div class="card"><h3>Payable Commission</h3><div id="payableCommission" class="metric">£0.00</div></div>
+    </div>
+
+    <div class="box" style="margin-top:22px">
+      <h2>Commission Policy</h2>
+      <p>Standard affiliate rate: <strong>3%</strong> of qualifying completed bookings.</p>
+      <p>Commission is payable only after bookings are successfully paid. Cancelled, refunded or unpaid bookings do not qualify.</p>
+      <p>Minimum payout: <strong>£50</strong>. Payouts are processed monthly.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+const API_BASE = location.hostname === "localhost" ? "http://127.0.0.1:5050" : "";
+let referralLink = "";
+
+function money(v){ const n=Number(v||0); return "£" + (Number.isFinite(n)?n.toFixed(2):"0.00"); }
+
+function showNotice(msg, ok){
+  const n=document.getElementById("notice");
+  n.textContent=msg;
+  n.style.display="block";
+  n.style.background=ok ? "#ecfdf3" : "#fff7ed";
+  n.style.color=ok ? "#166534" : "#9a3412";
+}
+
+async function login(){
+  const email=document.getElementById("email").value.trim();
+  const affiliateCode=document.getElementById("code").value.trim().toUpperCase();
+
+  if(!email || !affiliateCode){
+    showNotice("Enter your email and affiliate code.", false);
+    return;
+  }
+
+  try{
+    const res=await fetch(API_BASE + "/api/affiliate-portal/login", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({email, affiliateCode})
+    });
+    const data=await res.json();
+
+    if(!res.ok || !data.ok){
+      showNotice(data.message || "Login failed.", false);
+      return;
+    }
+
+    localStorage.setItem("msh_affiliate_portal_email", email);
+    localStorage.setItem("msh_affiliate_portal_code", affiliateCode);
+
+    await loadDashboard(email, affiliateCode);
+  }catch(e){
+    showNotice("Could not log in right now.", false);
+  }
+}
+
+async function loadDashboard(email, affiliateCode){
+  const res=await fetch(API_BASE + "/api/affiliate-portal/dashboard?email=" + encodeURIComponent(email) + "&affiliateCode=" + encodeURIComponent(affiliateCode));
+  const data=await res.json();
+
+  if(!res.ok || !data.ok){
+    showNotice(data.message || "Could not load dashboard.", false);
+    return;
+  }
+
+  document.getElementById("loginBox").classList.add("hidden");
+  document.getElementById("dashboard").classList.remove("hidden");
+
+  referralLink=data.affiliate.referralLink || "";
+  document.getElementById("welcome").textContent="Welcome, " + (data.affiliate.contactName || data.affiliate.businessName || "Affiliate");
+  document.getElementById("status").textContent="Status: " + data.affiliate.status + " | Affiliate Code: " + data.affiliate.affiliateCode;
+  document.getElementById("referral").textContent=referralLink;
+  document.getElementById("clicks").textContent=data.summary.clicks;
+  document.getElementById("paidBookings").textContent=data.summary.paidBookings;
+  document.getElementById("pendingBookings").textContent=data.summary.pendingBookings;
+  document.getElementById("payableCommission").textContent=money(data.summary.payableCommission);
+}
+
+function copyLink(){
+  if(referralLink) navigator.clipboard.writeText(referralLink);
+  alert("Referral link copied.");
+}
+</script>
+</body>
+</html>

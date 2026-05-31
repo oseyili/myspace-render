@@ -5,165 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Affiliate Network | MySpace Hotel</title>
   <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f7fb;
-      color: #0b1d51;
-    }
-    header {
-      background: #ffffff;
-      padding: 26px 34px;
-      border-bottom: 1px solid #dfe6f3;
-    }
-    .brand {
-      font-size: 42px;
-      font-weight: 950;
-      letter-spacing: -1px;
-      color: #0b1d51;
-    }
-    .tagline {
-      margin-top: 7px;
-      color: #5a6c8f;
-      font-weight: 800;
-    }
-    nav {
-      margin-top: 22px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    nav a {
-      padding: 11px 15px;
-      border-radius: 14px;
-      border: 1px solid #d5dff1;
-      color: #0b1d51;
-      background: #ffffff;
-      text-decoration: none;
-      font-weight: 900;
-    }
-    .gold {
-      background: #f1bf22;
-      border-color: #f1bf22;
-    }
-    main {
-      max-width: 1450px;
-      margin: 0 auto;
-      padding: 55px 34px;
-    }
-    .hero {
-      background: #ffffff;
-      border-radius: 30px;
-      padding: 38px;
-      box-shadow: 0 8px 25px rgba(0,0,0,.06);
-    }
-    .pill {
-      display: inline-block;
-      background: #0b1d51;
-      color: #ffffff;
-      border-radius: 999px;
-      padding: 10px 16px;
-      font-weight: 950;
-      margin-bottom: 18px;
-    }
-    h1 {
-      font-size: 60px;
-      line-height: 1;
-      margin: 0 0 18px;
-      font-weight: 950;
-      letter-spacing: -2px;
-    }
-    .lead {
-      font-size: 22px;
-      line-height: 1.5;
-      color: #30466e;
-      font-weight: 750;
-      max-width: 980px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 18px;
-      margin-top: 30px;
-    }
-    .card {
-      background: #f8fafc;
-      border: 1px solid #dce6f3;
-      border-radius: 22px;
-      padding: 24px;
-    }
-    .card h3 {
-      margin: 0 0 10px;
-      font-size: 23px;
-      font-weight: 950;
-    }
-    .card p {
-      margin: 0;
-      color: #445b82;
-      line-height: 1.6;
-      font-weight: 650;
-    }
-    form {
-      margin-top: 30px;
-      background: #ffffff;
-      border-radius: 30px;
-      padding: 34px;
-      box-shadow: 0 8px 25px rgba(0,0,0,.06);
-      display: grid;
-      gap: 15px;
-      max-width: 920px;
-    }
-    h2 {
-      margin: 0;
-      font-size: 36px;
-      font-weight: 950;
-    }
-    .formText {
-      margin: 0;
-      color: #50678f;
-      font-weight: 750;
-      line-height: 1.5;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 16px;
-      border-radius: 15px;
-      border: 1px solid #d8e0ef;
-      font-size: 16px;
-      font-family: Arial, sans-serif;
-    }
-    textarea {
-      min-height: 130px;
-      resize: vertical;
-    }
-    button {
-      background: #2750db;
-      color: #ffffff;
-      border: none;
-      border-radius: 15px;
-      padding: 17px;
-      font-size: 17px;
-      font-weight: 950;
-      cursor: pointer;
-    }
-    .notice {
-      display: none;
-      border-radius: 18px;
-      padding: 18px;
-      font-weight: 900;
-      line-height: 1.5;
-    }
-    footer {
-      background: #071538;
-      color: #dbe7ff;
-      padding: 32px 34px;
-      margin-top: 40px;
-    }
-    footer strong {
-      color: #ffffff;
-      font-size: 24px;
-    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#071b4d}
+    header{background:#fff;padding:28px 34px;border-bottom:1px solid #dfe6f3}
+    .brand{font-size:42px;font-weight:950;color:#071b4d}
+    .tagline{margin-top:6px;color:#51678d;font-weight:800}
+    nav{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap}
+    nav a{padding:11px 15px;border-radius:14px;border:1px solid #d5dff1;color:#071b4d;background:#fff;text-decoration:none;font-weight:900}
+    .gold{background:#f1bf22;border-color:#f1bf22}
+    main{max-width:1450px;margin:0 auto;padding:50px 34px}
+    .section{background:#fff;border-radius:30px;padding:38px;box-shadow:0 10px 30px rgba(0,0,0,.06);margin-bottom:28px}
+    .pill{display:inline-block;background:#071b4d;color:#fff;border-radius:999px;padding:10px 17px;font-weight:950;margin-bottom:20px}
+    h1{font-size:62px;line-height:1;margin:0 0 18px;font-weight:950;letter-spacing:-2px}
+    h2{font-size:36px;margin:0 0 14px;font-weight:950}
+    h3{margin:0 0 10px;font-size:23px;font-weight:950}
+    p{color:#28436f;font-weight:700;line-height:1.55}
+    .lead{font-size:22px;max-width:980px}
+    .heroGrid{display:grid;grid-template-columns:1.2fr .8fr;gap:32px;align-items:center}
+    .benefit{display:grid;grid-template-columns:40px 1fr;gap:14px;margin:22px 0}
+    .icon{width:40px;height:40px;border-radius:50%;background:#eaf1ff;display:grid;place-items:center;font-weight:950;color:#2750db}
+    .panel{background:#fff;border:1px solid #dce6f3;border-radius:24px;padding:28px;box-shadow:0 8px 24px rgba(0,0,0,.04)}
+    .checks div{margin:15px 0;color:#28436f;font-weight:800}
+    .checks span{color:#15803d;margin-right:8px}
+    .grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
+    .card{background:#f8fafc;border:1px solid #dce6f3;border-radius:22px;padding:24px}
+    .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;text-align:center;margin-top:26px}
+    .stepNo{width:44px;height:44px;border-radius:50%;border:1px solid #2750db;color:#2750db;display:grid;place-items:center;margin:0 auto 14px;font-weight:950}
+    .approvalGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:24px}
+    ul{margin:12px 0 0;padding-left:20px;color:#28436f;font-weight:750;line-height:1.8}
+    .commissionBox{background:#f1f8e9;border-radius:16px;padding:18px;text-align:center;font-weight:900}
+    .commissionBox strong{display:block;font-size:42px;color:#071b4d}
+    .important{background:#eef6ff;border:1px solid #bcd7ff;border-radius:18px;padding:18px;font-weight:850;color:#123d74;margin-top:20px}
+    form{background:#fff;border-radius:30px;padding:34px;box-shadow:0 10px 30px rgba(0,0,0,.06);display:grid;gap:15px;max-width:920px}
+    input,textarea{width:100%;padding:16px;border-radius:15px;border:1px solid #d8e0ef;font-size:16px}
+    textarea{min-height:130px;resize:vertical}
+    button,.btn{background:#2750db;color:#fff;border:none;border-radius:15px;padding:17px;font-size:17px;font-weight:950;cursor:pointer;text-decoration:none;text-align:center;display:block}
+    .notice{display:none;border-radius:18px;padding:18px;font-weight:900}
+    footer{padding:30px 34px;text-align:center;color:#51678d;font-weight:800}
+    @media(max-width:850px){.heroGrid{grid-template-columns:1fr}h1{font-size:44px}}
   </style>
 </head>
 <body>
@@ -179,47 +58,75 @@
       <a href="/#/guest-reviews">Guest Reviews</a>
       <a href="/#/support-centre">Support</a>
       <a class="gold" href="/#/industry-partnerships">Partnerships</a>
-      <a href="/affiliate-network.html">Affiliate Network</a>
+      <a href="/affiliate-network.html">Affiliate Network</a><a href="/affiliate-portal.html">Affiliate Login</a>
       <a href="/#/business-portal">Business Portal</a>
     </nav>
   </header>
 
   <main>
-    <section class="hero">
-      <div class="pill">Affiliate programme</div>
-      <h1>Earn with MySpace Hotel</h1>
-      <p class="lead">
-        Join the MySpace Hotel Affiliate Network and introduce travellers, businesses and audiences to trusted accommodation worldwide.
-      </p>
+    <section class="section heroGrid">
+      <div>
+        <div class="pill">Affiliate programme</div>
+        <h1>Earn with MySpace Hotel</h1>
+        <p class="lead">Join the MySpace Hotel Affiliate Network and introduce travellers, businesses and audiences to trusted accommodation worldwide.</p>
 
-      <div class="grid">
-        <div class="card">
-          <h3>Travel agents</h3>
-          <p>Introduce customers to hotel stays, serviced apartments and accommodation options.</p>
+        <div class="benefit"><div class="icon">£</div><div><h3>Earn commission on qualifying completed bookings</h3><p>You earn commission when your referrals complete and pay for their booking.</p></div></div>
+        <div class="benefit"><div class="icon">↗</div><div><h3>Dedicated tracking and reporting</h3><p>Approved affiliates receive referral tracking, booking reports and commission updates.</p></div></div>
+        <div class="benefit"><div class="icon">📅</div><div><h3>Monthly payouts</h3><p>Approved commissions are paid monthly once the minimum payout threshold is reached.</p></div></div>
+        <div class="benefit"><div class="icon">🌍</div><div><h3>Global inventory, trusted partners</h3><p>Promote millions of stays, serviced apartments and accommodation options worldwide.</p></div></div>
+      </div>
+
+      <div class="panel">
+        <h2>Why partner with MySpace Hotel?</h2>
+        <div class="checks">
+          <div><span>✓</span>Trusted by travellers and businesses</div>
+          <div><span>✓</span>Competitive accommodation options</div>
+          <div><span>✓</span>Secure bookings and payments</div>
+          <div><span>✓</span>Reliable support for your success</div>
+          <div><span>✓</span>Transparent terms and fair commissions</div>
         </div>
-        <div class="card">
-          <h3>Creators and bloggers</h3>
-          <p>Share MySpace Hotel with your travel audience and apply to earn from completed stays.</p>
-        </div>
-        <div class="card">
-          <h3>Businesses and communities</h3>
-          <p>Refer staff, clients, members or customers who need reliable accommodation support.</p>
-        </div>
-        <div class="card">
-          <h3>Simple process</h3>
-          <p>Apply, receive approval, share your referral link and grow with MySpace Hotel.</p>
-        </div>
+        <a class="btn" href="#apply">Apply to join</a><br /><a class="btn" style="background:#f1bf22;color:#071b4d" href="/affiliate-portal.html">Affiliate Login</a><br />
+        <p style="text-align:center;font-size:14px">It is free to join. No fees or hidden charges.</p>
+      </div>
+    </section>
+
+    <section class="grid4">
+      <div class="card"><h3>Travel agents</h3><p>Introduce customers to hotel stays, serviced apartments and accommodation options.</p></div>
+      <div class="card"><h3>Creators and bloggers</h3><p>Share MySpace Hotel with your travel audience and apply to earn from completed stays.</p></div>
+      <div class="card"><h3>Businesses and communities</h3><p>Refer staff, clients, members or customers who need reliable accommodation support.</p></div>
+      <div class="card"><h3>Simple process</h3><p>Apply, receive approval, share your referral link and grow with MySpace Hotel.</p></div>
+    </section>
+
+    <section class="section">
+      <h2 style="text-align:center">How it works</h2>
+      <div class="steps">
+        <div><div class="stepNo">1</div><h3>Apply</h3><p>Complete the short application form and tell us about your platform or audience.</p></div>
+        <div><div class="stepNo">2</div><h3>Review</h3><p>Our team reviews your application and contacts you with the next steps.</p></div>
+        <div><div class="stepNo">3</div><h3>Get approved</h3><p>Once approved, you receive your affiliate account and referral tools.</p></div>
+        <div><div class="stepNo">4</div><h3>Earn and grow</h3><p>Share your link, drive bookings and earn commission on qualifying stays.</p></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 style="text-align:center">After approval — what you receive</h2>
+      <p style="text-align:center">Approved affiliates receive everything needed to start promoting MySpace Hotel professionally.</p>
+
+      <div class="approvalGrid">
+        <div class="card"><h3>Your referral tools</h3><ul><li>Unique affiliate link</li><li>Referral tracking</li><li>Promotional materials</li><li>Easy-to-share resources</li></ul></div>
+        <div class="card"><h3>Real-time dashboard</h3><ul><li>Clicks and traffic reports</li><li>Booking and conversion data</li><li>Commission tracking</li><li>Performance insights</li></ul></div>
+        <div class="card"><h3>Commission structure</h3><div class="commissionBox">Standard Affiliate<strong>3%</strong>of qualifying completed bookings</div><p>Higher rates may be available for high-performing affiliates and strategic partners.</p></div>
+        <div class="card"><h3>Payment details</h3><ul><li>Monthly payouts</li><li>Minimum payout: £50</li><li>Secure payments</li><li>Clear commission records</li></ul></div>
+      </div>
+
+      <div class="important">
+        Important: commissions are earned only on qualifying completed bookings that are successfully paid. Cancelled, refunded or unpaid bookings do not qualify for commission.
       </div>
     </section>
 
     <form id="affiliateForm">
-      <h2>Apply to join</h2>
-      <p class="formText">
-        Complete the form below. Our team will review your application and contact you with the next steps.
-      </p>
-
+      <h2 id="apply">Apply to join</h2>
+      <p>Complete the form below. Our team will review your application and contact you with the next steps.</p>
       <div id="notice" class="notice"></div>
-
       <input name="businessName" placeholder="Business or brand name" required />
       <input name="contactName" placeholder="Contact name" required />
       <input name="email" type="email" placeholder="Email address" required />
@@ -227,21 +134,17 @@
       <input name="website" placeholder="Website or social media page" />
       <input name="audience" placeholder="Audience type or audience size" />
       <textarea name="promotionPlan" placeholder="How do you plan to promote MySpace Hotel?"></textarea>
-
       <button type="submit">Apply to Join</button>
     </form>
   </main>
 
   <footer>
-    <strong>MYSPACE HOTEL</strong>
-    <div>reservations@myspace-hotel.com | +44 7707836674 | 17 Barleycorn Way, London E14 8DE</div>
+    Affiliate Terms | Privacy Policy | Contact Us<br />
+    © 2026 MySpace Hotel. All rights reserved.
   </footer>
 
   <script>
-    const API_BASE = window.location.hostname === "localhost"
-      ? "http://127.0.0.1:5050"
-      : "";
-
+    const API_BASE = window.location.hostname === "localhost" ? "http://127.0.0.1:5050" : "";
     const form = document.getElementById("affiliateForm");
     const notice = document.getElementById("notice");
 
@@ -289,3 +192,5 @@
   </script>
 </body>
 </html>
+
+
