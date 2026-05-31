@@ -74,7 +74,7 @@
 </main>
 
 <script>
-const API_BASE = location.hostname === "localhost" ? "http://127.0.0.1:5050" : "";
+const API_BASE = location.hostname === "localhost" ? "http://127.0.0.1:5050" : "https://myspace-hotel-backend.onrender.com";
 let referralLink = "";
 
 function money(v){ const n=Number(v||0); return "£" + (Number.isFinite(n)?n.toFixed(2):"0.00"); }
@@ -147,3 +147,4 @@ function copyLink(){
 </script>
 </body>
 </html>
+
