@@ -46,7 +46,20 @@
     .tabs{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
     .tab{width:auto;padding:11px 15px;background:#fff;color:#071b4d;border:1px solid #d5dff1}
     .tab.active{background:#071b4d;color:#fff}
-    @media(max-width:760px){h1{font-size:38px}.brand{font-size:34px}main{padding:24px 14px}.box{padding:22px}}
+    .toolBtn{background:#071b4d;color:#fff;border:0;border-radius:14px;padding:13px 14px;font-size:14px;font-weight:950;cursor:pointer;width:100%;margin-top:8px;text-align:center;text-decoration:none;display:block}
+    .toolBtn.gold{background:#f1bf22;color:#071b4d}
+    .toolBtn.green{background:#10b981;color:#fff}
+    .toolBtn.blue{background:#2750db;color:#fff}
+    .templateBox{background:#ffffff;border:1px solid #dce6f3;border-radius:18px;padding:16px;white-space:pre-wrap;font-weight:750;color:#28436f;line-height:1.55;margin-top:10px}
+    .qrWrap{display:grid;grid-template-columns:220px minmax(0,1fr);gap:22px;align-items:center}
+    .qrImg{width:210px;height:210px;border:1px solid #dce6f3;border-radius:18px;background:#fff;padding:10px}
+    .progressShell{width:100%;height:18px;background:#e5edf8;border-radius:999px;overflow:hidden;margin-top:12px}
+    .progressFill{height:100%;background:#10b981;width:0%}
+    .miniLabel{font-size:13px;color:#60708a;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+    .copyNotice{display:none;background:#ecfdf3;color:#166534;border-radius:14px;padding:12px 14px;font-weight:950;margin-top:10px}
+    .leadActions{display:flex;gap:8px;flex-wrap:wrap}
+    .leadActions button{width:auto;padding:9px 12px;font-size:13px;margin:0}
+    @media(max-width:760px){.qrWrap{grid-template-columns:1fr}.qrImg{width:100%;max-width:240px;height:auto}h1{font-size:38px}.brand{font-size:34px}main{padding:24px 14px}.box{padding:22px}}
   </style>
 </head>
 <body>
@@ -204,13 +217,153 @@
 
     <div id="section-resources" class="hidden">
       <div class="box">
-        <h2>Marketing Resources</h2>
+        <h2>Revenue-Generating Marketing Resources</h2>
+        <p>Use these tools to promote MySpace Hotel with your personal referral link. Every qualifying paid booking through your link can earn commission.</p>
+        <div id="resourceNotice" class="copyNotice">Copied.</div>
+
         <div class="grid">
-          <div class="card"><h3>Social Post</h3><p>Share your referral link with travellers, communities and business customers planning hotel stays.</p></div>
-          <div class="card"><h3>Email Promotion</h3><p>Add your referral link to newsletters, client travel messages and accommodation recommendations.</p></div>
-          <div class="card"><h3>Business Referrals</h3><p>Refer staff travel, group trips, relocation stays and business accommodation enquiries.</p></div>
-          <div class="card"><h3>Support</h3><p>Contact reservations@myspace-hotel.com for affiliate support.</p></div>
+          <div class="card">
+            <h3>One-Click Sharing</h3>
+            <p>Share your tracked referral link directly with customers and business contacts.</p>
+            <button class="toolBtn green" onclick="shareAffiliate('whatsapp')">Share on WhatsApp</button>
+            <button class="toolBtn blue" onclick="shareAffiliate('facebook')">Share on Facebook</button>
+            <button class="toolBtn blue" onclick="shareAffiliate('linkedin')">Share on LinkedIn</button>
+            <button class="toolBtn" onclick="shareAffiliate('x')">Share on X</button>
+            <button class="toolBtn gold" onclick="shareAffiliate('email')">Open Email</button>
+          </div>
+
+          <div class="card">
+            <h3>Copy Ready-Made Posts</h3>
+            <p>Copy professional messages with your affiliate link already included.</p>
+            <button class="toolBtn" onclick="copyTemplate('whatsapp')">Copy WhatsApp Message</button>
+            <button class="toolBtn" onclick="copyTemplate('whatsappStatus')">Copy WhatsApp Status</button>
+            <button class="toolBtn" onclick="copyTemplate('facebook')">Copy Facebook Post</button>
+            <button class="toolBtn" onclick="copyTemplate('linkedin')">Copy LinkedIn Post</button>
+            <button class="toolBtn" onclick="copyTemplate('email')">Copy Email Campaign</button>
+            <button class="toolBtn" onclick="copyTemplate('signature')">Copy Email Signature</button>
+          </div>
+
+          <div class="card">
+            <h3>Commission Calculator</h3>
+            <p>Estimate earnings before promoting to a group or business customer.</p>
+            <input id="calcBookings" type="number" min="1" value="20" placeholder="Expected bookings" oninput="updateCommissionCalculator()" />
+            <input id="calcAverage" type="number" min="1" value="350" placeholder="Average booking value" oninput="updateCommissionCalculator()" />
+            <div class="templateBox" id="commissionEstimate">Estimated booking value: £7,000.00
+Estimated commission: £210.00</div>
+          </div>
+
+          <div class="card">
+            <h3>Payout Progress</h3>
+            <p>Track how close you are to the £50 minimum payout threshold.</p>
+            <div class="miniLabel">Progress to payout</div>
+            <div class="progressShell"><div id="payoutProgressFill" class="progressFill"></div></div>
+            <div class="templateBox" id="payoutProgressText">£0.00 of £50.00 reached</div>
+          </div>
         </div>
+      </div>
+
+      <div class="box">
+        <h2>Referral QR Code</h2>
+        <div class="qrWrap">
+          <div>
+            <img id="qrImage" class="qrImg" alt="Affiliate referral QR code" />
+          </div>
+          <div>
+            <p>Use this QR code on flyers, business cards, WhatsApp status, presentations, posters and events.</p>
+            <div id="qrLinkText" class="ref"></div>
+            <a id="qrDownload" class="toolBtn green" href="#" target="_blank" rel="noreferrer">Open / Download QR Code</a>
+            <button class="toolBtn" onclick="copyLink()">Copy Referral Link</button>
+            <button class="toolBtn gold" onclick="copyTemplate('flyer')">Copy A4 Flyer Text</button>
+            <button class="toolBtn" onclick="copyTemplate('businessCard')">Copy Business Card Text</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>Business Referral Toolkit</h2>
+        <div class="grid">
+          <div class="card"><h3>Corporate Travel</h3><p>Promote MySpace Hotel to companies booking staff travel, training trips and conferences.</p><button class="toolBtn" onclick="copyTemplate('corporate')">Copy Corporate Message</button></div>
+          <div class="card"><h3>Universities & Students</h3><p>Refer visiting families, international students, academic guests and relocation stays.</p><button class="toolBtn" onclick="copyTemplate('student')">Copy Student Travel Message</button></div>
+          <div class="card"><h3>Events & Groups</h3><p>Promote accommodation for weddings, sports teams, churches, NGOs and community groups.</p><button class="toolBtn" onclick="copyTemplate('groups')">Copy Group Travel Message</button></div>
+          <div class="card"><h3>Travel Contacts</h3><p>Send your link to agents, organisers, relocation contacts and repeat travellers.</p><button class="toolBtn" onclick="copyTemplate('agent')">Copy Travel Contact Message</button></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>Enterprise Lead Centre</h2>
+        <p>Track high-value business opportunities such as companies, universities, sports groups, churches, NGOs, relocation agencies and event organisers.</p>
+        <div class="grid2">
+          <input id="leadCompany" placeholder="Company / Organisation Name" />
+          <input id="leadContact" placeholder="Contact Name" />
+          <input id="leadEmail" type="email" placeholder="Contact Email" />
+          <input id="leadPhone" placeholder="Contact Phone" />
+          <input id="leadRooms" type="number" min="0" placeholder="Expected Rooms" />
+          <input id="leadValue" type="number" min="0" placeholder="Estimated Booking Value (£)" />
+        </div>
+        <select id="leadStatus">
+          <option value="Lead">Lead</option>
+          <option value="Contacted">Contacted</option>
+          <option value="Proposal Sent">Proposal Sent</option>
+          <option value="Negotiating">Negotiating</option>
+          <option value="Won">Won</option>
+          <option value="Lost">Lost</option>
+        </select>
+        <button class="toolBtn green" onclick="saveLead()">Save Lead</button>
+
+        <div class="tableWrap" style="margin-top:20px">
+          <table>
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Contact</th>
+                <th>Rooms</th>
+                <th>Value</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="leadRows">
+              <tr><td colspan="6">No leads yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>Revenue Pipeline</h2>
+        <div class="grid">
+          <div class="card"><h3>Open Opportunities</h3><div id="pipelineOpen" class="metric">0</div></div>
+          <div class="card"><h3>Pipeline Value</h3><div id="pipelineValue" class="metric">£0.00</div></div>
+          <div class="card"><h3>Won Business</h3><div id="pipelineWon" class="metric">£0.00</div></div>
+          <div class="card"><h3>Forecast Commission</h3><div id="pipelineCommission" class="metric">£0.00</div></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>High Value Booking Targets</h2>
+        <div class="grid">
+          <div class="card"><h3>Construction Companies</h3><p>Site workers, engineers and project managers often require long-stay accommodation.</p></div>
+          <div class="card"><h3>Universities</h3><p>Parents, lecturers, visiting students and conference delegates can generate repeat bookings.</p></div>
+          <div class="card"><h3>Healthcare Organisations</h3><p>Temporary staff, contractors and visiting specialists may need accommodation near hospitals.</p></div>
+          <div class="card"><h3>Relocation Services</h3><p>Families and professionals relocating nationally or internationally often need hotel stays.</p></div>
+          <div class="card"><h3>Sports Teams</h3><p>Teams, coaches and supporters often require group accommodation for events.</p></div>
+          <div class="card"><h3>Churches and NGOs</h3><p>Conferences, missions, charity events and group trips can produce strong booking volumes.</p></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>Achievement Centre</h2>
+        <div class="grid">
+          <div class="card"><h3>First Click</h3><div id="achievementClick" class="metricSmall">Progress</div></div>
+          <div class="card"><h3>First Paid Booking</h3><div id="achievementBooking" class="metricSmall">Progress</div></div>
+          <div class="card"><h3>£1,000 Booking Value</h3><div id="achievementRevenue" class="metricSmall">Progress</div></div>
+          <div class="card"><h3>£50 Commission</h3><div id="achievementPayout" class="metricSmall">Progress</div></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>Copy Preview</h2>
+        <div id="templatePreview" class="templateBox">Choose a template above to preview and copy it.</div>
       </div>
 
       <div class="box">
@@ -244,6 +397,7 @@ function statusBadge(status){
 
 function showNotice(id,msg,ok){
   const n=document.getElementById(id);
+  if(!n) return;
   n.textContent=msg;
   n.style.display="block";
   n.style.background=ok ? "#ecfdf3" : "#fff7ed";
@@ -334,6 +488,8 @@ async function loadDashboard(email, affiliateCode){
   await loadPayoutCentre(email, affiliateCode);
   await loadPaymentDetails(email, affiliateCode);
   await loadPayoutRequests(email, affiliateCode);
+  buildAffiliateMarketingTools();
+  renderLeads();
 }
 
 function renderBookingRows(bookings){
@@ -377,7 +533,7 @@ async function loadPayoutCentre(email, affiliateCode){
       if(!p.payoutHistory || !p.payoutHistory.length){
         history.textContent="No payouts yet.";
       }else{
-        history.innerHTML=p.payoutHistory.map(x=>`${String(x.createdAt||"").slice(0,10)} — ${x.currency || "GBP"} ${Number(x.amount || 0).toFixed(2)} — ${x.status}`).join("<br>");
+        history.innerHTML=p.payoutHistory.map(x=>`${String(x.createdAt||"").slice(0,10)} - ${x.currency || "GBP"} ${Number(x.amount || 0).toFixed(2)} - ${x.status}`).join("<br>");
       }
     }
   }catch(e){}
@@ -477,6 +633,254 @@ async function loadPayoutRequests(email, affiliateCode){
       </tr>
     `).join("");
   }catch(e){}
+}
+
+function affiliateMessage(){
+  const link = referralLink || "https://www.myspace-hotel.com";
+  const name = latestDashboard?.affiliate?.contactName || "Affiliate Partner";
+  const code = latestDashboard?.affiliate?.affiliateCode || currentCode || "";
+  return {
+    whatsapp: `Book hotels with MySpace Hotel using my referral link: ${link}`,
+    whatsappStatus: `Need a hotel?
+
+Compare prices and book securely with MySpace Hotel.
+
+Use my referral link:
+${link}`,
+    facebook: `Planning a hotel stay? Search and book with MySpace Hotel. Use my referral link here: ${link}`,
+    linkedin: `For business trips, family stays, city breaks and group accommodation, MySpace Hotel helps travellers search, compare and book trusted hotel stays. My referral link: ${link}`,
+    email: `Hello,
+
+If you or your team need hotel accommodation, you can search and book through MySpace Hotel using my referral link:
+
+${link}
+
+MySpace Hotel supports hotel search, price comparison, destination guidance and secure checkout.
+
+Kind regards`,
+    signature: `${name}
+MySpace Hotel Affiliate Partner
+
+Book Hotels Worldwide:
+${link}`,
+    flyer: `MYSPACE HOTEL
+
+Hotels Worldwide
+Search - Compare - Book
+
+Book hotels, business stays, group accommodation and city breaks with MySpace Hotel.
+
+Scan the QR code or use this referral link:
+${link}
+
+Affiliate Code: ${code}
+
+Website: www.myspace-hotel.com
+Phone: +44 7707836674`,
+    businessCard: `MYSPACE HOTEL AFFILIATE PARTNER
+
+Affiliate Code: ${code}
+
+Book hotels worldwide:
+${link}
+
+Reservations: reservations@myspace-hotel.com
+Phone: +44 7707836674`,
+    corporate: `Hello,
+
+If your organisation books staff travel, events, training trips or group accommodation, MySpace Hotel can help guests search and book hotel stays with clearer pricing and destination support.
+
+You can use my referral link here:
+${link}
+
+Kind regards`,
+    student: `Hello,
+
+For student travel, visiting families, international guests or relocation stays, MySpace Hotel can help with hotel search and booking support.
+
+Use my referral link:
+${link}`,
+    groups: `Hello,
+
+If your group needs hotels for an event, church trip, sports travel, wedding, conference or community programme, MySpace Hotel can help guests search and book accommodation.
+
+Use my referral link:
+${link}`,
+    agent: `Hello,
+
+I am sharing my MySpace Hotel referral link for hotel searches, business travel, group stays and accommodation enquiries:
+
+${link}
+
+Please feel free to use it when planning hotel bookings.`
+  };
+}
+
+function showResourceNotice(msg){
+  const n=document.getElementById("resourceNotice");
+  if(!n) return;
+  n.textContent=msg || "Copied.";
+  n.style.display="block";
+  setTimeout(()=>{ n.style.display="none"; }, 2500);
+}
+
+function copyTemplate(type){
+  const messages=affiliateMessage();
+  const text=messages[type] || messages.whatsapp;
+  const preview=document.getElementById("templatePreview");
+  if(preview) preview.textContent=text;
+  navigator.clipboard.writeText(text);
+  showResourceNotice("Template copied.");
+}
+
+function shareAffiliate(channel){
+  const link=encodeURIComponent(referralLink || "https://www.myspace-hotel.com");
+  const text=encodeURIComponent("Book hotels with MySpace Hotel using my referral link:");
+  const subject=encodeURIComponent("Hotel booking referral link");
+  const body=encodeURIComponent(affiliateMessage().email);
+
+  const urls={
+    whatsapp:`https://wa.me/?text=${text}%20${link}`,
+    facebook:`https://www.facebook.com/sharer/sharer.php?u=${link}`,
+    linkedin:`https://www.linkedin.com/sharing/share-offsite/?url=${link}`,
+    x:`https://twitter.com/intent/tweet?text=${text}&url=${link}`,
+    email:`mailto:?subject=${subject}&body=${body}`
+  };
+
+  window.open(urls[channel] || urls.whatsapp, "_blank", "noopener,noreferrer");
+}
+
+function updateCommissionCalculator(){
+  const bookings=Number(document.getElementById("calcBookings")?.value || 0);
+  const avg=Number(document.getElementById("calcAverage")?.value || 0);
+  const rate=Number(latestDashboard?.affiliate?.commissionRate || 3) / 100;
+  const revenue=bookings * avg;
+  const commission=revenue * rate;
+  const box=document.getElementById("commissionEstimate");
+  if(box){
+    box.textContent=`Estimated booking value: £${revenue.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
+Estimated commission: £${commission.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+  }
+}
+
+function buildAffiliateMarketingTools(){
+  const link=referralLink || "";
+  const qr=document.getElementById("qrImage");
+  const qrDownload=document.getElementById("qrDownload");
+  const qrText=document.getElementById("qrLinkText");
+
+  if(qr && link){
+    const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(link)}`;
+    qr.src=qrUrl;
+    if(qrDownload) qrDownload.href=qrUrl;
+    if(qrText) qrText.textContent=link;
+  }
+
+  const available=Number(latestPayout?.availableCommission || latestDashboard?.summary?.payableCommission || 0);
+  const minimum=Number(latestPayout?.minimumPayout || latestDashboard?.affiliate?.minimumPayout || 50);
+  const percent=minimum > 0 ? Math.min(100, Math.max(0, (available / minimum) * 100)) : 0;
+  const fill=document.getElementById("payoutProgressFill");
+  const text=document.getElementById("payoutProgressText");
+
+  if(fill) fill.style.width=percent.toFixed(0) + "%";
+  if(text) text.textContent=`£${available.toFixed(2)} of £${minimum.toFixed(2)} reached`;
+
+  document.getElementById("achievementClick").textContent = Number(latestDashboard?.summary?.clicks || 0) > 0 ? "Complete" : "Progress";
+  document.getElementById("achievementBooking").textContent = Number(latestDashboard?.summary?.paidBookings || 0) > 0 ? "Complete" : "Progress";
+  document.getElementById("achievementRevenue").textContent = Number(latestDashboard?.summary?.paidBookingValue || 0) >= 1000 ? "Complete" : "Progress";
+  document.getElementById("achievementPayout").textContent = available >= minimum ? "Complete" : "Progress";
+
+  updateCommissionCalculator();
+}
+
+function leadStorageKey(){
+  return "msh_affiliate_leads_" + (currentCode || "default");
+}
+
+function readLeads(){
+  try{
+    return JSON.parse(localStorage.getItem(leadStorageKey()) || "[]");
+  }catch(e){
+    return [];
+  }
+}
+
+function writeLeads(leads){
+  localStorage.setItem(leadStorageKey(), JSON.stringify(leads.slice(0,100)));
+}
+
+function saveLead(){
+  const lead = {
+    id: String(Date.now()),
+    company: document.getElementById("leadCompany").value.trim(),
+    contact: document.getElementById("leadContact").value.trim(),
+    email: document.getElementById("leadEmail").value.trim(),
+    phone: document.getElementById("leadPhone").value.trim(),
+    rooms: Number(document.getElementById("leadRooms").value || 0),
+    value: Number(document.getElementById("leadValue").value || 0),
+    status: document.getElementById("leadStatus").value,
+    createdAt: new Date().toISOString()
+  };
+
+  if(!lead.company){
+    showResourceNotice("Enter a company or organisation name.");
+    return;
+  }
+
+  const leads = readLeads();
+  leads.unshift(lead);
+  writeLeads(leads);
+
+  ["leadCompany","leadContact","leadEmail","leadPhone","leadRooms","leadValue"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value="";
+  });
+  document.getElementById("leadStatus").value="Lead";
+
+  renderLeads();
+  showResourceNotice("Lead saved.");
+}
+
+function deleteLead(id){
+  writeLeads(readLeads().filter(x=>x.id !== id));
+  renderLeads();
+}
+
+function renderLeads(){
+  const rows=document.getElementById("leadRows");
+  if(!rows) return;
+
+  const leads=readLeads();
+  if(!leads.length){
+    rows.innerHTML='<tr><td colspan="6">No leads yet.</td></tr>';
+  }else{
+    rows.innerHTML=leads.map(x=>`
+      <tr>
+        <td>${x.company || ""}<div class="small">${x.email || ""}</div></td>
+        <td>${x.contact || ""}<div class="small">${x.phone || ""}</div></td>
+        <td>${Number(x.rooms || 0)}</td>
+        <td>£${Number(x.value || 0).toFixed(2)}</td>
+        <td>${statusBadge(x.status)}</td>
+        <td><div class="leadActions"><button onclick="deleteLead('${x.id}')">Delete</button></div></td>
+      </tr>
+    `).join("");
+  }
+
+  const open = leads.filter(x => !["Won","Lost"].includes(String(x.status || ""))).length;
+  const pipeline = leads.filter(x => String(x.status || "") !== "Lost").reduce((s,x)=>s + Number(x.value || 0),0);
+  const won = leads.filter(x => String(x.status || "") === "Won").reduce((s,x)=>s + Number(x.value || 0),0);
+  const rate = Number(latestDashboard?.affiliate?.commissionRate || 3) / 100;
+  const commission = pipeline * rate;
+
+  const openBox=document.getElementById("pipelineOpen");
+  const pipelineBox=document.getElementById("pipelineValue");
+  const wonBox=document.getElementById("pipelineWon");
+  const commissionBox=document.getElementById("pipelineCommission");
+
+  if(openBox) openBox.textContent=String(open);
+  if(pipelineBox) pipelineBox.textContent=money(pipeline);
+  if(wonBox) wonBox.textContent=money(won);
+  if(commissionBox) commissionBox.textContent=money(commission);
 }
 
 function copyLink(){
