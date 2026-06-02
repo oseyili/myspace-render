@@ -1,5 +1,53 @@
 [
   {
+    "id": "50d6bc7c-79d3-4074-817a-2168ef346eb6",
+    "created_at": "2026-06-02T13:18:30.573Z",
+    "action": "email_skipped",
+    "payload": {
+      "subject": "New tours and attractions request - MySpace Hotel",
+      "to": "reservations@myspace-hotel.com"
+    },
+    "response": {
+      "reason": "No RESEND_API_KEY or SMTP configuration available"
+    }
+  },
+  {
+    "id": "665af551-fb5b-4fd1-b9a6-d283c3292d4b",
+    "created_at": "2026-06-02T13:12:06.508Z",
+    "action": "email_skipped",
+    "payload": {
+      "subject": "New tours and attractions request - MySpace Hotel",
+      "to": "reservations@myspace-hotel.com"
+    },
+    "response": {
+      "reason": "No RESEND_API_KEY or SMTP configuration available"
+    }
+  },
+  {
+    "id": "7cce9780-4ba8-4426-9d49-14677d5f1bb0",
+    "created_at": "2026-06-02T13:11:55.055Z",
+    "action": "email_skipped",
+    "payload": {
+      "subject": "New tours and attractions request - MySpace Hotel",
+      "to": "reservations@myspace-hotel.com"
+    },
+    "response": {
+      "reason": "No RESEND_API_KEY or SMTP configuration available"
+    }
+  },
+  {
+    "id": "b289f79a-47da-4ca6-b58e-5a833ff46e0b",
+    "created_at": "2026-06-02T13:11:28.204Z",
+    "action": "email_skipped",
+    "payload": {
+      "subject": "New tours and attractions request - MySpace Hotel",
+      "to": "reservations@myspace-hotel.com"
+    },
+    "response": {
+      "reason": "No RESEND_API_KEY or SMTP configuration available"
+    }
+  },
+  {
     "id": "5f83849b-552b-4e33-b64b-f11ce38a941f",
     "created_at": "2026-06-02T11:38:29.502Z",
     "action": "email_skipped",

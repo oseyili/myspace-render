@@ -1064,7 +1064,7 @@ function InsurancePortal(props) {
     setNotice("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/ancillary/insurance/book`, {
+      const res = await fetch(`${API_BASE}/api/insurance/book`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1137,7 +1137,7 @@ function TransfersPortal(props) {
     setNotice("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/ancillary/transfers/book`, {
+      const res = await fetch(`${API_BASE}/api/transfers/book`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1214,7 +1214,7 @@ function AttractionsPortal(props) {
     setNotice("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/ancillary/attractions/book`, {
+      const res = await fetch(`${API_BASE}/api/attractions/book`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1290,7 +1290,7 @@ function FeaturedHotelsPortal() {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/api/ancillary/hotels/feature`, {
+      const res = await fetch(`${API_BASE}/api/hotels/feature`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1798,7 +1798,6 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
-
 
 
 

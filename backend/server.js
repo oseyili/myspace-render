@@ -3711,6 +3711,196 @@ app.get("/api/internal/advertising-dashboard", (req, res) => {
 });
 // MSH ANCILLARY REVENUE STREAMS END
 
+
+// MSH REAL ANCILLARY EMAIL ROUTES START
+const MSH_ANCILLARY_DIR = path.join(__dirname, "data");
+const MSH_ANCILLARY_INSURANCE_FILE = path.join(MSH_ANCILLARY_DIR, "travel_insurance_leads.json");
+const MSH_ANCILLARY_TRANSFER_FILE = path.join(MSH_ANCILLARY_DIR, "airport_transfer_leads.json");
+const MSH_ANCILLARY_ATTRACTION_FILE = path.join(MSH_ANCILLARY_DIR, "attraction_leads.json");
+const MSH_ANCILLARY_FEATURED_FILE = path.join(MSH_ANCILLARY_DIR, "hotel_partner_visibility_leads.json");
+
+function mshEnsureJson(file, fallback) {
+  try {
+    if (!fs.existsSync(MSH_ANCILLARY_DIR)) fs.mkdirSync(MSH_ANCILLARY_DIR, { recursive: true });
+    if (!fs.existsSync(file)) fs.writeFileSync(file, JSON.stringify(fallback, null, 2), "utf8");
+  } catch (err) {
+    console.error("MSH ensure json failed:", err.message);
+  }
+}
+
+function mshReadJson(file, fallback) {
+  try {
+    mshEnsureJson(file, fallback);
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch {
+    return fallback;
+  }
+}
+
+function mshWriteJson(file, data) {
+  mshEnsureJson(file, []);
+  fs.writeFileSync(file, JSON.stringify(data, null, 2), "utf8");
+}
+
+function mshClean(v) {
+  return String(v || "").trim();
+}
+
+function mshLeadRef(prefix) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2, 8).toUpperCase()}`;
+}
+
+async function mshSendAncillaryEmail(subject, lead) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from =
+    process.env.RESEND_FROM ||
+    process.env.SMTP_FROM ||
+    process.env.RESERVATIONS_EMAIL ||
+    "reservations@myspace-hotel.com";
+
+  const to =
+    process.env.RESERVATIONS_EMAIL ||
+    process.env.EMAIL_TO ||
+    process.env.SMTP_FROM ||
+    "reservations@myspace-hotel.com";
+
+  const rows = Object.entries(lead)
+    .map(([key, value]) => `<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">${key}</td><td style="padding:8px;border:1px solid #ddd;">${String(value || "")}</td></tr>`)
+    .join("");
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;color:#0b1d51;">
+      <h2>${subject}</h2>
+      <p>A new MySpace Hotel customer or partner request has been received.</p>
+      <table style="border-collapse:collapse;width:100%;max-width:800px;">${rows}</table>
+    </div>
+  `;
+
+  if (!apiKey) {
+    console.error("MSH ancillary email not sent: RESEND_API_KEY missing.");
+    return { sent: false, reason: "RESEND_API_KEY missing" };
+  }
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      from,
+      to,
+      subject,
+      html
+    })
+  });
+
+  const text = await response.text();
+
+  if (!response.ok) {
+    console.error("MSH ancillary email failed:", response.status, text);
+    return { sent: false, reason: text };
+  }
+
+  return { sent: true, provider: "resend" };
+}
+
+app.post("/api/ancillary/insurance/book", async (req, res) => {
+  const leads = mshReadJson(MSH_ANCILLARY_INSURANCE_FILE, []);
+  const lead = {
+    reference: mshLeadRef("INS"),
+    createdAt: new Date().toISOString(),
+    type: "Trip Protection Quote Request",
+    hotelName: mshClean(req.body.hotelName),
+    destination: mshClean(req.body.destination),
+    customerName: mshClean(req.body.customerName),
+    customerEmail: mshClean(req.body.customerEmail),
+    productName: mshClean(req.body.productName),
+    status: "REQUEST_RECEIVED_PRICE_NOT_CONFIRMED"
+  };
+
+  leads.unshift(lead);
+  mshWriteJson(MSH_ANCILLARY_INSURANCE_FILE, leads.slice(0, 5000));
+
+  const email = await mshSendAncillaryEmail("New Trip Protection Quote Request - MySpace Hotel", lead);
+  res.json({ ok: true, message: "Trip protection request received.", lead, emailSent: email.sent });
+});
+
+app.post("/api/ancillary/transfers/book", async (req, res) => {
+  const leads = mshReadJson(MSH_ANCILLARY_TRANSFER_FILE, []);
+  const lead = {
+    reference: mshLeadRef("TRF"),
+    createdAt: new Date().toISOString(),
+    type: "Airport Transfer Quote Request",
+    hotelName: mshClean(req.body.hotelName),
+    city: mshClean(req.body.city),
+    country: mshClean(req.body.country),
+    customerName: mshClean(req.body.customerName),
+    customerEmail: mshClean(req.body.customerEmail),
+    transferType: mshClean(req.body.transferType),
+    pickup: mshClean(req.body.pickup),
+    dropoff: mshClean(req.body.dropoff),
+    travelDate: mshClean(req.body.travelDate),
+    status: "REQUEST_RECEIVED_PRICE_NOT_CONFIRMED"
+  };
+
+  leads.unshift(lead);
+  mshWriteJson(MSH_ANCILLARY_TRANSFER_FILE, leads.slice(0, 5000));
+
+  const email = await mshSendAncillaryEmail("New Airport Transfer Quote Request - MySpace Hotel", lead);
+  res.json({ ok: true, message: "Airport transfer request received.", lead, emailSent: email.sent });
+});
+
+app.post("/api/ancillary/attractions/book", async (req, res) => {
+  const leads = mshReadJson(MSH_ANCILLARY_ATTRACTION_FILE, []);
+  const lead = {
+    reference: mshLeadRef("ACT"),
+    createdAt: new Date().toISOString(),
+    type: "Things To Do Availability Request",
+    hotelName: mshClean(req.body.hotelName),
+    city: mshClean(req.body.city),
+    country: mshClean(req.body.country),
+    customerName: mshClean(req.body.customerName),
+    customerEmail: mshClean(req.body.customerEmail),
+    attractionName: mshClean(req.body.attractionName),
+    category: mshClean(req.body.category),
+    travelDate: mshClean(req.body.travelDate),
+    guests: mshClean(req.body.guests),
+    status: "REQUEST_RECEIVED_PRICE_NOT_CONFIRMED"
+  };
+
+  leads.unshift(lead);
+  mshWriteJson(MSH_ANCILLARY_ATTRACTION_FILE, leads.slice(0, 5000));
+
+  const email = await mshSendAncillaryEmail("New Things To Do Availability Request - MySpace Hotel", lead);
+  res.json({ ok: true, message: "Things to do request received.", lead, emailSent: email.sent });
+});
+
+app.post("/api/ancillary/hotels/feature", async (req, res) => {
+  const leads = mshReadJson(MSH_ANCILLARY_FEATURED_FILE, []);
+  const lead = {
+    reference: mshLeadRef("HOTEL"),
+    createdAt: new Date().toISOString(),
+    type: "Hotel Partner Visibility Request",
+    hotelName: mshClean(req.body.hotelName),
+    country: mshClean(req.body.country),
+    city: mshClean(req.body.city),
+    contactName: mshClean(req.body.contactName),
+    contactEmail: mshClean(req.body.contactEmail),
+    phone: mshClean(req.body.phone),
+    website: mshClean(req.body.website),
+    packageName: mshClean(req.body.packageName),
+    status: "REQUEST_RECEIVED_COMMERCIAL_TERMS_NOT_CONFIRMED"
+  };
+
+  leads.unshift(lead);
+  mshWriteJson(MSH_ANCILLARY_FEATURED_FILE, leads.slice(0, 5000));
+
+  const email = await mshSendAncillaryEmail("New Hotel Partner Visibility Request - MySpace Hotel", lead);
+  res.json({ ok: true, message: "Hotel partner request received.", lead, emailSent: email.sent });
+});
+// MSH REAL ANCILLARY EMAIL ROUTES END
+
 app.listen(PORT, "0.0.0.0", () => {
   const destinations = buildDestinations();
 
@@ -3730,6 +3920,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
