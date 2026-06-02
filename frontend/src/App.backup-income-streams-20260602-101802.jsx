@@ -19,10 +19,6 @@ const ROUTES = {
   reviews: "/#/guest-reviews",
   support: "/#/support-centre",
   partners: "/#/industry-partnerships",
-  insurance: "/#/insurance",
-  transfers: "/#/transfers",
-  attractions: "/#/attractions",
-  featured: "/#/featured-hotels",
   affiliates: "/#/affiliate-network",
   business: "/#/business-portal",
 };
@@ -77,10 +73,6 @@ function currentRoute() {
   if (hash === "#/guest-reviews") return "reviews";
   if (hash === "#/support-centre") return "support";
   if (hash === "#/industry-partnerships") return "partners";
-  if (hash === "#/insurance") return "insurance";
-  if (hash === "#/transfers") return "transfers";
-  if (hash === "#/attractions") return "attractions";
-  if (hash === "#/featured-hotels") return "featured";
   if (hash === "#/affiliate-network") return "affiliates";
   if (hash === "#/business-portal") return "business";
   return "hotels";
@@ -218,6 +210,33 @@ function validHotelImage(hotel) {
   return typeof image === "string" && image.startsWith("http") ? image : "";
 }
 
+
+// MSH LIVE COMPARE PRICE HELPERS START
+async function fetchBestCustomerPrice({ country, city, hotelId, hotelName, currency }) {
+  if (!country || !city || (!hotelId && !hotelName)) return null;
+
+  const params = new URLSearchParams({
+    country: country || "",
+    city: city || "",
+    hotelId: hotelId || "",
+    hotelName: hotelName || "",
+    currency: currency || "GBP",
+  });
+
+  const res = await fetch(`${API_BASE}/api/compare-prices?${params.toString()}`, {
+    cache: "no-store",
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || !data.ok) {
+    throw new Error(data.message || "Could not compare prices right now.");
+  }
+
+  return data;
+}
+// MSH LIVE COMPARE PRICE HELPERS END
+
 function selectedHotelWithRoom(hotel) {
   const firstRoom = Array.isArray(hotel?.rooms) && hotel.rooms.length ? hotel.rooms[0] : null;
 
@@ -269,6 +288,9 @@ export default function App() {
 
   const [reviewSent, setReviewSent] = useState(false);
   const [partnerSent, setPartnerSent] = useState(false);
+  const [compareLoading, setCompareLoading] = useState(false);
+  const [compareResult, setCompareResult] = useState(null);
+  const [compareNotice, setCompareNotice] = useState("");
 
   useEffect(() => {
     try {
@@ -312,7 +334,15 @@ export default function App() {
   const selectedRateSourceTimestamp = hotelRateSourceTimestamp(selectedHotel);
   const totalPrice = selectedNightPrice * Math.max(1, Number(rooms || 1)) * nights;
   const destinationQuery = [selectedHotel?.name, city, country].filter(Boolean).join(", ") || "London";
+  useEffect(() => {
+    try {
+      if (selectedHotel) {
+        localStorage.setItem("msh_selected_hotel", JSON.stringify(selectedHotel));
+      }
+    } catch {}
+  }, [selectedHotel]);
 
+  // msh_selected_hotel_auto_save
   useEffect(() => {
     try {
       if (selectedHotel) {
@@ -428,8 +458,7 @@ export default function App() {
         customerPhone,
         specialRequests,
         rate_source_id: selectedRateSourceId,
-        rate_source_timestamp: selectedRateSourceTimestamp,
-        affiliateCode: savedAffiliateCode,
+        rate_source_timestamp: selectedRateSourceTimestamp,        affiliateCode: savedAffiliateCode,
         affiliate_code: savedAffiliateCode,
         ref: savedAffiliateCode,
       };
@@ -509,7 +538,6 @@ export default function App() {
     fxAmount,
     fxFrom,
     fxTo,
-    affiliateCode,
     setCountry,
     setCity,
     setCheckIn,
@@ -541,10 +569,6 @@ export default function App() {
       {route === "reviews" && <ReviewsPortal reviewSent={reviewSent} setReviewSent={setReviewSent} />}
       {route === "support" && <SupportPortal />}
       {route === "partners" && <PartnersPortal partnerSent={partnerSent} setPartnerSent={setPartnerSent} />}
-      {route === "insurance" && <InsurancePortal {...appProps} />}
-      {route === "transfers" && <TransfersPortal {...appProps} />}
-      {route === "attractions" && <AttractionsPortal {...appProps} />}
-      {route === "featured" && <FeaturedHotelsPortal />}
       {route === "affiliates" && <AffiliateNetworkUltraSafe />}
       {route === "business" && <BusinessPortal />}
       <Footer />
@@ -564,10 +588,6 @@ function Header() {
         <a style={styles.navLink} href={routeUrl(ROUTES.hotels)}>Hotels</a>
         <a style={styles.navLink} href={routeUrl(ROUTES.compare)}>Compare Prices</a>
         <a style={styles.navLink} href={routeUrl(ROUTES.guide)}>Destination Guide</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.insurance)}>Insurance</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.transfers)}>Transfers</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.attractions)}>Attractions</a>
-        <a style={styles.goldLink} href={routeUrl(ROUTES.featured)}>Featured Hotels</a>
         <a style={styles.navLink} href={routeUrl(ROUTES.about)}>About Us</a>
         <a style={styles.navLink} href={routeUrl(ROUTES.faq)}>FAQ</a>
         <a style={styles.navLink} href={routeUrl(ROUTES.reviews)}>Guest Reviews</a>
@@ -629,9 +649,8 @@ function HotelsPage(props) {
           <div style={styles.metrics}>
             <Metric big="Clear" small="Stay totals" />
             <Metric big="Compare" small="Hotel value" />
-            <Metric big="Protect" small="Insurance options" />
-            <Metric big="Transfer" small="Airport support" />
-            <Metric big="Explore" small="Tours and attractions" />
+            <Metric big="Secure" small="Checkout steps" />
+            <Metric big="Helpful" small="Destination guide" />
           </div>
         </div>
       </section>
@@ -642,7 +661,7 @@ function HotelsPage(props) {
         <main>
           <h2 style={styles.title}>MORE STAY OPTIONS</h2>
           <p style={styles.sectionText}>
-            Select a hotel to refresh the booking summary, comparison box, travel extras and alternative hotel options immediately.
+            Select a hotel to refresh the booking summary, comparison box and alternative hotel options immediately.
           </p>
 
           {props.loading ? <div style={styles.empty}>Finding suitable accommodation for your destination...</div> : null}
@@ -659,7 +678,6 @@ function HotelsPage(props) {
 
           <ComparePanel {...props} />
           <AlternativeHotels {...props} />
-          <RevenueAddOns {...props} />
         </main>
 
         <BookingSummary {...props} />
@@ -818,9 +836,7 @@ function BookingSummary(props) {
           </button>
 
           <a style={styles.outlineBtn} href={routeUrl(ROUTES.compare)}>Compare Prices</a>
-          <a style={styles.outlineBtn} href={routeUrl(ROUTES.insurance)}>Add Travel Insurance</a>
-          <a style={styles.outlineBtn} href={routeUrl(ROUTES.transfers)}>Request Airport Transfer</a>
-          <a style={styles.outlineBtn} href={routeUrl(ROUTES.attractions)}>Add Tours & Attractions</a>
+          <a style={styles.outlineBtn} href={mapSearch("things to do", props.destinationQuery)} target="_blank" rel="noreferrer">Explore Destination</a>
         </>
       )}
     </aside>
@@ -828,7 +844,18 @@ function BookingSummary(props) {
 }
 
 function ComparePanel(props) {
-  if (!props.selectedHotel) return null;
+  if (!props.selectedHotel) {
+    try {
+      const saved = localStorage.getItem("msh_selected_hotel");
+      if (saved) {
+        const hotel = JSON.parse(saved);
+        if (hotel) {
+          return <ComparePanel {...props} selectedHotel={hotel} />;
+        }
+      }
+    } catch {}
+    return null;
+  }
 
   return (
     <section style={styles.panel}>
@@ -836,7 +863,7 @@ function ComparePanel(props) {
         <div>
           <div style={styles.kicker}>Compare Prices</div>
           <h2 style={styles.titleSmall}>Compare your selected stay</h2>
-          <p style={styles.sectionText}>Review stay choices and more stay options before continuing.</p>
+          <p style={styles.sectionText}>Review stay choices and MORE STAY OPTIONS before continuing.</p>
         </div>
         <a style={styles.primaryLink} href={routeUrl(ROUTES.compare)}>Open Compare Page</a>
       </div>
@@ -912,7 +939,7 @@ function ComparePortal(props) {
 
     if (!selected) {
       setLiveCompare(null);
-      setLiveNotice("Select a hotel from the Hotels page first. The best available price check will appear here.");
+      setLiveNotice("Select a hotel from the Hotels page first. The Today's Best Available Price check will appear here.");
       return;
     }
 
@@ -939,7 +966,7 @@ function ComparePortal(props) {
 
       setLiveCompare(data);
       setLiveNotice("");
-    } catch {
+    } catch (err) {
       setLiveCompare(null);
       setLiveNotice("The live price comparison could not be refreshed right now. Please try again.");
     } finally {
@@ -955,8 +982,10 @@ function ComparePortal(props) {
   const summary = liveCompare?.comparison_summary || null;
   const bestAmount = Number(customerOffer?.amount || summary?.best_amount || props.totalPrice || 0);
   const bestCurrency = customerOffer?.currency || summary?.currency || selectedCurrency || "GBP";
+  const checkedCount = Number(summary?.compared_options || 0);
   const hotelName = customerOffer?.hotelName || selectedHotelName || "Selected hotel";
   const roomName = customerOffer?.roomName || props.selectedRoomName || "Available room";
+  const updatedAt = customerOffer?.rate_source_timestamp || "";
 
   return (
     <PortalShell
@@ -966,394 +995,132 @@ function ComparePortal(props) {
     >
       {!selected ? (
         <div style={styles.empty}>
-          Select a hotel from the Hotels page first, then return here to compare today's best available price for that exact property.
+          Select a hotel from the Hotels page first, then return here to Compare today's best available price for that exact property.
         </div>
       ) : (
         <>
-          <section style={styles.panel}>
-            <div style={styles.panelHeader}>
+          <section style={{
+            background: "#ffffff",
+            borderRadius: 30,
+            padding: 30,
+            boxShadow: "0 8px 25px rgba(0,0,0,.06)",
+            border: "1px solid #dce6f3",
+            marginBottom: 28
+          }}>
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 20,
+              alignItems: "flex-start",
+              flexWrap: "wrap"
+            }}>
               <div>
                 <div style={styles.kicker}>Price comparison</div>
-                <h2 style={styles.titleSmall}>Today's Best Available Price: {hotelName}</h2>
-                <p style={styles.sectionText}>Review your selected stay clearly before continuing to secure checkout.</p>
+                <h2 style={styles.titleSmall}>Today's Best Available Price{hotelName}</h2>
+                <p style={styles.sectionText}>
+                  Review your selected stay clearly before continuing to secure checkout.
+                </p>
               </div>
+
+              
             </div>
 
             {liveNotice ? <div style={styles.notice}>{liveNotice}</div> : null}
 
-            <div style={styles.liveCompareBox}>
-              <div>
+            <div style={{
+              marginTop: 24,
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1.4fr) 330px",
+              gap: 22,
+              alignItems: "stretch"
+            }}>
+              <div style={{
+                background: "#ecfdf3",
+                border: "1px solid #bbf7d0",
+                borderRadius: 24,
+                padding: 26
+              }}>
                 <div style={styles.greenBadge}>
                   {liveLoading ? "Checking current rates" : "Recommended stay option"}
                 </div>
-                <h3 style={styles.cardTitle}>{hotelName}</h3>
-                <div style={styles.muted}>{selectedCity}, {selectedCountry}</div>
-                <div style={styles.strong}>Board Basis: {roomName}</div>
-                <p style={styles.cardText}>You can review this stay with confidence before continuing to secure checkout.</p>
+
+                <h3 style={{
+                  fontSize: 30,
+                  lineHeight: 1.15,
+                  margin: "12px 0 10px",
+                  fontWeight: 950,
+                  color: "#0b1d51"
+                }}>
+                  {hotelName}
+                </h3>
+
+                <div style={styles.muted}>
+                  {selectedCity}, {selectedCountry}
+                </div>
+
+                <div style={{
+                  marginTop: 16,
+                  display: "grid",
+                  gap: 8,
+                  color: "#30466e",
+                  fontWeight: 850
+                }}>
+                  <div>Board Basis: {roomName}</div>
+                  <div></div>
+                </div>
+
+                <p style={{
+                  marginTop: 18,
+                  color: "#365943",
+                  fontWeight: 800,
+                  lineHeight: 1.6
+                }}>
+                  You can review this stay with confidence before continuing to secure checkout.
+                </p>
               </div>
 
-              <div style={styles.liveComparePrice}>
-                {bestCurrency} {money(bestAmount)}
-                <div style={styles.small}>Reviewed before secure checkout</div>
+              <div style={{
+                background: "#0b1d51",
+                color: "#ffffff",
+                borderRadius: 24,
+                padding: 26,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                textAlign: "center"
+              }}>
+                <div style={{
+                  fontSize: 16,
+                  fontWeight: 900,
+                  color: "#dbe7ff",
+                  marginBottom: 12
+                }}>
+                  Today's Best Available Price
+                </div>
+
+                <div style={{
+                  fontSize: 44,
+                  lineHeight: 1,
+                  fontWeight: 950,
+                  letterSpacing: "-1px"
+                }}>
+                  {bestCurrency} {money(bestAmount)}
+                </div>
+
+                <div style={{
+                  marginTop: 12,
+                  color: "#dbe7ff",
+                  fontWeight: 800,
+                  lineHeight: 1.4
+                }}>
+                  Reviewed before secure checkout
+                </div>
               </div>
             </div>
           </section>
-
-          <RevenueAddOns {...props} />
           <AlternativeHotels {...props} />
         </>
       )}
-    </PortalShell>
-  );
-}
-
-function RevenueAddOns(props) {
-  if (!props.selectedHotel) return null;
-
-  return (
-    <section style={styles.panel}>
-      <div style={styles.panelHeader}>
-        <div>
-          <div style={styles.kicker}>Add more to your trip</div>
-          <h2 style={styles.titleSmall}>Travel extras for this stay</h2>
-          <p style={styles.sectionText}>
-            Add travel protection, Hotel Airport Transfers and destination experiences to make this booking more complete.
-          </p>
-        </div>
-      </div>
-
-      <div style={styles.cardGrid}>
-        <InfoCard title="Travel Insurance" text="Protect the trip with cancellation, travel disruption and emergency support cover." />
-        <InfoCard title="Hotel Airport Transfers" text="Request airport pickup or hotel drop-off support for a smoother journey." />
-        <InfoCard title="Tours & Attractions" text="Explore museums, family attractions, city tours, cultural sites and local experiences." />
-        <InfoCard title="Hotel Partner Visibility" text="Hotels can request promoted placement and destination visibility through MySpace Hotel." />
-      </div>
-
-      <div style={styles.compareGrid}>
-        <a style={styles.primaryLink} href={routeUrl(ROUTES.insurance)}>View Insurance</a>
-        <a style={styles.primaryLink} href={routeUrl(ROUTES.transfers)}>Plan My Transfer</a>
-        <a style={styles.primaryLink} href={routeUrl(ROUTES.attractions)}>View Attractions</a>
-        <a style={styles.primaryLink} href={routeUrl(ROUTES.featured)}>Promote a Hotel</a>
-      </div>
-    </section>
-  );
-}
-
-function InsurancePortal(props) {
-  const [options, setOptions] = useState([]);
-  const [notice, setNotice] = useState("");
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const params = new URLSearchParams({
-          destination: props.destinationQuery || "",
-          tripTotal: String(props.totalPrice || 0),
-        });
-        const res = await fetch(`${API_BASE}/api/insurance/options?${params}`, { cache: "no-store" });
-        const data = await res.json();
-        setOptions(Array.isArray(data.options) ? data.options : []);
-      } catch {
-        setNotice("Travel insurance options could not be loaded right now.");
-      }
-    }
-    load();
-  }, [props.destinationQuery, props.totalPrice]);
-
-  async function requestInsurance(option) {
-    setNotice("");
-
-    try {
-      const res = await fetch(`${API_BASE}/api/insurance/book`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          hotelName: props.selectedHotel?.name || "",
-          destination: props.destinationQuery,
-          customerName: props.customerName,
-          customerEmail: props.customerEmail,
-          productId: option.id,
-          productName: option.name,
-          amount: option.price,
-          currency: option.currency,
-          commissionRate: option.commissionRate,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.ok) {
-        setNotice(data.message || "Insurance request could not be submitted.");
-        return;
-      }
-
-      setNotice("Travel insurance request received by MySpace Hotel.");
-    } catch {
-      setNotice("Insurance request could not be submitted right now.");
-    }
-  }
-
-  return (
-    <PortalShell title="Travel Insurance" subtitle="Give customers extra confidence before they travel." badge="Trip protection">
-      {notice ? <div style={styles.notice}>{notice}</div> : null}
-      <div style={styles.cardGrid}>
-        {options.map((option) => (
-          <div key={option.id} style={styles.infoCard}>
-            <h3 style={styles.cardTitle}>{option.name}</h3>
-            <p style={styles.cardText}>{option.description}</p>
-            <div style={styles.softBox}>Live cover pricing is confirmed after the customer request is reviewed.</div>
-            <button style={styles.primaryBtn} onClick={() => requestInsurance(option)}>
-              Request Live Insurance Quote
-            </button>
-          </div>
-        ))}
-      </div>
-    </PortalShell>
-  );
-}
-
-function TransfersPortal(props) {
-  const [options, setOptions] = useState([]);
-  const [notice, setNotice] = useState("");
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const params = new URLSearchParams({
-          city: props.city || props.selectedHotel?.city || "",
-          currency: props.selectedCurrency || props.currency || "GBP",
-        });
-        const res = await fetch(`${API_BASE}/api/transfers/search?${params}`, { cache: "no-store" });
-        const data = await res.json();
-        setOptions(Array.isArray(data.options) ? data.options : []);
-      } catch {
-        setNotice("Airport transfer options could not be loaded right now.");
-      }
-    }
-    load();
-  }, [props.city, props.selectedHotel, props.selectedCurrency, props.currency]);
-
-  async function requestTransfer(option) {
-    setNotice("");
-
-    try {
-      const res = await fetch(`${API_BASE}/api/transfers/book`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          hotelName: props.selectedHotel?.name || "",
-          city: props.city || props.selectedHotel?.city || "",
-          country: props.country || props.selectedHotel?.country || "",
-          customerName: props.customerName,
-          customerEmail: props.customerEmail,
-          transferType: option.name,
-          pickup: "Airport",
-          dropoff: props.selectedHotel?.name || "Hotel",
-          travelDate: props.checkIn,
-          amount: option.price,
-          currency: option.currency,
-          commissionRate: option.commissionRate,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.ok) {
-        setNotice(data.message || "Transfer request could not be submitted.");
-        return;
-      }
-
-      setNotice("Airport transfer request received by MySpace Hotel.");
-    } catch {
-      setNotice("Transfer request could not be submitted right now.");
-    }
-  }
-
-  return (
-    <PortalShell title="Arrive Comfortably at Your Hotel" subtitle="Request a fixed-price airport transfer before you travel, with pickup, luggage and hotel drop-off support arranged around your stay." badge="Hotel Airport Transfers">
-      {notice ? <div style={styles.notice}>{notice}</div> : null}
-      <div style={styles.cardGrid}>
-        {options.map((option) => (
-          <div key={option.id} style={styles.infoCard}>
-            <h3 style={styles.cardTitle}>{option.name}</h3>
-            <p style={styles.cardText}>{option.description}</p>
-            <div style={styles.small}>Passengers: {option.passengers}</div>
-            <div style={styles.softBox}>Request your transfer before you travel. We will confirm the best available option for your airport, hotel, travel time, passengers and luggage.</div>
-            <button style={styles.primaryBtn} onClick={() => requestTransfer(option)}>
-              Request My Transfer Quote
-            </button>
-          </div>
-        ))}
-      </div>
-    </PortalShell>
-  );
-}
-
-function AttractionsPortal(props) {
-  const [attractions, setAttractions] = useState([]);
-  const [notice, setNotice] = useState("");
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const params = new URLSearchParams({
-          city: props.city || props.selectedHotel?.city || "",
-          currency: props.selectedCurrency || props.currency || "GBP",
-        });
-        const res = await fetch(`${API_BASE}/api/attractions?${params}`, { cache: "no-store" });
-        const data = await res.json();
-        setAttractions(Array.isArray(data.attractions) ? data.attractions : []);
-      } catch {
-        setNotice("Tours and attractions could not be loaded right now.");
-      }
-    }
-    load();
-  }, [props.city, props.selectedHotel, props.selectedCurrency, props.currency]);
-
-  async function requestAttraction(item) {
-    setNotice("");
-
-    try {
-      const res = await fetch(`${API_BASE}/api/attractions/book`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          hotelName: props.selectedHotel?.name || "",
-          city: props.city || props.selectedHotel?.city || "",
-          country: props.country || props.selectedHotel?.country || "",
-          customerName: props.customerName,
-          customerEmail: props.customerEmail,
-          attractionId: item.id,
-          attractionName: item.name,
-          category: item.category,
-          travelDate: props.checkIn,
-          guests: props.guests,
-          amount: item.price,
-          currency: item.currency,
-          commissionRate: item.commissionRate,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.ok) {
-        setNotice(data.message || "Attraction request could not be submitted.");
-        return;
-      }
-
-      setNotice("Tours and attractions request received by MySpace Hotel.");
-    } catch {
-      setNotice("Attraction request could not be submitted right now.");
-    }
-  }
-
-  return (
-    <PortalShell title="Tours & Attractions" subtitle="Add destination experiences around the customer's hotel stay." badge="Experiences">
-      {notice ? <div style={styles.notice}>{notice}</div> : null}
-      <div style={styles.cardGrid}>
-        {attractions.map((item) => (
-          <div key={item.id} style={styles.infoCard}>
-            <div style={styles.greenBadge}>{item.category}</div>
-            <h3 style={styles.cardTitle}>{item.name}</h3>
-            <p style={styles.cardText}>{item.description}</p>
-            <div style={styles.softBox}>Live attraction pricing depends on date, availability, supplier and guest numbers.</div>
-            <button style={styles.primaryBtn} onClick={() => requestAttraction(item)}>
-              Request Live Experience Quote
-            </button>
-          </div>
-        ))}
-      </div>
-    </PortalShell>
-  );
-}
-
-function FeaturedHotelsPortal() {
-  const [hotelName, setHotelName] = useState("");
-  const [country, setCountry] = useState("");
-  const [city, setCity] = useState("");
-  const [contactName, setContactName] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [website, setWebsite] = useState("");
-  const [packageName, setPackageName] = useState("BRONZE");
-  const [notice, setNotice] = useState("");
-
-  const prices = { BRONZE: 49, SILVER: 99, GOLD: 199, PLATINUM: 499 };
-
-  async function submit(e) {
-    e.preventDefault();
-    setNotice("");
-
-    if (!hotelName.trim() || !contactName.trim() || !contactEmail.trim()) {
-      setNotice("Please enter hotel name, contact name and contact email.");
-      return;
-    }
-
-    try {
-      const res = await fetch(`${API_BASE}/api/hotels/feature`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          hotelName,
-          country,
-          city,
-          contactName,
-          contactEmail,
-          phone,
-          website,
-          packageName,
-          amount: prices[packageName],
-          currency: "GBP",
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.ok) {
-        setNotice(data.message || "Featured hotel request could not be submitted.");
-        return;
-      }
-
-      setNotice("Hotel Partner Visibility request received by MySpace Hotel.");
-      setHotelName("");
-      setCountry("");
-      setCity("");
-      setContactName("");
-      setContactEmail("");
-      setPhone("");
-      setWebsite("");
-      setPackageName("BRONZE");
-    } catch {
-      setNotice("Featured hotel request could not be submitted right now.");
-    }
-  }
-
-  return (
-    <PortalShell title="Hotel Partner Visibility" subtitle="Accommodation providers can request partnership and visibility opportunities with MySpace Hotel." badge="Hotel growth">
-      <div style={styles.cardGrid}>
-        <InfoCard title="Starter Visibility Request" text="Request introductory visibility for your property. Commercial terms are confirmed after review. Commercial pricing is confirmed after review." />
-        <InfoCard title="Growth Visibility Request" text="Request stronger destination visibility for your property. Commercial terms are confirmed after review. Commercial pricing is confirmed after review." />
-        <InfoCard title="Priority Visibility Request" text="Request priority visibility for selected destination campaigns. Commercial terms are confirmed after review. Commercial pricing is confirmed after review." />
-        <InfoCard title="Premium Visibility Request" text="Request premium visibility opportunities. Commercial terms are confirmed after review. Commercial pricing is confirmed after review." />
-      </div>
-
-      <form style={styles.form} onSubmit={submit}>
-        <input style={styles.input} placeholder="Hotel name" value={hotelName} onChange={(e) => setHotelName(e.target.value)} />
-        <input style={styles.input} placeholder="Country" value={country} onChange={(e) => setCountry(e.target.value)} />
-        <input style={styles.input} placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
-        <input style={styles.input} placeholder="Contact name" value={contactName} onChange={(e) => setContactName(e.target.value)} />
-        <input style={styles.input} type="email" placeholder="Contact email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
-        <input style={styles.input} placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
-        <input style={styles.input} placeholder="Website" value={website} onChange={(e) => setWebsite(e.target.value)} />
-        <select style={styles.input} value={packageName} onChange={(e) => setPackageName(e.target.value)}>
-          <option value="BRONZE">Starter Visibility Request</option>
-          <option value="SILVER">Growth Visibility Request</option>
-          <option value="GOLD">Priority Visibility Request</option>
-          <option value="PLATINUM">Premium Visibility Request</option>
-        </select>
-        <button style={styles.primaryBtn}>Request Hotel Partner Review</button>
-        {notice ? <div style={styles.notice}>{notice}</div> : null}
-      </form>
     </PortalShell>
   );
 }
@@ -1395,7 +1162,7 @@ function FaqPortal() {
         <FaqItem q="How do I search for a hotel?" a="Select your country, city, dates, guests and rooms, then choose Find Hotels. Available hotel options will appear below the search box." />
         <FaqItem q="When is the final price confirmed?" a="The stay total is shown before checkout. Final payment details are confirmed securely before payment is completed." />
         <FaqItem q="Can I compare hotels in the same destination?" a="Yes. After selecting a hotel, MySpace Hotel shows comparison choices and MORE STAY OPTIONS where available." />
-        <FaqItem q="Can I add insurance, transfers or attractions?" a="Yes. Select a hotel first, then use the Insurance, Transfers and Attractions pages to request additional travel services." />
+        <FaqItem q="Can I request support before travelling?" a="Yes. The Support Centre and Destination Guide help customers review important travel and local service information." />
         <FaqItem q="Can hotels or partners work with MySpace Hotel?" a="Yes. Accommodation providers and travel technology partners can use the Industry Partnerships page to contact MySpace Hotel." />
       </div>
     </PortalShell>
@@ -1572,19 +1339,6 @@ function PartnersPortal({ partnerSent, setPartnerSent }) {
   );
 }
 
-function AffiliateNetworkUltraSafe() {
-  return (
-    <PortalShell title="Affiliate Network" subtitle="Promote MySpace Hotel and earn on qualifying completed stays." badge="Affiliate growth">
-      <div style={styles.cardGrid}>
-        <InfoCard title="Referral links" text="Approved affiliates receive a referral link to promote MySpace Hotel." />
-        <InfoCard title="Commission tracking" text="Clicks, bookings and payable commissions are tracked after approval." />
-        <InfoCard title="Payout review" text="Payouts are reviewed monthly once the minimum payout threshold is reached." />
-      </div>
-      <a style={styles.primaryLink} href="/affiliate-network.html">Open Affiliate Portal</a>
-    </PortalShell>
-  );
-}
-
 function BusinessPortal() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -1728,7 +1482,7 @@ const styles = {
   darkBtn: { marginTop: 16, width: "100%", background: "#0b1d51", color: "#fff", border: "none", borderRadius: 15, padding: 15, fontSize: 16, fontWeight: 950, cursor: "pointer" },
   payBtn: { marginTop: 18, width: "100%", background: "#10b981", color: "#fff", border: "none", borderRadius: 17, padding: 17, fontSize: 17, fontWeight: 950, cursor: "pointer" },
   outlineBtn: { display: "block", marginTop: 12, border: "2px solid #d9e4f2", borderRadius: 17, padding: 15, textAlign: "center", color: "#0b1d51", background: "#fff", textDecoration: "none", fontWeight: 950 },
-  primaryLink: { display: "inline-block", background: "#2750db", color: "#fff", borderRadius: 16, padding: "14px 18px", textDecoration: "none", fontWeight: 950, textAlign: "center" },
+  primaryLink: { display: "inline-block", background: "#2750db", color: "#fff", borderRadius: 16, padding: "14px 18px", textDecoration: "none", fontWeight: 950 },
   textLink: { color: "#2750db", textDecoration: "none", fontWeight: 950 },
   notice: { maxWidth: 1450, margin: "20px auto", background: "#fff7ed", color: "#9a3412", border: "1px solid #fed7aa", borderRadius: 18, padding: 18, fontWeight: 900 },
   contentGrid: { maxWidth: 1540, margin: "0 auto", padding: "40px 34px 60px", display: "grid", gridTemplateColumns: "minmax(0,1fr) 420px", gap: 28, alignItems: "start" },
@@ -1772,6 +1526,8 @@ const styles = {
   comparePrice: { marginTop: 14, color: "#2750db", fontSize: 24, fontWeight: 950 },
   liveCompareBox: { marginTop: 22, background: "#ecfdf3", border: "1px solid #bbf7d0", borderRadius: 24, padding: 24, display: "grid", gridTemplateColumns: "minmax(0,1.4fr) 260px", gap: 20, alignItems: "center" },
   liveComparePrice: { background: "#fff", color: "#0b1d51", borderRadius: 20, padding: 22, fontSize: 30, fontWeight: 950, textAlign: "center", boxShadow: "0 8px 20px rgba(0,0,0,.05)" },
+  compareMiniGrid: { gridColumn: "1 / -1", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 12 },
+  compareMini: { background: "#fff", borderRadius: 18, padding: 16, display: "grid", gap: 6, color: "#30466e", fontWeight: 850 },
   altGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))", gap: 18, marginTop: 18 },
   altCard: { background: "#fff", border: "1px solid #dce6f3", borderRadius: 22, overflow: "hidden" },
   altImage: { width: "100%", height: 145, objectFit: "cover" },
@@ -1798,6 +1554,31 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

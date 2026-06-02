@@ -1,0 +1,19 @@
+[
+  {
+    "id": "b282b1da-c32b-4292-800f-574bc360f95d",
+    "reference": "INS-1780399526023-7A1F4C",
+    "createdAt": "2026-06-02T11:25:26.024Z",
+    "bookingRef": "",
+    "hotelName": "",
+    "destination": "London",
+    "customerName": "",
+    "customerEmail": "",
+    "productId": "family-trip-cover",
+    "productName": "Family Trip Cover",
+    "amount": 0,
+    "currency": "GBP",
+    "commissionRate": 25,
+    "commissionAmount": 0,
+    "status": "REQUESTED"
+  }
+]

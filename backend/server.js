@@ -3306,6 +3306,411 @@ app.get("/api/certification/logs", (req, res) => {
   });
 });
 
+
+// MSH ANCILLARY REVENUE STREAMS START
+const INSURANCE_BOOKINGS_FILE = path.join(DATA_DIR, "travel_insurance_bookings.json");
+const TRANSFER_BOOKINGS_FILE = path.join(DATA_DIR, "airport_transfer_bookings.json");
+const ATTRACTION_BOOKINGS_FILE = path.join(DATA_DIR, "attraction_bookings.json");
+const FEATURED_HOTELS_FILE = path.join(DATA_DIR, "featured_hotel_advertising.json");
+
+ensureFile(INSURANCE_BOOKINGS_FILE, []);
+ensureFile(TRANSFER_BOOKINGS_FILE, []);
+ensureFile(ATTRACTION_BOOKINGS_FILE, []);
+ensureFile(FEATURED_HOTELS_FILE, []);
+
+function ancillaryRef(prefix) {
+  return `${prefix}-${Date.now()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
+}
+
+function ancillaryCommission(amount, rate) {
+  return money(number(amount) * number(rate) / 100);
+}
+
+app.get("/api/insurance/options", (req, res) => {
+  const destination = clean(req.query.destination || req.query.city || "your trip");
+  const tripTotal = money(req.query.tripTotal || req.query.total || 0);
+  const base = tripTotal > 0 ? Math.max(12, tripTotal * 0.06) : 24;
+
+  res.json({
+    ok: true,
+    destination,
+    options: [
+      {
+        id: "single-trip-standard",
+        name: "Single Trip Standard",
+        description: "Trip cancellation, travel disruption and emergency support cover.",
+        price: 0,
+        currency: "GBP",
+        commissionRate: 25,
+        recommended: true
+      },
+      {
+        id: "family-trip-cover",
+        name: "Family Trip Cover",
+        description: "Flexible travel protection for families travelling together.",
+        price: 0,
+        currency: "GBP",
+        commissionRate: 25,
+        recommended: false
+      },
+      {
+        id: "business-travel-cover",
+        name: "Business Travel Cover",
+        description: "Travel protection designed for business and corporate trips.",
+        price: 0,
+        currency: "GBP",
+        commissionRate: 25,
+        recommended: false
+      }
+    ]
+  });
+});
+
+app.post("/api/insurance/book", async (req, res) => {
+  const rows = readJSON(INSURANCE_BOOKINGS_FILE, []);
+  const amount = money(req.body.amount || req.body.price || 0);
+  const commissionRate = number(req.body.commissionRate || 25);
+
+  const row = {
+    id: crypto.randomUUID(),
+    reference: ancillaryRef("INS"),
+    createdAt: nowISO(),
+    bookingRef: clean(req.body.bookingRef),
+    hotelName: clean(req.body.hotelName),
+    destination: clean(req.body.destination || req.body.city),
+    customerName: clean(req.body.customerName),
+    customerEmail: clean(req.body.customerEmail),
+    productId: clean(req.body.productId),
+    productName: clean(req.body.productName || "Travel Insurance"),
+    amount,
+    currency: clean(req.body.currency || "GBP").toUpperCase(),
+    commissionRate,
+    commissionAmount: ancillaryCommission(amount, commissionRate),
+    status: "REQUESTED"
+  };
+
+  rows.unshift(row);
+  writeJSON(INSURANCE_BOOKINGS_FILE, rows.slice(0, 5000));
+
+  await sendEmailNotification("New travel insurance request - MySpace Hotel", [
+    ["Reference", row.reference],
+    ["Hotel booking", row.bookingRef],
+    ["Hotel", row.hotelName],
+    ["Destination", row.destination],
+    ["Customer", row.customerName],
+    ["Email", row.customerEmail],
+    ["Product", row.productName],
+    ["Amount", `${row.currency} ${row.amount}`],
+    ["Commission estimate", `${row.currency} ${row.commissionAmount}`],
+    ["Created", row.createdAt]
+  ]);
+
+  res.json({
+    ok: true,
+    message: "Travel insurance request received.",
+    insurance: row
+  });
+});
+
+app.get("/api/transfers/search", (req, res) => {
+  const city = clean(req.query.city || "Destination");
+  const currency = clean(req.query.currency || "GBP").toUpperCase();
+
+  res.json({
+    ok: true,
+    city,
+    currency,
+    options: [
+      {
+        id: "airport-standard",
+        name: "Standard Airport Transfer",
+        description: `Private transfer between the airport and your hotel in ${city}.`,
+        price: 0,
+        currency,
+        commissionRate: 18,
+        passengers: "1-3"
+      },
+      {
+        id: "airport-family",
+        name: "Family / Group Transfer",
+        description: `Larger vehicle for families, groups and luggage in ${city}.`,
+        price: 0,
+        currency,
+        commissionRate: 18,
+        passengers: "4-7"
+      },
+      {
+        id: "airport-executive",
+        name: "Executive Transfer",
+        description: `Premium transfer option for business and comfort travel in ${city}.`,
+        price: 0,
+        currency,
+        commissionRate: 18,
+        passengers: "1-3"
+      }
+    ]
+  });
+});
+
+app.post("/api/transfers/book", async (req, res) => {
+  const rows = readJSON(TRANSFER_BOOKINGS_FILE, []);
+  const amount = money(req.body.amount || req.body.price || 0);
+  const commissionRate = number(req.body.commissionRate || 18);
+
+  const row = {
+    id: crypto.randomUUID(),
+    reference: ancillaryRef("TRF"),
+    createdAt: nowISO(),
+    bookingRef: clean(req.body.bookingRef),
+    hotelName: clean(req.body.hotelName),
+    city: clean(req.body.city),
+    country: clean(req.body.country),
+    customerName: clean(req.body.customerName),
+    customerEmail: clean(req.body.customerEmail),
+    transferType: clean(req.body.transferType || req.body.productName || "Airport Transfer"),
+    pickup: clean(req.body.pickup || "Airport"),
+    dropoff: clean(req.body.dropoff || req.body.hotelName || "Hotel"),
+    travelDate: clean(req.body.travelDate),
+    amount,
+    currency: clean(req.body.currency || "GBP").toUpperCase(),
+    commissionRate,
+    commissionAmount: ancillaryCommission(amount, commissionRate),
+    status: "REQUESTED"
+  };
+
+  rows.unshift(row);
+  writeJSON(TRANSFER_BOOKINGS_FILE, rows.slice(0, 5000));
+
+  await sendEmailNotification("New airport transfer request - MySpace Hotel", [
+    ["Reference", row.reference],
+    ["Hotel booking", row.bookingRef],
+    ["Hotel", row.hotelName],
+    ["Destination", `${row.city}, ${row.country}`],
+    ["Customer", row.customerName],
+    ["Email", row.customerEmail],
+    ["Transfer", row.transferType],
+    ["Route", `${row.pickup} to ${row.dropoff}`],
+    ["Amount", `${row.currency} ${row.amount}`],
+    ["Commission estimate", `${row.currency} ${row.commissionAmount}`],
+    ["Created", row.createdAt]
+  ]);
+
+  res.json({
+    ok: true,
+    message: "Airport transfer request received.",
+    transfer: row
+  });
+});
+
+app.get("/api/attractions", (req, res) => {
+  const city = clean(req.query.city || "Destination");
+  const currency = clean(req.query.currency || "GBP").toUpperCase();
+
+  res.json({
+    ok: true,
+    city,
+    currency,
+    attractions: [
+      {
+        id: "city-tour",
+        name: `${city} City Tour`,
+        category: "Sightseeing",
+        description: "A customer-friendly city tour option for discovering the destination.",
+        price: 0,
+        currency,
+        commissionRate: 15
+      },
+      {
+        id: "museum-culture-pass",
+        name: "Museums and Culture Pass",
+        category: "Culture",
+        description: "A useful option for museums, galleries and cultural attractions.",
+        price: 0,
+        currency,
+        commissionRate: 15
+      },
+      {
+        id: "family-attractions",
+        name: "Family Attractions",
+        category: "Family",
+        description: "Family-friendly attractions such as parks, zoos and visitor experiences.",
+        price: 0,
+        currency,
+        commissionRate: 15
+      },
+      {
+        id: "evening-experience",
+        name: "Evening Experience",
+        category: "Experience",
+        description: "Evening activity suggestions for customers who want more from their trip.",
+        price: 0,
+        currency,
+        commissionRate: 15
+      }
+    ]
+  });
+});
+
+app.post("/api/attractions/book", async (req, res) => {
+  const rows = readJSON(ATTRACTION_BOOKINGS_FILE, []);
+  const amount = money(req.body.amount || req.body.price || 0);
+  const commissionRate = number(req.body.commissionRate || 15);
+
+  const row = {
+    id: crypto.randomUUID(),
+    reference: ancillaryRef("ACT"),
+    createdAt: nowISO(),
+    bookingRef: clean(req.body.bookingRef),
+    hotelName: clean(req.body.hotelName),
+    city: clean(req.body.city),
+    country: clean(req.body.country),
+    customerName: clean(req.body.customerName),
+    customerEmail: clean(req.body.customerEmail),
+    attractionId: clean(req.body.attractionId),
+    attractionName: clean(req.body.attractionName || "Tours and Attractions"),
+    category: clean(req.body.category),
+    travelDate: clean(req.body.travelDate),
+    guests: number(req.body.guests || 1),
+    amount,
+    currency: clean(req.body.currency || "GBP").toUpperCase(),
+    commissionRate,
+    commissionAmount: ancillaryCommission(amount, commissionRate),
+    status: "REQUESTED"
+  };
+
+  rows.unshift(row);
+  writeJSON(ATTRACTION_BOOKINGS_FILE, rows.slice(0, 5000));
+
+  await sendEmailNotification("New tours and attractions request - MySpace Hotel", [
+    ["Reference", row.reference],
+    ["Hotel booking", row.bookingRef],
+    ["Hotel", row.hotelName],
+    ["Destination", `${row.city}, ${row.country}`],
+    ["Customer", row.customerName],
+    ["Email", row.customerEmail],
+    ["Attraction", row.attractionName],
+    ["Guests", String(row.guests)],
+    ["Amount", `${row.currency} ${row.amount}`],
+    ["Commission estimate", `${row.currency} ${row.commissionAmount}`],
+    ["Created", row.createdAt]
+  ]);
+
+  res.json({
+    ok: true,
+    message: "Tours and attractions request received.",
+    attractionBooking: row
+  });
+});
+
+app.post("/api/hotels/feature", async (req, res) => {
+  const rows = readJSON(FEATURED_HOTELS_FILE, []);
+  const packageName = clean(req.body.packageName || "Bronze").toUpperCase();
+  const amountMap = { BRONZE: 49, SILVER: 99, GOLD: 199, PLATINUM: 499 };
+  const amount = money(req.body.amount || amountMap[packageName] || 49);
+
+  const row = {
+    id: crypto.randomUUID(),
+    reference: ancillaryRef("AD"),
+    createdAt: nowISO(),
+    hotelName: clean(req.body.hotelName),
+    country: clean(req.body.country),
+    city: clean(req.body.city),
+    contactName: clean(req.body.contactName),
+    contactEmail: clean(req.body.contactEmail),
+    phone: clean(req.body.phone),
+    website: clean(req.body.website),
+    packageName,
+    amount,
+    currency: clean(req.body.currency || "GBP").toUpperCase(),
+    status: "PENDING_REVIEW",
+    notes: clean(req.body.notes)
+  };
+
+  rows.unshift(row);
+  writeJSON(FEATURED_HOTELS_FILE, rows.slice(0, 5000));
+
+  await sendEmailNotification("New featured hotel advertising request - MySpace Hotel", [
+    ["Reference", row.reference],
+    ["Hotel", row.hotelName],
+    ["Destination", `${row.city}, ${row.country}`],
+    ["Contact", row.contactName],
+    ["Email", row.contactEmail],
+    ["Package", row.packageName],
+    ["Amount", `${row.currency} ${row.amount}`],
+    ["Created", row.createdAt]
+  ]);
+
+  res.json({
+    ok: true,
+    message: "Featured hotel advertising request received.",
+    featuredHotel: row
+  });
+});
+
+app.get("/api/internal/ancillary-dashboard", (req, res) => {
+  const insurance = readJSON(INSURANCE_BOOKINGS_FILE, []);
+  const transfers = readJSON(TRANSFER_BOOKINGS_FILE, []);
+  const attractions = readJSON(ATTRACTION_BOOKINGS_FILE, []);
+  const featured = readJSON(FEATURED_HOTELS_FILE, []);
+
+  function totals(rows) {
+    return rows.reduce((acc, x) => {
+      acc.count += 1;
+      acc.revenue += money(x.amount);
+      acc.commission += money(x.commissionAmount || x.amount);
+      return acc;
+    }, { count: 0, revenue: 0, commission: 0 });
+  }
+
+  const data = {
+    insurance: totals(insurance),
+    transfers: totals(transfers),
+    attractions: totals(attractions),
+    featuredHotels: totals(featured)
+  };
+
+  const totalRevenue = money(data.insurance.revenue + data.transfers.revenue + data.attractions.revenue + data.featuredHotels.revenue);
+  const totalCommission = money(data.insurance.commission + data.transfers.commission + data.attractions.commission + data.featuredHotels.commission);
+
+  res.json({
+    ok: true,
+    generatedAt: nowISO(),
+    totals: {
+      totalRevenue,
+      totalCommission,
+      requests: data.insurance.count + data.transfers.count + data.attractions.count + data.featuredHotels.count
+    },
+    streams: data,
+    latest: {
+      insurance: insurance.slice(0, 25),
+      transfers: transfers.slice(0, 25),
+      attractions: attractions.slice(0, 25),
+      featuredHotels: featured.slice(0, 25)
+    }
+  });
+});
+
+app.get("/api/internal/insurance-dashboard", (req, res) => {
+  const rows = readJSON(INSURANCE_BOOKINGS_FILE, []);
+  res.json({ ok: true, total: rows.length, insuranceBookings: rows });
+});
+
+app.get("/api/internal/transfer-dashboard", (req, res) => {
+  const rows = readJSON(TRANSFER_BOOKINGS_FILE, []);
+  res.json({ ok: true, total: rows.length, transferBookings: rows });
+});
+
+app.get("/api/internal/attraction-dashboard", (req, res) => {
+  const rows = readJSON(ATTRACTION_BOOKINGS_FILE, []);
+  res.json({ ok: true, total: rows.length, attractionBookings: rows });
+});
+
+app.get("/api/internal/advertising-dashboard", (req, res) => {
+  const rows = readJSON(FEATURED_HOTELS_FILE, []);
+  res.json({ ok: true, total: rows.length, featuredHotels: rows });
+});
+// MSH ANCILLARY REVENUE STREAMS END
+
 app.listen(PORT, "0.0.0.0", () => {
   const destinations = buildDestinations();
 
@@ -3325,6 +3730,8 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
+
 
 
 

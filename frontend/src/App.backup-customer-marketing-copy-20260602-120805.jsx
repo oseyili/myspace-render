@@ -1026,7 +1026,7 @@ function RevenueAddOns(props) {
         <InfoCard title="Travel Insurance" text="Protect the trip with cancellation, travel disruption and emergency support cover." />
         <InfoCard title="Hotel Airport Transfers" text="Request airport pickup or hotel drop-off support for a smoother journey." />
         <InfoCard title="Tours & Attractions" text="Explore museums, family attractions, city tours, cultural sites and local experiences." />
-        <InfoCard title="Hotel Partner Visibility" text="Hotels can request promoted placement and destination visibility through MySpace Hotel." />
+        <InfoCard title="Featured Hotel Advertising" text="Hotels can request promoted placement and destination visibility through MySpace Hotel." />
       </div>
 
       <div style={styles.compareGrid}>
@@ -1248,7 +1248,7 @@ function AttractionsPortal(props) {
   }
 
   return (
-    <PortalShell title="Tours & Attractions" subtitle="Add destination experiences around the customer's hotel stay." badge="Experiences">
+    <PortalShell title="Tours & Attractions" subtitle="Add destination experiences around the customerâ€™s hotel stay." badge="Experiences">
       {notice ? <div style={styles.notice}>{notice}</div> : null}
       <div style={styles.cardGrid}>
         {attractions.map((item) => (
@@ -1314,7 +1314,7 @@ function FeaturedHotelsPortal() {
         return;
       }
 
-      setNotice("Hotel Partner Visibility request received by MySpace Hotel.");
+      setNotice("Featured hotel advertising request received by MySpace Hotel.");
       setHotelName("");
       setCountry("");
       setCity("");
@@ -1329,12 +1329,12 @@ function FeaturedHotelsPortal() {
   }
 
   return (
-    <PortalShell title="Hotel Partner Visibility" subtitle="Accommodation providers can request partnership and visibility opportunities with MySpace Hotel." badge="Hotel growth">
+    <PortalShell title="Featured Hotel Advertising" subtitle="Hotels can request promoted visibility on MySpace Hotel." badge="Hotel growth">
       <div style={styles.cardGrid}>
-        <InfoCard title="Starter Visibility Request" text="Request introductory visibility for your property. Commercial terms are confirmed after review. Commercial pricing is confirmed after review." />
-        <InfoCard title="Growth Visibility Request" text="Request stronger destination visibility for your property. Commercial terms are confirmed after review. Commercial pricing is confirmed after review." />
-        <InfoCard title="Priority Visibility Request" text="Request priority visibility for selected destination campaigns. Commercial terms are confirmed after review. Commercial pricing is confirmed after review." />
-        <InfoCard title="Premium Visibility Request" text="Request premium visibility opportunities. Commercial terms are confirmed after review. Commercial pricing is confirmed after review." />
+        <InfoCard title="Bronze - Â£49/month" text="Entry-level promoted visibility. Commercial pricing is confirmed after review." />
+        <InfoCard title="Silver - Â£99/month" text="Stronger destination visibility. Commercial pricing is confirmed after review." />
+        <InfoCard title="Gold - Â£199/month" text="Priority promotion for selected campaigns. Commercial pricing is confirmed after review." />
+        <InfoCard title="Platinum - Â£499/month" text="Premium brand visibility. Commercial pricing is confirmed after review." />
       </div>
 
       <form style={styles.form} onSubmit={submit}>
@@ -1346,12 +1346,12 @@ function FeaturedHotelsPortal() {
         <input style={styles.input} placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
         <input style={styles.input} placeholder="Website" value={website} onChange={(e) => setWebsite(e.target.value)} />
         <select style={styles.input} value={packageName} onChange={(e) => setPackageName(e.target.value)}>
-          <option value="BRONZE">Starter Visibility Request</option>
-          <option value="SILVER">Growth Visibility Request</option>
-          <option value="GOLD">Priority Visibility Request</option>
-          <option value="PLATINUM">Premium Visibility Request</option>
+          <option value="BRONZE">Bronze - Â£49/month</option>
+          <option value="SILVER">Silver - Â£99/month</option>
+          <option value="GOLD">Gold - Â£199/month</option>
+          <option value="PLATINUM">Platinum - Â£499/month</option>
         </select>
-        <button style={styles.primaryBtn}>Request Hotel Partner Review</button>
+        <button style={styles.primaryBtn}>Submit Featured Hotel Request</button>
         {notice ? <div style={styles.notice}>{notice}</div> : null}
       </form>
     </PortalShell>
@@ -1798,6 +1798,5 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
-
 
 

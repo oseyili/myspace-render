@@ -1,0 +1,14 @@
+{
+  "id": "LEAD-123",
+  "affiliateCode": "LUKAKA-91F16B",
+  "company": "ABC Construction",
+  "contactName": "John Smith",
+  "email": "john@abc.com",
+  "phone": "+44...",
+  "expectedRooms": 20,
+  "estimatedValue": 5000,
+  "status": "NEW_LEAD",
+  "winProbability": 25,
+  "nextContactDate": "2026-06-15",
+  "createdAt": "2026-06-01T12:00:00Z"
+}

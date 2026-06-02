@@ -1,0 +1,22 @@
+[
+  {
+    "id": "cedb8f48-378c-4a71-9f8c-ebfdc3ff6eed",
+    "reference": "TRF-1780400309498-10F3D3",
+    "createdAt": "2026-06-02T11:38:29.499Z",
+    "bookingRef": "",
+    "hotelName": "",
+    "city": "",
+    "country": "",
+    "customerName": "",
+    "customerEmail": "",
+    "transferType": "Family / Group Transfer",
+    "pickup": "Airport",
+    "dropoff": "Hotel",
+    "travelDate": "2026-06-02",
+    "amount": 0,
+    "currency": "GBP",
+    "commissionRate": 18,
+    "commissionAmount": 0,
+    "status": "REQUESTED"
+  }
+]
