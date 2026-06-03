@@ -15,6 +15,13 @@ const GYG_PARTNER_ID =
   import.meta.env.VITE_PUBLIC_GYG_PARTNER_ID ||
   "";
 
+const KLOOK_WIDGET_SCRIPT = "https://affiliate.klook.com/widget/fetch-iframe-init.js";
+
+const KLOOK_DYNAMIC_WIDGETS = {
+  GLOBAL: "1293547",
+  Paris: "1293547",
+};
+
 const ROUTES = {
   hotels: "/",
   compare: "/#/compare-prices",
@@ -161,6 +168,18 @@ function cleanList(list) {
   );
 }
 
+function normaliseCityName(value) {
+  return String(value || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .replace(/[^\w\s-]/g, "");
+}
+
+function klookAdIdForCity(city) {
+  const clean = normaliseCityName(city);
+  return KLOOK_DYNAMIC_WIDGETS[clean] || KLOOK_DYNAMIC_WIDGETS.GLOBAL;
+}
+
 function buildComparisons(selectedHotel, hotels, nights, rooms, fallbackCurrency) {
   if (!selectedHotel) return [];
 
@@ -198,7 +217,6 @@ function buildComparisons(selectedHotel, hotels, nights, rooms, fallbackCurrency
       total: baseNight * 1.16 * stayMultiplier,
     },
   ];
-
   const alternatives = (hotels || [])
     .filter((h) => hotelKey(h) !== hotelKey(selectedHotel))
     .slice(0, 4)
@@ -238,6 +256,71 @@ function selectedHotelWithRoom(hotel) {
   };
 }
 
+function KlookDynamicWidget({ city, country }) {
+  const cleanCity = normaliseCityName(city || "Paris");
+  const adid = klookAdIdForCity(cleanCity);
+  const widgetKey = `${cleanCity || "global"}-${adid}`;
+  const destinationLabel = [cleanCity, country].filter(Boolean).join(", ") || "your destination";
+
+  useEffect(() => {
+    const existing = document.querySelector(`script[src="${KLOOK_WIDGET_SCRIPT}"]`);
+
+    if (!existing) {
+      const script = document.createElement("script");
+      script.src = KLOOK_WIDGET_SCRIPT;
+      script.async = true;
+      document.body.appendChild(script);
+    } else if (window.KlookAffiliateWidget && typeof window.KlookAffiliateWidget.init === "function") {
+      window.KlookAffiliateWidget.init();
+    }
+
+    const timer = window.setTimeout(() => {
+      if (window.KlookAffiliateWidget && typeof window.KlookAffiliateWidget.init === "function") {
+        window.KlookAffiliateWidget.init();
+      }
+    }, 500);
+
+    return () => window.clearTimeout(timer);
+  }, [widgetKey]);
+
+  return (
+    <section style={styles.klookPanel}>
+      <div style={styles.panelHeader}>
+        <div>
+          <div style={styles.kicker}>Live attraction partner</div>
+          <h2 style={styles.titleSmall}>Things to do in {destinationLabel}</h2>
+          <p style={styles.sectionText}>
+            Browse live activities, attractions and experiences matched to the selected hotel destination. Availability, prices and booking terms are confirmed securely by Klook before checkout.
+          </p>
+        </div>
+      </div>
+
+      <div style={styles.klookWidgetShell}>
+        <ins
+          key={widgetKey}
+          className="klk-aff-widget"
+          data-adid={adid}
+          data-lang=""
+          data-currency=""
+          data-cardH="126"
+          data-padding="92"
+          data-lgH="470"
+          data-edgeValue="655"
+          data-cid=""
+          data-tid="-1"
+          data-amount="6"
+          data-prod="dynamic_widget"
+          style={{ display: "block", width: "100%" }}
+        />
+      </div>
+
+      <div style={styles.softBox}>
+        MySpace Hotel only shows destination-relevant travel extras here. No fake attraction cards are added by MySpace Hotel.
+      </div>
+    </section>
+  );
+}
+
 export default function App() {
   const [route, setRoute] = useState(currentRoute());
   const [affiliateCode, setAffiliateCode] = useState("");
@@ -274,7 +357,6 @@ export default function App() {
 
   const [reviewSent, setReviewSent] = useState(false);
   const [partnerSent, setPartnerSent] = useState(false);
-
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search || "");
@@ -584,7 +666,6 @@ function Header() {
     </header>
   );
 }
-
 function HotelsPage(props) {
   const converted = convertCurrency(Number(props.fxAmount || 0), props.fxFrom, props.fxTo);
 
@@ -740,7 +821,6 @@ function Field({ label, children }) {
     </div>
   );
 }
-
 function HotelCard({ hotel, selectedHotel, setSelectedHotel, rooms, nights, currency, city, country }) {
   const selectedReadyHotel = selectedHotelWithRoom(hotel);
   const price = hotelPrice(selectedReadyHotel);
@@ -868,7 +948,6 @@ function AlternativeHotels(props) {
     .slice(0, 3);
 
   if (!props.selectedHotel || alternatives.length === 0) return null;
-
   return (
     <section style={styles.panel}>
       <div style={styles.kicker}>MORE STAY OPTIONS</div>
@@ -1011,7 +1090,6 @@ function ComparePortal(props) {
     </PortalShell>
   );
 }
-
 function RevenueAddOns(props) {
   if (!props.selectedHotel) return null;
 
@@ -1030,7 +1108,7 @@ function RevenueAddOns(props) {
       <div style={styles.cardGrid}>
         <InfoCard title="Travel Insurance" text="Protect the trip with cancellation, travel disruption and emergency support cover." />
         <InfoCard title="Hotel Airport Transfers" text="Request airport pickup or hotel drop-off support for a smoother journey." />
-        <InfoCard title="Tours & Attractions" text="Explore museums, family attractions, city tours, cultural sites and local experiences." />
+        <InfoCard title="Tours & Attractions" text="Explore live activities, tours and attractions matched to the selected destination." />
         <InfoCard title="Hotel Partner Visibility" text="Hotels can request promoted placement and destination visibility through MySpace Hotel." />
       </div>
 
@@ -1201,51 +1279,12 @@ function AttractionsPortal(props) {
   const query = [city, country].filter(Boolean).join(", ");
   const destinationReady = Boolean(city);
 
-  function openGetYourGuide(category) {
-    if (!destinationReady) return;
-
-    const searchTerm = [category, city, country].filter(Boolean).join(" ");
-    const url = `https://www.getyourguide.com/s/?q=${encodeURIComponent(searchTerm)}`;
-    window.open(url, "_blank", "noreferrer");
-  }
-
-  const options = [
-    {
-      id: "city",
-      category: "Sightseeing",
-      title: `City tours in ${city || "your destination"}`,
-      text: "Find guided tours, landmarks, local highlights and sightseeing experiences near your selected stay.",
-      search: "city tours attractions"
-    },
-    {
-      id: "culture",
-      category: "Culture",
-      title: `Museums and culture in ${city || "your destination"}`,
-      text: "Explore museums, galleries, heritage sites, exhibitions and cultural experiences around your hotel destination.",
-      search: "museums culture attractions"
-    },
-    {
-      id: "family",
-      category: "Family",
-      title: `Family activities in ${city || "your destination"}`,
-      text: "Find family-friendly activities, parks, zoos, visitor attractions and memorable experiences for all ages.",
-      search: "family attractions kids activities"
-    },
-    {
-      id: "evening",
-      category: "Evening",
-      title: `Evening experiences in ${city || "your destination"}`,
-      text: "Discover evening tours, dinner experiences, night attractions and activities after check-in.",
-      search: "evening night tours experiences"
-    }
-  ];
-
   return (
     <PortalShell
       title="Things To Do Near Your Stay"
       subtitle={
         destinationReady
-          ? `Browse live experiences for ${query}. Final prices, availability and booking terms are confirmed by GetYourGuide before checkout.`
+          ? `Browse live destination experiences for ${query}. Final prices, availability and booking terms are confirmed securely before checkout.`
           : "Select a hotel first so MySpace Hotel can show attractions for the correct destination."
       }
       badge="Destination experiences"
@@ -1260,25 +1299,11 @@ function AttractionsPortal(props) {
             <div style={styles.kicker}>Selected destination</div>
             <h2 style={styles.titleSmall}>{query}</h2>
             <p style={styles.sectionText}>
-              The options below are based on the destination of your selected hotel. MySpace Hotel will not show unrelated attraction placecards.
+              The attraction area below is powered by the approved MySpace Hotel Klook affiliate widget and matched to the selected hotel destination.
             </p>
           </section>
 
-          <div style={styles.cardGrid}>
-            {options.map((item) => (
-              <div key={item.id} style={styles.infoCard}>
-                <div style={styles.greenBadge}>{item.category}</div>
-                <h3 style={styles.cardTitle}>{item.title}</h3>
-                <p style={styles.cardText}>{item.text}</p>
-                <div style={styles.softBox}>
-                  Live prices and availability are checked for {query} before booking.
-                </div>
-                <button style={styles.primaryBtn} onClick={() => openGetYourGuide(item.search)}>
-                  Check Live Options
-                </button>
-              </div>
-            ))}
-          </div>
+          <KlookDynamicWidget city={city} country={country} />
         </>
       )}
     </PortalShell>
@@ -1348,10 +1373,10 @@ function FeaturedHotelsPortal() {
   return (
     <PortalShell title="Hotel Partner Visibility" subtitle="Accommodation providers can request partnership and visibility opportunities with MySpace Hotel." badge="Hotel growth">
       <div style={styles.cardGrid}>
-        <InfoCard title="Starter Visibility Request" text="Request introductory visibility for your property. Commercial terms are confirmed after review. Commercial pricing is confirmed after review." />
-        <InfoCard title="Growth Visibility Request" text="Request stronger destination visibility for your property. Commercial terms are confirmed after review. Commercial pricing is confirmed after review." />
-        <InfoCard title="Priority Visibility Request" text="Request priority visibility for selected destination campaigns. Commercial terms are confirmed after review. Commercial pricing is confirmed after review." />
-        <InfoCard title="Premium Visibility Request" text="Request premium visibility opportunities. Commercial terms are confirmed after review. Commercial pricing is confirmed after review." />
+        <InfoCard title="Starter Visibility Request" text="Request introductory visibility for your property. Commercial terms are confirmed after review." />
+        <InfoCard title="Growth Visibility Request" text="Request stronger destination visibility for your property. Commercial terms are confirmed after review." />
+        <InfoCard title="Priority Visibility Request" text="Request priority visibility for selected destination campaigns. Commercial terms are confirmed after review." />
+        <InfoCard title="Premium Visibility Request" text="Request premium visibility opportunities. Commercial terms are confirmed after review." />
       </div>
 
       <form style={styles.form} onSubmit={submit}>
@@ -1503,56 +1528,6 @@ function SupportPortal() {
 }
 
 function PartnersPortal({ partnerSent, setPartnerSent }) {
-  const [partnerType, setPartnerType] = useState("");
-  const [businessName, setBusinessName] = useState("");
-  const [contactName, setContactName] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [partnerCountry, setPartnerCountry] = useState("");
-  const [partnerCity, setPartnerCity] = useState("");
-  const [website, setWebsite] = useState("");
-  const [message, setMessage] = useState("");
-  const [partnerNotice, setPartnerNotice] = useState("");
-
-  async function submitPartner(e) {
-    e.preventDefault();
-    setPartnerNotice("");
-
-    if (!partnerType.trim() || !businessName.trim() || !contactName.trim() || !contactEmail.trim() || !message.trim()) {
-      setPartnerNotice("Please complete partnership type, business name, contact name, email and message.");
-      return;
-    }
-
-    try {
-      const res = await fetch(`${API_BASE}/api/partner-applications`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          partner_type: partnerType,
-          business_name: businessName,
-          contact_name: contactName,
-          contact_email: contactEmail,
-          phone,
-          country: partnerCountry,
-          city: partnerCity,
-          website,
-          message,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.ok) {
-        setPartnerNotice(data.message || "We could not send your partnership enquiry right now. Please try again.");
-        return;
-      }
-
-      setPartnerSent(true);
-    } catch {
-      setPartnerNotice("We could not send your partnership enquiry right now. Please try again.");
-    }
-  }
-
   return (
     <PortalShell title="Industry Partnerships" subtitle="Connect with MySpace Hotel for trusted accommodation, travel technology and service partnerships." badge="Partnerships">
       <div style={styles.cardGrid}>
@@ -1561,30 +1536,9 @@ function PartnersPortal({ partnerSent, setPartnerSent }) {
         <InfoCard title="Travel technology partners" text="Collaborate on better travel experiences, destination support and improved guest journeys." />
       </div>
 
-      {partnerSent ? (
-        <div style={styles.success}>Thank you. Your partnership enquiry has been received.</div>
-      ) : (
-        <form style={styles.form} onSubmit={submitPartner}>
-          <select style={styles.input} value={partnerType} onChange={(e) => setPartnerType(e.target.value)}>
-            <option value="">Partnership type</option>
-            <option value="Hotel or accommodation provider">Hotel or accommodation provider</option>
-            <option value="Property or channel technology">Property or channel technology</option>
-            <option value="Travel technology partner">Travel technology partner</option>
-            <option value="Corporate or business travel partner">Corporate or business travel partner</option>
-            <option value="Other partnership">Other partnership</option>
-          </select>
-          <input style={styles.input} placeholder="Business name" value={businessName} onChange={(e) => setBusinessName(e.target.value)} />
-          <input style={styles.input} placeholder="Contact name" value={contactName} onChange={(e) => setContactName(e.target.value)} />
-          <input style={styles.input} type="email" placeholder="Contact email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
-          <input style={styles.input} placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
-          <input style={styles.input} placeholder="Country" value={partnerCountry} onChange={(e) => setPartnerCountry(e.target.value)} />
-          <input style={styles.input} placeholder="City" value={partnerCity} onChange={(e) => setPartnerCity(e.target.value)} />
-          <input style={styles.input} placeholder="Website" value={website} onChange={(e) => setWebsite(e.target.value)} />
-          <textarea style={styles.textarea} placeholder="Tell us how you would like to work with MySpace Hotel." value={message} onChange={(e) => setMessage(e.target.value)} />
-          {partnerNotice ? <div style={styles.notice}>{partnerNotice}</div> : null}
-          <button style={styles.primaryBtn}>Submit Partnership Enquiry</button>
-        </form>
-      )}
+      <div style={styles.success}>
+        Partnership enquiries can be sent to reservations@myspace-hotel.com or sales@myspace-hotel.com.
+      </div>
     </PortalShell>
   );
 }
@@ -1779,6 +1733,8 @@ const styles = {
   textareaSmall: { padding: 15, borderRadius: 15, border: "1px solid #d8e0ef", minHeight: 85, fontSize: 15, fontFamily: "Arial, sans-serif" },
   textarea: { padding: 15, borderRadius: 15, border: "1px solid #d8e0ef", minHeight: 130, fontSize: 15, fontFamily: "Arial, sans-serif" },
   panel: { marginTop: 30, background: "#fff", borderRadius: 28, padding: 28, boxShadow: "0 8px 25px rgba(0,0,0,.06)" },
+  klookPanel: { marginTop: 30, background: "#fff", borderRadius: 28, padding: 28, boxShadow: "0 8px 25px rgba(0,0,0,.06)", border: "1px solid #dce6f3" },
+  klookWidgetShell: { marginTop: 22, minHeight: 430, background: "#f8fafc", borderRadius: 22, padding: 16, overflow: "hidden", border: "1px solid #dce6f3" },
   panelHeader: { display: "flex", justifyContent: "space-between", gap: 20, flexWrap: "wrap", alignItems: "flex-start" },
   kicker: { color: "#2750db", fontWeight: 950, letterSpacing: ".04em", textTransform: "uppercase", fontSize: 13, marginBottom: 8 },
   compareGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))", gap: 16, marginTop: 20 },
@@ -1815,9 +1771,3 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
-
-
-
-
-
-
