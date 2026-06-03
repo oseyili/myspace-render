@@ -314,9 +314,22 @@ function KlookDynamicWidget({ city, country }) {
         />
       </div>
 
-      <div style={styles.softBox}>
-        MySpace Hotel only shows destination-relevant travel extras here. No fake attraction cards are added by MySpace Hotel.
-      </div>
+      <div
+  style={{
+    background: "#f4f7fc",
+    padding: "18px",
+    borderRadius: "14px",
+    marginTop: "18px",
+    textAlign: "center",
+    fontSize: "18px",
+    fontWeight: "600",
+    color: "#0a2458",
+  }}
+>
+  Discover popular attractions, sightseeing tours, transport options and travel
+  experiences recommended for your destination. Create unforgettable memories
+  before you even arrive.
+</div>
     </section>
   );
 }
