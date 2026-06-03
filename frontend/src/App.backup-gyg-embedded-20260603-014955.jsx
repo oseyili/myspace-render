@@ -10,9 +10,9 @@ const STRIPE_PAYMENT_LINK =
   import.meta.env.VITE_PUBLIC_STRIPE_PAYMENT_LINK ||
   "";
 
-const GYG_PARTNER_ID =
-  import.meta.env.VITE_GYG_PARTNER_ID ||
-  import.meta.env.VITE_PUBLIC_GYG_PARTNER_ID ||
+const GYG_ATTRACTIONS_URL =
+  import.meta.env.VITE_GYG_ATTRACTIONS_URL ||
+  import.meta.env.VITE_PUBLIC_GYG_ATTRACTIONS_URL ||
   "";
 
 const ROUTES = {
@@ -1195,95 +1195,83 @@ function TransfersPortal(props) {
 }
 
 function AttractionsPortal(props) {
-  const selected = props.selectedHotel || null;
-  const city = selected?.city || props.city || "";
-  const country = selected?.country || props.country || "";
-  const query = [city, country].filter(Boolean).join(", ");
-  const destinationReady = Boolean(city);
+  const [attractions, setAttractions] = useState([]);
+  const [notice, setNotice] = useState("");
 
-  function openGetYourGuide(category) {
-    if (!destinationReady) return;
+  useEffect(() => {
+    async function load() {
+      try {
+        const params = new URLSearchParams({
+          city: props.city || props.selectedHotel?.city || "",
+          currency: props.selectedCurrency || props.currency || "GBP",
+        });
+        const res = await fetch(`${API_BASE}/api/attractions?${params}`, { cache: "no-store" });
+        const data = await res.json();
+        setAttractions(Array.isArray(data.attractions) ? data.attractions : []);
+      } catch {
+        setNotice("Tours and attractions could not be loaded right now.");
+      }
+    }
+    load();
+  }, [props.city, props.selectedHotel, props.selectedCurrency, props.currency]);
 
-    const searchTerm = [category, city, country].filter(Boolean).join(" ");
-    const url = `https://www.getyourguide.com/s/?q=${encodeURIComponent(searchTerm)}`;
-    window.open(url, "_blank", "noreferrer");
+  async function requestAttraction(item) {
+    setNotice("");
+
+    try {
+      const res = await fetch(`${API_BASE}/api/ancillary/attractions/book`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          hotelName: props.selectedHotel?.name || "",
+          city: props.city || props.selectedHotel?.city || "",
+          country: props.country || props.selectedHotel?.country || "",
+          customerName: props.customerName,
+          customerEmail: props.customerEmail,
+          attractionId: item.id,
+          attractionName: item.name,
+          category: item.category,
+          travelDate: props.checkIn,
+          guests: props.guests,
+          amount: item.price,
+          currency: item.currency,
+          commissionRate: item.commissionRate,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        setNotice(data.message || "Attraction request could not be submitted.");
+        return;
+      }
+
+      setNotice("Tours and attractions request received by MySpace Hotel.");
+    } catch {
+      setNotice("Attraction request could not be submitted right now.");
+    }
   }
 
-  const options = [
-    {
-      id: "city",
-      category: "Sightseeing",
-      title: `City tours in ${city || "your destination"}`,
-      text: "Find guided tours, landmarks, local highlights and sightseeing experiences near your selected stay.",
-      search: "city tours attractions"
-    },
-    {
-      id: "culture",
-      category: "Culture",
-      title: `Museums and culture in ${city || "your destination"}`,
-      text: "Explore museums, galleries, heritage sites, exhibitions and cultural experiences around your hotel destination.",
-      search: "museums culture attractions"
-    },
-    {
-      id: "family",
-      category: "Family",
-      title: `Family activities in ${city || "your destination"}`,
-      text: "Find family-friendly activities, parks, zoos, visitor attractions and memorable experiences for all ages.",
-      search: "family attractions kids activities"
-    },
-    {
-      id: "evening",
-      category: "Evening",
-      title: `Evening experiences in ${city || "your destination"}`,
-      text: "Discover evening tours, dinner experiences, night attractions and activities after check-in.",
-      search: "evening night tours experiences"
-    }
-  ];
-
   return (
-    <PortalShell
-      title="Things To Do Near Your Stay"
-      subtitle={
-        destinationReady
-          ? `Browse live experiences for ${query}. Final prices, availability and booking terms are confirmed by GetYourGuide before checkout.`
-          : "Select a hotel first so MySpace Hotel can show attractions for the correct destination."
-      }
-      badge="Destination experiences"
-    >
-      {!destinationReady ? (
-        <div style={styles.notice}>
-          Please select a hotel from the Hotels page first. Attractions will then be matched to that hotel destination.
-        </div>
-      ) : (
-        <>
-          <section style={styles.panel}>
-            <div style={styles.kicker}>Selected destination</div>
-            <h2 style={styles.titleSmall}>{query}</h2>
-            <p style={styles.sectionText}>
-              The options below are based on the destination of your selected hotel. MySpace Hotel will not show unrelated attraction placecards.
-            </p>
-          </section>
-
-          <div style={styles.cardGrid}>
-            {options.map((item) => (
-              <div key={item.id} style={styles.infoCard}>
-                <div style={styles.greenBadge}>{item.category}</div>
-                <h3 style={styles.cardTitle}>{item.title}</h3>
-                <p style={styles.cardText}>{item.text}</p>
-                <div style={styles.softBox}>
-                  Live prices and availability are checked for {query} before booking.
-                </div>
-                <button style={styles.primaryBtn} onClick={() => openGetYourGuide(item.search)}>
-                  Check Live Options
-                </button>
-              </div>
-            ))}
+    <PortalShell title="Tours & Attractions" subtitle="Discover tours, attractions and destination experiences near your stay." badge="Experiences">
+      {notice ? <div style={styles.notice}>{notice}</div> : null}
+      <div style={styles.cardGrid}>
+        {attractions.map((item) => (
+          <div key={item.id} style={styles.infoCard}>
+            <div style={styles.greenBadge}>{item.category}</div>
+            <h3 style={styles.cardTitle}>{item.name}</h3>
+            <p style={styles.cardText}>{item.description}</p>
+            <div style={styles.softBox}>Live prices and availability are confirmed before booking.</div>
+            <button style={styles.primaryBtn} onClick={() => { if (GYG_ATTRACTIONS_URL) window.open(GYG_ATTRACTIONS_URL, "_blank", "noreferrer"); else requestAttraction(item); }}>
+              View Live Experience Options
+            </button>
           </div>
-        </>
-      )}
+        ))}
+      </div>
     </PortalShell>
   );
 }
+
 function FeaturedHotelsPortal() {
   const [hotelName, setHotelName] = useState("");
   const [country, setCountry] = useState("");

@@ -1195,95 +1195,130 @@ function TransfersPortal(props) {
 }
 
 function AttractionsPortal(props) {
-  const selected = props.selectedHotel || null;
-  const city = selected?.city || props.city || "";
-  const country = selected?.country || props.country || "";
-  const query = [city, country].filter(Boolean).join(", ");
-  const destinationReady = Boolean(city);
+  const [attractions, setAttractions] = useState([]);
+  const [notice, setNotice] = useState("");
 
-  function openGetYourGuide(category) {
-    if (!destinationReady) return;
+  useEffect(() => {
+    async function load() {
+      try {
+        const params = new URLSearchParams({
+          city: props.city || props.selectedHotel?.city || "",
+          currency: props.selectedCurrency || props.currency || "GBP",
+        });
+        const res = await fetch(`${API_BASE}/api/attractions?${params}`, { cache: "no-store" });
+        const data = await res.json();
+        setAttractions(Array.isArray(data.attractions) ? data.attractions : []);
+      } catch {
+        setNotice("Tours and attractions could not be loaded right now.");
+      }
+    }
+    load();
+  }, [props.city, props.selectedHotel, props.selectedCurrency, props.currency]);
 
-    const searchTerm = [category, city, country].filter(Boolean).join(" ");
-    const url = `https://www.getyourguide.com/s/?q=${encodeURIComponent(searchTerm)}`;
-    window.open(url, "_blank", "noreferrer");
+  async function requestAttraction(item) {
+    setNotice("");
+
+    try {
+      const res = await fetch(`${API_BASE}/api/ancillary/attractions/book`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          hotelName: props.selectedHotel?.name || "",
+          city: props.city || props.selectedHotel?.city || "",
+          country: props.country || props.selectedHotel?.country || "",
+          customerName: props.customerName,
+          customerEmail: props.customerEmail,
+          attractionId: item.id,
+          attractionName: item.name,
+          category: item.category,
+          travelDate: props.checkIn,
+          guests: props.guests,
+          amount: item.price,
+          currency: item.currency,
+          commissionRate: item.commissionRate,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        setNotice(data.message || "Attraction request could not be submitted.");
+        return;
+      }
+
+      setNotice("Tours and attractions request received by MySpace Hotel.");
+    } catch {
+      setNotice("Attraction request could not be submitted right now.");
+    }
   }
 
-  const options = [
-    {
-      id: "city",
-      category: "Sightseeing",
-      title: `City tours in ${city || "your destination"}`,
-      text: "Find guided tours, landmarks, local highlights and sightseeing experiences near your selected stay.",
-      search: "city tours attractions"
-    },
-    {
-      id: "culture",
-      category: "Culture",
-      title: `Museums and culture in ${city || "your destination"}`,
-      text: "Explore museums, galleries, heritage sites, exhibitions and cultural experiences around your hotel destination.",
-      search: "museums culture attractions"
-    },
-    {
-      id: "family",
-      category: "Family",
-      title: `Family activities in ${city || "your destination"}`,
-      text: "Find family-friendly activities, parks, zoos, visitor attractions and memorable experiences for all ages.",
-      search: "family attractions kids activities"
-    },
-    {
-      id: "evening",
-      category: "Evening",
-      title: `Evening experiences in ${city || "your destination"}`,
-      text: "Discover evening tours, dinner experiences, night attractions and activities after check-in.",
-      search: "evening night tours experiences"
-    }
-  ];
-
   return (
-    <PortalShell
-      title="Things To Do Near Your Stay"
-      subtitle={
-        destinationReady
-          ? `Browse live experiences for ${query}. Final prices, availability and booking terms are confirmed by GetYourGuide before checkout.`
-          : "Select a hotel first so MySpace Hotel can show attractions for the correct destination."
-      }
-      badge="Destination experiences"
-    >
-      {!destinationReady ? (
-        <div style={styles.notice}>
-          Please select a hotel from the Hotels page first. Attractions will then be matched to that hotel destination.
-        </div>
-      ) : (
-        <>
-          <section style={styles.panel}>
-            <div style={styles.kicker}>Selected destination</div>
-            <h2 style={styles.titleSmall}>{query}</h2>
-            <p style={styles.sectionText}>
-              The options below are based on the destination of your selected hotel. MySpace Hotel will not show unrelated attraction placecards.
-            </p>
-          </section>
-
-          <div style={styles.cardGrid}>
-            {options.map((item) => (
-              <div key={item.id} style={styles.infoCard}>
-                <div style={styles.greenBadge}>{item.category}</div>
-                <h3 style={styles.cardTitle}>{item.title}</h3>
-                <p style={styles.cardText}>{item.text}</p>
-                <div style={styles.softBox}>
-                  Live prices and availability are checked for {query} before booking.
-                </div>
-                <button style={styles.primaryBtn} onClick={() => openGetYourGuide(item.search)}>
-                  Check Live Options
-                </button>
-              </div>
-            ))}
+    <PortalShell title="Things To Do Near Your Stay" subtitle="Discover live tours, attractions and experiences for your destination. Prices and availability are confirmed by the live partner before booking." badge="Experiences">
+      {notice ? <div style={styles.notice}>{notice}</div> : null}
+      <div style={styles.cardGrid}>
+        {attractions.map((item) => (
+          <div key={item.id} style={styles.infoCard}>
+            <div style={styles.greenBadge}>{item.category}</div>
+            <h3 style={styles.cardTitle}>{item.name}</h3>
+            <p style={styles.cardText}>{item.description}</p>
+            <div style={styles.softBox}>Live attraction pricing depends on date, availability, supplier and guest numbers.</div>
+            <button style={styles.primaryBtn} onClick={() => requestAttraction(item)}>
+              Request Live Experience Quote
+            </button>
           </div>
-        </>
-      )}
+        ))}
+      </div>
     </PortalShell>
   );
 }
+
+
+function GetYourGuideWidget({ campaign = "MySpaceHotel_Attractions" }) {
+  useEffect(() => {
+    if (!GYG_PARTNER_ID) return;
+
+    const existing = document.querySelector("script[data-msh-gyg='true']");
+    if (!existing) {
+      const script = document.createElement("script");
+      script.async = true;
+      script.defer = true;
+      script.src = "https://widget.getyourguide.com/dist/pa.umd.production.min.js";
+      script.setAttribute("data-gyg-partner-id", GYG_PARTNER_ID);
+      script.setAttribute("data-msh-gyg", "true");
+      document.body.appendChild(script);
+    }
+  }, []);
+
+  if (!GYG_PARTNER_ID) {
+    return (
+      <div style={styles.notice}>
+        Live experiences are being connected. Please check again shortly.
+      </div>
+    );
+  }
+
+  return (
+    <section style={styles.panel}>
+      <div style={styles.panelHeader}>
+        <div>
+          <div style={styles.kicker}>Live partner experiences</div>
+          <h2 style={styles.titleSmall}>Book tours and activities with GetYourGuide</h2>
+          <p style={styles.sectionText}>
+            Browse live destination experiences from GetYourGuide. Availability, prices and booking terms are shown by GetYourGuide before checkout.
+          </p>
+        </div>
+      </div>
+
+      <div
+        data-gyg-widget="auto"
+        data-gyg-partner-id={GYG_PARTNER_ID}
+        data-gyg-cmp={campaign}
+        style={{ minHeight: 420, marginTop: 20 }}
+      />
+    </section>
+  );
+}
+
 function FeaturedHotelsPortal() {
   const [hotelName, setHotelName] = useState("");
   const [country, setCountry] = useState("");
@@ -1815,7 +1850,6 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
-
 
 
 

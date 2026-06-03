@@ -1,0 +1,24 @@
+[
+  {
+    "reference": "INS-1780455120438-3E040A",
+    "createdAt": "2026-06-03T02:52:00.438Z",
+    "type": "Trip Protection Quote Request",
+    "hotelName": "Porto das Asas Park Hotel",
+    "destination": "Porto das Asas Park Hotel, Andradas, Brazil",
+    "customerName": "",
+    "customerEmail": "",
+    "productName": "Family Trip Cover",
+    "status": "REQUEST_RECEIVED_PRICE_NOT_CONFIRMED"
+  },
+  {
+    "reference": "INS-1780453259073-4009C1",
+    "createdAt": "2026-06-03T02:20:59.073Z",
+    "type": "Trip Protection Quote Request",
+    "hotelName": "",
+    "destination": "London",
+    "customerName": "",
+    "customerEmail": "",
+    "productName": "Family Trip Cover",
+    "status": "REQUEST_RECEIVED_PRICE_NOT_CONFIRMED"
+  }
+]

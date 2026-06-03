@@ -1195,95 +1195,78 @@ function TransfersPortal(props) {
 }
 
 function AttractionsPortal(props) {
-  const selected = props.selectedHotel || null;
-  const city = selected?.city || props.city || "";
-  const country = selected?.country || props.country || "";
-  const query = [city, country].filter(Boolean).join(", ");
-  const destinationReady = Boolean(city);
-
-  function openGetYourGuide(category) {
-    if (!destinationReady) return;
-
-    const searchTerm = [category, city, country].filter(Boolean).join(" ");
-    const url = `https://www.getyourguide.com/s/?q=${encodeURIComponent(searchTerm)}`;
-    window.open(url, "_blank", "noreferrer");
-  }
-
-  const options = [
-    {
-      id: "city",
-      category: "Sightseeing",
-      title: `City tours in ${city || "your destination"}`,
-      text: "Find guided tours, landmarks, local highlights and sightseeing experiences near your selected stay.",
-      search: "city tours attractions"
-    },
-    {
-      id: "culture",
-      category: "Culture",
-      title: `Museums and culture in ${city || "your destination"}`,
-      text: "Explore museums, galleries, heritage sites, exhibitions and cultural experiences around your hotel destination.",
-      search: "museums culture attractions"
-    },
-    {
-      id: "family",
-      category: "Family",
-      title: `Family activities in ${city || "your destination"}`,
-      text: "Find family-friendly activities, parks, zoos, visitor attractions and memorable experiences for all ages.",
-      search: "family attractions kids activities"
-    },
-    {
-      id: "evening",
-      category: "Evening",
-      title: `Evening experiences in ${city || "your destination"}`,
-      text: "Discover evening tours, dinner experiences, night attractions and activities after check-in.",
-      search: "evening night tours experiences"
-    }
-  ];
-
   return (
     <PortalShell
       title="Things To Do Near Your Stay"
-      subtitle={
-        destinationReady
-          ? `Browse live experiences for ${query}. Final prices, availability and booking terms are confirmed by GetYourGuide before checkout.`
-          : "Select a hotel first so MySpace Hotel can show attractions for the correct destination."
-      }
-      badge="Destination experiences"
+      subtitle="Discover tours, attractions and destination experiences inside MySpace Hotel before completing your booking with our experience partner."
+      badge="Live experiences"
     >
-      {!destinationReady ? (
-        <div style={styles.notice}>
-          Please select a hotel from the Hotels page first. Attractions will then be matched to that hotel destination.
-        </div>
-      ) : (
-        <>
-          <section style={styles.panel}>
-            <div style={styles.kicker}>Selected destination</div>
-            <h2 style={styles.titleSmall}>{query}</h2>
-            <p style={styles.sectionText}>
-              The options below are based on the destination of your selected hotel. MySpace Hotel will not show unrelated attraction placecards.
-            </p>
-          </section>
-
-          <div style={styles.cardGrid}>
-            {options.map((item) => (
-              <div key={item.id} style={styles.infoCard}>
-                <div style={styles.greenBadge}>{item.category}</div>
-                <h3 style={styles.cardTitle}>{item.title}</h3>
-                <p style={styles.cardText}>{item.text}</p>
-                <div style={styles.softBox}>
-                  Live prices and availability are checked for {query} before booking.
-                </div>
-                <button style={styles.primaryBtn} onClick={() => openGetYourGuide(item.search)}>
-                  Check Live Options
-                </button>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+      <GetYourGuideWidget />
     </PortalShell>
   );
 }
+function GetYourGuideWidget() {
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!GYG_PARTNER_ID) return;
+
+    const oldScript = document.querySelector("script[data-myspace-gyg='true']");
+    if (oldScript) oldScript.remove();
+
+    const script = document.createElement("script");
+    script.async = true;
+    script.defer = true;
+    script.src = "https://widget.getyourguide.com/dist/pa.umd.production.min.js";
+    script.setAttribute("data-gyg-partner-id", GYG_PARTNER_ID);
+    script.setAttribute("data-myspace-gyg", "true");
+    script.onload = () => setLoaded(true);
+    script.onerror = () => setLoaded(false);
+    document.body.appendChild(script);
+
+    return () => {};
+  }, []);
+
+  return (
+    <section style={styles.panel}>
+      <div style={styles.panelHeader}>
+        <div>
+          <div style={styles.kicker}>Live experiences</div>
+          <h2 style={styles.titleSmall}>Tours, attractions and things to do</h2>
+          <p style={styles.sectionText}>
+            Browse live destination experiences inside MySpace Hotel. Prices, availability and booking terms are confirmed by GetYourGuide before checkout.
+          </p>
+        </div>
+      </div>
+
+      {!GYG_PARTNER_ID ? (
+        <div style={styles.notice}>
+          GetYourGuide partner ID is missing from the frontend environment.
+        </div>
+      ) : (
+        <>
+          {!loaded ? <div style={styles.softBox}>Loading live experiences...</div> : null}
+
+          <div
+            data-gyg-widget="auto"
+            data-gyg-partner-id={GYG_PARTNER_ID}
+            data-gyg-cmp="MySpaceHotel_Attractions"
+            style={{
+              minHeight: 650,
+              width: "100%",
+              background: "#ffffff",
+              borderRadius: 24,
+              marginTop: 22,
+              padding: 12,
+              overflow: "hidden"
+            }}
+          />
+        </>
+      )}
+    </section>
+  );
+}
+
 function FeaturedHotelsPortal() {
   const [hotelName, setHotelName] = useState("");
   const [country, setCountry] = useState("");
@@ -1815,7 +1798,6 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
-
 
 
 
