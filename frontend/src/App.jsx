@@ -10,11 +10,6 @@ const STRIPE_PAYMENT_LINK =
   import.meta.env.VITE_PUBLIC_STRIPE_PAYMENT_LINK ||
   "";
 
-const GYG_PARTNER_ID =
-  import.meta.env.VITE_GYG_PARTNER_ID ||
-  import.meta.env.VITE_PUBLIC_GYG_PARTNER_ID ||
-  "";
-
 const KLOOK_WIDGET_SCRIPT = "https://affiliate.klook.com/widget/fetch-iframe-init.js";
 
 const KLOOK_DYNAMIC_WIDGETS = {
@@ -145,12 +140,7 @@ function hotelRoomName(hotel) {
 }
 
 function hotelRateSourceId(hotel) {
-  return (
-    hotel?.selectedRoom?.rate_source_id ||
-    hotel?.rate_source_id ||
-    hotel?.rooms?.[0]?.rate_source_id ||
-    ""
-  );
+  return hotel?.selectedRoom?.rate_source_id || hotel?.rate_source_id || hotel?.rooms?.[0]?.rate_source_id || "";
 }
 
 function hotelRateSourceTimestamp(hotel) {
@@ -217,6 +207,7 @@ function buildComparisons(selectedHotel, hotels, nights, rooms, fallbackCurrency
       total: baseNight * 1.16 * stayMultiplier,
     },
   ];
+
   const alternatives = (hotels || [])
     .filter((h) => hotelKey(h) !== hotelKey(selectedHotel))
     .slice(0, 4)
@@ -287,12 +278,16 @@ function KlookDynamicWidget({ city, country }) {
     <section style={styles.klookPanel}>
       <div style={styles.panelHeader}>
         <div>
-          <div style={styles.kicker}>Live attraction partner</div>
-          <h2 style={styles.titleSmall}>Things to do in {destinationLabel}</h2>
+          <div style={styles.kicker}>Popular Experiences</div>
+          <h2 style={styles.titleSmall}>Explore More In {destinationLabel}</h2>
           <p style={styles.sectionText}>
-            Browse live activities, attractions and experiences matched to the selected hotel destination. Availability, prices and booking terms are confirmed securely by Klook before checkout.
+            Discover popular attractions, sightseeing tours, transport options and travel experiences recommended for your destination.
           </p>
         </div>
+      </div>
+
+      <div style={styles.customerReminderBox}>
+        Your hotel choice remains saved on MySpace Hotel while you explore experiences for your trip.
       </div>
 
       <div style={styles.klookWidgetShell}>
@@ -314,22 +309,9 @@ function KlookDynamicWidget({ city, country }) {
         />
       </div>
 
-      <div
-  style={{
-    background: "#f4f7fc",
-    padding: "18px",
-    borderRadius: "14px",
-    marginTop: "18px",
-    textAlign: "center",
-    fontSize: "18px",
-    fontWeight: "600",
-    color: "#0a2458",
-  }}
->
-  Discover popular attractions, sightseeing tours, transport options and travel
-  experiences recommended for your destination. Create unforgettable memories
-  before you even arrive.
-</div>
+      <div style={styles.customerExperienceText}>
+        Create unforgettable memories before you even arrive. When you are ready, return to your saved hotel booking and complete your stay securely with MySpace Hotel.
+      </div>
     </section>
   );
 }
@@ -370,6 +352,7 @@ export default function App() {
 
   const [reviewSent, setReviewSent] = useState(false);
   const [partnerSent, setPartnerSent] = useState(false);
+
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search || "");
@@ -666,7 +649,7 @@ function Header() {
         <a style={styles.navLink} href={routeUrl(ROUTES.guide)}>Destination Guide</a>
         <a style={styles.navLink} href={routeUrl(ROUTES.insurance)}>Insurance</a>
         <a style={styles.navLink} href={routeUrl(ROUTES.transfers)}>Transfers</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.attractions)}>Attractions</a>
+        <a style={styles.navLink} href={routeUrl(ROUTES.attractions)}>Experiences</a>
         <a style={styles.goldLink} href={routeUrl(ROUTES.featured)}>Featured Hotels</a>
         <a style={styles.navLink} href={routeUrl(ROUTES.about)}>About Us</a>
         <a style={styles.navLink} href={routeUrl(ROUTES.faq)}>FAQ</a>
@@ -679,6 +662,7 @@ function Header() {
     </header>
   );
 }
+
 function HotelsPage(props) {
   const converted = convertCurrency(Number(props.fxAmount || 0), props.fxFrom, props.fxTo);
 
@@ -730,7 +714,7 @@ function HotelsPage(props) {
             <Metric big="Compare" small="Hotel value" />
             <Metric big="Protect" small="Insurance options" />
             <Metric big="Transfer" small="Airport support" />
-            <Metric big="Explore" small="Tours and attractions" />
+            <Metric big="Explore" small="Travel experiences" />
           </div>
         </div>
       </section>
@@ -741,7 +725,7 @@ function HotelsPage(props) {
         <main>
           <h2 style={styles.title}>MORE STAY OPTIONS</h2>
           <p style={styles.sectionText}>
-            Select a hotel to refresh the booking summary, comparison box, travel extras and alternative hotel options immediately.
+            Select a hotel to refresh the booking summary, comparison box, travel support and alternative hotel options immediately.
           </p>
 
           {props.loading ? <div style={styles.empty}>Finding suitable accommodation for your destination...</div> : null}
@@ -834,6 +818,7 @@ function Field({ label, children }) {
     </div>
   );
 }
+
 function HotelCard({ hotel, selectedHotel, setSelectedHotel, rooms, nights, currency, city, country }) {
   const selectedReadyHotel = selectedHotelWithRoom(hotel);
   const price = hotelPrice(selectedReadyHotel);
@@ -864,10 +849,7 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, rooms, nights, curr
         <div style={styles.priceLine}>{curr} {money(price)} <span style={styles.small}>per night</span></div>
         <div style={styles.small}>Estimated stay total: {curr} {money(total)}</div>
 
-        <button
-          style={styles.darkBtn}
-          onClick={() => setSelectedHotel(selectedReadyHotel)}
-        >
+        <button style={styles.darkBtn} onClick={() => setSelectedHotel(selectedReadyHotel)}>
           Select Hotel
         </button>
       </div>
@@ -905,20 +887,18 @@ function BookingSummary(props) {
             <textarea style={styles.textareaSmall} placeholder="Special requests, optional" value={props.specialRequests} onChange={(e) => props.setSpecialRequests(e.target.value)} />
           </div>
 
-          {props.affiliateCode ? (
-            <div style={styles.referralNote}>
-              Referral applied for this booking.
-            </div>
-          ) : null}
+          {props.affiliateCode ? <div style={styles.referralNote}>Referral applied for this booking.</div> : null}
 
           <button style={styles.payBtn} disabled={props.paying} onClick={props.secureReservation}>
             {props.paying ? "Opening Secure Payment..." : "Continue to Secure Checkout"}
           </button>
 
-          <a style={styles.outlineBtn} href={routeUrl(ROUTES.compare)}>Compare Prices</a>
-          <a style={styles.outlineBtn} href={routeUrl(ROUTES.insurance)}>Add Travel Insurance</a>
-          <a style={styles.outlineBtn} href={routeUrl(ROUTES.transfers)}>Request Airport Transfer</a>
-          <a style={styles.outlineBtn} href={routeUrl(ROUTES.attractions)}>Add Tours & Attractions</a>
+          <div style={styles.bookingFirstBox}>
+            <div style={styles.bookingFirstTitle}>Complete your hotel reservation first</div>
+            <div style={styles.bookingFirstText}>
+              Your hotel stay is the priority. After your reservation is secured, you can still add airport transfers, travel insurance and destination experiences through MySpace Hotel.
+            </div>
+          </div>
         </>
       )}
     </aside>
@@ -961,6 +941,7 @@ function AlternativeHotels(props) {
     .slice(0, 3);
 
   if (!props.selectedHotel || alternatives.length === 0) return null;
+
   return (
     <section style={styles.panel}>
       <div style={styles.kicker}>MORE STAY OPTIONS</div>
@@ -1056,11 +1037,7 @@ function ComparePortal(props) {
   const roomName = customerOffer?.roomName || props.selectedRoomName || "Available room";
 
   return (
-    <PortalShell
-      title="Compare Prices"
-      subtitle="Review your selected stay clearly before continuing to secure checkout."
-      badge="Best price check"
-    >
+    <PortalShell title="Compare Prices" subtitle="Review your selected stay clearly before continuing to secure checkout." badge="Best price check">
       {!selected ? (
         <div style={styles.empty}>
           Select a hotel from the Hotels page first, then return here to compare today's best available price for that exact property.
@@ -1080,9 +1057,7 @@ function ComparePortal(props) {
 
             <div style={styles.liveCompareBox}>
               <div>
-                <div style={styles.greenBadge}>
-                  {liveLoading ? "Checking current rates" : "Recommended stay option"}
-                </div>
+                <div style={styles.greenBadge}>{liveLoading ? "Checking current rates" : "Recommended stay option"}</div>
                 <h3 style={styles.cardTitle}>{hotelName}</h3>
                 <div style={styles.muted}>{selectedCity}, {selectedCountry}</div>
                 <div style={styles.strong}>Board Basis: {roomName}</div>
@@ -1103,6 +1078,7 @@ function ComparePortal(props) {
     </PortalShell>
   );
 }
+
 function RevenueAddOns(props) {
   if (!props.selectedHotel) return null;
 
@@ -1110,26 +1086,26 @@ function RevenueAddOns(props) {
     <section style={styles.panel}>
       <div style={styles.panelHeader}>
         <div>
-          <div style={styles.kicker}>Add more to your trip</div>
-          <h2 style={styles.titleSmall}>Travel extras for this stay</h2>
+          <div style={styles.kicker}>Enhance Your Stay</div>
+          <h2 style={styles.titleSmall}>Complete your hotel booking, then personalise your trip</h2>
           <p style={styles.sectionText}>
-            Add travel protection, Hotel Airport Transfers and destination experiences to make this booking more complete.
+            Secure your accommodation first. After booking, you can add airport transfers, travel insurance, sightseeing tours and destination experiences without losing your MySpace Hotel reservation.
           </p>
         </div>
       </div>
 
       <div style={styles.cardGrid}>
-        <InfoCard title="Travel Insurance" text="Protect the trip with cancellation, travel disruption and emergency support cover." />
-        <InfoCard title="Hotel Airport Transfers" text="Request airport pickup or hotel drop-off support for a smoother journey." />
-        <InfoCard title="Tours & Attractions" text="Explore live activities, tours and attractions matched to the selected destination." />
-        <InfoCard title="Hotel Partner Visibility" text="Hotels can request promoted placement and destination visibility through MySpace Hotel." />
+        <InfoCard title="Travel Insurance" text="Protect the trip with cancellation, travel disruption and emergency support options after your stay is reserved." />
+        <InfoCard title="Hotel Airport Transfers" text="Arrange airport pickup or hotel drop-off support after securing your accommodation." />
+        <InfoCard title="Tours & Experiences" text="Explore popular activities matched to your destination once your hotel booking is safely underway." />
+        <InfoCard title="Destination Support" text="Use MySpace Hotel guidance to plan your trip with more confidence before and after booking." />
       </div>
 
-      <div style={styles.compareGrid}>
-        <a style={styles.primaryLink} href={routeUrl(ROUTES.insurance)}>View Insurance</a>
-        <a style={styles.primaryLink} href={routeUrl(ROUTES.transfers)}>Plan My Transfer</a>
-        <a style={styles.primaryLink} href={routeUrl(ROUTES.attractions)}>View Attractions</a>
-        <a style={styles.primaryLink} href={routeUrl(ROUTES.featured)}>Promote a Hotel</a>
+      <div style={styles.bookingFirstBox}>
+        <div style={styles.bookingFirstTitle}>Recommended next step</div>
+        <div style={styles.bookingFirstText}>
+          Return to the booking summary and complete your hotel reservation first. Trip extras will remain available afterwards.
+        </div>
       </div>
     </section>
   );
@@ -1190,16 +1166,16 @@ function InsurancePortal(props) {
   }
 
   return (
-    <PortalShell title="Travel Insurance" subtitle="Give customers extra confidence before they travel." badge="Trip protection">
+    <PortalShell title="Travel Insurance" subtitle="Add protection after choosing your stay, so your trip feels safer and easier to manage." badge="Trip protection">
       {notice ? <div style={styles.notice}>{notice}</div> : null}
       <div style={styles.cardGrid}>
         {options.map((option) => (
           <div key={option.id} style={styles.infoCard}>
             <h3 style={styles.cardTitle}>{option.name}</h3>
             <p style={styles.cardText}>{option.description}</p>
-            <div style={styles.softBox}>Live cover pricing is confirmed after the customer request is reviewed.</div>
+            <div style={styles.softBox}>Cover pricing is confirmed after your request is reviewed.</div>
             <button style={styles.primaryBtn} onClick={() => requestInsurance(option)}>
-              Request Live Insurance Quote
+              Request Insurance Support
             </button>
           </div>
         ))}
@@ -1266,7 +1242,7 @@ function TransfersPortal(props) {
   }
 
   return (
-    <PortalShell title="Arrive Comfortably at Your Hotel" subtitle="Request a fixed-price airport transfer before you travel, with pickup, luggage and hotel drop-off support arranged around your stay." badge="Hotel Airport Transfers">
+    <PortalShell title="Arrive Comfortably at Your Hotel" subtitle="Request airport pickup or hotel drop-off support around your selected stay." badge="Hotel Airport Transfers">
       {notice ? <div style={styles.notice}>{notice}</div> : null}
       <div style={styles.cardGrid}>
         {options.map((option) => (
@@ -1294,26 +1270,37 @@ function AttractionsPortal(props) {
 
   return (
     <PortalShell
-      title="Things To Do Near Your Stay"
+      title="Popular Experiences & Travel Essentials"
       subtitle={
         destinationReady
-          ? `Browse live destination experiences for ${query}. Final prices, availability and booking terms are confirmed securely before checkout.`
-          : "Select a hotel first so MySpace Hotel can show attractions for the correct destination."
+          ? `Explore things to do in ${query}. Your selected hotel remains saved while you browse.`
+          : "Select a hotel first so MySpace Hotel can recommend experiences for the correct destination."
       }
-      badge="Destination experiences"
+      badge="Enhance Your Stay"
     >
       {!destinationReady ? (
         <div style={styles.notice}>
-          Please select a hotel from the Hotels page first. Attractions will then be matched to that hotel destination.
+          Please select a hotel from the Hotels page first. Your destination experiences will then match the hotel location.
         </div>
       ) : (
         <>
-          <section style={styles.panel}>
-            <div style={styles.kicker}>Selected destination</div>
-            <h2 style={styles.titleSmall}>{query}</h2>
-            <p style={styles.sectionText}>
-              The attraction area below is powered by the approved MySpace Hotel Klook affiliate widget and matched to the selected hotel destination.
-            </p>
+          <section style={styles.staySavedPanel}>
+            <div>
+              <div style={styles.kicker}>Your hotel is saved</div>
+              <h2 style={styles.titleSmall}>{selected?.name || "Selected hotel"}</h2>
+              <p style={styles.sectionText}>
+                {query}. You can explore experiences now and return to complete your MySpace Hotel booking securely.
+              </p>
+            </div>
+
+            <div style={styles.savedStayActions}>
+              <a style={styles.payLinkBtn} href={routeUrl(ROUTES.hotels)}>
+                Return to Hotel Booking
+              </a>
+              <a style={styles.primaryLink} href={routeUrl(ROUTES.compare)}>
+                Review Stay Price
+              </a>
+            </div>
           </section>
 
           <KlookDynamicWidget city={city} country={country} />
@@ -1322,6 +1309,7 @@ function AttractionsPortal(props) {
     </PortalShell>
   );
 }
+
 function FeaturedHotelsPortal() {
   const [hotelName, setHotelName] = useState("");
   const [country, setCountry] = useState("");
@@ -1450,7 +1438,7 @@ function FaqPortal() {
         <FaqItem q="How do I search for a hotel?" a="Select your country, city, dates, guests and rooms, then choose Find Hotels. Available hotel options will appear below the search box." />
         <FaqItem q="When is the final price confirmed?" a="The stay total is shown before checkout. Final payment details are confirmed securely before payment is completed." />
         <FaqItem q="Can I compare hotels in the same destination?" a="Yes. After selecting a hotel, MySpace Hotel shows comparison choices and MORE STAY OPTIONS where available." />
-        <FaqItem q="Can I add insurance, transfers or attractions?" a="Yes. Select a hotel first, then use the Insurance, Transfers and Attractions pages to request additional travel services." />
+        <FaqItem q="Can I add insurance, transfers or attractions?" a="Yes. Complete your hotel reservation first. Additional travel services can be requested afterwards through MySpace Hotel." />
         <FaqItem q="Can hotels or partners work with MySpace Hotel?" a="Yes. Accommodation providers and travel technology partners can use the Industry Partnerships page to contact MySpace Hotel." />
       </div>
     </PortalShell>
@@ -1540,7 +1528,7 @@ function SupportPortal() {
   );
 }
 
-function PartnersPortal({ partnerSent, setPartnerSent }) {
+function PartnersPortal() {
   return (
     <PortalShell title="Industry Partnerships" subtitle="Connect with MySpace Hotel for trusted accommodation, travel technology and service partnerships." badge="Partnerships">
       <div style={styles.cardGrid}>
@@ -1713,6 +1701,7 @@ const styles = {
   payBtn: { marginTop: 18, width: "100%", background: "#10b981", color: "#fff", border: "none", borderRadius: 17, padding: 17, fontSize: 17, fontWeight: 950, cursor: "pointer" },
   outlineBtn: { display: "block", marginTop: 12, border: "2px solid #d9e4f2", borderRadius: 17, padding: 15, textAlign: "center", color: "#0b1d51", background: "#fff", textDecoration: "none", fontWeight: 950 },
   primaryLink: { display: "inline-block", background: "#2750db", color: "#fff", borderRadius: 16, padding: "14px 18px", textDecoration: "none", fontWeight: 950, textAlign: "center" },
+  payLinkBtn: { display: "inline-block", background: "#10b981", color: "#fff", borderRadius: 16, padding: "15px 18px", textDecoration: "none", fontWeight: 950, textAlign: "center" },
   textLink: { color: "#2750db", textDecoration: "none", fontWeight: 950 },
   notice: { maxWidth: 1450, margin: "20px auto", background: "#fff7ed", color: "#9a3412", border: "1px solid #fed7aa", borderRadius: 18, padding: 18, fontWeight: 900 },
   contentGrid: { maxWidth: 1540, margin: "0 auto", padding: "40px 34px 60px", display: "grid", gridTemplateColumns: "minmax(0,1fr) 420px", gap: 28, alignItems: "start" },
@@ -1736,6 +1725,9 @@ const styles = {
   summary: { position: "sticky", top: 104, background: "#fff", borderRadius: 26, padding: 24, boxShadow: "0 8px 25px rgba(0,0,0,.08)" },
   summaryTitle: { fontSize: 30, margin: "0 0 8px", fontWeight: 950 },
   softBox: { marginTop: 18, background: "#f4f7fb", borderRadius: 18, padding: 18, color: "#60708a", fontWeight: 850, lineHeight: 1.5 },
+  bookingFirstBox: { marginTop: 18, background: "#ecfdf3", border: "1px solid #bbf7d0", borderRadius: 18, padding: 18, textAlign: "center" },
+  bookingFirstTitle: { color: "#166534", fontWeight: 950, fontSize: 18, marginBottom: 8 },
+  bookingFirstText: { color: "#315445", fontWeight: 800, lineHeight: 1.55 },
   selectedName: { margin: "20px 0 8px", fontSize: 23, lineHeight: 1.25, fontWeight: 950 },
   totalBox: { marginTop: 20, background: "#ecfdf3", borderRadius: 20, padding: 20 },
   totalLabel: { color: "#166534", fontWeight: 950 },
@@ -1746,8 +1738,12 @@ const styles = {
   textareaSmall: { padding: 15, borderRadius: 15, border: "1px solid #d8e0ef", minHeight: 85, fontSize: 15, fontFamily: "Arial, sans-serif" },
   textarea: { padding: 15, borderRadius: 15, border: "1px solid #d8e0ef", minHeight: 130, fontSize: 15, fontFamily: "Arial, sans-serif" },
   panel: { marginTop: 30, background: "#fff", borderRadius: 28, padding: 28, boxShadow: "0 8px 25px rgba(0,0,0,.06)" },
+  staySavedPanel: { marginTop: 30, background: "#fff", borderRadius: 28, padding: 28, boxShadow: "0 8px 25px rgba(0,0,0,.06)", display: "grid", gridTemplateColumns: "minmax(0,1fr) 320px", gap: 22, alignItems: "center", border: "2px solid #bbf7d0" },
+  savedStayActions: { display: "grid", gap: 14 },
   klookPanel: { marginTop: 30, background: "#fff", borderRadius: 28, padding: 28, boxShadow: "0 8px 25px rgba(0,0,0,.06)", border: "1px solid #dce6f3" },
   klookWidgetShell: { marginTop: 22, minHeight: 430, background: "#f8fafc", borderRadius: 22, padding: 16, overflow: "hidden", border: "1px solid #dce6f3" },
+  customerReminderBox: { marginTop: 18, background: "#ecfdf3", color: "#166534", borderRadius: 18, padding: 18, fontWeight: 950, lineHeight: 1.5, textAlign: "center" },
+  customerExperienceText: { marginTop: 18, background: "#f4f7fc", padding: 18, borderRadius: 14, textAlign: "center", fontSize: 18, fontWeight: 700, color: "#0a2458", lineHeight: 1.5 },
   panelHeader: { display: "flex", justifyContent: "space-between", gap: 20, flexWrap: "wrap", alignItems: "flex-start" },
   kicker: { color: "#2750db", fontWeight: 950, letterSpacing: ".04em", textTransform: "uppercase", fontSize: 13, marginBottom: 8 },
   compareGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))", gap: 16, marginTop: 20 },
