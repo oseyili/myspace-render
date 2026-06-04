@@ -317,7 +317,12 @@ function KlookDynamicWidget({ city, country }) {
 }
 
 export default function App() {
-  const [route, setRoute] = useState(currentRoute());
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
+  }, []);
+const [route, setRoute] = useState(currentRoute());
   const [affiliateCode, setAffiliateCode] = useState("");
   const [countries, setCountries] = useState([]);
   const [cities, setCities] = useState([]);
