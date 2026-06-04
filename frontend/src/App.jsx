@@ -640,6 +640,70 @@ const [route, setRoute] = useState(currentRoute());
   );
 }
 
+
+function InstallAppButton() {
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [installed, setInstalled] = useState(false);
+
+  useEffect(() => {
+    const alreadyInstalled =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+
+    setInstalled(alreadyInstalled);
+
+    function handleBeforeInstallPrompt(event) {
+      event.preventDefault();
+      setInstallPrompt(event);
+    }
+
+    function handleInstalled() {
+      setInstalled(true);
+      setInstallPrompt(null);
+    }
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleInstalled);
+    };
+  }, []);
+
+  async function installApp() {
+    if (installPrompt) {
+      installPrompt.prompt();
+      await installPrompt.userChoice;
+      setInstallPrompt(null);
+      return;
+    }
+
+    alert("To install MySpace Hotel, open your browser menu, choose Apps, then select Install this site as an app.");
+  }
+
+  if (installed) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={installApp}
+      style={{
+        padding: "10px 13px",
+        borderRadius: 13,
+        border: "1px solid #10b981",
+        color: "#ffffff",
+        background: "#10b981",
+        textDecoration: "none",
+        fontWeight: 950,
+        fontSize: 14,
+        cursor: "pointer",
+      }}
+    >
+      Install App
+    </button>
+  );
+}
 function Header() {
   return (
     <header style={styles.header}>
@@ -660,6 +724,7 @@ function Header() {
         <a style={styles.navLink} href={routeUrl(ROUTES.faq)}>FAQ</a>
         <a style={styles.navLink} href={routeUrl(ROUTES.reviews)}>Guest Reviews</a>
         <a style={styles.navLink} href={routeUrl(ROUTES.support)}>Support</a>
+        <InstallAppButton />
         <a style={styles.goldLink} href={routeUrl(ROUTES.partners)}>Partnerships</a>
         <a style={styles.navLink} href="/affiliate-network.html">Affiliate Network</a>
         <a style={styles.darkLink} href={routeUrl(ROUTES.business)}>Business Portal</a>
@@ -1854,3 +1919,4 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
