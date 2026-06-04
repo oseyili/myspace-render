@@ -1529,34 +1529,103 @@ function SupportPortal() {
 }
 
 function PartnersPortal() {
+  const [sent, setSent] = useState(false);
+  const [form, setForm] = useState({
+    companyName: "",
+    contactName: "",
+    email: "",
+    phone: "",
+    website: "",
+    companyAddress: "",
+    country: "",
+    partnershipType: "Hotel or accommodation provider",
+    expectedMonthlyBookings: "",
+    pmsOrChannelManager: "",
+    apiCapability: "Not sure",
+    message: "",
+  });
+
+  function updateField(name, value) {
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }
+
+  async function submitPartnerForm(e) {
+    e.preventDefault();
+
+    try {
+      await fetch(`${API_BASE}/api/partners/apply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+    } catch {}
+
+    setSent(true);
+  }
+
   return (
-    <PortalShell title="Industry Partnerships" subtitle="Connect with MySpace Hotel for trusted accommodation, travel technology and service partnerships." badge="Partnerships">
+    <PortalShell
+      title="Industry Partnerships"
+      subtitle="Apply to work with MySpace Hotel across accommodation, technology, transfers, insurance and destination services."
+      badge="Partnerships"
+    >
       <div style={styles.cardGrid}>
-        <InfoCard title="Hotels and accommodation" text="Work with MySpace Hotel to present trusted stays to guests seeking global accommodation." />
-        <InfoCard title="Property or channel technology" text="Connect availability, rates and booking information through professional partnership workflows." />
-        <InfoCard title="Travel technology partners" text="Collaborate on better travel experiences, destination support and improved guest journeys." />
+        <InfoCard title="Hotels and accommodation" text="List your property or accommodation portfolio with MySpace Hotel." />
+        <InfoCard title="Technology partners" text="Connect rates, availability, inventory, booking and travel service workflows." />
+        <InfoCard title="Travel service partners" text="Work with MySpace Hotel on transfers, insurance, attractions and guest support." />
       </div>
 
-      <div style={styles.success}>
-        Partnership enquiries can be sent to reservations@myspace-hotel.com or sales@myspace-hotel.com.
-      </div>
+      {sent ? (
+        <div style={styles.success}>
+          Thank you. Your partnership application has been received by MySpace Hotel.
+        </div>
+      ) : (
+        <form style={styles.form} onSubmit={submitPartnerForm}>
+          <h2 style={styles.titleSmall}>Partnership Application</h2>
+
+          <input style={styles.input} placeholder="Company name" value={form.companyName} onChange={(e) => updateField("companyName", e.target.value)} required />
+          <input style={styles.input} placeholder="Contact name" value={form.contactName} onChange={(e) => updateField("contactName", e.target.value)} required />
+          <input style={styles.input} type="email" placeholder="Email address" value={form.email} onChange={(e) => updateField("email", e.target.value)} required />
+          <input style={styles.input} placeholder="Phone number" value={form.phone} onChange={(e) => updateField("phone", e.target.value)} />
+          <input style={styles.input} placeholder="Website" value={form.website} onChange={(e) => updateField("website", e.target.value)} />
+          <input style={styles.input} placeholder="Company address" value={form.companyAddress} onChange={(e) => updateField("companyAddress", e.target.value)} />
+          <input style={styles.input} placeholder="Country / main operating market" value={form.country} onChange={(e) => updateField("country", e.target.value)} />
+
+          <select style={styles.input} value={form.partnershipType} onChange={(e) => updateField("partnershipType", e.target.value)}>
+            <option>Hotel or accommodation provider</option>
+            <option>Channel manager or property technology</option>
+            <option>Airport transfer partner</option>
+            <option>Insurance partner</option>
+            <option>Attractions or experiences partner</option>
+            <option>Affiliate or marketing partner</option>
+            <option>Other travel service partner</option>
+          </select>
+
+          <input style={styles.input} placeholder="Expected monthly bookings or enquiries" value={form.expectedMonthlyBookings} onChange={(e) => updateField("expectedMonthlyBookings", e.target.value)} />
+          <input style={styles.input} placeholder="PMS / Channel Manager used, if applicable" value={form.pmsOrChannelManager} onChange={(e) => updateField("pmsOrChannelManager", e.target.value)} />
+
+          <select style={styles.input} value={form.apiCapability} onChange={(e) => updateField("apiCapability", e.target.value)}>
+            <option>Not sure</option>
+            <option>API available</option>
+            <option>Extranet available</option>
+            <option>Channel manager connection available</option>
+            <option>Email/manual onboarding only</option>
+          </select>
+
+          <textarea
+            style={styles.textarea}
+            placeholder="Tell us about your business, destinations covered, inventory, services, rates, or how you would like to work with MySpace Hotel."
+            value={form.message}
+            onChange={(e) => updateField("message", e.target.value)}
+            required
+          />
+
+          <button style={styles.primaryBtn}>Submit Partnership Application</button>
+        </form>
+      )}
     </PortalShell>
   );
 }
-
-function AffiliateNetworkUltraSafe() {
-  return (
-    <PortalShell title="Affiliate Network" subtitle="Promote MySpace Hotel and earn on qualifying completed stays." badge="Affiliate growth">
-      <div style={styles.cardGrid}>
-        <InfoCard title="Referral links" text="Approved affiliates receive a referral link to promote MySpace Hotel." />
-        <InfoCard title="Commission tracking" text="Clicks, bookings and payable commissions are tracked after approval." />
-        <InfoCard title="Payout review" text="Payouts are reviewed monthly once the minimum payout threshold is reached." />
-      </div>
-      <a style={styles.primaryLink} href="/affiliate-network.html">Open Affiliate Portal</a>
-    </PortalShell>
-  );
-}
-
 function BusinessPortal() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
