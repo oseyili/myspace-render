@@ -639,7 +639,33 @@ const [route, setRoute] = useState(currentRoute());
     </div>
   );
 }
+function AttractionsPortal(props) {
+  return (
+    <PortalShell
+      title="Experiences"
+      subtitle="Explore destination experiences that can complement your hotel stay."
+      badge="Experiences"
+    >
+      <section style={styles.panel}>
+        <div style={styles.panelHeader}>
+          <div>
+            <div style={styles.kicker}>Destination Experiences</div>
+            <h2 style={styles.titleSmall}>Things to do near your destination</h2>
+            <p style={styles.sectionText}>
+              Find relevant activities and experiences after choosing your destination.
+            </p>
+          </div>
+        </div>
 
+        <KlookDynamicWidget
+          city={props.city}
+          country={props.country}
+          destinationQuery={props.destinationQuery}
+        />
+      </section>
+    </PortalShell>
+  );
+}
 
 function InstallAppButton() {
   const [installPrompt, setInstallPrompt] = useState(null);
