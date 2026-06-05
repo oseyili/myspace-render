@@ -316,7 +316,32 @@ function KlookDynamicWidget({ city, country }) {
   );
 }
 
-export default function App() {
+export default 
+function Header() {
+  return (
+    <header style={styles.header}>
+      <div>
+        <a style={styles.brand} href={routeUrl(ROUTES.hotels)}>MYSPACE HOTEL</a>
+        <div style={styles.tagline}>Hotels, resorts, serviced apartments and worldwide travel support</div>
+      </div>
+      <nav style={styles.nav}>
+        <a style={styles.navLink} href={routeUrl(ROUTES.hotels)}>Hotels</a>
+        <a style={styles.navLink} href={routeUrl(ROUTES.compare)}>Compare Prices</a>
+        <a style={styles.navLink} href={routeUrl(ROUTES.guide)}>Destination Guide</a>
+        <a style={styles.navLinkGold} href={routeUrl(ROUTES.featured)}>Featured Hotels</a>
+        <a style={styles.navLink} href={routeUrl(ROUTES.about)}>About Us</a>
+        <a style={styles.navLink} href={routeUrl(ROUTES.faq)}>FAQ</a>
+        <a style={styles.navLink} href={routeUrl(ROUTES.reviews)}>Guest Reviews</a>
+        <a style={styles.navLink} href={routeUrl(ROUTES.support)}>Support</a>
+        <a style={styles.navLinkGold} href={routeUrl(ROUTES.partners)}>Partnerships</a>
+        <a style={styles.navLink} href={routeUrl(ROUTES.affiliates)}>Affiliate Network</a>
+        <a style={styles.navLinkDark} href={routeUrl(ROUTES.business)}>Business Portal</a>
+      </nav>
+    </header>
+  );
+}
+
+function App() {
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(() => {});
@@ -1213,6 +1238,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
