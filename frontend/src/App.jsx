@@ -1329,56 +1329,38 @@ function TransfersPortal(props) {
       </div>
     </PortalShell>
   );
+}function WelcomePickupsWidget() {
+  useEffect(() => {
+    const container = document.getElementById("welcomepickups");
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const propsScript = document.createElement("script");
+    propsScript.type = "text/props";
+    propsScript.textContent = JSON.stringify({
+      partner_id: "110382",
+      button_color: "#2750db",
+      button_text: "Book Now",
+    });
+
+    container.appendChild(propsScript);
+
+    const existingScript = document.querySelector('script[src="https://cdn.b2b.welcomepickups.com/widget/bundle.js"]');
+
+    if (!existingScript) {
+      const script = document.createElement("script");
+      script.src = "https://cdn.b2b.welcomepickups.com/widget/bundle.js";
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
+  return <div id="welcomepickups" style={{ width: "100%" }} />;
 }
 
-function AttractionsPortal(props) {
-  const selected = props.selectedHotel || null;
-  const city = selected?.city || props.city || "";
-  const country = selected?.country || props.country || "";
-  const query = [city, country].filter(Boolean).join(", ");
-  const destinationReady = Boolean(city);
 
-  return (
-    <PortalShell
-      title="Popular Experiences & Travel Essentials"
-      subtitle={
-        destinationReady
-          ? `Explore things to do in ${query}. Your selected hotel remains saved while you browse.`
-          : "Select a hotel first so MySpace Hotel can recommend experiences for the correct destination."
-      }
-      badge="Enhance Your Stay"
-    >
-      {!destinationReady ? (
-        <div style={styles.notice}>
-          Please select a hotel from the Hotels page first. Your destination experiences will then match the hotel location.
-        </div>
-      ) : (
-        <>
-          <section style={styles.staySavedPanel}>
-            <div>
-              <div style={styles.kicker}>Your hotel is saved</div>
-              <h2 style={styles.titleSmall}>{selected?.name || "Selected hotel"}</h2>
-              <p style={styles.sectionText}>
-                {query}. You can explore experiences now and return to complete your MySpace Hotel booking securely.
-              </p>
-            </div>
-
-            <div style={styles.savedStayActions}>
-              <a style={styles.payLinkBtn} href={routeUrl(ROUTES.hotels)}>
-                Return to Hotel Booking
-              </a>
-              <a style={styles.primaryLink} href={routeUrl(ROUTES.compare)}>
-                Review Stay Price
-              </a>
-            </div>
-          </section>
-
-          <KlookDynamicWidget city={city} country={country} />
-        </>
-      )}
-    </PortalShell>
-  );
-}
 
 function FeaturedHotelsPortal() {
   const [hotelName, setHotelName] = useState("");
