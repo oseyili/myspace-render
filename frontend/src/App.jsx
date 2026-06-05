@@ -640,28 +640,63 @@ const [route, setRoute] = useState(currentRoute());
   );
 }
 function AttractionsPortal(props) {
+  useEffect(() => {
+    function keepExperienceLinksSeparate(event) {
+      const link = event.target.closest ? event.target.closest("a") : null;
+      if (!link) return;
+
+      const href = link.getAttribute("href") || "";
+      if (href.includes("klook.com")) {
+        link.setAttribute("target", "_blank");
+        link.setAttribute("rel", "noopener noreferrer");
+      }
+    }
+
+    document.addEventListener("click", keepExperienceLinksSeparate);
+    return () => document.removeEventListener("click", keepExperienceLinksSeparate);
+  }, []);
+
   return (
     <PortalShell
       title="Experiences"
-      subtitle="Explore destination experiences that can complement your hotel stay."
+      subtitle="Explore destination experiences while your MySpace Hotel booking journey remains available."
       badge="Experiences"
     >
       <section style={styles.panel}>
         <div style={styles.panelHeader}>
           <div>
             <div style={styles.kicker}>Destination Experiences</div>
-            <h2 style={styles.titleSmall}>Things to do near your destination</h2>
+            <h2 style={styles.titleSmall}>Explore experiences without losing your hotel booking</h2>
             <p style={styles.sectionText}>
-              Find relevant activities and experiences after choosing your destination.
+              Experiences may open in a separate partner page. Keep this MySpace Hotel page open so you can return and complete your accommodation booking.
             </p>
           </div>
+          <a style={styles.primaryLink} href={routeUrl(ROUTES.hotels)}>
+            Return to Hotel Booking
+          </a>
         </div>
 
-        <KlookDynamicWidget
-          city={props.city}
-          country={props.country}
-          destinationQuery={props.destinationQuery}
-        />
+        <div style={styles.success}>
+          Your hotel choice remains with MySpace Hotel. After viewing an experience, return here to continue your hotel booking, compare prices or complete checkout.
+        </div>
+
+        <div id="myspace-experiences-widget">
+          <KlookDynamicWidget
+            city={props.city}
+            country={props.country}
+            destinationQuery={props.destinationQuery}
+          />
+        </div>
+
+        <div style={styles.bookingFirstBox}>
+          <div style={styles.bookingFirstTitle}>Ready to continue?</div>
+          <div style={styles.bookingFirstText}>
+            Return to MySpace Hotel to complete your hotel booking first, then add experiences, transfers or insurance for the same trip.
+          </div>
+          <a style={styles.primaryLink} href={routeUrl(ROUTES.hotels)}>
+            Continue Hotel Booking
+          </a>
+        </div>
       </section>
     </PortalShell>
   );
@@ -1927,4 +1962,5 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
