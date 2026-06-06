@@ -4690,6 +4690,87 @@ app.get("/api/webbeds/hotel-details", async (req, res) => {
     });
   }
 });
+
+// MSH WEBBEDS HOTEL ID BATCH SEARCH START
+function buildWebbedsHotelIdSearchXml(query) {
+  const fromDate = xmlEscapeValue(query.fromDate || query.checkIn || query.checkin || webbedsDateISO(14));
+  const toDate = xmlEscapeValue(query.toDate || query.checkOut || query.checkout || webbedsDateISO(15));
+
+  const currencyId = positiveIntegerOrBlank(query.currencyId || query.currency_id) || webbedsCurrencyIdFromCode(query.currency);
+  const nationalityId = positiveIntegerOrBlank(query.nationalityId || query.nationality_id) || webbedsCountryIdFromCode(query.nationality || "GB");
+  const residenceId = positiveIntegerOrBlank(query.residenceId || query.residence_id) || webbedsCountryIdFromCode(query.residence || "GB");
+
+  const hotelIds = clean(query.hotelIds || query.hotelids || query.ids || "")
+    .split(",")
+    .map((x) => clean(x))
+    .filter((x) => /^[0-9]+$/.test(x))
+    .slice(0, 50);
+
+  if (!hotelIds.length) {
+    return { ok: false, message: "hotelIds is required. Example: hotelIds=31354,31064,1073078" };
+  }
+
+  const fieldValues = hotelIds.map((id) => `<fieldValue>${xmlEscapeValue(id)}</fieldValue>`).join("");
+
+  return {
+    ok: true,
+    xml: webbedsCustomerXml(`<request command="searchhotels">
+    <bookingDetails>
+      <fromDate>${fromDate}</fromDate>
+      <toDate>${toDate}</toDate>
+      <currency>${currencyId}</currency>
+      <rooms no="1">
+        <room runno="0">
+          <adultsCode>2</adultsCode>
+          <children no="0"></children>
+          <rateBasis>-1</rateBasis>
+          <passengerNationality>${nationalityId}</passengerNationality>
+          <passengerCountryOfResidence>${residenceId}</passengerCountryOfResidence>
+        </room>
+      </rooms>
+    </bookingDetails>
+    <return>
+      <filters xmlns:a="http://us.dotwconnect.com/xsd/atomicCondition" xmlns:c="http://us.dotwconnect.com/xsd/complexCondition">
+        <c:condition>
+          <a:condition>
+            <fieldName>hotelId</fieldName>
+            <fieldTest>in</fieldTest>
+            <fieldValues>${fieldValues}</fieldValues>
+          </a:condition>
+        </c:condition>
+      </filters>
+    </return>
+  </request>`)
+  };
+}
+
+app.get("/api/webbeds/search-by-hotel-ids", async (req, res) => {
+  try {
+    const built = buildWebbedsHotelIdSearchXml(req.query);
+    if (!built.ok) return res.status(400).json(built);
+
+    const result = await webbedsPostXml(built.xml);
+    const hotels = parseWebbedsHotels(result.text, clean(req.query.currency || "USD").toUpperCase());
+
+    res.status(result.ok ? 200 : 502).json({
+      ok: result.ok,
+      supplier: "configured_private_supplier",
+      source: "live_hotel_id_batch",
+      status: result.status,
+      count: hotels.length,
+      hotels,
+      responsePreview: result.text.slice(0, 15000)
+    });
+  } catch (err) {
+    res.status(500).json({
+      ok: false,
+      message: "WebBeds hotel ID batch search failed.",
+      error: err.message
+    });
+  }
+});
+// MSH WEBBEDS HOTEL ID BATCH SEARCH END
+
 // MSH WEBBEDS HOTEL DETAILS TEST END
 
 // MSH CUSTOMER LIVE HOTEL SEARCH VIA WEBBEDS END
@@ -4929,6 +5010,87 @@ app.get("/api/webbeds/hotel-details", async (req, res) => {
     });
   }
 });
+
+// MSH WEBBEDS HOTEL ID BATCH SEARCH START
+function buildWebbedsHotelIdSearchXml(query) {
+  const fromDate = xmlEscapeValue(query.fromDate || query.checkIn || query.checkin || webbedsDateISO(14));
+  const toDate = xmlEscapeValue(query.toDate || query.checkOut || query.checkout || webbedsDateISO(15));
+
+  const currencyId = positiveIntegerOrBlank(query.currencyId || query.currency_id) || webbedsCurrencyIdFromCode(query.currency);
+  const nationalityId = positiveIntegerOrBlank(query.nationalityId || query.nationality_id) || webbedsCountryIdFromCode(query.nationality || "GB");
+  const residenceId = positiveIntegerOrBlank(query.residenceId || query.residence_id) || webbedsCountryIdFromCode(query.residence || "GB");
+
+  const hotelIds = clean(query.hotelIds || query.hotelids || query.ids || "")
+    .split(",")
+    .map((x) => clean(x))
+    .filter((x) => /^[0-9]+$/.test(x))
+    .slice(0, 50);
+
+  if (!hotelIds.length) {
+    return { ok: false, message: "hotelIds is required. Example: hotelIds=31354,31064,1073078" };
+  }
+
+  const fieldValues = hotelIds.map((id) => `<fieldValue>${xmlEscapeValue(id)}</fieldValue>`).join("");
+
+  return {
+    ok: true,
+    xml: webbedsCustomerXml(`<request command="searchhotels">
+    <bookingDetails>
+      <fromDate>${fromDate}</fromDate>
+      <toDate>${toDate}</toDate>
+      <currency>${currencyId}</currency>
+      <rooms no="1">
+        <room runno="0">
+          <adultsCode>2</adultsCode>
+          <children no="0"></children>
+          <rateBasis>-1</rateBasis>
+          <passengerNationality>${nationalityId}</passengerNationality>
+          <passengerCountryOfResidence>${residenceId}</passengerCountryOfResidence>
+        </room>
+      </rooms>
+    </bookingDetails>
+    <return>
+      <filters xmlns:a="http://us.dotwconnect.com/xsd/atomicCondition" xmlns:c="http://us.dotwconnect.com/xsd/complexCondition">
+        <c:condition>
+          <a:condition>
+            <fieldName>hotelId</fieldName>
+            <fieldTest>in</fieldTest>
+            <fieldValues>${fieldValues}</fieldValues>
+          </a:condition>
+        </c:condition>
+      </filters>
+    </return>
+  </request>`)
+  };
+}
+
+app.get("/api/webbeds/search-by-hotel-ids", async (req, res) => {
+  try {
+    const built = buildWebbedsHotelIdSearchXml(req.query);
+    if (!built.ok) return res.status(400).json(built);
+
+    const result = await webbedsPostXml(built.xml);
+    const hotels = parseWebbedsHotels(result.text, clean(req.query.currency || "USD").toUpperCase());
+
+    res.status(result.ok ? 200 : 502).json({
+      ok: result.ok,
+      supplier: "configured_private_supplier",
+      source: "live_hotel_id_batch",
+      status: result.status,
+      count: hotels.length,
+      hotels,
+      responsePreview: result.text.slice(0, 15000)
+    });
+  } catch (err) {
+    res.status(500).json({
+      ok: false,
+      message: "WebBeds hotel ID batch search failed.",
+      error: err.message
+    });
+  }
+});
+// MSH WEBBEDS HOTEL ID BATCH SEARCH END
+
 // MSH WEBBEDS HOTEL DETAILS TEST END
 
 // MSH CUSTOMER LIVE HOTEL SEARCH VIA WEBBEDS END
@@ -5330,6 +5492,87 @@ app.get("/api/webbeds/hotel-details", async (req, res) => {
     });
   }
 });
+
+// MSH WEBBEDS HOTEL ID BATCH SEARCH START
+function buildWebbedsHotelIdSearchXml(query) {
+  const fromDate = xmlEscapeValue(query.fromDate || query.checkIn || query.checkin || webbedsDateISO(14));
+  const toDate = xmlEscapeValue(query.toDate || query.checkOut || query.checkout || webbedsDateISO(15));
+
+  const currencyId = positiveIntegerOrBlank(query.currencyId || query.currency_id) || webbedsCurrencyIdFromCode(query.currency);
+  const nationalityId = positiveIntegerOrBlank(query.nationalityId || query.nationality_id) || webbedsCountryIdFromCode(query.nationality || "GB");
+  const residenceId = positiveIntegerOrBlank(query.residenceId || query.residence_id) || webbedsCountryIdFromCode(query.residence || "GB");
+
+  const hotelIds = clean(query.hotelIds || query.hotelids || query.ids || "")
+    .split(",")
+    .map((x) => clean(x))
+    .filter((x) => /^[0-9]+$/.test(x))
+    .slice(0, 50);
+
+  if (!hotelIds.length) {
+    return { ok: false, message: "hotelIds is required. Example: hotelIds=31354,31064,1073078" };
+  }
+
+  const fieldValues = hotelIds.map((id) => `<fieldValue>${xmlEscapeValue(id)}</fieldValue>`).join("");
+
+  return {
+    ok: true,
+    xml: webbedsCustomerXml(`<request command="searchhotels">
+    <bookingDetails>
+      <fromDate>${fromDate}</fromDate>
+      <toDate>${toDate}</toDate>
+      <currency>${currencyId}</currency>
+      <rooms no="1">
+        <room runno="0">
+          <adultsCode>2</adultsCode>
+          <children no="0"></children>
+          <rateBasis>-1</rateBasis>
+          <passengerNationality>${nationalityId}</passengerNationality>
+          <passengerCountryOfResidence>${residenceId}</passengerCountryOfResidence>
+        </room>
+      </rooms>
+    </bookingDetails>
+    <return>
+      <filters xmlns:a="http://us.dotwconnect.com/xsd/atomicCondition" xmlns:c="http://us.dotwconnect.com/xsd/complexCondition">
+        <c:condition>
+          <a:condition>
+            <fieldName>hotelId</fieldName>
+            <fieldTest>in</fieldTest>
+            <fieldValues>${fieldValues}</fieldValues>
+          </a:condition>
+        </c:condition>
+      </filters>
+    </return>
+  </request>`)
+  };
+}
+
+app.get("/api/webbeds/search-by-hotel-ids", async (req, res) => {
+  try {
+    const built = buildWebbedsHotelIdSearchXml(req.query);
+    if (!built.ok) return res.status(400).json(built);
+
+    const result = await webbedsPostXml(built.xml);
+    const hotels = parseWebbedsHotels(result.text, clean(req.query.currency || "USD").toUpperCase());
+
+    res.status(result.ok ? 200 : 502).json({
+      ok: result.ok,
+      supplier: "configured_private_supplier",
+      source: "live_hotel_id_batch",
+      status: result.status,
+      count: hotels.length,
+      hotels,
+      responsePreview: result.text.slice(0, 15000)
+    });
+  } catch (err) {
+    res.status(500).json({
+      ok: false,
+      message: "WebBeds hotel ID batch search failed.",
+      error: err.message
+    });
+  }
+});
+// MSH WEBBEDS HOTEL ID BATCH SEARCH END
+
 // MSH WEBBEDS HOTEL DETAILS TEST END
 
 // MSH CUSTOMER LIVE HOTEL SEARCH VIA WEBBEDS END
@@ -5569,6 +5812,87 @@ app.get("/api/webbeds/hotel-details", async (req, res) => {
     });
   }
 });
+
+// MSH WEBBEDS HOTEL ID BATCH SEARCH START
+function buildWebbedsHotelIdSearchXml(query) {
+  const fromDate = xmlEscapeValue(query.fromDate || query.checkIn || query.checkin || webbedsDateISO(14));
+  const toDate = xmlEscapeValue(query.toDate || query.checkOut || query.checkout || webbedsDateISO(15));
+
+  const currencyId = positiveIntegerOrBlank(query.currencyId || query.currency_id) || webbedsCurrencyIdFromCode(query.currency);
+  const nationalityId = positiveIntegerOrBlank(query.nationalityId || query.nationality_id) || webbedsCountryIdFromCode(query.nationality || "GB");
+  const residenceId = positiveIntegerOrBlank(query.residenceId || query.residence_id) || webbedsCountryIdFromCode(query.residence || "GB");
+
+  const hotelIds = clean(query.hotelIds || query.hotelids || query.ids || "")
+    .split(",")
+    .map((x) => clean(x))
+    .filter((x) => /^[0-9]+$/.test(x))
+    .slice(0, 50);
+
+  if (!hotelIds.length) {
+    return { ok: false, message: "hotelIds is required. Example: hotelIds=31354,31064,1073078" };
+  }
+
+  const fieldValues = hotelIds.map((id) => `<fieldValue>${xmlEscapeValue(id)}</fieldValue>`).join("");
+
+  return {
+    ok: true,
+    xml: webbedsCustomerXml(`<request command="searchhotels">
+    <bookingDetails>
+      <fromDate>${fromDate}</fromDate>
+      <toDate>${toDate}</toDate>
+      <currency>${currencyId}</currency>
+      <rooms no="1">
+        <room runno="0">
+          <adultsCode>2</adultsCode>
+          <children no="0"></children>
+          <rateBasis>-1</rateBasis>
+          <passengerNationality>${nationalityId}</passengerNationality>
+          <passengerCountryOfResidence>${residenceId}</passengerCountryOfResidence>
+        </room>
+      </rooms>
+    </bookingDetails>
+    <return>
+      <filters xmlns:a="http://us.dotwconnect.com/xsd/atomicCondition" xmlns:c="http://us.dotwconnect.com/xsd/complexCondition">
+        <c:condition>
+          <a:condition>
+            <fieldName>hotelId</fieldName>
+            <fieldTest>in</fieldTest>
+            <fieldValues>${fieldValues}</fieldValues>
+          </a:condition>
+        </c:condition>
+      </filters>
+    </return>
+  </request>`)
+  };
+}
+
+app.get("/api/webbeds/search-by-hotel-ids", async (req, res) => {
+  try {
+    const built = buildWebbedsHotelIdSearchXml(req.query);
+    if (!built.ok) return res.status(400).json(built);
+
+    const result = await webbedsPostXml(built.xml);
+    const hotels = parseWebbedsHotels(result.text, clean(req.query.currency || "USD").toUpperCase());
+
+    res.status(result.ok ? 200 : 502).json({
+      ok: result.ok,
+      supplier: "configured_private_supplier",
+      source: "live_hotel_id_batch",
+      status: result.status,
+      count: hotels.length,
+      hotels,
+      responsePreview: result.text.slice(0, 15000)
+    });
+  } catch (err) {
+    res.status(500).json({
+      ok: false,
+      message: "WebBeds hotel ID batch search failed.",
+      error: err.message
+    });
+  }
+});
+// MSH WEBBEDS HOTEL ID BATCH SEARCH END
+
 // MSH WEBBEDS HOTEL DETAILS TEST END
 
 // MSH CUSTOMER LIVE HOTEL SEARCH VIA WEBBEDS END
@@ -5597,6 +5921,13 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
+
+
+
+
+
+
 
 
 
