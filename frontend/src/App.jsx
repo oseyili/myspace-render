@@ -456,7 +456,6 @@ const [route, setRoute] = useState(currentRoute());
 
       const [mainRes, webbedsRes] = await Promise.allSettled([
         fetch(`${API_BASE}/api/multi-supplier-hotels?${params}`, { cache: "no-store" }),
-        fetch(`${API_BASE}/api/multi-supplier-hotels?${params}`, { cache: "no-store" }),
       ]);
 
       const mainData =
@@ -464,13 +463,8 @@ const [route, setRoute] = useState(currentRoute());
           ? await mainRes.value.json()
           : {};
 
-      const webbedsData =
-        webbedsRes.status === "fulfilled" && webbedsRes.value.ok
-          ? await webbedsRes.value.json()
-          : {};
-
       const mainHotels = Array.isArray(mainData.hotels) ? mainData.hotels : [];
-      const webbedsHotels = Array.isArray(webbedsData.hotels) ? webbedsData.hotels : [];
+      const webbedsHotels = [];
 
       const safeWebbedsHotels = webbedsHotels.map((hotel) => {
         const rawId = String(hotel.hotel_id || hotel.hotelId || "").replace("WEBBEDS-", "");
@@ -1952,6 +1946,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
