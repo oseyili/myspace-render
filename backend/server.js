@@ -5998,7 +5998,15 @@ app.get("/api/multi-supplier-hotels", async (req, res) => {
 
     merged = merged.filter((hotel) => {
       const livePrice = number(hotel.price || hotel.total || hotel.convertedPrice || 0);
-      return livePrice > 0 && hotel.availableToBook !== false;
+      const displayName = clean(hotel.name || hotel.hotel_name || "");
+      const hasRealName =
+        displayName &&
+        !/^Live supplier property/i.test(displayName) &&
+        !/^Hotel\s+\d+$/i.test(displayName);
+
+      const hasRealImage = Boolean(clean(hotel.image));
+
+      return livePrice > 0 && hotel.availableToBook !== false && hasRealName && hasRealImage;
     });
 
     merged.sort((a, b) => {
@@ -6069,6 +6077,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
