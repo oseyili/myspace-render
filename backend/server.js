@@ -3900,7 +3900,309 @@ app.post("/api/ancillary/hotels/feature", async (req, res) => {
   res.json({ ok: true, message: "Hotel partner request received.", lead, emailSent: email.sent });
 });
 // MSH REAL ANCILLARY EMAIL ROUTES END
+// MSH RATEHAWK SANDBOX CONNECTOR START
+function ratehawkConfig() {
+  const enabled = String(process.env.RATEHAWK_ENABLED || "").toLowerCase() === "true";
+  const baseUrl = clean(process.env.RATEHAWK_BASE_URL || "https://api-sandbox.worldota.net").replace(/\/$/, "");
+  const keyId = clean(process.env.RATEHAWK_KEY_ID);
+  const keyToken = clean(process.env.RATEHAWK_KEY_TOKEN);
+  const userAgent = clean(process.env.RATEHAWK_USER_AGENT || "MySpaceHotel/1.0");
+  const env = clean(process.env.RATEHAWK_ENV || "sandbox");
 
+  return {
+    enabled,
+    env,
+    baseUrl,
+    keyId,
+    keyToken,
+    userAgent,
+    ready: Boolean(enabled && baseUrl && keyId && keyToken)
+  };
+}
+
+function ratehawkAuthHeader() {
+  const cfg = ratehawkConfig();
+  return `Basic ${Buffer.from(`${cfg.keyId}:${cfg.keyToken}`).toString("base64")}`;
+}
+
+async function ratehawkPost(pathname, body) {
+  const cfg = ratehawkConfig();
+
+  if (!cfg.ready) {
+    return {
+      ok: false,
+      status: 400,
+      data: {
+        message: "RateHawk is not configured. Check RATEHAWK_ENABLED, RATEHAWK_BASE_URL, RATEHAWK_KEY_ID and RATEHAWK_KEY_TOKEN."
+      }
+    };
+  }
+
+  const url = `${cfg.baseUrl}${pathname}`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: ratehawkAuthHeader(),
+      "Content-Type": "application/json",
+      "User-Agent": cfg.userAgent
+    },
+    body: JSON.stringify(body || {})
+  });
+
+  const text = await response.text();
+  let data = {};
+
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = { raw: text.slice(0, 1000) };
+  }
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    data
+  };
+}
+
+app.get("/api/ratehawk/status", (req, res) => {
+  const cfg = ratehawkConfig();
+
+  res.json({
+    ok: true,
+    enabled: cfg.enabled,
+    env: cfg.env,
+    baseUrl: cfg.baseUrl,
+    hasKeyId: Boolean(cfg.keyId),
+    hasKeyToken: Boolean(cfg.keyToken),
+    userAgent: cfg.userAgent,
+    ready: cfg.ready,
+    message: cfg.ready ? "RateHawk connector is configured." : "RateHawk connector is not ready."
+  });
+});
+
+app.get("/api/ratehawk/test", async (req, res) => {
+  try {
+    const checkin = clean(req.query.checkin || req.query.checkIn || tomorrowISOForRatehawk(14));
+    const checkout = clean(req.query.checkout || req.query.checkOut || tomorrowISOForRatehawk(15));
+    const residency = clean(req.query.residency || "gb").toLowerCase();
+    const language = clean(req.query.language || "en");
+    const regionId = Number(req.query.region_id || req.query.regionId || 2011);
+
+    const payload = {
+      checkin,
+      checkout,
+      residency,
+      language,
+      guests: [
+        {
+          adults: 2,
+          children: []
+        }
+      ],
+      region_id: regionId,
+      currency: "USD"
+    };
+
+    const result = await ratehawkPost("/api/b2b/v3/search/serp/region/", payload);
+
+    recordActivity("ratehawk_test", {
+      region_id: regionId,
+      checkin,
+      checkout,
+      residency,
+      language
+    }, {
+      ok: result.ok,
+      status: result.status
+    });
+
+    res.status(result.ok ? 200 : 502).json({
+      ok: result.ok,
+      supplier: "configured_private_supplier",
+      status: result.status,
+      request: {
+        region_id: regionId,
+        checkin,
+        checkout,
+        residency,
+        language,
+        currency: "USD"
+      },
+      result: result.data
+    });
+  } catch (err) {
+    recordActivity("ratehawk_test_error", {}, { error: err.message });
+
+    res.status(500).json({
+      ok: false,
+      message: "RateHawk test failed.",
+      error: err.message
+    });
+  }
+});
+
+function tomorrowISOForRatehawk(daysAhead) {
+  const d = new Date(Date.now() + Number(daysAhead || 1) * 86400000);
+  return d.toISOString().slice(0, 10);
+}
+// MSH RATEHAWK SANDBOX CONNECTOR END
+// MSH WEBBEDS DOTW XML CONNECTOR START
+function webbedsConfig() {
+  const enabled = String(process.env.WEBBEDS_ENABLED || "").toLowerCase() === "true";
+  return {
+    enabled,
+    env: clean(process.env.WEBBEDS_ENV || "sandbox"),
+    baseUrl: clean(process.env.WEBBEDS_BASE_URL || "https://xmldev.dotwconnect.com/gatewayV4.dotw"),
+    username: clean(process.env.WEBBEDS_USERNAME),
+    password: clean(process.env.WEBBEDS_PASSWORD),
+    companyId: clean(process.env.WEBBEDS_COMPANY_ID),
+    source: clean(process.env.WEBBEDS_SOURCE || "1"),
+    userAgent: clean(process.env.WEBBEDS_USER_AGENT || "MySpaceHotel/1.0"),
+    ready: Boolean(
+      String(process.env.WEBBEDS_ENABLED || "").toLowerCase() === "true" &&
+      clean(process.env.WEBBEDS_BASE_URL || "https://xmldev.dotwconnect.com/gatewayV4.dotw") &&
+      clean(process.env.WEBBEDS_USERNAME) &&
+      clean(process.env.WEBBEDS_PASSWORD) &&
+      clean(process.env.WEBBEDS_COMPANY_ID)
+    )
+  };
+}
+
+function webbedsMd5Password() {
+  return crypto.createHash("md5").update(webbedsConfig().password).digest("hex");
+}
+
+function xmlEscapeValue(v) {
+  return clean(v)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
+}
+
+async function webbedsPostXml(xml) {
+  const cfg = webbedsConfig();
+
+  if (!cfg.ready) {
+    return {
+      ok: false,
+      status: 400,
+      text: "WebBeds is not configured. Check WEBBEDS_ENABLED, WEBBEDS_BASE_URL, WEBBEDS_USERNAME, WEBBEDS_PASSWORD and WEBBEDS_COMPANY_ID."
+    };
+  }
+
+  const response = await fetch(cfg.baseUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/xml",
+      "User-Agent": cfg.userAgent
+    },
+    body: xml
+  });
+
+  const text = await response.text();
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    text
+  };
+}
+
+function buildWebbedsSearchXml(query) {
+  const cfg = webbedsConfig();
+
+  const fromDate = xmlEscapeValue(query.fromDate || query.checkIn || query.checkin || tomorrowISOForRatehawk(14));
+  const toDate = xmlEscapeValue(query.toDate || query.checkOut || query.checkout || tomorrowISOForRatehawk(15));
+  const currency = xmlEscapeValue(query.currency || "USD");
+  const city = xmlEscapeValue(query.city || "");
+  const nationality = xmlEscapeValue(query.nationality || query.passengerNationality || "GB");
+  const residence = xmlEscapeValue(query.residence || query.passengerCountryOfResidence || "GB");
+  const adults = Number(query.adults || 2);
+
+  return `<customer>
+  <username>${xmlEscapeValue(cfg.username)}</username>
+  <password>${webbedsMd5Password()}</password>
+  <id>${xmlEscapeValue(cfg.companyId)}</id>
+  <source>${xmlEscapeValue(cfg.source)}</source>
+  <product>hotel</product>
+  <request command="searchhotels">
+    <bookingDetails>
+      <fromDate>${fromDate}</fromDate>
+      <toDate>${toDate}</toDate>
+      <currency>${currency}</currency>
+      <rooms no="1">
+        <room runno="0">
+          <adultsCode>${adults}</adultsCode>
+          <children no="0"></children>
+          <rateBasis>-1</rateBasis>
+          <passengerNationality>${nationality}</passengerNationality>
+          <passengerCountryOfResidence>${residence}</passengerCountryOfResidence>
+        </room>
+      </rooms>
+    </bookingDetails>
+    <return>
+      <filters xmlns:c="http://us.dotwconnect.com/xsd/complexCondition" xmlns:a="http://us.dotwconnect.com/xsd/atomicCondition">
+        <city>${city}</city>
+      </filters>
+    </return>
+  </request>
+</customer>`;
+}
+
+app.get("/api/webbeds/status", (req, res) => {
+  const cfg = webbedsConfig();
+
+  res.json({
+    ok: true,
+    enabled: cfg.enabled,
+    env: cfg.env,
+    baseUrl: cfg.baseUrl,
+    hasUsername: Boolean(cfg.username),
+    hasPassword: Boolean(cfg.password),
+    hasCompanyId: Boolean(cfg.companyId),
+    source: cfg.source,
+    ready: cfg.ready,
+    message: cfg.ready ? "WebBeds connector is configured." : "WebBeds connector is not ready."
+  });
+});
+
+app.get("/api/webbeds/test-search", async (req, res) => {
+  try {
+    const xml = buildWebbedsSearchXml(req.query);
+    const result = await webbedsPostXml(xml);
+
+    recordActivity("webbeds_test_search", {
+      city: clean(req.query.city || ""),
+      currency: clean(req.query.currency || "USD"),
+      checkIn: clean(req.query.checkIn || req.query.checkin || ""),
+      checkOut: clean(req.query.checkOut || req.query.checkout || "")
+    }, {
+      ok: result.ok,
+      status: result.status,
+      preview: result.text.slice(0, 500)
+    });
+
+    res.status(result.ok ? 200 : 502).json({
+      ok: result.ok,
+      supplier: "configured_private_supplier",
+      status: result.status,
+      responsePreview: result.text.slice(0, 3000)
+    });
+  } catch (err) {
+    recordActivity("webbeds_test_search_error", {}, { error: err.message });
+
+    res.status(500).json({
+      ok: false,
+      message: "WebBeds test search failed.",
+      error: err.message
+    });
+  }
+});
+// MSH WEBBEDS DOTW XML CONNECTOR END
 app.listen(PORT, "0.0.0.0", () => {
   const destinations = buildDestinations();
 
