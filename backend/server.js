@@ -6000,11 +6000,29 @@ app.get("/api/multi-supplier-hotels", async (req, res) => {
       const aPrice = number(a.price || a.total || 0);
       const bPrice = number(b.price || b.total || 0);
 
-      const aPriced = aPrice > 0 ? 0 : 1;
-      const bPriced = bPrice > 0 ? 0 : 1;
+      const aHasRealName =
+        clean(a.name || a.hotel_name) &&
+        !/^Live supplier property/i.test(clean(a.name || a.hotel_name)) &&
+        !/^Hotel\s+\d+$/i.test(clean(a.name || a.hotel_name));
 
-      if (aPriced !== bPriced) return aPriced - bPriced;
-      return aPrice - bPrice;
+      const bHasRealName =
+        clean(b.name || b.hotel_name) &&
+        !/^Live supplier property/i.test(clean(b.name || b.hotel_name)) &&
+        !/^Hotel\s+\d+$/i.test(clean(b.name || b.hotel_name));
+
+      const aHasImage = Boolean(clean(a.image));
+      const bHasImage = Boolean(clean(b.image));
+
+      const aPriced = aPrice > 0;
+      const bPriced = bPrice > 0;
+
+      const aScore = (aHasRealName ? 100 : 0) + (aHasImage ? 50 : 0) + (aPriced ? 25 : 0);
+      const bScore = (bHasRealName ? 100 : 0) + (bHasImage ? 50 : 0) + (bPriced ? 25 : 0);
+
+      if (aScore !== bScore) return bScore - aScore;
+
+      if (aPriced && bPriced) return aPrice - bPrice;
+      return 0;
     });
 
     res.json({
@@ -6046,6 +6064,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
