@@ -5902,6 +5902,131 @@ app.get("/api/webbeds/search-by-hotel-ids", async (req, res) => {
 // MSH WEBBEDS JSON SEARCH NORMALIZER END
 
 // MSH WEBBEDS DOTW XML CONNECTOR END
+
+// MSH REAL MULTI SUPPLIER ORCHESTRATOR START
+function mergeUniqueHotelsByKey(hotels) {
+  const seen = new Set();
+  const merged = [];
+
+  for (const hotel of hotels || []) {
+    const name = clean(hotel.hotel_name || hotel.name || "");
+    const city = clean(hotel.city || "");
+    const country = clean(hotel.country || "");
+    const supplierKey = clean(hotel.rate_source_id || hotel.hotel_id || hotel.hotelId || name);
+
+    const key = `${name.toLowerCase()}|${city.toLowerCase()}|${country.toLowerCase()}|${supplierKey.toLowerCase()}`;
+
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(hotel);
+  }
+
+  return merged;
+}
+
+app.get("/api/multi-supplier-hotels", async (req, res) => {
+  try {
+    const query = new URLSearchParams(req.query).toString();
+
+    const localUrl = `http://127.0.0.1:${PORT}/search?${query}`;
+    const localResult = await fetch(localUrl, { cache: "no-store" })
+      .then((r) => r.json())
+      .catch(() => ({ hotels: [] }));
+
+    const localHotels = Array.isArray(localResult.hotels) ? localResult.hotels : [];
+
+    let webbedsHotels = [];
+    try {
+      const city = clean(req.query.city || "");
+      const currency = clean(req.query.currency || "GBP").toUpperCase();
+
+      const cityId =
+        findWebbedsCityCodeFromCache(city) ||
+        webbedsCityIdFromName(city);
+
+      if (cityId && typeof buildWebbedsSearchXml === "function") {
+        const built = buildWebbedsSearchXml({
+          ...req.query,
+          cityId,
+          currencyId: webbedsCurrencyIdFromCode(currency),
+          nationalityId: webbedsCountryIdFromCode(req.query.nationality || "GB"),
+          residenceId: webbedsCountryIdFromCode(req.query.residence || "GB")
+        });
+
+        if (built.ok) {
+          const result = await webbedsPostXml(built.xml);
+          webbedsHotels = parseWebbedsHotels(result.text, currency).map((hotel) => {
+            const rawId = String(hotel.hotel_id || hotel.hotelId || "").replace("WEBBEDS-", "");
+            const hasRealName =
+              hotel.name &&
+              !/^Hotel\s+\d+$/i.test(String(hotel.name)) &&
+              !/^\d+$/.test(String(hotel.name));
+
+            const safeName = hasRealName ? hotel.name : `Live supplier property ${rawId}`;
+
+            return {
+              ...hotel,
+              name: safeName,
+              hotel_name: safeName,
+              city,
+              country:
+                city.toUpperCase() === "DUBAI" || city.toUpperCase() === "ABU DHABI"
+                  ? "United Arab Emirates"
+                  : clean(req.query.country || hotel.country || ""),
+              source: "webbeds_live_supplier",
+              supplierLabel: "WebBeds live rate",
+              supplier_private: {
+                ...(hotel.supplier_private || {}),
+                supplier_code: "WEBBEDS"
+              }
+            };
+          });
+        }
+      }
+    } catch (err) {
+      webbedsHotels = [];
+    }
+
+    const merged = mergeUniqueHotelsByKey([
+      ...localHotels.map((hotel) => ({
+        ...hotel,
+        source: hotel.source || "existing_supplier_inventory",
+        supplierLabel: hotel.supplierLabel || "Existing supplier inventory"
+      })),
+      ...webbedsHotels
+    ]);
+
+    merged.sort((a, b) => {
+      const aPrice = number(a.price || a.total || 0);
+      const bPrice = number(b.price || b.total || 0);
+
+      const aPriced = aPrice > 0 ? 0 : 1;
+      const bPriced = bPrice > 0 ? 0 : 1;
+
+      if (aPriced !== bPriced) return aPriced - bPriced;
+      return aPrice - bPrice;
+    });
+
+    res.json({
+      ok: true,
+      source: "multi_supplier",
+      suppliers: {
+        existing: localHotels.length,
+        webbeds: webbedsHotels.length
+      },
+      count: merged.length,
+      hotels: merged
+    });
+  } catch (err) {
+    res.status(500).json({
+      ok: false,
+      message: "Multi-supplier hotel search failed.",
+      error: err.message
+    });
+  }
+});
+// MSH REAL MULTI SUPPLIER ORCHESTRATOR END
+
 app.listen(PORT, "0.0.0.0", () => {
   const destinations = buildDestinations();
 
@@ -5921,6 +6046,8 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
+
 
 
 

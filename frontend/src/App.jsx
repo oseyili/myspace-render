@@ -454,9 +454,42 @@ const [route, setRoute] = useState(currentRoute());
         currency,
       });
 
-      const res = await fetch(`${API_BASE}/search?${params}`, { cache: "no-store" });
-      const data = await res.json();
-      const found = Array.isArray(data.hotels) ? data.hotels : [];
+      const [mainRes, webbedsRes] = await Promise.allSettled([
+        fetch(`${API_BASE}/api/multi-supplier-hotels?${params}`, { cache: "no-store" }),
+        fetch(`${API_BASE}/api/multi-supplier-hotels?${params}`, { cache: "no-store" }),
+      ]);
+
+      const mainData =
+        mainRes.status === "fulfilled" && mainRes.value.ok
+          ? await mainRes.value.json()
+          : {};
+
+      const webbedsData =
+        webbedsRes.status === "fulfilled" && webbedsRes.value.ok
+          ? await webbedsRes.value.json()
+          : {};
+
+      const mainHotels = Array.isArray(mainData.hotels) ? mainData.hotels : [];
+      const webbedsHotels = Array.isArray(webbedsData.hotels) ? webbedsData.hotels : [];
+
+      const safeWebbedsHotels = webbedsHotels.map((hotel) => {
+        const rawId = String(hotel.hotel_id || hotel.hotelId || "").replace("WEBBEDS-", "");
+        const supplierName =
+          hotel.name && !/^Hotel\s+\d+$/i.test(String(hotel.name))
+            ? hotel.name
+            : `Live supplier property ${rawId}`;
+
+        return {
+          ...hotel,
+          name: supplierName,
+          hotel_name: supplierName,
+          supplierLabel: "WebBeds live rate",
+          source: "webbeds_live_supplier",
+        };
+      });
+
+      const found = [...mainHotels, ...safeWebbedsHotels];
+
       setHotels(found);
 
       if (!found.length) {
@@ -1919,6 +1952,9 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
+
+
 
 
 
