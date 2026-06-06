@@ -5987,7 +5987,7 @@ app.get("/api/multi-supplier-hotels", async (req, res) => {
       webbedsHotels = [];
     }
 
-    const merged = mergeUniqueHotelsByKey([
+    let merged = mergeUniqueHotelsByKey([
       ...localHotels.map((hotel) => ({
         ...hotel,
         source: hotel.source || "existing_supplier_inventory",
@@ -5995,6 +5995,11 @@ app.get("/api/multi-supplier-hotels", async (req, res) => {
       })),
       ...webbedsHotels
     ]);
+
+    merged = merged.filter((hotel) => {
+      const livePrice = number(hotel.price || hotel.total || hotel.convertedPrice || 0);
+      return livePrice > 0 && hotel.availableToBook !== false;
+    });
 
     merged.sort((a, b) => {
       const aPrice = number(a.price || a.total || 0);
@@ -6064,6 +6069,8 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
+
 
 
 
