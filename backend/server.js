@@ -4051,22 +4051,22 @@ function tomorrowISOForRatehawk(daysAhead) {
 // MSH WEBBEDS DOTW XML CONNECTOR START
 function webbedsConfig() {
   const enabled = String(process.env.WEBBEDS_ENABLED || "").toLowerCase() === "true";
+  const baseUrl = clean(process.env.WEBBEDS_BASE_URL || "https://xmldev.dotwconnect.com/gatewayV4.dotw");
+  const username = clean(process.env.WEBBEDS_USERNAME);
+  const password = clean(process.env.WEBBEDS_PASSWORD);
+  const companyId = clean(process.env.WEBBEDS_COMPANY_ID || process.env.WEBBEDS_COMPANY_CODE);
+  const source = clean(process.env.WEBBEDS_SOURCE || "1");
+
   return {
     enabled,
     env: clean(process.env.WEBBEDS_ENV || "sandbox"),
-    baseUrl: clean(process.env.WEBBEDS_BASE_URL || "https://xmldev.dotwconnect.com/gatewayV4.dotw"),
-    username: clean(process.env.WEBBEDS_USERNAME),
-    password: clean(process.env.WEBBEDS_PASSWORD),
-    companyId: clean(process.env.WEBBEDS_COMPANY_ID),
-    source: clean(process.env.WEBBEDS_SOURCE || "1"),
+    baseUrl,
+    username,
+    password,
+    companyId,
+    source,
     userAgent: clean(process.env.WEBBEDS_USER_AGENT || "MySpaceHotel/1.0"),
-    ready: Boolean(
-      String(process.env.WEBBEDS_ENABLED || "").toLowerCase() === "true" &&
-      clean(process.env.WEBBEDS_BASE_URL || "https://xmldev.dotwconnect.com/gatewayV4.dotw") &&
-      clean(process.env.WEBBEDS_USERNAME) &&
-      clean(process.env.WEBBEDS_PASSWORD) &&
-      clean(process.env.WEBBEDS_COMPANY_ID)
-    )
+    ready: Boolean(enabled && baseUrl && username && password && companyId)
   };
 }
 
@@ -4081,6 +4081,24 @@ function xmlEscapeValue(v) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&apos;");
+}
+
+function webbedsDateISO(daysAhead) {
+  const d = new Date(Date.now() + Number(daysAhead || 1) * 86400000);
+  return d.toISOString().slice(0, 10);
+}
+
+function webbedsCustomerXml(innerXml) {
+  const cfg = webbedsConfig();
+
+  return `<customer>
+  <username>${xmlEscapeValue(cfg.username)}</username>
+  <password>${webbedsMd5Password()}</password>
+  <id>${xmlEscapeValue(cfg.companyId)}</id>
+  <source>${xmlEscapeValue(cfg.source)}</source>
+  <product>hotel</product>
+  ${innerXml}
+</customer>`;
 }
 
 async function webbedsPostXml(xml) {
@@ -4098,6 +4116,8 @@ async function webbedsPostXml(xml) {
     method: "POST",
     headers: {
       "Content-Type": "text/xml",
+      "Accept-Encoding": "gzip",
+      "Connection": "close",
       "User-Agent": cfg.userAgent
     },
     body: xml
@@ -4112,45 +4132,68 @@ async function webbedsPostXml(xml) {
   };
 }
 
+function buildWebbedsInternalCodeXml(command) {
+  return webbedsCustomerXml(`<request command="${xmlEscapeValue(command)}"></request>`);
+}
+
+function positiveIntegerOrBlank(v) {
+  const value = clean(v);
+  return /^[1-9][0-9]*$/.test(value) ? value : "";
+}
+
 function buildWebbedsSearchXml(query) {
-  const cfg = webbedsConfig();
+  const fromDate = xmlEscapeValue(query.fromDate || query.checkIn || query.checkin || webbedsDateISO(14));
+  const toDate = xmlEscapeValue(query.toDate || query.checkOut || query.checkout || webbedsDateISO(15));
 
-  const fromDate = xmlEscapeValue(query.fromDate || query.checkIn || query.checkin || tomorrowISOForRatehawk(14));
-  const toDate = xmlEscapeValue(query.toDate || query.checkOut || query.checkout || tomorrowISOForRatehawk(15));
-  const currency = xmlEscapeValue(query.currency || "USD");
-  const city = xmlEscapeValue(query.city || "");
-  const nationality = xmlEscapeValue(query.nationality || query.passengerNationality || "GB");
-  const residence = xmlEscapeValue(query.residence || query.passengerCountryOfResidence || "GB");
-  const adults = Number(query.adults || 2);
+  const cityId = positiveIntegerOrBlank(query.cityId || query.city_id || query.city);
+  const currencyId = positiveIntegerOrBlank(query.currencyId || query.currency_id || query.currency);
+  const nationalityId = positiveIntegerOrBlank(query.nationalityId || query.nationality_id || query.passengerNationality);
+  const residenceId = positiveIntegerOrBlank(query.residenceId || query.residence_id || query.passengerCountryOfResidence);
+  const adults = positiveIntegerOrBlank(query.adults || 2) || "2";
 
-  return `<customer>
-  <username>${xmlEscapeValue(cfg.username)}</username>
-  <password>${webbedsMd5Password()}</password>
-  <id>${xmlEscapeValue(cfg.companyId)}</id>
-  <source>${xmlEscapeValue(cfg.source)}</source>
-  <product>hotel</product>
-  <request command="searchhotels">
+  if (!cityId || !currencyId || !nationalityId || !residenceId) {
+    return {
+      ok: false,
+      message: "DOTW/WebBeds search requires numeric internal IDs, not names. Use /api/webbeds/internal-code/getallcities, /api/webbeds/internal-code/getcurrenciesids and /api/webbeds/internal-code/getallcountries first.",
+      required: {
+        cityId: "numeric DOTW city ID",
+        currencyId: "numeric DOTW currency ID",
+        nationalityId: "numeric DOTW country/nationality ID",
+        residenceId: "numeric DOTW country/residence ID"
+      },
+      received: {
+        city: clean(query.city || query.cityId || ""),
+        currency: clean(query.currency || query.currencyId || ""),
+        nationality: clean(query.nationality || query.nationalityId || query.passengerNationality || ""),
+        residence: clean(query.residence || query.residenceId || query.passengerCountryOfResidence || "")
+      }
+    };
+  }
+
+  return {
+    ok: true,
+    xml: webbedsCustomerXml(`<request command="searchhotels">
     <bookingDetails>
       <fromDate>${fromDate}</fromDate>
       <toDate>${toDate}</toDate>
-      <currency>${currency}</currency>
+      <currency>${currencyId}</currency>
       <rooms no="1">
         <room runno="0">
           <adultsCode>${adults}</adultsCode>
           <children no="0"></children>
           <rateBasis>-1</rateBasis>
-          <passengerNationality>${nationality}</passengerNationality>
-          <passengerCountryOfResidence>${residence}</passengerCountryOfResidence>
+          <passengerNationality>${nationalityId}</passengerNationality>
+          <passengerCountryOfResidence>${residenceId}</passengerCountryOfResidence>
         </room>
       </rooms>
     </bookingDetails>
     <return>
       <filters xmlns:c="http://us.dotwconnect.com/xsd/complexCondition" xmlns:a="http://us.dotwconnect.com/xsd/atomicCondition">
-        <city>${city}</city>
+        <city>${cityId}</city>
       </filters>
     </return>
-  </request>
-</customer>`;
+  </request>`)
+  };
 }
 
 app.get("/api/webbeds/status", (req, res) => {
@@ -4170,16 +4213,73 @@ app.get("/api/webbeds/status", (req, res) => {
   });
 });
 
-app.get("/api/webbeds/test-search", async (req, res) => {
+app.get("/api/webbeds/internal-code/:command", async (req, res) => {
   try {
-    const xml = buildWebbedsSearchXml(req.query);
+    const allowed = new Set([
+      "getallcities",
+      "getallcountries",
+      "getservingcities",
+      "getservingcountries",
+      "getcurrenciesids",
+      "getlanguageids",
+      "getleisureids",
+      "getbusinessids",
+      "getamenitieids",
+      "getroomamenitieids",
+      "getsalutationsids",
+      "getspecialrequestsids",
+      "gethotelchainsids",
+      "gethotelclassificationids",
+      "getratebasisids",
+      "getlocationids"
+    ]);
+
+    const command = clean(req.params.command).toLowerCase();
+
+    if (!allowed.has(command)) {
+      return res.status(400).json({
+        ok: false,
+        message: "Unsupported WebBeds internal-code command.",
+        allowed: Array.from(allowed).sort()
+      });
+    }
+
+    const xml = buildWebbedsInternalCodeXml(command);
     const result = await webbedsPostXml(xml);
 
+    recordActivity("webbeds_internal_code", { command }, {
+      ok: result.ok,
+      status: result.status,
+      preview: result.text.slice(0, 500)
+    });
+
+    res.status(result.ok ? 200 : 502).json({
+      ok: result.ok,
+      command,
+      status: result.status,
+      responsePreview: result.text
+    });
+  } catch (err) {
+    recordActivity("webbeds_internal_code_error", { command: req.params.command }, { error: err.message });
+    res.status(500).json({ ok: false, message: "WebBeds internal-code request failed.", error: err.message });
+  }
+});
+
+app.get("/api/webbeds/test-search", async (req, res) => {
+  try {
+    const built = buildWebbedsSearchXml(req.query);
+
+    if (!built.ok) {
+      return res.status(400).json(built);
+    }
+
+    const result = await webbedsPostXml(built.xml);
+
     recordActivity("webbeds_test_search", {
-      city: clean(req.query.city || ""),
-      currency: clean(req.query.currency || "USD"),
-      checkIn: clean(req.query.checkIn || req.query.checkin || ""),
-      checkOut: clean(req.query.checkOut || req.query.checkout || "")
+      cityId: clean(req.query.cityId || req.query.city || ""),
+      currencyId: clean(req.query.currencyId || req.query.currency || ""),
+      nationalityId: clean(req.query.nationalityId || req.query.passengerNationality || ""),
+      residenceId: clean(req.query.residenceId || req.query.passengerCountryOfResidence || "")
     }, {
       ok: result.ok,
       status: result.status,
@@ -4190,18 +4290,1293 @@ app.get("/api/webbeds/test-search", async (req, res) => {
       ok: result.ok,
       supplier: "configured_private_supplier",
       status: result.status,
-      responsePreview: result.text.slice(0, 3000)
+      responsePreview: result.text
     });
   } catch (err) {
     recordActivity("webbeds_test_search_error", {}, { error: err.message });
+    res.status(500).json({ ok: false, message: "WebBeds test search failed.", error: err.message });
+  }
+});
 
+// MSH WEBBEDS JSON SEARCH NORMALIZER START
+function extractXmlTag(block, tag) {
+  const match = String(block || "").match(new RegExp("<" + tag + ">([\\s\\S]*?)<\\/" + tag + ">", "i"));
+  return match ? clean(match[1]) : "";
+}
+
+function extractXmlAttr(block, attr) {
+  const match = String(block || "").match(new RegExp(attr + "=\"([^\"]*)\"", "i"));
+  return match ? clean(match[1]) : "";
+}
+
+function parseWebbedsHotels(xml, currencyCode) {
+  const hotels = [];
+  const hotelBlocks = String(xml || "").match(/<hotel[\s\S]*?<\/hotel>/gi) || [];
+
+  for (const hotelBlock of hotelBlocks.slice(0, 80)) {
+    const hotelId = extractXmlAttr(hotelBlock, "hotelid");
+    const roomBlocks = hotelBlock.match(/<roomType[\s\S]*?<\/roomType>/gi) || [];
+
+    const rooms = [];
+
+    for (const roomBlock of roomBlocks.slice(0, 10)) {
+      const roomTypeCode = extractXmlAttr(roomBlock, "roomtypecode");
+      const roomName = extractXmlTag(roomBlock, "name") || "Available room";
+      const rateBlocks = roomBlock.match(/<rateBasis[\s\S]*?<\/rateBasis>/gi) || [];
+
+      for (const rateBlock of rateBlocks.slice(0, 4)) {
+        const rateBasisId = extractXmlAttr(rateBlock, "id");
+        const total = money(extractXmlTag(rateBlock, "total"));
+
+        if (total <= 0) continue;
+
+        rooms.push({
+          roomCode: roomTypeCode,
+          roomName,
+          board: `Rate basis ${rateBasisId || "standard"}`,
+          price: total,
+          convertedPrice: total,
+          displayCurrency: currencyCode || "USD",
+          cancellation: "Cancellation details are confirmed before booking.",
+          taxes: "Taxes and fees are confirmed before booking.",
+          rate_source_id: `WEBBEDS-${hotelId}-${roomTypeCode}-${rateBasisId}`,
+          rate_source_timestamp: nowISO(),
+          source_health: "verified",
+          supplier_private: {
+            supplier_code: "WEBBEDS",
+            supplier_hotel_id: hotelId,
+            room_type_code: roomTypeCode,
+            rate_basis_id: rateBasisId
+          }
+        });
+      }
+    }
+
+    rooms.sort((a, b) => number(a.price) - number(b.price));
+
+    if (hotelId && rooms.length) {
+      hotels.push({
+        hotelId: `WEBBEDS-${hotelId}`,
+        hotel_id: `WEBBEDS-${hotelId}`,
+        name: `Hotel ${hotelId}`,
+        hotel_name: `Hotel ${hotelId}`,
+        country: "United Arab Emirates",
+        city: "Abu Dhabi",
+        area: "",
+        address: "",
+        stars: "",
+        image: "",
+        facilities: [],
+        availableToBook: true,
+        price: rooms[0].price,
+        currency: rooms[0].displayCurrency,
+        rooms: rooms.slice(0, 8),
+        rate_source_id: rooms[0].rate_source_id,
+        rate_source_timestamp: rooms[0].rate_source_timestamp,
+        source_health: "verified"
+      });
+    }
+  }
+
+  hotels.sort((a, b) => number(a.price) - number(b.price));
+  return hotels;
+}
+
+function webbedsCurrencyIdFromCode(code) {
+  const c = clean(code || "USD").toUpperCase();
+  if (c === "GBP") return "416";
+  if (c === "EUR") return "413";
+  return "520";
+}
+
+function webbedsCountryIdFromCode(code) {
+  const c = clean(code || "GB").toUpperCase();
+  if (c === "AE" || c === "UAE" || c === "UNITED ARAB EMIRATES") return "6";
+  if (c === "US" || c === "USA" || c === "UNITED STATES") return "102";
+  return "88";
+}
+
+function webbedsCityIdFromName(city) {
+  const c = clean(city).toUpperCase();
+  if (c === "ABU DHABI") return "334";
+  return "";
+}
+
+app.get("/api/webbeds/search", async (req, res) => {
+  try {
+    const cityId = positiveIntegerOrBlank(req.query.cityId || req.query.city_id) || findWebbedsCityCodeFromCache(req.query.city) || webbedsCityIdFromName(req.query.city);
+    const currencyId = positiveIntegerOrBlank(req.query.currencyId || req.query.currency_id) || webbedsCurrencyIdFromCode(req.query.currency);
+    const nationalityId = positiveIntegerOrBlank(req.query.nationalityId || req.query.nationality_id) || webbedsCountryIdFromCode(req.query.nationality || "GB");
+    const residenceId = positiveIntegerOrBlank(req.query.residenceId || req.query.residence_id) || webbedsCountryIdFromCode(req.query.residence || "GB");
+
+    if (!cityId) {
+      return res.status(400).json({
+        ok: false,
+        message: "This WebBeds city is not mapped yet. Use cityId directly or add the city to the WebBeds city map.",
+        example: "/api/webbeds/search?cityId=334&currency=USD&nationality=GB&residence=GB"
+      });
+    }
+
+    const built = buildWebbedsSearchXml({
+      ...req.query,
+      cityId,
+      currencyId,
+      nationalityId,
+      residenceId
+    });
+
+    if (!built.ok) return res.status(400).json(built);
+
+    const result = await webbedsPostXml(built.xml);
+    const hotels = parseWebbedsHotels(result.text, clean(req.query.currency || "USD").toUpperCase());
+
+    recordActivity("webbeds_json_search", {
+      cityId,
+      currencyId,
+      nationalityId,
+      residenceId,
+      count: hotels.length
+    }, {
+      ok: result.ok,
+      status: result.status
+    });
+
+    res.status(result.ok ? 200 : 502).json({
+      ok: result.ok,
+      supplier: "configured_private_supplier",
+      source: "live",
+      count: hotels.length,
+      hotels
+    });
+  } catch (err) {
+    recordActivity("webbeds_json_search_error", {}, { error: err.message });
     res.status(500).json({
       ok: false,
-      message: "WebBeds test search failed.",
+      message: "WebBeds JSON search failed.",
       error: err.message
     });
   }
 });
+
+// MSH WEBBEDS CITY MAP CACHE START
+function parseWebbedsCityMap(xml) {
+  const map = {};
+  const cities = [];
+  const cityBlocks = String(xml || "").match(/<city[\s\S]*?<\/city>/gi) || [];
+
+  for (const block of cityBlocks) {
+    const name = extractXmlTag(block, "name");
+    const code = extractXmlTag(block, "code");
+
+    if (!name || !code) continue;
+
+    const key = clean(name).toUpperCase();
+    map[key] = code;
+
+    cities.push({
+      name,
+      key,
+      code
+    });
+  }
+
+  cities.sort((a, b) => a.name.localeCompare(b.name));
+
+  return {
+    generated_at: nowISO(),
+    count: cities.length,
+    map,
+    cities
+  };
+}
+
+function webbedsCityMapFile() {
+  return path.join(DATA_DIR, "webbeds-city-map.json");
+}
+
+function loadWebbedsCityMap() {
+  try {
+    const file = webbedsCityMapFile();
+    if (!fs.existsSync(file)) return null;
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function saveWebbedsCityMap(data) {
+  fs.writeFileSync(webbedsCityMapFile(), JSON.stringify(data, null, 2), "utf8");
+}
+
+function findWebbedsCityCodeFromCache(city) {
+  const cityMap = loadWebbedsCityMap();
+  if (!cityMap || !cityMap.map) return "";
+
+  const key = clean(city).toUpperCase();
+  if (cityMap.map[key]) return cityMap.map[key];
+
+  const partial = (cityMap.cities || []).find((item) => {
+    const itemKey = clean(item.key || item.name).toUpperCase();
+    return itemKey === key || itemKey.startsWith(key + " -") || itemKey.includes(key);
+  });
+
+  return partial ? clean(partial.code) : "";
+}
+
+app.get("/api/webbeds/build-city-map", async (req, res) => {
+  try {
+    const xml = buildWebbedsInternalCodeXml("getservingcities");
+    const result = await webbedsPostXml(xml);
+
+    if (!result.ok) {
+      return res.status(502).json({
+        ok: false,
+        message: "Could not download WebBeds serving cities.",
+        status: result.status,
+        responsePreview: result.text.slice(0, 2000)
+      });
+    }
+
+    const parsed = parseWebbedsCityMap(result.text);
+    saveWebbedsCityMap(parsed);
+
+    recordActivity("webbeds_build_city_map", {}, {
+      ok: true,
+      cities: parsed.count
+    });
+
+    res.json({
+      ok: true,
+      file: "backend/data/webbeds-city-map.json",
+      count: parsed.count,
+      generated_at: parsed.generated_at,
+      examples: parsed.cities.slice(0, 20)
+    });
+  } catch (err) {
+    recordActivity("webbeds_build_city_map_error", {}, { error: err.message });
+
+    res.status(500).json({
+      ok: false,
+      message: "WebBeds city map build failed.",
+      error: err.message
+    });
+  }
+});
+
+app.get("/api/webbeds/city-code", (req, res) => {
+  const city = clean(req.query.city || req.query.q || "");
+  const cityMap = loadWebbedsCityMap();
+
+  if (!cityMap) {
+    return res.status(404).json({
+      ok: false,
+      message: "WebBeds city map has not been built yet. Run /api/webbeds/build-city-map first."
+    });
+  }
+
+  const code = findWebbedsCityCodeFromCache(city);
+
+  res.json({
+    ok: Boolean(code),
+    city,
+    code,
+    message: code ? "City code found." : "City is not mapped yet."
+  });
+});
+
+// MSH CUSTOMER LIVE HOTEL SEARCH VIA WEBBEDS START
+app.get("/api/live-webbeds-hotels", async (req, res) => {
+  try {
+    const city = clean(req.query.city || req.query.destination || "DUBAI");
+    const currency = clean(req.query.currency || "USD").toUpperCase();
+    const nationality = clean(req.query.nationality || "GB");
+    const residence = clean(req.query.residence || "GB");
+
+    const cityId =
+      positiveIntegerOrBlank(req.query.cityId || req.query.city_id) ||
+      findWebbedsCityCodeFromCache(city) ||
+      webbedsCityIdFromName(city);
+
+    if (!cityId) {
+      return res.status(400).json({
+        ok: false,
+        source: "live",
+        message: "Live hotel rates are not available for this city yet.",
+        city
+      });
+    }
+
+    const built = buildWebbedsSearchXml({
+      ...req.query,
+      cityId,
+      currencyId: webbedsCurrencyIdFromCode(currency),
+      nationalityId: webbedsCountryIdFromCode(nationality),
+      residenceId: webbedsCountryIdFromCode(residence)
+    });
+
+    if (!built.ok) return res.status(400).json(built);
+
+    const result = await webbedsPostXml(built.xml);
+    const hotels = parseWebbedsHotels(result.text, currency).map((hotel) => ({
+      ...hotel,
+      city,
+      country: city.toUpperCase() === "DUBAI" || city.toUpperCase() === "ABU DHABI"
+        ? "United Arab Emirates"
+        : hotel.country,
+      source: "live",
+      supplier: "configured_private_supplier"
+    }));
+
+    return res.json({
+      ok: result.ok,
+      source: "live",
+      city,
+      cityId,
+      currency,
+      count: hotels.length,
+      hotels
+    });
+  } catch (err) {
+    res.status(500).json({
+      ok: false,
+      message: "Live hotel search failed.",
+      error: err.message
+    });
+  }
+});
+
+// MSH WEBBEDS HOTEL DETAILS TEST START
+function buildWebbedsHotelDetailsXml(hotelId) {
+  return webbedsCustomerXml(`<request command="gethoteldetails">
+    <hotelId>${xmlEscapeValue(hotelId)}</hotelId>
+  </request>`);
+}
+
+app.get("/api/webbeds/hotel-details", async (req, res) => {
+  try {
+    const hotelId = clean(req.query.hotelId || req.query.hotelid || req.query.id || "");
+
+    if (!hotelId) {
+      return res.status(400).json({
+        ok: false,
+        message: "hotelId is required.",
+        example: "/api/webbeds/hotel-details?hotelId=313455"
+      });
+    }
+
+    const xml = buildWebbedsHotelDetailsXml(hotelId);
+    const result = await webbedsPostXml(xml);
+
+    recordActivity("webbeds_hotel_details", { hotelId }, {
+      ok: result.ok,
+      status: result.status,
+      preview: result.text.slice(0, 500)
+    });
+
+    res.status(result.ok ? 200 : 502).json({
+      ok: result.ok,
+      supplier: "configured_private_supplier",
+      hotelId,
+      status: result.status,
+      responsePreview: result.text.slice(0, 12000)
+    });
+  } catch (err) {
+    recordActivity("webbeds_hotel_details_error", {}, { error: err.message });
+
+    res.status(500).json({
+      ok: false,
+      message: "WebBeds hotel details request failed.",
+      error: err.message
+    });
+  }
+});
+// MSH WEBBEDS HOTEL DETAILS TEST END
+
+// MSH CUSTOMER LIVE HOTEL SEARCH VIA WEBBEDS END
+
+// MSH WEBBEDS CITY MAP CACHE END
+
+
+// MSH WEBBEDS CITY MAP CACHE START
+function parseWebbedsCityMap(xml) {
+  const map = {};
+  const cities = [];
+  const cityBlocks = String(xml || "").match(/<city[\s\S]*?<\/city>/gi) || [];
+
+  for (const block of cityBlocks) {
+    const name = extractXmlTag(block, "name");
+    const code = extractXmlTag(block, "code");
+
+    if (!name || !code) continue;
+
+    const key = clean(name).toUpperCase();
+    map[key] = code;
+
+    cities.push({
+      name,
+      key,
+      code
+    });
+  }
+
+  cities.sort((a, b) => a.name.localeCompare(b.name));
+
+  return {
+    generated_at: nowISO(),
+    count: cities.length,
+    map,
+    cities
+  };
+}
+
+function webbedsCityMapFile() {
+  return path.join(DATA_DIR, "webbeds-city-map.json");
+}
+
+function loadWebbedsCityMap() {
+  try {
+    const file = webbedsCityMapFile();
+    if (!fs.existsSync(file)) return null;
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function saveWebbedsCityMap(data) {
+  fs.writeFileSync(webbedsCityMapFile(), JSON.stringify(data, null, 2), "utf8");
+}
+
+function findWebbedsCityCodeFromCache(city) {
+  const cityMap = loadWebbedsCityMap();
+  if (!cityMap || !cityMap.map) return "";
+
+  const key = clean(city).toUpperCase();
+  if (cityMap.map[key]) return cityMap.map[key];
+
+  const partial = (cityMap.cities || []).find((item) => {
+    const itemKey = clean(item.key || item.name).toUpperCase();
+    return itemKey === key || itemKey.startsWith(key + " -") || itemKey.includes(key);
+  });
+
+  return partial ? clean(partial.code) : "";
+}
+
+app.get("/api/webbeds/build-city-map", async (req, res) => {
+  try {
+    const xml = buildWebbedsInternalCodeXml("getservingcities");
+    const result = await webbedsPostXml(xml);
+
+    if (!result.ok) {
+      return res.status(502).json({
+        ok: false,
+        message: "Could not download WebBeds serving cities.",
+        status: result.status,
+        responsePreview: result.text.slice(0, 2000)
+      });
+    }
+
+    const parsed = parseWebbedsCityMap(result.text);
+    saveWebbedsCityMap(parsed);
+
+    recordActivity("webbeds_build_city_map", {}, {
+      ok: true,
+      cities: parsed.count
+    });
+
+    res.json({
+      ok: true,
+      file: "backend/data/webbeds-city-map.json",
+      count: parsed.count,
+      generated_at: parsed.generated_at,
+      examples: parsed.cities.slice(0, 20)
+    });
+  } catch (err) {
+    recordActivity("webbeds_build_city_map_error", {}, { error: err.message });
+
+    res.status(500).json({
+      ok: false,
+      message: "WebBeds city map build failed.",
+      error: err.message
+    });
+  }
+});
+
+app.get("/api/webbeds/city-code", (req, res) => {
+  const city = clean(req.query.city || req.query.q || "");
+  const cityMap = loadWebbedsCityMap();
+
+  if (!cityMap) {
+    return res.status(404).json({
+      ok: false,
+      message: "WebBeds city map has not been built yet. Run /api/webbeds/build-city-map first."
+    });
+  }
+
+  const code = findWebbedsCityCodeFromCache(city);
+
+  res.json({
+    ok: Boolean(code),
+    city,
+    code,
+    message: code ? "City code found." : "City is not mapped yet."
+  });
+});
+
+// MSH CUSTOMER LIVE HOTEL SEARCH VIA WEBBEDS START
+app.get("/api/live-webbeds-hotels", async (req, res) => {
+  try {
+    const city = clean(req.query.city || req.query.destination || "DUBAI");
+    const currency = clean(req.query.currency || "USD").toUpperCase();
+    const nationality = clean(req.query.nationality || "GB");
+    const residence = clean(req.query.residence || "GB");
+
+    const cityId =
+      positiveIntegerOrBlank(req.query.cityId || req.query.city_id) ||
+      findWebbedsCityCodeFromCache(city) ||
+      webbedsCityIdFromName(city);
+
+    if (!cityId) {
+      return res.status(400).json({
+        ok: false,
+        source: "live",
+        message: "Live hotel rates are not available for this city yet.",
+        city
+      });
+    }
+
+    const built = buildWebbedsSearchXml({
+      ...req.query,
+      cityId,
+      currencyId: webbedsCurrencyIdFromCode(currency),
+      nationalityId: webbedsCountryIdFromCode(nationality),
+      residenceId: webbedsCountryIdFromCode(residence)
+    });
+
+    if (!built.ok) return res.status(400).json(built);
+
+    const result = await webbedsPostXml(built.xml);
+    const hotels = parseWebbedsHotels(result.text, currency).map((hotel) => ({
+      ...hotel,
+      city,
+      country: city.toUpperCase() === "DUBAI" || city.toUpperCase() === "ABU DHABI"
+        ? "United Arab Emirates"
+        : hotel.country,
+      source: "live",
+      supplier: "configured_private_supplier"
+    }));
+
+    return res.json({
+      ok: result.ok,
+      source: "live",
+      city,
+      cityId,
+      currency,
+      count: hotels.length,
+      hotels
+    });
+  } catch (err) {
+    res.status(500).json({
+      ok: false,
+      message: "Live hotel search failed.",
+      error: err.message
+    });
+  }
+});
+
+// MSH WEBBEDS HOTEL DETAILS TEST START
+function buildWebbedsHotelDetailsXml(hotelId) {
+  return webbedsCustomerXml(`<request command="gethoteldetails">
+    <hotelId>${xmlEscapeValue(hotelId)}</hotelId>
+  </request>`);
+}
+
+app.get("/api/webbeds/hotel-details", async (req, res) => {
+  try {
+    const hotelId = clean(req.query.hotelId || req.query.hotelid || req.query.id || "");
+
+    if (!hotelId) {
+      return res.status(400).json({
+        ok: false,
+        message: "hotelId is required.",
+        example: "/api/webbeds/hotel-details?hotelId=313455"
+      });
+    }
+
+    const xml = buildWebbedsHotelDetailsXml(hotelId);
+    const result = await webbedsPostXml(xml);
+
+    recordActivity("webbeds_hotel_details", { hotelId }, {
+      ok: result.ok,
+      status: result.status,
+      preview: result.text.slice(0, 500)
+    });
+
+    res.status(result.ok ? 200 : 502).json({
+      ok: result.ok,
+      supplier: "configured_private_supplier",
+      hotelId,
+      status: result.status,
+      responsePreview: result.text.slice(0, 12000)
+    });
+  } catch (err) {
+    recordActivity("webbeds_hotel_details_error", {}, { error: err.message });
+
+    res.status(500).json({
+      ok: false,
+      message: "WebBeds hotel details request failed.",
+      error: err.message
+    });
+  }
+});
+// MSH WEBBEDS HOTEL DETAILS TEST END
+
+// MSH CUSTOMER LIVE HOTEL SEARCH VIA WEBBEDS END
+
+// MSH WEBBEDS CITY MAP CACHE END
+
+// MSH WEBBEDS JSON SEARCH NORMALIZER END
+
+
+// MSH WEBBEDS JSON SEARCH NORMALIZER START
+function extractXmlTag(block, tag) {
+  const match = String(block || "").match(new RegExp("<" + tag + ">([\\s\\S]*?)<\\/" + tag + ">", "i"));
+  return match ? clean(match[1]) : "";
+}
+
+function extractXmlAttr(block, attr) {
+  const match = String(block || "").match(new RegExp(attr + "=\"([^\"]*)\"", "i"));
+  return match ? clean(match[1]) : "";
+}
+
+function parseWebbedsHotels(xml, currencyCode) {
+  const hotels = [];
+  const hotelBlocks = String(xml || "").match(/<hotel[\s\S]*?<\/hotel>/gi) || [];
+
+  for (const hotelBlock of hotelBlocks.slice(0, 80)) {
+    const hotelId = extractXmlAttr(hotelBlock, "hotelid");
+    const roomBlocks = hotelBlock.match(/<roomType[\s\S]*?<\/roomType>/gi) || [];
+
+    const rooms = [];
+
+    for (const roomBlock of roomBlocks.slice(0, 10)) {
+      const roomTypeCode = extractXmlAttr(roomBlock, "roomtypecode");
+      const roomName = extractXmlTag(roomBlock, "name") || "Available room";
+      const rateBlocks = roomBlock.match(/<rateBasis[\s\S]*?<\/rateBasis>/gi) || [];
+
+      for (const rateBlock of rateBlocks.slice(0, 4)) {
+        const rateBasisId = extractXmlAttr(rateBlock, "id");
+        const total = money(extractXmlTag(rateBlock, "total"));
+
+        if (total <= 0) continue;
+
+        rooms.push({
+          roomCode: roomTypeCode,
+          roomName,
+          board: `Rate basis ${rateBasisId || "standard"}`,
+          price: total,
+          convertedPrice: total,
+          displayCurrency: currencyCode || "USD",
+          cancellation: "Cancellation details are confirmed before booking.",
+          taxes: "Taxes and fees are confirmed before booking.",
+          rate_source_id: `WEBBEDS-${hotelId}-${roomTypeCode}-${rateBasisId}`,
+          rate_source_timestamp: nowISO(),
+          source_health: "verified",
+          supplier_private: {
+            supplier_code: "WEBBEDS",
+            supplier_hotel_id: hotelId,
+            room_type_code: roomTypeCode,
+            rate_basis_id: rateBasisId
+          }
+        });
+      }
+    }
+
+    rooms.sort((a, b) => number(a.price) - number(b.price));
+
+    if (hotelId && rooms.length) {
+      hotels.push({
+        hotelId: `WEBBEDS-${hotelId}`,
+        hotel_id: `WEBBEDS-${hotelId}`,
+        name: `Hotel ${hotelId}`,
+        hotel_name: `Hotel ${hotelId}`,
+        country: "United Arab Emirates",
+        city: "Abu Dhabi",
+        area: "",
+        address: "",
+        stars: "",
+        image: "",
+        facilities: [],
+        availableToBook: true,
+        price: rooms[0].price,
+        currency: rooms[0].displayCurrency,
+        rooms: rooms.slice(0, 8),
+        rate_source_id: rooms[0].rate_source_id,
+        rate_source_timestamp: rooms[0].rate_source_timestamp,
+        source_health: "verified"
+      });
+    }
+  }
+
+  hotels.sort((a, b) => number(a.price) - number(b.price));
+  return hotels;
+}
+
+function webbedsCurrencyIdFromCode(code) {
+  const c = clean(code || "USD").toUpperCase();
+  if (c === "GBP") return "416";
+  if (c === "EUR") return "413";
+  return "520";
+}
+
+function webbedsCountryIdFromCode(code) {
+  const c = clean(code || "GB").toUpperCase();
+  if (c === "AE" || c === "UAE" || c === "UNITED ARAB EMIRATES") return "6";
+  if (c === "US" || c === "USA" || c === "UNITED STATES") return "102";
+  return "88";
+}
+
+function webbedsCityIdFromName(city) {
+  const c = clean(city).toUpperCase();
+  if (c === "ABU DHABI") return "334";
+  return "";
+}
+
+app.get("/api/webbeds/search", async (req, res) => {
+  try {
+    const cityId = positiveIntegerOrBlank(req.query.cityId || req.query.city_id) || findWebbedsCityCodeFromCache(req.query.city) || webbedsCityIdFromName(req.query.city);
+    const currencyId = positiveIntegerOrBlank(req.query.currencyId || req.query.currency_id) || webbedsCurrencyIdFromCode(req.query.currency);
+    const nationalityId = positiveIntegerOrBlank(req.query.nationalityId || req.query.nationality_id) || webbedsCountryIdFromCode(req.query.nationality || "GB");
+    const residenceId = positiveIntegerOrBlank(req.query.residenceId || req.query.residence_id) || webbedsCountryIdFromCode(req.query.residence || "GB");
+
+    if (!cityId) {
+      return res.status(400).json({
+        ok: false,
+        message: "This WebBeds city is not mapped yet. Use cityId directly or add the city to the WebBeds city map.",
+        example: "/api/webbeds/search?cityId=334&currency=USD&nationality=GB&residence=GB"
+      });
+    }
+
+    const built = buildWebbedsSearchXml({
+      ...req.query,
+      cityId,
+      currencyId,
+      nationalityId,
+      residenceId
+    });
+
+    if (!built.ok) return res.status(400).json(built);
+
+    const result = await webbedsPostXml(built.xml);
+    const hotels = parseWebbedsHotels(result.text, clean(req.query.currency || "USD").toUpperCase());
+
+    recordActivity("webbeds_json_search", {
+      cityId,
+      currencyId,
+      nationalityId,
+      residenceId,
+      count: hotels.length
+    }, {
+      ok: result.ok,
+      status: result.status
+    });
+
+    res.status(result.ok ? 200 : 502).json({
+      ok: result.ok,
+      supplier: "configured_private_supplier",
+      source: "live",
+      count: hotels.length,
+      hotels
+    });
+  } catch (err) {
+    recordActivity("webbeds_json_search_error", {}, { error: err.message });
+    res.status(500).json({
+      ok: false,
+      message: "WebBeds JSON search failed.",
+      error: err.message
+    });
+  }
+});
+
+// MSH WEBBEDS CITY MAP CACHE START
+function parseWebbedsCityMap(xml) {
+  const map = {};
+  const cities = [];
+  const cityBlocks = String(xml || "").match(/<city[\s\S]*?<\/city>/gi) || [];
+
+  for (const block of cityBlocks) {
+    const name = extractXmlTag(block, "name");
+    const code = extractXmlTag(block, "code");
+
+    if (!name || !code) continue;
+
+    const key = clean(name).toUpperCase();
+    map[key] = code;
+
+    cities.push({
+      name,
+      key,
+      code
+    });
+  }
+
+  cities.sort((a, b) => a.name.localeCompare(b.name));
+
+  return {
+    generated_at: nowISO(),
+    count: cities.length,
+    map,
+    cities
+  };
+}
+
+function webbedsCityMapFile() {
+  return path.join(DATA_DIR, "webbeds-city-map.json");
+}
+
+function loadWebbedsCityMap() {
+  try {
+    const file = webbedsCityMapFile();
+    if (!fs.existsSync(file)) return null;
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function saveWebbedsCityMap(data) {
+  fs.writeFileSync(webbedsCityMapFile(), JSON.stringify(data, null, 2), "utf8");
+}
+
+function findWebbedsCityCodeFromCache(city) {
+  const cityMap = loadWebbedsCityMap();
+  if (!cityMap || !cityMap.map) return "";
+
+  const key = clean(city).toUpperCase();
+  if (cityMap.map[key]) return cityMap.map[key];
+
+  const partial = (cityMap.cities || []).find((item) => {
+    const itemKey = clean(item.key || item.name).toUpperCase();
+    return itemKey === key || itemKey.startsWith(key + " -") || itemKey.includes(key);
+  });
+
+  return partial ? clean(partial.code) : "";
+}
+
+app.get("/api/webbeds/build-city-map", async (req, res) => {
+  try {
+    const xml = buildWebbedsInternalCodeXml("getservingcities");
+    const result = await webbedsPostXml(xml);
+
+    if (!result.ok) {
+      return res.status(502).json({
+        ok: false,
+        message: "Could not download WebBeds serving cities.",
+        status: result.status,
+        responsePreview: result.text.slice(0, 2000)
+      });
+    }
+
+    const parsed = parseWebbedsCityMap(result.text);
+    saveWebbedsCityMap(parsed);
+
+    recordActivity("webbeds_build_city_map", {}, {
+      ok: true,
+      cities: parsed.count
+    });
+
+    res.json({
+      ok: true,
+      file: "backend/data/webbeds-city-map.json",
+      count: parsed.count,
+      generated_at: parsed.generated_at,
+      examples: parsed.cities.slice(0, 20)
+    });
+  } catch (err) {
+    recordActivity("webbeds_build_city_map_error", {}, { error: err.message });
+
+    res.status(500).json({
+      ok: false,
+      message: "WebBeds city map build failed.",
+      error: err.message
+    });
+  }
+});
+
+app.get("/api/webbeds/city-code", (req, res) => {
+  const city = clean(req.query.city || req.query.q || "");
+  const cityMap = loadWebbedsCityMap();
+
+  if (!cityMap) {
+    return res.status(404).json({
+      ok: false,
+      message: "WebBeds city map has not been built yet. Run /api/webbeds/build-city-map first."
+    });
+  }
+
+  const code = findWebbedsCityCodeFromCache(city);
+
+  res.json({
+    ok: Boolean(code),
+    city,
+    code,
+    message: code ? "City code found." : "City is not mapped yet."
+  });
+});
+
+// MSH CUSTOMER LIVE HOTEL SEARCH VIA WEBBEDS START
+app.get("/api/live-webbeds-hotels", async (req, res) => {
+  try {
+    const city = clean(req.query.city || req.query.destination || "DUBAI");
+    const currency = clean(req.query.currency || "USD").toUpperCase();
+    const nationality = clean(req.query.nationality || "GB");
+    const residence = clean(req.query.residence || "GB");
+
+    const cityId =
+      positiveIntegerOrBlank(req.query.cityId || req.query.city_id) ||
+      findWebbedsCityCodeFromCache(city) ||
+      webbedsCityIdFromName(city);
+
+    if (!cityId) {
+      return res.status(400).json({
+        ok: false,
+        source: "live",
+        message: "Live hotel rates are not available for this city yet.",
+        city
+      });
+    }
+
+    const built = buildWebbedsSearchXml({
+      ...req.query,
+      cityId,
+      currencyId: webbedsCurrencyIdFromCode(currency),
+      nationalityId: webbedsCountryIdFromCode(nationality),
+      residenceId: webbedsCountryIdFromCode(residence)
+    });
+
+    if (!built.ok) return res.status(400).json(built);
+
+    const result = await webbedsPostXml(built.xml);
+    const hotels = parseWebbedsHotels(result.text, currency).map((hotel) => ({
+      ...hotel,
+      city,
+      country: city.toUpperCase() === "DUBAI" || city.toUpperCase() === "ABU DHABI"
+        ? "United Arab Emirates"
+        : hotel.country,
+      source: "live",
+      supplier: "configured_private_supplier"
+    }));
+
+    return res.json({
+      ok: result.ok,
+      source: "live",
+      city,
+      cityId,
+      currency,
+      count: hotels.length,
+      hotels
+    });
+  } catch (err) {
+    res.status(500).json({
+      ok: false,
+      message: "Live hotel search failed.",
+      error: err.message
+    });
+  }
+});
+
+// MSH WEBBEDS HOTEL DETAILS TEST START
+function buildWebbedsHotelDetailsXml(hotelId) {
+  return webbedsCustomerXml(`<request command="gethoteldetails">
+    <hotelId>${xmlEscapeValue(hotelId)}</hotelId>
+  </request>`);
+}
+
+app.get("/api/webbeds/hotel-details", async (req, res) => {
+  try {
+    const hotelId = clean(req.query.hotelId || req.query.hotelid || req.query.id || "");
+
+    if (!hotelId) {
+      return res.status(400).json({
+        ok: false,
+        message: "hotelId is required.",
+        example: "/api/webbeds/hotel-details?hotelId=313455"
+      });
+    }
+
+    const xml = buildWebbedsHotelDetailsXml(hotelId);
+    const result = await webbedsPostXml(xml);
+
+    recordActivity("webbeds_hotel_details", { hotelId }, {
+      ok: result.ok,
+      status: result.status,
+      preview: result.text.slice(0, 500)
+    });
+
+    res.status(result.ok ? 200 : 502).json({
+      ok: result.ok,
+      supplier: "configured_private_supplier",
+      hotelId,
+      status: result.status,
+      responsePreview: result.text.slice(0, 12000)
+    });
+  } catch (err) {
+    recordActivity("webbeds_hotel_details_error", {}, { error: err.message });
+
+    res.status(500).json({
+      ok: false,
+      message: "WebBeds hotel details request failed.",
+      error: err.message
+    });
+  }
+});
+// MSH WEBBEDS HOTEL DETAILS TEST END
+
+// MSH CUSTOMER LIVE HOTEL SEARCH VIA WEBBEDS END
+
+// MSH WEBBEDS CITY MAP CACHE END
+
+
+// MSH WEBBEDS CITY MAP CACHE START
+function parseWebbedsCityMap(xml) {
+  const map = {};
+  const cities = [];
+  const cityBlocks = String(xml || "").match(/<city[\s\S]*?<\/city>/gi) || [];
+
+  for (const block of cityBlocks) {
+    const name = extractXmlTag(block, "name");
+    const code = extractXmlTag(block, "code");
+
+    if (!name || !code) continue;
+
+    const key = clean(name).toUpperCase();
+    map[key] = code;
+
+    cities.push({
+      name,
+      key,
+      code
+    });
+  }
+
+  cities.sort((a, b) => a.name.localeCompare(b.name));
+
+  return {
+    generated_at: nowISO(),
+    count: cities.length,
+    map,
+    cities
+  };
+}
+
+function webbedsCityMapFile() {
+  return path.join(DATA_DIR, "webbeds-city-map.json");
+}
+
+function loadWebbedsCityMap() {
+  try {
+    const file = webbedsCityMapFile();
+    if (!fs.existsSync(file)) return null;
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function saveWebbedsCityMap(data) {
+  fs.writeFileSync(webbedsCityMapFile(), JSON.stringify(data, null, 2), "utf8");
+}
+
+function findWebbedsCityCodeFromCache(city) {
+  const cityMap = loadWebbedsCityMap();
+  if (!cityMap || !cityMap.map) return "";
+
+  const key = clean(city).toUpperCase();
+  if (cityMap.map[key]) return cityMap.map[key];
+
+  const partial = (cityMap.cities || []).find((item) => {
+    const itemKey = clean(item.key || item.name).toUpperCase();
+    return itemKey === key || itemKey.startsWith(key + " -") || itemKey.includes(key);
+  });
+
+  return partial ? clean(partial.code) : "";
+}
+
+app.get("/api/webbeds/build-city-map", async (req, res) => {
+  try {
+    const xml = buildWebbedsInternalCodeXml("getservingcities");
+    const result = await webbedsPostXml(xml);
+
+    if (!result.ok) {
+      return res.status(502).json({
+        ok: false,
+        message: "Could not download WebBeds serving cities.",
+        status: result.status,
+        responsePreview: result.text.slice(0, 2000)
+      });
+    }
+
+    const parsed = parseWebbedsCityMap(result.text);
+    saveWebbedsCityMap(parsed);
+
+    recordActivity("webbeds_build_city_map", {}, {
+      ok: true,
+      cities: parsed.count
+    });
+
+    res.json({
+      ok: true,
+      file: "backend/data/webbeds-city-map.json",
+      count: parsed.count,
+      generated_at: parsed.generated_at,
+      examples: parsed.cities.slice(0, 20)
+    });
+  } catch (err) {
+    recordActivity("webbeds_build_city_map_error", {}, { error: err.message });
+
+    res.status(500).json({
+      ok: false,
+      message: "WebBeds city map build failed.",
+      error: err.message
+    });
+  }
+});
+
+app.get("/api/webbeds/city-code", (req, res) => {
+  const city = clean(req.query.city || req.query.q || "");
+  const cityMap = loadWebbedsCityMap();
+
+  if (!cityMap) {
+    return res.status(404).json({
+      ok: false,
+      message: "WebBeds city map has not been built yet. Run /api/webbeds/build-city-map first."
+    });
+  }
+
+  const code = findWebbedsCityCodeFromCache(city);
+
+  res.json({
+    ok: Boolean(code),
+    city,
+    code,
+    message: code ? "City code found." : "City is not mapped yet."
+  });
+});
+
+// MSH CUSTOMER LIVE HOTEL SEARCH VIA WEBBEDS START
+app.get("/api/live-webbeds-hotels", async (req, res) => {
+  try {
+    const city = clean(req.query.city || req.query.destination || "DUBAI");
+    const currency = clean(req.query.currency || "USD").toUpperCase();
+    const nationality = clean(req.query.nationality || "GB");
+    const residence = clean(req.query.residence || "GB");
+
+    const cityId =
+      positiveIntegerOrBlank(req.query.cityId || req.query.city_id) ||
+      findWebbedsCityCodeFromCache(city) ||
+      webbedsCityIdFromName(city);
+
+    if (!cityId) {
+      return res.status(400).json({
+        ok: false,
+        source: "live",
+        message: "Live hotel rates are not available for this city yet.",
+        city
+      });
+    }
+
+    const built = buildWebbedsSearchXml({
+      ...req.query,
+      cityId,
+      currencyId: webbedsCurrencyIdFromCode(currency),
+      nationalityId: webbedsCountryIdFromCode(nationality),
+      residenceId: webbedsCountryIdFromCode(residence)
+    });
+
+    if (!built.ok) return res.status(400).json(built);
+
+    const result = await webbedsPostXml(built.xml);
+    const hotels = parseWebbedsHotels(result.text, currency).map((hotel) => ({
+      ...hotel,
+      city,
+      country: city.toUpperCase() === "DUBAI" || city.toUpperCase() === "ABU DHABI"
+        ? "United Arab Emirates"
+        : hotel.country,
+      source: "live",
+      supplier: "configured_private_supplier"
+    }));
+
+    return res.json({
+      ok: result.ok,
+      source: "live",
+      city,
+      cityId,
+      currency,
+      count: hotels.length,
+      hotels
+    });
+  } catch (err) {
+    res.status(500).json({
+      ok: false,
+      message: "Live hotel search failed.",
+      error: err.message
+    });
+  }
+});
+
+// MSH WEBBEDS HOTEL DETAILS TEST START
+function buildWebbedsHotelDetailsXml(hotelId) {
+  return webbedsCustomerXml(`<request command="gethoteldetails">
+    <hotelId>${xmlEscapeValue(hotelId)}</hotelId>
+  </request>`);
+}
+
+app.get("/api/webbeds/hotel-details", async (req, res) => {
+  try {
+    const hotelId = clean(req.query.hotelId || req.query.hotelid || req.query.id || "");
+
+    if (!hotelId) {
+      return res.status(400).json({
+        ok: false,
+        message: "hotelId is required.",
+        example: "/api/webbeds/hotel-details?hotelId=313455"
+      });
+    }
+
+    const xml = buildWebbedsHotelDetailsXml(hotelId);
+    const result = await webbedsPostXml(xml);
+
+    recordActivity("webbeds_hotel_details", { hotelId }, {
+      ok: result.ok,
+      status: result.status,
+      preview: result.text.slice(0, 500)
+    });
+
+    res.status(result.ok ? 200 : 502).json({
+      ok: result.ok,
+      supplier: "configured_private_supplier",
+      hotelId,
+      status: result.status,
+      responsePreview: result.text.slice(0, 12000)
+    });
+  } catch (err) {
+    recordActivity("webbeds_hotel_details_error", {}, { error: err.message });
+
+    res.status(500).json({
+      ok: false,
+      message: "WebBeds hotel details request failed.",
+      error: err.message
+    });
+  }
+});
+// MSH WEBBEDS HOTEL DETAILS TEST END
+
+// MSH CUSTOMER LIVE HOTEL SEARCH VIA WEBBEDS END
+
+// MSH WEBBEDS CITY MAP CACHE END
+
+// MSH WEBBEDS JSON SEARCH NORMALIZER END
+
 // MSH WEBBEDS DOTW XML CONNECTOR END
 app.listen(PORT, "0.0.0.0", () => {
   const destinations = buildDestinations();
@@ -4222,6 +5597,15 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
+
+
+
+
+
+
+
+
 
 
 
