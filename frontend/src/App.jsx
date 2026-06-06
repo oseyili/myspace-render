@@ -454,13 +454,13 @@ const [route, setRoute] = useState(currentRoute());
         currency,
       });
 
-      const res = await fetch(`${API_BASE}/api/live-webbeds-hotels?${params}`, { cache: "no-store" });
+      const res = await fetch(`${API_BASE}/search?${params}`, { cache: "no-store" });
       const data = await res.json();
       const found = Array.isArray(data.hotels) ? data.hotels : [];
       setHotels(found);
 
       if (!found.length) {
-        setNotice("No live hotel rates were found for this destination. Try another city or adjust your dates.");
+        setNotice("No matching hotels were found for this search. Try another city or adjust your dates.");
       }
     } catch {
       setNotice("We could not load hotels for this destination right now. Please try again.");
@@ -1919,5 +1919,6 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
