@@ -6058,6 +6058,369 @@ app.get("/api/multi-supplier-hotels", async (req, res) => {
 });
 // MSH REAL MULTI SUPPLIER ORCHESTRATOR END
 
+function MSH_PUBLIC_CLEAN_TEXT(value) {
+  return String(value || "").trim().replace(/\s+/g, " ");
+}
+
+function MSH_PUBLIC_NORM(value) {
+  return MSH_PUBLIC_CLEAN_TEXT(value)
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function MSH_PUBLIC_READ_LIVE_HOTELS() {
+  try {
+    const file = path.join(__dirname, "data", "live_hotels.json");
+    const raw = JSON.parse(fs.readFileSync(file, "utf8"));
+    if (Array.isArray(raw)) return raw;
+    if (Array.isArray(raw.hotels)) return raw.hotels;
+    return [];
+  } catch {
+    return [];
+  }
+}
+
+function MSH_PUBLIC_PRICE(hotel) {
+  const room = Array.isArray(hotel?.rooms) && hotel.rooms.length ? hotel.rooms[0] : {};
+  const values = [
+    hotel?.price,
+    hotel?.convertedPrice,
+    hotel?.displayPrice,
+    hotel?.amount,
+    hotel?.total,
+    hotel?.totalPrice,
+    hotel?.net,
+    hotel?.sellingRate,
+    hotel?.rate,
+    room?.price,
+    room?.convertedPrice,
+    room?.displayPrice,
+    room?.amount,
+    room?.total,
+    room?.net,
+    room?.sellingRate,
+    room?.rate
+  ];
+  for (const v of values) {
+    const n = Number(v || 0);
+    if (Number.isFinite(n) && n > 0) return n;
+  }
+  return 0;
+}
+
+function MSH_PUBLIC_IMAGES(hotel) {
+  const raw = [
+    hotel?.image,
+    hotel?.image_url,
+    hotel?.main_image,
+    hotel?.thumbnail,
+    hotel?.photo,
+    ...(Array.isArray(hotel?.images) ? hotel.images : []),
+    ...(Array.isArray(hotel?.photos) ? hotel.photos : [])
+  ];
+
+  return Array.from(new Set(raw.map((x) => {
+    if (!x) return "";
+    if (typeof x === "string") return x.trim();
+    return String(x.url || x.image || x.image_url || x.path || "").trim();
+  }).filter((x) => /^https?:\/\//i.test(x))));
+}
+
+function MSH_PUBLIC_ID(hotel) {
+  return MSH_PUBLIC_CLEAN_TEXT(
+    hotel?.hotelId ||
+    hotel?.hotel_id ||
+    hotel?.id ||
+    hotel?.code ||
+    hotel?.supplier_hotel_id ||
+    hotel?.name ||
+    hotel?.hotel_name ||
+    ""
+  );
+}
+
+function MSH_PUBLIC_SUPPLIER(hotel) {
+  const raw = MSH_PUBLIC_NORM([
+    hotel?.supplierLabel,
+    hotel?.supplier,
+    hotel?.source,
+    hotel?.provider,
+    hotel?.supplierCode,
+    hotel?.supplier_code,
+    hotel?.supplier_private?.supplier_code
+  ].join(" "));
+  if (raw.includes("webbeds")) return "WebBeds";
+  if (raw.includes("hotelbeds")) return "Hotelbeds";
+  return "Inventory";
+}
+
+function MSH_PUBLIC_CITY_PARENT(country, city) {
+  const c = MSH_PUBLIC_NORM(country);
+  const q = MSH_PUBLIC_NORM(city);
+
+  const rules = [
+    ["united kingdom", "london", ["lon", "central london", "canary wharf", "westminster", "paddington", "kensington", "chelsea", "mayfair", "soho", "shoreditch", "docklands", "heathrow"]],
+    ["united arab emirates", "abu dhabi", ["yas island", "saadiyat island", "corniche", "au h", "auh"]],
+    ["united arab emirates", "dubai", ["dubai marina", "jbr", "palm jumeirah", "downtown dubai", "deira"]],
+    ["bahrain", "manama", ["juffair", "al juffair"]],
+    ["nigeria", "lagos", ["lekki", "victoria island", "ikoyi"]],
+    ["nigeria", "abuja", ["wuse", "maitama", "asokoro"]],
+    ["united states", "new york", ["nyc", "manhattan", "brooklyn", "queens"]]
+  ];
+
+  for (const [countryKey, parent, aliases] of rules) {
+    if (c && c !== countryKey) continue;
+    if (q === parent || aliases.some((x) => q.includes(x))) {
+      const area = q === parent ? "" : MSH_PUBLIC_CLEAN_TEXT(city);
+      return { supplierCity: parent.replace(/\b\w/g, (m) => m.toUpperCase()), area };
+    }
+  }
+
+  if (String(city || "").includes(",")) {
+    const parts = String(city).split(",").map((x) => x.trim()).filter(Boolean);
+    return {
+      supplierCity: parts[parts.length - 1],
+      area: parts.slice(0, -1).join(", ")
+    };
+  }
+
+  return { supplierCity: MSH_PUBLIC_CLEAN_TEXT(city), area: "" };
+}
+
+function MSH_PUBLIC_NORMALISE_HOTEL(hotel, query, sourceType) {
+  const images = MSH_PUBLIC_IMAGES(hotel);
+  const price = MSH_PUBLIC_PRICE(hotel);
+  const supplier = MSH_PUBLIC_SUPPLIER(hotel);
+
+  const name = MSH_PUBLIC_CLEAN_TEXT(hotel?.name || hotel?.hotel_name || hotel?.hotelName || "Available property");
+  const city = MSH_PUBLIC_CLEAN_TEXT(hotel?.city || hotel?.destination || hotel?.location?.city || query.city || "");
+  const country = MSH_PUBLIC_CLEAN_TEXT(hotel?.country || hotel?.location?.country || query.country || "");
+
+  return {
+    ...hotel,
+    hotelId: MSH_PUBLIC_ID(hotel),
+    hotel_id: MSH_PUBLIC_ID(hotel),
+    name,
+    hotel_name: name,
+    country,
+    city,
+    area: MSH_PUBLIC_CLEAN_TEXT(hotel?.area || hotel?.zone || hotel?.district || ""),
+    address: MSH_PUBLIC_CLEAN_TEXT(hotel?.address || hotel?.location?.address || ""),
+    image: images[0] || "",
+    images,
+    price,
+    convertedPrice: price,
+    displayPrice: price,
+    currency: MSH_PUBLIC_CLEAN_TEXT(hotel?.currency || hotel?.displayCurrency || query.currency || "GBP"),
+    displayCurrency: MSH_PUBLIC_CLEAN_TEXT(hotel?.displayCurrency || hotel?.currency || query.currency || "GBP"),
+    availableToBook: price > 0,
+    customerBadge: price > 0 ? "Live hotel rate" : "Check availability",
+    availabilityMode: price > 0 ? "live_rate" : "request_availability",
+    sourceType,
+    internalSupplierSettlement: {
+      supplier,
+      supplierCode: hotel?.supplierCode || hotel?.supplier_code || hotel?.supplier_private?.supplier_code || "",
+      rateSourceId: hotel?.rate_source_id || hotel?.rooms?.[0]?.rate_source_id || "",
+      rateSourceTimestamp: hotel?.rate_source_timestamp || hotel?.rooms?.[0]?.rate_source_timestamp || ""
+    }
+  };
+}
+
+async function MSH_PUBLIC_TRY_SUPPLIER_SEARCH(req, query) {
+  try {
+    const params = new URLSearchParams({
+      country: query.country,
+      city: query.city,
+      checkIn: query.checkIn || "",
+      checkOut: query.checkOut || "",
+      guests: query.guests || "2",
+      rooms: query.rooms || "1",
+      currency: query.currency || "GBP",
+      limit: String(query.limit || 1000)
+    });
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 9000);
+
+    const response = await fetch(`http://127.0.0.1:${PORT}/api/multi-supplier-hotels?${params.toString()}`, {
+      signal: controller.signal
+    });
+
+    clearTimeout(timer);
+
+    if (!response.ok) return { hotels: [], suppliers: {}, supplierStatus: { multiSupplier: `http_${response.status}` } };
+
+    const payload = await response.json();
+    return {
+      hotels: Array.isArray(payload.hotels) ? payload.hotels : [],
+      suppliers: payload.suppliers || {},
+      supplierStatus: payload.supplierStatus || {}
+    };
+  } catch {
+    return { hotels: [], suppliers: {}, supplierStatus: { multiSupplier: "unavailable" } };
+  }
+}
+
+function MSH_PUBLIC_CATALOGUE_SEARCH(query) {
+  const wantedCountry = MSH_PUBLIC_NORM(query.country);
+  const wantedCity = MSH_PUBLIC_NORM(query.city);
+  const wantedArea = MSH_PUBLIC_NORM(query.area);
+  const limit = Math.max(1, Math.min(Number(query.limit || 1000), 1000));
+
+  const rows = MSH_PUBLIC_READ_LIVE_HOTELS()
+    .filter((hotel) => {
+      const country = MSH_PUBLIC_NORM(hotel?.country || hotel?.location?.country || "");
+      if (wantedCountry && country && country !== wantedCountry) return false;
+      return true;
+    })
+    .map((hotel) => {
+      const text = MSH_PUBLIC_NORM([
+        hotel?.name,
+        hotel?.hotel_name,
+        hotel?.hotelName,
+        hotel?.country,
+        hotel?.city,
+        hotel?.destination,
+        hotel?.area,
+        hotel?.zone,
+        hotel?.district,
+        hotel?.address,
+        hotel?.description
+      ].join(" "));
+
+      let score = 0;
+      if (wantedCity && text.includes(wantedCity)) score += 1000;
+      if (wantedArea && text.includes(wantedArea)) score += 600;
+
+      return { hotel, score };
+    })
+    .filter((x) => !wantedCity || x.score > 0)
+    .sort((a, b) => b.score - a.score || MSH_PUBLIC_PRICE(b.hotel) - MSH_PUBLIC_PRICE(a.hotel))
+    .slice(0, limit)
+    .map((x) => x.hotel);
+
+  return rows;
+}
+
+function MSH_PUBLIC_MERGE_HOTELS(items) {
+  const map = new Map();
+
+  for (const hotel of items) {
+    const key = MSH_PUBLIC_NORM([
+      MSH_PUBLIC_ID(hotel),
+      hotel?.name,
+      hotel?.hotel_name,
+      hotel?.city,
+      hotel?.country
+    ].join("|"));
+
+    if (!key) continue;
+
+    const existing = map.get(key);
+    if (!existing) {
+      map.set(key, hotel);
+      continue;
+    }
+
+    const existingPrice = MSH_PUBLIC_PRICE(existing);
+    const newPrice = MSH_PUBLIC_PRICE(hotel);
+
+    if ((newPrice > 0 && existingPrice <= 0) || MSH_PUBLIC_IMAGES(hotel).length > MSH_PUBLIC_IMAGES(existing).length) {
+      map.set(key, { ...existing, ...hotel });
+    }
+  }
+
+  return Array.from(map.values());
+}
+
+app.get("/api/customer-global-hotels", async (req, res) => {
+  try {
+    const country = MSH_PUBLIC_CLEAN_TEXT(req.query.country || "United Kingdom");
+    const requestedCity = MSH_PUBLIC_CLEAN_TEXT(req.query.city || "London");
+    const currency = MSH_PUBLIC_CLEAN_TEXT(req.query.currency || "GBP").toUpperCase();
+    const checkIn = MSH_PUBLIC_CLEAN_TEXT(req.query.checkIn || req.query.checkin || "");
+    const checkOut = MSH_PUBLIC_CLEAN_TEXT(req.query.checkOut || req.query.checkout || "");
+    const guests = MSH_PUBLIC_CLEAN_TEXT(req.query.guests || "2");
+    const rooms = MSH_PUBLIC_CLEAN_TEXT(req.query.rooms || "1");
+    const limit = Math.max(1, Math.min(Number(req.query.limit || 1000), 1000));
+
+    const fixed = MSH_PUBLIC_CITY_PARENT(country, requestedCity);
+    const supplierCity = fixed.supplierCity || requestedCity;
+    const area = fixed.area || "";
+
+    const supplierResult = await MSH_PUBLIC_TRY_SUPPLIER_SEARCH(req, {
+      country,
+      city: supplierCity,
+      currency,
+      checkIn,
+      checkOut,
+      guests,
+      rooms,
+      limit
+    });
+
+    const supplierHotels = supplierResult.hotels.map((hotel) =>
+      MSH_PUBLIC_NORMALISE_HOTEL(hotel, { country, city: supplierCity, area, currency }, "supplier_live")
+    );
+
+    const catalogueHotels = MSH_PUBLIC_CATALOGUE_SEARCH({
+      country,
+      city: supplierCity,
+      area,
+      currency,
+      limit
+    }).map((hotel) =>
+      MSH_PUBLIC_NORMALISE_HOTEL(hotel, { country, city: supplierCity, area, currency }, "catalogue")
+    );
+
+    const merged = MSH_PUBLIC_MERGE_HOTELS([...supplierHotels, ...catalogueHotels])
+      .sort((a, b) => {
+        const aLive = MSH_PUBLIC_PRICE(a) > 0 ? 1 : 0;
+        const bLive = MSH_PUBLIC_PRICE(b) > 0 ? 1 : 0;
+        if (bLive !== aLive) return bLive - aLive;
+        return MSH_PUBLIC_PRICE(a) - MSH_PUBLIC_PRICE(b);
+      })
+      .slice(0, limit);
+
+    const customerHotels = merged.map((hotel) => {
+      const cleanHotel = { ...hotel };
+      delete cleanHotel.supplierName;
+      delete cleanHotel.supplierDisplay;
+      delete cleanHotel.supplierLabel;
+      return cleanHotel;
+    });
+
+    const liveCount = customerHotels.filter((h) => MSH_PUBLIC_PRICE(h) > 0).length;
+    const requestCount = customerHotels.length - liveCount;
+
+    return res.json({
+      ok: true,
+      source: "global_live_plus_catalogue",
+      searched: {
+        country,
+        requestedCity,
+        supplierCity,
+        area
+      },
+      suppliers: supplierResult.suppliers || {},
+      supplierStatus: supplierResult.supplierStatus || {},
+      livePricedHotels: liveCount,
+      requestAvailabilityHotels: requestCount,
+      count: customerHotels.length,
+      customerMessage: `${liveCount} live-priced hotels and ${requestCount} additional real properties loaded.`,
+      hotels: customerHotels
+    });
+  } catch (err) {
+    return res.status(500).json({
+      ok: false,
+      message: "Hotel search failed."
+    });
+  }
+});
+
 app.listen(PORT, "0.0.0.0", () => {
   const destinations = buildDestinations();
 
@@ -6077,6 +6440,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
