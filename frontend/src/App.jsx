@@ -2039,7 +2039,7 @@ function MySpaceKlookExperiencesPortal(props) {
                     textDecoration: "none",
                     fontWeight: 950
                   }}
-                 onClick={(event) => { event.preventDefault(); document.getElementById("myspace-klook-live-table")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>View Experience</a>
+                 onClick={(event) => { event.preventDefault(); document.getElementById("myspace-klook-live-table")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} onClick={(event) => { event.preventDefault(); document.getElementById("myspace-klook-live-table")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>View Experience</a>
               </div>
             </article>
           ))}
@@ -2405,6 +2405,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
