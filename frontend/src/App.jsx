@@ -2056,6 +2056,99 @@ function MySpaceKlookExperiencesPortal(props) {
   );
 }
 
+
+function AffiliateNetworkUltraSafe() {
+  const affiliates = [
+    { name: "Hotelbeds", service: "Worldwide hotel supply", status: "Active", route: "hotels" },
+    { name: "WebBeds", service: "Global hotel inventory", status: "Active", route: "hotels" },
+    { name: "Klook", service: "Experiences & attractions", status: "Active", route: "attractions" },
+    { name: "Viator", service: "Tours & activities", status: "Active", route: "attractions" },
+    { name: "GetYourGuide", service: "Destination experiences", status: "Active", route: "attractions" },
+    { name: "Welcome Pickups", service: "Airport transfers", status: "In progress", route: "transfers" },
+    { name: "SiteMinder", service: "Hotel connectivity", status: "In progress", route: "partners" },
+    { name: "HyperGuest", service: "Direct hotel distribution", status: "In progress", route: "partners" },
+    { name: "RateHawk", service: "Additional hotel supply", status: "Technical review", route: "partners" },
+    { name: "Expedia Partner", service: "Future inventory channel", status: "Pending", route: "partners" },
+  ];
+
+  function go(route) {
+    window.location.hash = `#/${route}`;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  return (
+    <main style={{ padding: "34px 28px", background: "#f4f7fb", minHeight: "70vh" }}>
+      <section style={{ background: "#fff", borderRadius: 26, padding: 30, boxShadow: "0 18px 55px rgba(9,30,66,.08)" }}>
+        <div style={{ color: "#3155e7", fontWeight: 950, letterSpacing: 1.6, textTransform: "uppercase", marginBottom: 10 }}>
+          Affiliate Network
+        </div>
+
+        <h1 style={{ margin: 0, color: "#071a52", fontSize: 40, lineHeight: 1.05 }}>
+          MySpace Hotel global travel partners
+        </h1>
+
+        <p style={{ color: "#466083", fontWeight: 750, fontSize: 18, maxWidth: 980 }}>
+          Our partner network supports hotels, attractions, transfers and destination services. Each partner is shown equally so the platform remains balanced, professional and scalable.
+        </p>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            gap: 16,
+            marginTop: 26,
+          }}
+        >
+          {affiliates.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => go(item.route)}
+              style={{
+                minHeight: 150,
+                border: "1px solid #dce7f7",
+                borderRadius: 20,
+                background: "#ffffff",
+                padding: 18,
+                textAlign: "left",
+                cursor: "pointer",
+                boxShadow: "0 10px 28px rgba(9,30,66,.07)",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+              }}
+            >
+              <div>
+                <div style={{ color: "#071a52", fontSize: 23, fontWeight: 950, lineHeight: 1.05 }}>
+                  {item.name}
+                </div>
+                <div style={{ color: "#526985", fontSize: 14, fontWeight: 800, marginTop: 10 }}>
+                  {item.service}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 16,
+                  display: "inline-flex",
+                  alignSelf: "flex-start",
+                  background: item.status === "Active" ? "#e9fff3" : "#eef4ff",
+                  color: item.status === "Active" ? "#087a3c" : "#3155e7",
+                  borderRadius: 999,
+                  padding: "8px 12px",
+                  fontSize: 13,
+                  fontWeight: 950,
+                }}
+              >
+                {item.status}
+              </div>
+            </button>
+          ))}
+        </div>
+      </section>
+    </main>
+  );
+}
+
 function Footer() {
   return (
     <footer style={styles.footer}>
@@ -2191,6 +2284,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
