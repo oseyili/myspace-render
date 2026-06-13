@@ -248,40 +248,25 @@ function selectedHotelWithRoom(hotel) {
 }
 
 function KlookDynamicWidget({ city, country }) {
-  const cleanCity = normaliseCityName(city || "Paris");
-  const adid = klookAdIdForCity(cleanCity);
-  const widgetKey = `${cleanCity || "global"}-${adid}`;
-  const destinationLabel = [cleanCity, country].filter(Boolean).join(", ") || "your destination";
+  const destinationLabel = [city, country].filter(Boolean).join(", ") || "your destination";
 
-  useEffect(() => {
-    const existing = document.querySelector(`script[src="${KLOOK_WIDGET_SCRIPT}"]`);
-
-    if (!existing) {
-      const script = document.createElement("script");
-      script.src = KLOOK_WIDGET_SCRIPT;
-      script.async = true;
-      document.body.appendChild(script);
-    } else if (window.KlookAffiliateWidget && typeof window.KlookAffiliateWidget.init === "function") {
-      window.KlookAffiliateWidget.init();
-    }
-
-    const timer = window.setTimeout(() => {
-      if (window.KlookAffiliateWidget && typeof window.KlookAffiliateWidget.init === "function") {
-        window.KlookAffiliateWidget.init();
-      }
-    }, 500);
-
-    return () => window.clearTimeout(timer);
-  }, [widgetKey]);
+  const openCityExperiences = () => {
+    const query = encodeURIComponent(`${destinationLabel} tours attractions experiences`);
+    window.open(
+      `https://www.klook.com/en-US/search/result/?query=${query}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  };
 
   return (
     <section style={styles.klookPanel}>
       <div style={styles.panelHeader}>
         <div>
-          <div style={styles.kicker}>Popular Experiences</div>
+          <div style={styles.kicker}>Recommended Experiences</div>
           <h2 style={styles.titleSmall}>Explore More In {destinationLabel}</h2>
           <p style={styles.sectionText}>
-            Discover popular attractions, sightseeing tours, transport options and travel experiences recommended for your destination.
+            Discover selected tours, attractions, transfers and local experiences for the city chosen for your stay.
           </p>
         </div>
       </div>
@@ -290,27 +275,34 @@ function KlookDynamicWidget({ city, country }) {
         Your hotel choice remains saved on MySpace Hotel while you explore experiences for your trip.
       </div>
 
-      <div style={styles.klookWidgetShell}>
-        <ins
-          key={widgetKey}
-          className="klk-aff-widget"
-          data-adid={adid}
-          data-lang=""
-          data-currency=""
-          data-cardH="126"
-          data-padding="92"
-          data-lgH="470"
-          data-edgeValue="655"
-          data-cid=""
-          data-tid="-1"
-          data-amount="6"
-          data-prod="dynamic_widget"
-          style={{ display: "block", width: "100%" }}
-        />
-      </div>
-
-      <div style={styles.customerExperienceText}>
-        Create unforgettable memories before you even arrive. When you are ready, return to your saved hotel booking and complete your stay securely with MySpace Hotel.
+      <div style={{
+        background: "#ffffff",
+        border: "1px solid #d9efe9",
+        borderRadius: 24,
+        padding: 24,
+        boxShadow: "0 10px 28px rgba(0,0,0,.06)"
+      }}>
+        <h3 style={{ margin: "0 0 8px", fontSize: 22, color: "#0f172a" }}>
+          Experiences in {destinationLabel}
+        </h3>
+        <p style={{ margin: "0 0 18px", color: "#475569", lineHeight: 1.6 }}>
+          Open experiences matched to the customer-selected city. This keeps the journey focused on the destination they are visiting.
+        </p>
+        <button
+          type="button"
+          onClick={openCityExperiences}
+          style={{
+            background: "#007f7a",
+            color: "#ffffff",
+            border: 0,
+            borderRadius: 14,
+            padding: "14px 22px",
+            fontWeight: 900,
+            cursor: "pointer"
+          }}
+        >
+          View experiences for this city
+        </button>
       </div>
     </section>
   );
@@ -1977,6 +1969,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
