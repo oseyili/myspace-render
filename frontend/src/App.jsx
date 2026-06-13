@@ -482,12 +482,43 @@ const [route, setRoute] = useState(currentRoute());
         };
       });
 
-      const found = [...mainHotels, ...safeWebbedsHotels];
+      const backendHotels =
+        typeof data !== "undefined" && Array.isArray(data?.hotels)
+          ? data.hotels
+          : typeof payload !== "undefined" && Array.isArray(payload?.hotels)
+          ? payload.hotels
+          : typeof json !== "undefined" && Array.isArray(json?.hotels)
+          ? json.hotels
+          : [];
+
+      const found = [...backendHotels, ...mainHotels, ...safeWebbedsHotels]
+        .filter(Boolean)
+        .filter((hotel, index, list) => {
+          const key = String(
+            hotel?.hotelId ||
+              hotel?.hotel_id ||
+              hotel?.id ||
+              hotel?.code ||
+              `${hotel?.name || hotel?.hotel_name || "hotel"}-${hotel?.city || ""}-${hotel?.country || ""}`
+          ).toLowerCase();
+
+          return index === list.findIndex((x) => {
+            const xKey = String(
+              x?.hotelId ||
+                x?.hotel_id ||
+                x?.id ||
+                x?.code ||
+                `${x?.name || x?.hotel_name || "hotel"}-${x?.city || ""}-${x?.country || ""}`
+            ).toLowerCase();
+
+            return xKey === key;
+          });
+        });
 
       setHotels(found);
 
       if (!found.length) {
-        setNotice("No matching hotels were found for this search. Try another city or adjust your dates.");
+        setNotice("No matching hotels were found for this search. Try another city or wider destination.");
       }
     } catch {
       setNotice("We could not load hotels for this destination right now. Please try again.");
@@ -1946,6 +1977,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
