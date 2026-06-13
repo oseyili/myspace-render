@@ -281,7 +281,7 @@ function KlookDynamicWidget({ city, country }) {
           <div style={styles.kicker}>Popular Experiences</div>
           <h2 style={styles.titleSmall}>Explore More In {destinationLabel}</h2>
           <p style={styles.sectionText}>
-            Discover popular attractions, sightseeing tours, transport options and travel experiences recommended for your destination.
+            MySpace Hotel Experiences Experiences powered by Klook Affiliate Partner ID 123338. Discover attractions, sightseeing tours, transport options and travel experiences recommended for your destination.
           </p>
         </div>
       </div>
@@ -2191,6 +2191,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
