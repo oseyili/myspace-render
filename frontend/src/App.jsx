@@ -10,7 +10,7 @@ const STRIPE_PAYMENT_LINK =
   import.meta.env.VITE_PUBLIC_STRIPE_PAYMENT_LINK ||
   "";
 
-const KLOOK_WIDGET_SCRIPT = "https://affiliate.klook.com/widget/fetch-iframe-init.js";
+const KLOOK_WIDGET_SCRIPT = "";
 
 const KLOOK_DYNAMIC_WIDGETS = {
   GLOBAL: "1293547",
@@ -2154,10 +2154,10 @@ function ExperienceAffiliatePartnerBoxes({ city = "London", country = "United Ki
   const partners = [
     {
       name: "Klook",
-      service: "Live destination activities shown below",
+      service: "Public destination activities and tickets",
       status: "Active",
-      button: "View Klook Options Below",
-      action: "scroll-klook"
+      button: "View Public Klook Experiences",
+      action: "public-klook"
     },
     {
       name: "Viator",
@@ -2183,9 +2183,9 @@ function ExperienceAffiliatePartnerBoxes({ city = "London", country = "United Ki
   ];
 
   function openPartner(item) {
-    if (item.action === "scroll-klook") {
-      const box = document.getElementById("myspace-klook-live-table");
-      if (box) box.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (item.action === "public-klook") {
+      const q = encodeURIComponent(`${cleanCity} attractions tours activities`);
+      window.open(`https://www.klook.com/en-US/search/result/?query=${q}`, "_blank", "noopener,noreferrer");
       return;
     }
 
@@ -2366,7 +2366,7 @@ const styles = {
   staySavedPanel: { marginTop: 30, background: "#fff", borderRadius: 28, padding: 28, boxShadow: "0 8px 25px rgba(0,0,0,.06)", display: "grid", gridTemplateColumns: "minmax(0,1fr) 320px", gap: 22, alignItems: "center", border: "2px solid #bbf7d0" },
   savedStayActions: { display: "grid", gap: 14 },
   klookPanel: { marginTop: 30, background: "#fff", borderRadius: 28, padding: 28, boxShadow: "0 8px 25px rgba(0,0,0,.06)", border: "1px solid #dce6f3" },
-  klookWidgetShell: { marginTop: 22, minHeight: 430, background: "#f8fafc", borderRadius: 22, padding: 16, overflow: "hidden", border: "1px solid #dce6f3" },
+  klookWidgetShell: { display: "none" },
   customerReminderBox: { marginTop: 18, background: "#ecfdf3", color: "#166534", borderRadius: 18, padding: 18, fontWeight: 950, lineHeight: 1.5, textAlign: "center" },
   customerExperienceText: { marginTop: 18, background: "#f4f7fc", padding: 18, borderRadius: 14, textAlign: "center", fontSize: 18, fontWeight: 700, color: "#0a2458", lineHeight: 1.5 },
   panelHeader: { display: "flex", justifyContent: "space-between", gap: 20, flexWrap: "wrap", alignItems: "flex-start" },
@@ -2405,6 +2405,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
