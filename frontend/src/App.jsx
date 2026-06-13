@@ -290,7 +290,7 @@ function KlookDynamicWidget({ city, country }) {
         Your hotel choice remains saved on MySpace Hotel while you explore experiences for your trip.
       </div>
 
-      <div style={styles.klookWidgetShell}>
+      <div id="myspace-klook-live-table" style={styles.klookWidgetShell}>
         <ins
           key={widgetKey}
           className="klk-aff-widget"
@@ -2157,41 +2157,46 @@ function ExperienceAffiliatePartnerBoxes({ city = "London", country = "United Ki
   const partners = [
     {
       name: "Klook",
-      service: "Attractions, tickets, eSIM, rail and activities",
+      service: "Live destination activities shown below",
       status: "Active",
-      button: "Explore Klook",
-      url: "https://affiliate.klook.com/redirect?aid=123338&aff_adid=1303191&k_site=" + encodeURIComponent(`https://www.klook.com/en-US/search/result/?query=${cleanCity}`)
+      button: "View Klook Options Below",
+      action: "scroll-klook"
     },
     {
       name: "Viator",
       service: "Tours, sightseeing and destination experiences",
-      status: "Active",
-      button: "Explore Viator",
-      url: "#/attractions"
+      status: "Ready to connect",
+      button: "Coming Soon",
+      action: "none"
     },
     {
       name: "GetYourGuide",
       service: "Guided activities, tickets and local experiences",
-      status: "Active",
-      button: "Explore GetYourGuide",
-      url: "#/attractions"
+      status: "Ready to connect",
+      button: "Coming Soon",
+      action: "none"
     },
     {
       name: "Welcome Pickups",
       service: "Airport transfers and arrival support",
       status: "In progress",
       button: "View Transfers",
-      url: "#/transfers"
+      action: "transfers"
     }
   ];
 
   function openPartner(item) {
-    if (String(item.url).startsWith("http")) {
-      window.open(item.url, "_blank", "noopener,noreferrer");
+    if (item.action === "scroll-klook") {
+      const box = document.getElementById("myspace-klook-live-table");
+      if (box) box.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
-    window.location.hash = item.url;
-    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    if (item.action === "transfers") {
+      window.location.hash = "#/transfers";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
   }
 
   return (
@@ -2201,11 +2206,11 @@ function ExperienceAffiliatePartnerBoxes({ city = "London", country = "United Ki
       </div>
 
       <h2 style={{ margin: 0, color: "#071a52", fontSize: 32, lineHeight: 1.1 }}>
-        Compare travel experiences for {cleanCity}, {cleanCountry}
+        Choose experience support for {cleanCity}, {cleanCountry}
       </h2>
 
       <p style={{ color: "#466083", fontWeight: 750, fontSize: 17, maxWidth: 950 }}>
-        Choose from our experience partner network. Each partner is shown in an equal box so customers can clearly compare attractions, tours, transfers and destination services.
+        Klook live options are displayed directly on this page. Other experience partners will be connected here as they become ready for customer use.
       </p>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginTop: 20 }}>
@@ -2220,7 +2225,7 @@ function ExperienceAffiliatePartnerBoxes({ city = "London", country = "United Ki
               background: "#ffffff",
               padding: 18,
               textAlign: "left",
-              cursor: "pointer",
+              cursor: item.action === "none" ? "default" : "pointer",
               boxShadow: "0 10px 28px rgba(9,30,66,.07)",
               display: "flex",
               flexDirection: "column",
@@ -2251,7 +2256,7 @@ function ExperienceAffiliatePartnerBoxes({ city = "London", country = "United Ki
               </div>
 
               <div style={{
-                background: "#071a52",
+                background: item.action === "none" ? "#94a3b8" : "#071a52",
                 color: "#fff",
                 borderRadius: 12,
                 padding: "12px 14px",
@@ -2403,6 +2408,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
