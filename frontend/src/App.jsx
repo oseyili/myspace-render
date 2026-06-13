@@ -253,7 +253,7 @@ function KlookDynamicWidget({ city, country }) {
   const openCityExperiences = () => {
     const query = encodeURIComponent(`${destinationLabel} tours attractions experiences`);
     window.open(
-      `https://www.klook.com/en-US/search/result/?query=${query}`,
+      `https://www.klook.com/en-US/search/result/?aid=&query=${query}&aid=`,
       "_blank",
       "noopener,noreferrer"
     );
@@ -1969,6 +1969,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
