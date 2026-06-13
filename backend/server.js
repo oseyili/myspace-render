@@ -6421,6 +6421,131 @@ app.get("/api/customer-global-hotels", async (req, res) => {
   }
 });
 
+
+const KLOOK_AFFILIATE_ID = "123338";
+const KLOOK_AFFILIATE_AD_ID = "1303191";
+
+function mshCleanKlookText(value) {
+  return String(value || "").trim().replace(/\s+/g, " ");
+}
+
+function mshKlookAffiliateLink(klookUrl, tag = "") {
+  const safeUrl = mshCleanKlookText(klookUrl);
+  const safeTag = mshCleanKlookText(tag);
+
+  const params = new URLSearchParams({
+    aid: KLOOK_AFFILIATE_ID,
+    aff_adid: KLOOK_AFFILIATE_AD_ID,
+    k_site: safeUrl
+  });
+
+  if (safeTag) params.set("aff_label", safeTag);
+
+  return `https://affiliate.klook.com/redirect?${params.toString()}`;
+}
+
+function mshKlookDestinationItems(city, country) {
+  const c = mshCleanKlookText(city || "London");
+  const countryText = mshCleanKlookText(country || "");
+  const key = c.toLowerCase();
+
+  const map = {
+    london: [
+      ["Tower of London and Crown Jewels", "Tower of London", "From US$51", "https://www.klook.com/en-US/activity/3491-tower-of-london-entry-ticket-london/"],
+      ["London attractions and sightseeing", "London", "View live options", "https://www.klook.com/en-US/search/result/?query=London"],
+      ["London airport transfers", "London", "View live options", "https://www.klook.com/en-US/search/result/?query=London%20airport%20transfer"]
+    ],
+    paris: [
+      ["Paris attractions and sightseeing", "Paris", "View live options", "https://www.klook.com/en-US/search/result/?query=Paris"],
+      ["Eiffel Tower experiences", "Paris", "View live options", "https://www.klook.com/en-US/search/result/?query=Eiffel%20Tower"],
+      ["Disneyland Paris", "Paris", "View live options", "https://www.klook.com/en-US/search/result/?query=Disneyland%20Paris"]
+    ],
+    dubai: [
+      ["Dubai attractions and experiences", "Dubai", "View live options", "https://www.klook.com/en-US/search/result/?query=Dubai"],
+      ["Burj Khalifa tickets and experiences", "Dubai", "View live options", "https://www.klook.com/en-US/search/result/?query=Burj%20Khalifa"],
+      ["Dubai desert safari", "Dubai", "View live options", "https://www.klook.com/en-US/search/result/?query=Dubai%20desert%20safari"]
+    ],
+    singapore: [
+      ["Singapore attractions and experiences", "Singapore", "View live options", "https://www.klook.com/en-US/search/result/?query=Singapore"],
+      ["Gardens by the Bay", "Singapore", "View live options", "https://www.klook.com/en-US/search/result/?query=Gardens%20by%20the%20Bay"],
+      ["Singapore airport transfers", "Singapore", "View live options", "https://www.klook.com/en-US/search/result/?query=Singapore%20airport%20transfer"]
+    ],
+    tokyo: [
+      ["Tokyo attractions and experiences", "Tokyo", "View live options", "https://www.klook.com/en-US/search/result/?query=Tokyo"],
+      ["Tokyo theme parks", "Tokyo", "View live options", "https://www.klook.com/en-US/search/result/?query=Tokyo%20theme%20park"],
+      ["Tokyo rail passes and transport", "Tokyo", "View live options", "https://www.klook.com/en-US/search/result/?query=Tokyo%20rail%20pass"]
+    ]
+  };
+
+  const pickedKey =
+    key.includes("london") ? "london" :
+    key.includes("paris") ? "paris" :
+    key.includes("dubai") ? "dubai" :
+    key.includes("singapore") ? "singapore" :
+    key.includes("tokyo") ? "tokyo" :
+    "global";
+
+  const rows = map[pickedKey] || [
+    [`Experiences in ${c}`, c, "View live options", `https://www.klook.com/en-US/search/result/?query=${encodeURIComponent(c)}`],
+    [`Airport transfers in ${c}`, c, "View live options", `https://www.klook.com/en-US/search/result/?query=${encodeURIComponent(c + " airport transfer")}`],
+    [`Tours and activities in ${c}`, c, "View live options", `https://www.klook.com/en-US/search/result/?query=${encodeURIComponent(c + " tours activities")}`]
+  ];
+
+  return rows.map(([title, area, price, url], index) => ({
+    id: `klook-${pickedKey}-${index + 1}`,
+    provider: "Klook",
+    partnerType: "Affiliate experience partner",
+    title,
+    city: c,
+    country: countryText,
+    area,
+    priceText: price,
+    affiliateUrl: mshKlookAffiliateLink(url, `myspace-${pickedKey}-${index + 1}`),
+    directUrl: url,
+    customerNote: "Final availability, price and booking terms are confirmed before purchase."
+  }));
+}
+
+app.get("/api/klook/status", (req, res) => {
+  res.json({
+    ok: true,
+    provider: "Klook",
+    affiliateReady: true,
+    affiliateId: KLOOK_AFFILIATE_ID,
+    website: "MySpace Hotel",
+    message: "Klook affiliate tracking is configured for MySpace Hotel."
+  });
+});
+
+app.get("/api/klook/experiences", (req, res) => {
+  const city = mshCleanKlookText(req.query.city || "London");
+  const country = mshCleanKlookText(req.query.country || "United Kingdom");
+
+  res.json({
+    ok: true,
+    source: "klook_affiliate_destination_experiences",
+    provider: "Klook",
+    city,
+    country,
+    count: mshKlookDestinationItems(city, country).length,
+    experiences: mshKlookDestinationItems(city, country)
+  });
+});
+
+app.get("/api/klook/redirect", (req, res) => {
+  const target = mshCleanKlookText(req.query.url || "");
+  const tag = mshCleanKlookText(req.query.tag || "myspace-hotel");
+
+  if (!target || !/^https:\/\/www\.klook\.com\//i.test(target)) {
+    return res.status(400).json({
+      ok: false,
+      message: "A valid Klook URL is required."
+    });
+  }
+
+  return res.redirect(mshKlookAffiliateLink(target, tag));
+});
+
 app.listen(PORT, "0.0.0.0", () => {
   const destinations = buildDestinations();
 
@@ -6440,6 +6565,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
