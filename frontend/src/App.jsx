@@ -249,11 +249,22 @@ function selectedHotelWithRoom(hotel) {
 
 function KlookDynamicWidget({ city, country }) {
   const destinationLabel = [city, country].filter(Boolean).join(", ") || "your destination";
+  const klookAid = "";
+  const getYourGuidePartnerId = "";
 
-  const openCityExperiences = () => {
-    const query = encodeURIComponent(`${destinationLabel} tours attractions experiences`);
+  const openKlookExperiences = () => {
+    const query = encodeURIComponent(destinationLabel + " tours attractions experiences");
     window.open(
-      `https://www.klook.com/en-US/search/result/?aid=&query=${query}&aid=`,
+      "https://www.klook.com/en-US/search/result/?query=" + query + "&aid=" + encodeURIComponent(klookAid),
+      "_blank",
+      "noopener,noreferrer"
+    );
+  };
+
+  const openGetYourGuideExperiences = () => {
+    const query = encodeURIComponent(destinationLabel + " tours attractions experiences");
+    window.open(
+      "https://www.getyourguide.com/s/?q=" + query + "&partner_id=" + encodeURIComponent(getYourGuidePartnerId),
       "_blank",
       "noopener,noreferrer"
     );
@@ -285,24 +296,44 @@ function KlookDynamicWidget({ city, country }) {
         <h3 style={{ margin: "0 0 8px", fontSize: 22, color: "#0f172a" }}>
           Experiences in {destinationLabel}
         </h3>
+
         <p style={{ margin: "0 0 18px", color: "#475569", lineHeight: 1.6 }}>
-          Open experiences matched to the customer-selected city. This keeps the journey focused on the destination they are visiting.
+          Open city-matched activities through MySpace Hotel affiliate partners.
         </p>
-        <button
-          type="button"
-          onClick={openCityExperiences}
-          style={{
-            background: "#007f7a",
-            color: "#ffffff",
-            border: 0,
-            borderRadius: 14,
-            padding: "14px 22px",
-            fontWeight: 900,
-            cursor: "pointer"
-          }}
-        >
-          View experiences for this city
-        </button>
+
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          <button
+            type="button"
+            onClick={openKlookExperiences}
+            style={{
+              background: "#007f7a",
+              color: "#ffffff",
+              border: 0,
+              borderRadius: 14,
+              padding: "14px 22px",
+              fontWeight: 900,
+              cursor: "pointer"
+            }}
+          >
+            View city experiences
+          </button>
+
+          <button
+            type="button"
+            onClick={openGetYourGuideExperiences}
+            style={{
+              background: "#0f172a",
+              color: "#ffffff",
+              border: 0,
+              borderRadius: 14,
+              padding: "14px 22px",
+              fontWeight: 900,
+              cursor: "pointer"
+            }}
+          >
+            More tours and tickets
+          </button>
+        </div>
       </div>
     </section>
   );
@@ -1969,6 +2000,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
