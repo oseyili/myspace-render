@@ -1848,7 +1848,7 @@ function MySpaceKlookExperiencesPortal(props) {
   const country = String(props.selectedCountry || props.country || "United Kingdom").trim();
 
   function klookLink(url) {
-    return "https://affiliate.klook.com/redirect?aid=123338&aff_adid=1303191&k_site=" + encodeURIComponent(url);
+    return String(url || "").replace("https://affiliate.klook.com/redirect?", "https://www.klook.com/");
   }
 
   const destinationText = `${city}, ${country}`;
@@ -2027,9 +2027,8 @@ function MySpaceKlookExperiencesPortal(props) {
                 <div style={{ color: "#536985", fontWeight: 800, marginBottom: 12 }}>{item.area}</div>
                 <div style={{ color: "#3155e7", fontSize: 24, fontWeight: 950, marginBottom: 18 }}>{item.price}</div>
                 <a
-                  href={klookLink(item.url)}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={item.url}
+                  target="_blank" rel="noopener noreferrer nofollow sponsored"
                   style={{
                     display: "block",
                     textAlign: "center",
@@ -2408,6 +2407,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
