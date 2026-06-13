@@ -281,7 +281,7 @@ function KlookDynamicWidget({ city, country }) {
           <div style={styles.kicker}>Popular Experiences</div>
           <h2 style={styles.titleSmall}>Explore More In {destinationLabel}</h2>
           <p style={styles.sectionText}>
-            MySpace Hotel Experiences Experiences powered by Klook Affiliate Partner ID 123338. Discover attractions, sightseeing tours, transport options and travel experiences recommended for your destination.
+            MySpace Hotel Experiences Experiences powered by our travel experience partner. Discover attractions, sightseeing tours, transport options and travel experiences recommended for your destination.
           </p>
         </div>
       </div>
@@ -1848,7 +1848,7 @@ function MySpaceKlookExperiencesPortal(props) {
   const country = String(props.selectedCountry || props.country || "United Kingdom").trim();
 
   function klookLink(url) {
-    return String(url || "").replace("https://affiliate.klook.com/redirect?", "https://www.klook.com/");
+    return "#/attractions";
   }
 
   const destinationText = `${city}, ${country}`;
@@ -2027,7 +2027,7 @@ function MySpaceKlookExperiencesPortal(props) {
                 <div style={{ color: "#536985", fontWeight: 800, marginBottom: 12 }}>{item.area}</div>
                 <div style={{ color: "#3155e7", fontSize: 24, fontWeight: 950, marginBottom: 18 }}>{item.price}</div>
                 <a
-                  href={item.url}
+                  href="#/attractions"
                   target="_blank" rel="noopener noreferrer nofollow sponsored"
                   style={{
                     display: "block",
@@ -2039,9 +2039,7 @@ function MySpaceKlookExperiencesPortal(props) {
                     textDecoration: "none",
                     fontWeight: 950
                   }}
-                >
-                  View Experience
-                </a>
+                 onClick={(event) => { event.preventDefault(); document.getElementById("myspace-klook-live-table")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>View Experience</a>
               </div>
             </article>
           ))}
@@ -2407,6 +2405,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
