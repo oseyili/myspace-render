@@ -2149,6 +2149,125 @@ function AffiliateNetworkUltraSafe() {
   );
 }
 
+
+function ExperienceAffiliatePartnerBoxes({ city = "London", country = "United Kingdom" }) {
+  const cleanCity = String(city || "London").trim();
+  const cleanCountry = String(country || "United Kingdom").trim();
+
+  const partners = [
+    {
+      name: "Klook",
+      service: "Attractions, tickets, eSIM, rail and activities",
+      status: "Active",
+      button: "Explore Klook",
+      url: "https://affiliate.klook.com/redirect?aid=123338&aff_adid=1303191&k_site=" + encodeURIComponent(`https://www.klook.com/en-US/search/result/?query=${cleanCity}`)
+    },
+    {
+      name: "Viator",
+      service: "Tours, sightseeing and destination experiences",
+      status: "Active",
+      button: "Explore Viator",
+      url: "#/attractions"
+    },
+    {
+      name: "GetYourGuide",
+      service: "Guided activities, tickets and local experiences",
+      status: "Active",
+      button: "Explore GetYourGuide",
+      url: "#/attractions"
+    },
+    {
+      name: "Welcome Pickups",
+      service: "Airport transfers and arrival support",
+      status: "In progress",
+      button: "View Transfers",
+      url: "#/transfers"
+    }
+  ];
+
+  function openPartner(item) {
+    if (String(item.url).startsWith("http")) {
+      window.open(item.url, "_blank", "noopener,noreferrer");
+      return;
+    }
+    window.location.hash = item.url;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  return (
+    <section style={{ marginTop: 24, background: "#ffffff", borderRadius: 24, padding: 24, border: "1px solid #dce6f3", boxShadow: "0 8px 25px rgba(0,0,0,.06)" }}>
+      <div style={{ color: "#3155e7", fontWeight: 950, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 8 }}>
+        Experience Partners
+      </div>
+
+      <h2 style={{ margin: 0, color: "#071a52", fontSize: 32, lineHeight: 1.1 }}>
+        Compare travel experiences for {cleanCity}, {cleanCountry}
+      </h2>
+
+      <p style={{ color: "#466083", fontWeight: 750, fontSize: 17, maxWidth: 950 }}>
+        Choose from our experience partner network. Each partner is shown in an equal box so customers can clearly compare attractions, tours, transfers and destination services.
+      </p>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginTop: 20 }}>
+        {partners.map((item) => (
+          <button
+            key={item.name}
+            onClick={() => openPartner(item)}
+            style={{
+              minHeight: 170,
+              border: "1px solid #dce7f7",
+              borderRadius: 20,
+              background: "#ffffff",
+              padding: 18,
+              textAlign: "left",
+              cursor: "pointer",
+              boxShadow: "0 10px 28px rgba(9,30,66,.07)",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between"
+            }}
+          >
+            <div>
+              <div style={{ color: "#071a52", fontSize: 25, fontWeight: 950, lineHeight: 1.05 }}>
+                {item.name}
+              </div>
+              <div style={{ color: "#526985", fontSize: 14, fontWeight: 800, marginTop: 10, lineHeight: 1.35 }}>
+                {item.service}
+              </div>
+            </div>
+
+            <div>
+              <div style={{
+                display: "inline-flex",
+                background: item.status === "Active" ? "#e9fff3" : "#eef4ff",
+                color: item.status === "Active" ? "#087a3c" : "#3155e7",
+                borderRadius: 999,
+                padding: "7px 11px",
+                fontSize: 12,
+                fontWeight: 950,
+                marginBottom: 10
+              }}>
+                {item.status}
+              </div>
+
+              <div style={{
+                background: "#071a52",
+                color: "#fff",
+                borderRadius: 12,
+                padding: "12px 14px",
+                textAlign: "center",
+                fontWeight: 950
+              }}>
+                {item.button}
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function Footer() {
   return (
     <footer style={styles.footer}>
@@ -2284,6 +2403,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
