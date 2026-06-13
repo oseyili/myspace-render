@@ -1842,6 +1842,220 @@ function GuideCard({ title, text, href }) {
   );
 }
 
+
+function MySpaceKlookExperiencesPortal(props) {
+  const city = String(props.selectedCity || props.city || "London").trim();
+  const country = String(props.selectedCountry || props.country || "United Kingdom").trim();
+
+  function klookLink(url) {
+    return "https://affiliate.klook.com/redirect?aid=123338&aff_adid=1303191&k_site=" + encodeURIComponent(url);
+  }
+
+  const destinationText = `${city}, ${country}`;
+
+  const destinationMap = {
+    london: [
+      {
+        title: "Tower of London and Crown Jewels",
+        area: "London",
+        price: "From US$51",
+        image: "https://res.klook.com/image/upload/fl_lossy.progressive,q_85/c_fill,w_900,h_600/activities/zcjodqizkg1dxqknj1ge.webp",
+        url: "https://www.klook.com/en-US/activity/3491-tower-of-london-entry-ticket-london/"
+      },
+      {
+        title: "London sightseeing and attractions",
+        area: "London",
+        price: "View live options",
+        image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=900&q=80",
+        url: "https://www.klook.com/en-US/search/result/?query=London"
+      },
+      {
+        title: "Airport transfers and local transport",
+        area: "London",
+        price: "View live options",
+        image: "https://images.unsplash.com/photo-1513026705753-bc3fffca8bf4?auto=format&fit=crop&w=900&q=80",
+        url: "https://www.klook.com/en-US/search/result/?query=London%20airport%20transfer"
+      }
+    ],
+    paris: [
+      {
+        title: "Paris attractions and experiences",
+        area: "Paris",
+        price: "View live options",
+        image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=900&q=80",
+        url: "https://www.klook.com/en-US/search/result/?query=Paris"
+      },
+      {
+        title: "Eiffel Tower and city experiences",
+        area: "Paris",
+        price: "View live options",
+        image: "https://images.unsplash.com/photo-1543349689-9a4d426bee8e?auto=format&fit=crop&w=900&q=80",
+        url: "https://www.klook.com/en-US/search/result/?query=Eiffel%20Tower"
+      },
+      {
+        title: "Disneyland Paris and family days out",
+        area: "Paris",
+        price: "View live options",
+        image: "https://images.unsplash.com/photo-1590144662036-33bf0ebd2c7f?auto=format&fit=crop&w=900&q=80",
+        url: "https://www.klook.com/en-US/search/result/?query=Disneyland%20Paris"
+      }
+    ],
+    dubai: [
+      {
+        title: "Dubai attractions and experiences",
+        area: "Dubai",
+        price: "View live options",
+        image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=900&q=80",
+        url: "https://www.klook.com/en-US/search/result/?query=Dubai"
+      },
+      {
+        title: "Burj Khalifa and city views",
+        area: "Dubai",
+        price: "View live options",
+        image: "https://images.unsplash.com/photo-1582672060674-bc2bd808a8b5?auto=format&fit=crop&w=900&q=80",
+        url: "https://www.klook.com/en-US/search/result/?query=Burj%20Khalifa"
+      },
+      {
+        title: "Desert safari and evening experiences",
+        area: "Dubai",
+        price: "View live options",
+        image: "https://images.unsplash.com/photo-1549944850-84e00be4203b?auto=format&fit=crop&w=900&q=80",
+        url: "https://www.klook.com/en-US/search/result/?query=Dubai%20desert%20safari"
+      }
+    ],
+    singapore: [
+      {
+        title: "Singapore attractions and experiences",
+        area: "Singapore",
+        price: "View live options",
+        image: "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=900&q=80",
+        url: "https://www.klook.com/en-US/search/result/?query=Singapore"
+      },
+      {
+        title: "Gardens by the Bay and city highlights",
+        area: "Singapore",
+        price: "View live options",
+        image: "https://images.unsplash.com/photo-1533628635777-112b2239b1c7?auto=format&fit=crop&w=900&q=80",
+        url: "https://www.klook.com/en-US/search/result/?query=Gardens%20by%20the%20Bay"
+      },
+      {
+        title: "Airport transport and local passes",
+        area: "Singapore",
+        price: "View live options",
+        image: "https://images.unsplash.com/photo-1565967511849-76a60a516170?auto=format&fit=crop&w=900&q=80",
+        url: "https://www.klook.com/en-US/search/result/?query=Singapore%20airport%20transfer"
+      }
+    ],
+    tokyo: [
+      {
+        title: "Tokyo attractions and experiences",
+        area: "Tokyo",
+        price: "View live options",
+        image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=900&q=80",
+        url: "https://www.klook.com/en-US/search/result/?query=Tokyo"
+      },
+      {
+        title: "Theme parks and family experiences",
+        area: "Tokyo",
+        price: "View live options",
+        image: "https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?auto=format&fit=crop&w=900&q=80",
+        url: "https://www.klook.com/en-US/search/result/?query=Tokyo%20theme%20park"
+      },
+      {
+        title: "Rail passes and local transport",
+        area: "Tokyo",
+        price: "View live options",
+        image: "https://images.unsplash.com/photo-1513407030348-c983a97b98d8?auto=format&fit=crop&w=900&q=80",
+        url: "https://www.klook.com/en-US/search/result/?query=Tokyo%20rail%20pass"
+      }
+    ]
+  };
+
+  const key = city.toLowerCase().includes("london") ? "london"
+    : city.toLowerCase().includes("paris") ? "paris"
+    : city.toLowerCase().includes("dubai") ? "dubai"
+    : city.toLowerCase().includes("singapore") ? "singapore"
+    : city.toLowerCase().includes("tokyo") ? "tokyo"
+    : "global";
+
+  const items = destinationMap[key] || [
+    {
+      title: `Experiences in ${destinationText}`,
+      area: city,
+      price: "View live options",
+      image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=900&q=80",
+      url: `https://www.klook.com/en-US/search/result/?query=${encodeURIComponent(city)}`
+    },
+    {
+      title: "Airport transfers and local transport",
+      area: city,
+      price: "View live options",
+      image: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=900&q=80",
+      url: `https://www.klook.com/en-US/search/result/?query=${encodeURIComponent(city + " airport transfer")}`
+    },
+    {
+      title: "Tours, tickets and things to do",
+      area: city,
+      price: "View live options",
+      image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80",
+      url: `https://www.klook.com/en-US/search/result/?query=${encodeURIComponent(city + " tours")}`
+    }
+  ];
+
+  return (
+    <div style={{ padding: "34px 28px", background: "#f4f7fb", minHeight: "70vh" }}>
+      <section style={{ background: "#fff", borderRadius: 24, padding: 28, boxShadow: "0 18px 50px rgba(9, 30, 66, 0.08)" }}>
+        <div style={{ color: "#3155e7", fontWeight: 900, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
+          Destination Experiences
+        </div>
+        <h1 style={{ margin: 0, color: "#071a52", fontSize: 36, lineHeight: 1.1 }}>
+          Things to do in {destinationText}
+        </h1>
+        <p style={{ color: "#466083", fontWeight: 700, fontSize: 18, maxWidth: 920 }}>
+          Add attractions, tours, activities and local transport to your stay. Options open securely with our approved experience partner.
+        </p>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 22, marginTop: 24 }}>
+          {items.map((item, index) => (
+            <article key={index} style={{ border: "1px solid #e4ebf7", borderRadius: 22, overflow: "hidden", background: "#fff" }}>
+              <img src={item.image} alt={item.title} style={{ width: "100%", height: 190, objectFit: "cover", display: "block" }} />
+              <div style={{ padding: 20 }}>
+                <div style={{ display: "inline-block", background: "#e9fff3", color: "#087a3c", borderRadius: 999, padding: "8px 12px", fontWeight: 900, fontSize: 13, marginBottom: 12 }}>
+                  Experience option
+                </div>
+                <h2 style={{ margin: "0 0 8px", color: "#071a52", fontSize: 23, lineHeight: 1.15 }}>{item.title}</h2>
+                <div style={{ color: "#536985", fontWeight: 800, marginBottom: 12 }}>{item.area}</div>
+                <div style={{ color: "#3155e7", fontSize: 24, fontWeight: 950, marginBottom: 18 }}>{item.price}</div>
+                <a
+                  href={klookLink(item.url)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "block",
+                    textAlign: "center",
+                    background: "#071a52",
+                    color: "#fff",
+                    padding: "15px 18px",
+                    borderRadius: 14,
+                    textDecoration: "none",
+                    fontWeight: 950
+                  }}
+                >
+                  View Experience
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <div style={{ marginTop: 22, padding: 18, borderRadius: 18, background: "#eef4ff", color: "#38506f", fontWeight: 750 }}>
+          Experiences are destination-based recommendations. Final availability, price and booking terms are confirmed before purchase.
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function Footer() {
   return (
     <footer style={styles.footer}>
@@ -1977,6 +2191,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
