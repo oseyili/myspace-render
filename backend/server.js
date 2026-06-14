@@ -6978,6 +6978,18 @@ app.get("/api/live-rate-cascade", async (req, res) => {
     }
 
     function chooseBestCandidate(sourceName, hotels, offer = null) {
+      const liveSourceName = norm(sourceName);
+      const allowedLiveSource =
+        liveSourceName.includes("supplier") ||
+        liveSourceName.includes("webbeds") ||
+        liveSourceName.includes("hotelbeds") ||
+        liveSourceName.includes("selected hotel live") ||
+        liveSourceName.includes("multi supplier") ||
+        liveSourceName.includes("customer global");
+
+      if (!allowedLiveSource || liveSourceName.includes("catalogue") || liveSourceName.includes("plain search") || liveSourceName.includes("existing inventory")) {
+        return null;
+      }
       const candidates = [];
 
       if (offer && number(offer.amount || offer.price) > 0) {
@@ -7106,10 +7118,8 @@ app.get("/api/live-rate-cascade", async (req, res) => {
         idParams.set("hotelIds", rawId);
         return fetchJsonSource("webbeds_hotel_id_batch", `${base}/api/webbeds/search-by-hotel-ids?${idParams.toString()}`);
       },
-      () => fetchJsonSource("hotelbeds_or_existing_inventory", `${base}/api/hotels/search?${params.toString()}`),
-      () => fetchJsonSource("plain_search_inventory", `${base}/search?${params.toString()}`),
-      () => catalogueSource("harvested_catalogue_parent_city", supplierCity, area),
-      () => catalogueSource("harvested_catalogue_requested_city", city, "")
+      
+      
     ];
 
     for (const step of chain) {
@@ -7185,6 +7195,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
