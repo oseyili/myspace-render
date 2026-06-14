@@ -488,12 +488,7 @@ const [currentPage, setCurrentPage] = useState("home");
         limit: "1000",
       });
 
-      const endpoints = [`${API_BASE}/api/live-rate-cascade?${params.toString()}`,`${API_BASE}/api/selected-hotel-live-rate?${params.toString()}`,
-        `${API_BASE}/api/multi-supplier-hotels?${params.toString()}`,
-        `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
-        `${API_BASE}/api/hotels/search?${params.toString()}`,
-        `${API_BASE}/search?${params.toString()}`,
-      ];
+      const endpoints = [`${API_BASE}/api/live-rate-correct-source?${params.toString()}`];
 
       const results = await Promise.allSettled(
         endpoints.map((url) =>
