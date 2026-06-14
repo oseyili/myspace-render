@@ -488,7 +488,7 @@ const [currentPage, setCurrentPage] = useState("home");
         limit: "1000",
       });
 
-      const endpoints = [
+      const endpoints = [`${API_BASE}/api/selected-hotel-live-rate?${params.toString()}`,
         `${API_BASE}/api/multi-supplier-hotels?${params.toString()}`,
         `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
         `${API_BASE}/api/hotels/search?${params.toString()}`,
@@ -606,7 +606,7 @@ const [currentPage, setCurrentPage] = useState("home");
         limit: "25",
       });
 
-      const endpoints = [
+      const endpoints = [`${API_BASE}/api/selected-hotel-live-rate?${params.toString()}`,
         `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
         `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
         `${API_BASE}/api/multi-supplier-hotels?${params.toString()}`,
@@ -636,7 +636,7 @@ const [currentPage, setCurrentPage] = useState("home");
             );
           }) || list[0];
 
-          if (offer) {
+          if (offer && Number(offer.amount || offer.price || 0) > 0) {
             refreshedHotel = {
               ...readyHotel,
               price: safeNumber(offer.amount || offer.price || readyHotel.price),
@@ -2140,6 +2140,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
