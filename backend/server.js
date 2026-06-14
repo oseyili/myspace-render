@@ -6990,6 +6990,18 @@ app.get("/api/live-rate-cascade", async (req, res) => {
       if (!allowedLiveSource || liveSourceName.includes("catalogue") || liveSourceName.includes("plain search") || liveSourceName.includes("existing inventory")) {
         return null;
       }
+      const liveSourceName = norm(sourceName);
+      const allowedLiveSource =
+        liveSourceName.includes("supplier") ||
+        liveSourceName.includes("webbeds") ||
+        liveSourceName.includes("hotelbeds") ||
+        liveSourceName.includes("selected hotel live") ||
+        liveSourceName.includes("multi supplier") ||
+        liveSourceName.includes("customer global");
+
+      if (!allowedLiveSource || liveSourceName.includes("catalogue") || liveSourceName.includes("plain search") || liveSourceName.includes("existing inventory")) {
+        return null;
+      }
       const candidates = [];
 
       if (offer && number(offer.amount || offer.price) > 0) {
@@ -7195,6 +7207,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
