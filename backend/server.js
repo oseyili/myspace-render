@@ -6728,6 +6728,444 @@ app.get("/api/selected-hotel-live-rate", async (req, res) => {
   }
 });
 
+
+app.get("/api/live-rate-cascade", async (req, res) => {
+  const startedAt = Date.now();
+
+  try {
+    const country = clean(req.query.country || "");
+    const city = clean(req.query.city || "");
+    const currency = clean(req.query.currency || "GBP").toUpperCase();
+    const hotelId = clean(req.query.hotelId || req.query.hotel_id || "");
+    const hotelName = clean(req.query.hotelName || req.query.hotel_name || "");
+    const checkIn = clean(req.query.checkIn || req.query.checkin || "");
+    const checkOut = clean(req.query.checkOut || req.query.checkout || "");
+    const guests = clean(req.query.guests || "2");
+    const rooms = clean(req.query.rooms || "1");
+    const limit = Math.max(1, Math.min(Number(req.query.limit || 1000), 1000));
+
+    function norm(v) {
+      return clean(v).toLowerCase().replace(/^webbeds[-\s]*/i, "").replace(/^hotelbeds[-\s]*/i, "").replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+    }
+
+    function priceOf(h) {
+      const room = Array.isArray(h?.rooms) && h.rooms.length ? h.rooms[0] : {};
+      const selectedRoom = h?.selectedRoom || {};
+      const values = [
+        h?.price, h?.convertedPrice, h?.displayPrice, h?.amount, h?.total, h?.totalPrice,
+        room?.price, room?.convertedPrice, room?.displayPrice, room?.amount, room?.total,
+        selectedRoom?.price, selectedRoom?.convertedPrice, selectedRoom?.displayPrice, selectedRoom?.amount, selectedRoom?.total
+      ];
+
+      for (const value of values) {
+        const n = number(value);
+        if (n > 0) return money(n);
+      }
+
+      return 0;
+    }
+
+    function bestRoomOf(h) {
+      const rows = [
+        ...(Array.isArray(h?.rooms) ? h.rooms : []),
+        ...(h?.selectedRoom ? [h.selectedRoom] : [])
+      ];
+
+      return rows
+        .map((room) => ({
+          ...room,
+          _mshPrice: money(room.convertedPrice || room.price || room.displayPrice || room.amount || room.total || 0)
+        }))
+        .filter((room) => room._mshPrice > 0)
+        .sort((a, b) => a._mshPrice - b._mshPrice)[0] || null;
+    }
+
+    function idMatches(h) {
+      const wanted = norm(hotelId);
+      if (!wanted) return false;
+
+      const ids = [
+        h?.hotelId,
+        h?.hotel_id,
+        h?.id,
+        h?.code,
+        h?.hotel_code,
+        h?.supplier_hotel_id,
+        h?.supplierHotelId,
+        h?.rate_source_id,
+        h?.internalSupplierSettlement?.rateSourceId,
+        h?.rooms?.[0]?.rate_source_id
+      ].map(norm).filter(Boolean);
+
+      return ids.some((id) => id === wanted || id.includes(wanted) || wanted.includes(id));
+    }
+
+    function nameMatches(h) {
+      const wanted = norm(hotelName);
+      if (!wanted) return false;
+
+      const names = [
+        h?.name,
+        h?.hotel_name,
+        h?.hotelName
+      ].map(norm).filter(Boolean);
+
+      return names.some((name) => name === wanted || name.includes(wanted) || wanted.includes(name));
+    }
+
+    function locationMatches(h) {
+      const wantedCountry = norm(country);
+      const wantedCity = norm(city);
+      const gotCountry = norm(h?.country || h?.location?.country);
+      const gotCity = norm(h?.city || h?.destination || h?.location?.city);
+
+      const countryOk = !wantedCountry || !gotCountry || gotCountry === wantedCountry;
+      const cityOk = !wantedCity || !gotCity || gotCity === wantedCity || gotCity.includes(wantedCity) || wantedCity.includes(gotCity);
+
+      return countryOk && cityOk;
+    }
+
+    function scoreHotel(h, sourceName) {
+      let score = 0;
+
+      if (idMatches(h)) score += 600;
+      if (nameMatches(h)) score += 450;
+      if (locationMatches(h)) score += 120;
+
+      const p = priceOf(h);
+      if (p > 0) score += 1000;
+
+      const sourceText = norm([sourceName, h?.source, h?.sourceType, h?.supplier, h?.supplierLabel, h?.internalSupplierSettlement?.supplier].join(" "));
+      if (sourceText.includes("live")) score += 100;
+      if (sourceText.includes("webbeds")) score += 90;
+      if (sourceText.includes("hotelbeds")) score += 90;
+      if (sourceText.includes("catalogue")) score += 40;
+
+      return score;
+    }
+
+    function normaliseFoundHotel(h, sourceName) {
+      const room = bestRoomOf(h);
+      const amount = room ? room._mshPrice : priceOf(h);
+      const displayCurrency = clean(room?.displayCurrency || room?.currency || h?.displayCurrency || h?.currency || currency).toUpperCase();
+
+      return {
+        ...h,
+        hotelId: h?.hotelId || h?.hotel_id || h?.id || hotelId,
+        hotel_id: h?.hotel_id || h?.hotelId || h?.id || hotelId,
+        name: clean(h?.name || h?.hotel_name || h?.hotelName || hotelName),
+        hotel_name: clean(h?.hotel_name || h?.name || h?.hotelName || hotelName),
+        country: clean(h?.country || country),
+        city: clean(h?.city || city),
+        price: amount,
+        convertedPrice: amount,
+        displayPrice: amount,
+        currency: displayCurrency,
+        displayCurrency,
+        availableToBook: amount > 0,
+        customerBadge: "Live hotel rate",
+        availabilityMode: "live_rate",
+        sourceType: sourceName,
+        selectedRoom: {
+          roomCode: clean(room?.roomCode || room?.room_code || h?.roomCode || "STANDARD"),
+          roomName: clean(room?.roomName || room?.room_name || h?.roomName || "Available room"),
+          board: clean(room?.board || h?.board || "Available room"),
+          price: amount,
+          convertedPrice: amount,
+          displayCurrency,
+          rate_source_id: clean(room?.rate_source_id || h?.rate_source_id || ""),
+          rate_source_timestamp: clean(room?.rate_source_timestamp || h?.rate_source_timestamp || nowISO()),
+          source_health: "verified"
+        },
+        rate_source_id: clean(room?.rate_source_id || h?.rate_source_id || ""),
+        rate_source_timestamp: clean(room?.rate_source_timestamp || h?.rate_source_timestamp || nowISO()),
+        source_health: "verified"
+      };
+    }
+
+    async function fetchJsonSource(sourceName, url, timeoutMs = 9000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+      try {
+        const response = await fetch(url, { signal: controller.signal, cache: "no-store" });
+        const payload = await response.json().catch(() => ({}));
+        clearTimeout(timer);
+
+        return {
+          sourceName,
+          ok: response.ok && Boolean(payload),
+          status: response.status,
+          payload,
+          hotels: Array.isArray(payload.hotels) ? payload.hotels : [],
+          offer: payload.customer_offer || payload.best_offer || payload.offer || null
+        };
+      } catch (err) {
+        clearTimeout(timer);
+        return {
+          sourceName,
+          ok: false,
+          status: 0,
+          payload: {},
+          hotels: [],
+          offer: null,
+          error: err.message
+        };
+      }
+    }
+
+    async function directSupplierSource(sourceName, queryCity, area = "") {
+      try {
+        if (typeof MSH_PUBLIC_TRY_SUPPLIER_SEARCH !== "function") {
+          return { sourceName, ok: false, hotels: [], supplierStatus: { direct: "not_available" } };
+        }
+
+        const supplierResult = await MSH_PUBLIC_TRY_SUPPLIER_SEARCH(req, {
+          country,
+          city: queryCity,
+          currency,
+          checkIn,
+          checkOut,
+          guests,
+          rooms,
+          limit
+        });
+
+        const hotels = Array.isArray(supplierResult.hotels)
+          ? supplierResult.hotels.map((hotel) => {
+              if (typeof MSH_PUBLIC_NORMALISE_HOTEL === "function") {
+                return MSH_PUBLIC_NORMALISE_HOTEL(hotel, { country, city: queryCity, area, currency }, sourceName);
+              }
+              return hotel;
+            })
+          : [];
+
+        return {
+          sourceName,
+          ok: hotels.length > 0,
+          hotels,
+          supplierStatus: supplierResult.supplierStatus || {},
+          suppliers: supplierResult.suppliers || {}
+        };
+      } catch (err) {
+        return { sourceName, ok: false, hotels: [], error: err.message };
+      }
+    }
+
+    async function catalogueSource(sourceName, queryCity, area = "") {
+      try {
+        if (typeof MSH_PUBLIC_CATALOGUE_SEARCH !== "function") {
+          return { sourceName, ok: false, hotels: [] };
+        }
+
+        const hotels = MSH_PUBLIC_CATALOGUE_SEARCH({
+          country,
+          city: queryCity,
+          area,
+          currency,
+          limit
+        }).map((hotel) => {
+          if (typeof MSH_PUBLIC_NORMALISE_HOTEL === "function") {
+            return MSH_PUBLIC_NORMALISE_HOTEL(hotel, { country, city: queryCity, area, currency }, sourceName);
+          }
+          return hotel;
+        });
+
+        return { sourceName, ok: hotels.length > 0, hotels };
+      } catch (err) {
+        return { sourceName, ok: false, hotels: [], error: err.message };
+      }
+    }
+
+    function chooseBestCandidate(sourceName, hotels, offer = null) {
+      const candidates = [];
+
+      if (offer && number(offer.amount || offer.price) > 0) {
+        candidates.push({
+          hotelId: offer.hotelId || hotelId,
+          hotel_id: offer.hotelId || hotelId,
+          name: offer.hotelName || hotelName,
+          hotel_name: offer.hotelName || hotelName,
+          country,
+          city,
+          price: money(offer.amount || offer.price),
+          currency: clean(offer.currency || currency).toUpperCase(),
+          rooms: [{
+            roomCode: offer.roomCode || "STANDARD",
+            roomName: offer.roomName || "Available room",
+            board: offer.board || "Available room",
+            price: money(offer.amount || offer.price),
+            convertedPrice: money(offer.amount || offer.price),
+            displayCurrency: clean(offer.currency || currency).toUpperCase(),
+            rate_source_id: offer.rate_source_id || "",
+            rate_source_timestamp: offer.rate_source_timestamp || nowISO()
+          }],
+          sourceType: sourceName,
+          rate_source_id: offer.rate_source_id || "",
+          rate_source_timestamp: offer.rate_source_timestamp || nowISO()
+        });
+      }
+
+      for (const h of hotels || []) {
+        candidates.push(h);
+      }
+
+      const matched = candidates
+        .filter((h) => priceOf(h) > 0)
+        .map((h) => ({ hotel: h, score: scoreHotel(h, sourceName), price: priceOf(h) }))
+        .filter((x) => {
+          if (hotelId || hotelName) return x.score >= 1000 || idMatches(x.hotel) || nameMatches(x.hotel);
+          return locationMatches(x.hotel);
+        })
+        .sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return a.price - b.price;
+        });
+
+      return matched[0]?.hotel || null;
+    }
+
+    const fixed = typeof MSH_PUBLIC_CITY_PARENT === "function"
+      ? MSH_PUBLIC_CITY_PARENT(country, city)
+      : { supplierCity: city, area: "" };
+
+    const supplierCity = fixed.supplierCity || city;
+    const area = fixed.area || "";
+
+    const params = new URLSearchParams({
+      country,
+      city,
+      checkIn,
+      checkOut,
+      checkin: checkIn,
+      checkout: checkOut,
+      guests,
+      rooms,
+      currency,
+      hotelId,
+      hotel_id: hotelId,
+      hotelName,
+      hotel_name: hotelName,
+      limit: String(limit)
+    });
+
+    const supplierParams = new URLSearchParams({
+      country,
+      city: supplierCity,
+      checkIn,
+      checkOut,
+      checkin: checkIn,
+      checkout: checkOut,
+      guests,
+      rooms,
+      currency,
+      hotelId,
+      hotel_id: hotelId,
+      hotelName,
+      hotel_name: hotelName,
+      limit: String(limit)
+    });
+
+    const base = `http://127.0.0.1:${PORT}`;
+    const attempts = [];
+
+    async function tryAndReturn(sourcePromise) {
+      const result = await sourcePromise;
+      const best = chooseBestCandidate(result.sourceName, result.hotels || [], result.offer || null);
+
+      attempts.push({
+        source: result.sourceName,
+        ok: Boolean(result.ok),
+        status: result.status || "",
+        candidates: Array.isArray(result.hotels) ? result.hotels.length : 0,
+        foundPositiveMatch: Boolean(best),
+        error: result.error || "",
+        supplierStatus: result.supplierStatus || {}
+      });
+
+      if (!best) return null;
+
+      return {
+        result,
+        hotel: normaliseFoundHotel(best, result.sourceName)
+      };
+    }
+
+    const chain = [
+      () => directSupplierSource("direct_supplier_live_area", supplierCity, area),
+      () => fetchJsonSource("selected_hotel_live_rate", `${base}/api/selected-hotel-live-rate?${params.toString()}`),
+      () => fetchJsonSource("customer_global_live_plus_catalogue", `${base}/api/customer-global-hotels?${params.toString()}`),
+      () => fetchJsonSource("multi_supplier_live", `${base}/api/multi-supplier-hotels?${params.toString()}`),
+      () => fetchJsonSource("multi_supplier_parent_city_live", `${base}/api/multi-supplier-hotels?${supplierParams.toString()}`),
+      () => fetchJsonSource("webbeds_live_city", `${base}/api/live-webbeds-hotels?${supplierParams.toString()}`),
+      () => fetchJsonSource("webbeds_search_city", `${base}/api/webbeds/search?${supplierParams.toString()}`),
+      () => {
+        const rawId = hotelId.replace(/^WEBBEDS-/i, "").replace(/[^0-9,]/g, "");
+        if (!rawId) return Promise.resolve({ sourceName: "webbeds_hotel_id_batch", ok: false, hotels: [], error: "no numeric WebBeds hotel id" });
+        const idParams = new URLSearchParams(supplierParams);
+        idParams.set("hotelIds", rawId);
+        return fetchJsonSource("webbeds_hotel_id_batch", `${base}/api/webbeds/search-by-hotel-ids?${idParams.toString()}`);
+      },
+      () => fetchJsonSource("hotelbeds_or_existing_inventory", `${base}/api/hotels/search?${params.toString()}`),
+      () => fetchJsonSource("plain_search_inventory", `${base}/search?${params.toString()}`),
+      () => catalogueSource("harvested_catalogue_parent_city", supplierCity, area),
+      () => catalogueSource("harvested_catalogue_requested_city", city, "")
+    ];
+
+    for (const step of chain) {
+      const found = await tryAndReturn(step());
+      if (!found) continue;
+
+      return res.json({
+        ok: true,
+        source: "live_rate_cascade",
+        winning_source: found.result.sourceName,
+        hotel: found.hotel,
+        hotels: [found.hotel],
+        customer_offer: {
+          hotelId: found.hotel.hotelId || found.hotel.hotel_id,
+          hotelName: found.hotel.name || found.hotel.hotel_name,
+          country: found.hotel.country,
+          city: found.hotel.city,
+          roomCode: found.hotel.selectedRoom?.roomCode || "STANDARD",
+          roomName: found.hotel.selectedRoom?.roomName || "Available room",
+          board: found.hotel.selectedRoom?.board || "Available room",
+          amount: found.hotel.price,
+          price: found.hotel.price,
+          currency: found.hotel.displayCurrency || found.hotel.currency || currency,
+          rate_source_id: found.hotel.selectedRoom?.rate_source_id || found.hotel.rate_source_id || "",
+          rate_source_timestamp: found.hotel.selectedRoom?.rate_source_timestamp || found.hotel.rate_source_timestamp || nowISO(),
+          source_health: "verified"
+        },
+        attempts,
+        elapsedMs: Date.now() - startedAt,
+        message: "Current live rate found."
+      });
+    }
+
+    return res.status(404).json({
+      ok: false,
+      source: "live_rate_cascade",
+      message: "No current positive live rate was found from the available sources. The hotel remains available for request/availability check only.",
+      selected_hotel: {
+        hotelId,
+        hotelName,
+        country,
+        city
+      },
+      attempts,
+      elapsedMs: Date.now() - startedAt
+    });
+  } catch (err) {
+    return res.status(500).json({
+      ok: false,
+      source: "live_rate_cascade",
+      message: "Live-rate cascade failed.",
+      error: err.message
+    });
+  }
+});
+
 app.listen(PORT, "0.0.0.0", () => {
   const destinations = buildDestinations();
 
@@ -6747,6 +7185,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
