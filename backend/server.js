@@ -6978,8 +6978,8 @@ app.get("/api/live-rate-cascade", async (req, res) => {
     }
 
     function chooseBestCandidate(sourceName, hotels, offer = null) {
-      const liveSourceName = norm(sourceName);
-      const allowedLiveSource =
+      var liveSourceName = norm(sourceName);
+      var allowedLiveSource =
         liveSourceName.includes("supplier") ||
         liveSourceName.includes("webbeds") ||
         liveSourceName.includes("hotelbeds") ||
@@ -6990,8 +6990,8 @@ app.get("/api/live-rate-cascade", async (req, res) => {
       if (!allowedLiveSource || liveSourceName.includes("catalogue") || liveSourceName.includes("plain search") || liveSourceName.includes("existing inventory")) {
         return null;
       }
-      const liveSourceName = norm(sourceName);
-      const allowedLiveSource =
+      var liveSourceName = norm(sourceName);
+      var allowedLiveSource =
         liveSourceName.includes("supplier") ||
         liveSourceName.includes("webbeds") ||
         liveSourceName.includes("hotelbeds") ||
@@ -7207,6 +7207,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
