@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useMemo, useState } from "react";
-
+import ExperiencePage from "./ExperiencePage";
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
   import.meta.env.VITE_API_BASE_URL ||
@@ -29,6 +29,7 @@ const ROUTES = {
   insurance: "/#/insurance",
   transfers: "/#/transfers",
   attractions: "/#/attractions",
+experiences: "/#/experiences",
   featured: "/#/featured-hotels",
   affiliates: "/#/affiliate-network",
   business: "/#/business-portal",
@@ -87,6 +88,7 @@ function currentRoute() {
   if (hash === "#/insurance") return "insurance";
   if (hash === "#/transfers") return "transfers";
   if (hash === "#/attractions") return "attractions";
+if (hash === "#/experiences") return "experiences";
   if (hash === "#/featured-hotels") return "featured";
   if (hash === "#/affiliate-network") return "affiliates";
   if (hash === "#/business-portal") return "business";
@@ -346,6 +348,8 @@ export default function App() {
     }
   }, []);
 const [route, setRoute] = useState(currentRoute());
+const [currentPage, setCurrentPage] = useState("home");
+
   const [affiliateCode, setAffiliateCode] = useState("");
   const [countries, setCountries] = useState([]);
   const [cities, setCities] = useState([]);
@@ -452,6 +456,7 @@ const [route, setRoute] = useState(currentRoute());
   async function searchHotels() {
     setNotice("");
     setSelectedHotel(null);
+    setHotels([]);
 
     if (!country || !city) {
       setNotice("Please select your country and city before searching.");
@@ -465,9 +470,12 @@ const [route, setRoute] = useState(currentRoute());
 
     try {
       setLoading(true);
+
       const params = new URLSearchParams({
         country,
         city,
+        checkIn,
+        checkOut,
         check_in: checkIn,
         check_out: checkOut,
         checkin: checkIn,
@@ -475,47 +483,52 @@ const [route, setRoute] = useState(currentRoute());
         guests: String(guests),
         rooms: String(rooms),
         currency,
+        limit: "1000",
       });
 
-      const [mainRes, webbedsRes] = await Promise.allSettled([
-        fetch(`${API_BASE}/api/multi-supplier-hotels?${params}`, { cache: "no-store" }),
-      ]);
+      const endpoints = [
+        `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
+        `${API_BASE}/api/multi-supplier-hotels?${params.toString()}`,
+        `${API_BASE}/api/hotels/search?${params.toString()}`,
+        `${API_BASE}/search?${params.toString()}`,
+      ];
 
-      const mainData =
-        mainRes.status === "fulfilled" && mainRes.value.ok
-          ? await mainRes.value.json()
-          : {};
+      const results = await Promise.allSettled(
+        endpoints.map((url) =>
+          fetch(url, { cache: "no-store" })
+            .then((res) => res.json())
+            .catch(() => ({ hotels: [] }))
+        )
+      );
 
-      const mainHotels = Array.isArray(mainData.hotels) ? mainData.hotels : [];
-      const webbedsHotels = [];
+      const collected = [];
 
-      const safeWebbedsHotels = webbedsHotels.map((hotel) => {
-        const rawId = String(hotel.hotel_id || hotel.hotelId || "").replace("WEBBEDS-", "");
-        const supplierName =
-          hotel.name && !/^Hotel\s+\d+$/i.test(String(hotel.name))
-            ? hotel.name
-            : `Live supplier property ${rawId}`;
+      for (const result of results) {
+        if (result.status !== "fulfilled") continue;
+        const data = result.value || {};
+        if (Array.isArray(data.hotels)) collected.push(...data.hotels);
+      }
 
-        return {
-          ...hotel,
-          name: supplierName,
-          hotel_name: supplierName,
-          supplierLabel: "WebBeds live rate",
-          source: "webbeds_live_supplier",
-        };
-      });
-
-      const backendHotels =
-        typeof data !== "undefined" && Array.isArray(data?.hotels)
-          ? data.hotels
-          : typeof payload !== "undefined" && Array.isArray(payload?.hotels)
-          ? payload.hotels
-          : typeof json !== "undefined" && Array.isArray(json?.hotels)
-          ? json.hotels
-          : [];
-
-      const found = [...backendHotels, ...mainHotels, ...safeWebbedsHotels]
+      const found = collected
         .filter(Boolean)
+        .filter((hotel) => {
+          const hotelCountry = String(hotel.country || "").trim().toLowerCase();
+          const hotelCity = String(hotel.city || hotel.destination || "").trim().toLowerCase();
+          const wantedCountry = String(country || "").trim().toLowerCase();
+          const wantedCity = String(city || "").trim().toLowerCase();
+
+          if (wantedCountry && hotelCountry && hotelCountry !== wantedCountry) return false;
+
+          if (wantedCity && hotelCity) {
+            return (
+              hotelCity === wantedCity ||
+              hotelCity.includes(wantedCity) ||
+              wantedCity.includes(hotelCity)
+            );
+          }
+
+          return true;
+        })
         .filter((hotel, index, list) => {
           const key = String(
             hotel?.hotelId ||
@@ -541,7 +554,7 @@ const [route, setRoute] = useState(currentRoute());
       setHotels(found);
 
       if (!found.length) {
-        setNotice("No matching hotels were found for this search. Try another city or wider destination.");
+        setNotice(`No matching hotels were returned for ${city}, ${country}. Try another nearby city, or check that backend supplier inventory/city maps are loaded.`);
       }
     } catch {
       setNotice("We could not load hotels for this destination right now. Please try again.");
@@ -549,7 +562,6 @@ const [route, setRoute] = useState(currentRoute());
       setLoading(false);
     }
   }
-
   async function secureReservation() {
     setNotice("");
 
@@ -713,6 +725,7 @@ const [route, setRoute] = useState(currentRoute());
       {route === "insurance" && <InsurancePortal {...appProps} />}
       {route === "transfers" && <TransfersPortal {...appProps} />}
       {route === "attractions" && <AttractionsPortal {...appProps} />}
+{route === "experiences" && <ExperiencePage />}
       {route === "featured" && <FeaturedHotelsPortal />}
       {route === "affiliates" && <AffiliateNetworkUltraSafe />}
       {route === "business" && <BusinessPortal />}
@@ -799,7 +812,7 @@ function Header() {
         <a style={styles.navLink} href={routeUrl(ROUTES.guide)}>Destination Guide</a>
         <a style={styles.navLink} href={routeUrl(ROUTES.insurance)}>Insurance</a>
         <a style={styles.navLink} href={routeUrl(ROUTES.transfers)}>Transfers</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.attractions)}>Experiences</a>
+        <a style={styles.navLink} href={routeUrl(ROUTES.experiences)}>Experiences</a>
         <a style={styles.goldLink} href={routeUrl(ROUTES.featured)}>Featured Hotels</a>
         <a style={styles.navLink} href={routeUrl(ROUTES.about)}>About Us</a>
         <a style={styles.navLink} href={routeUrl(ROUTES.faq)}>FAQ</a>
@@ -2000,6 +2013,8 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
+
 
 
 
