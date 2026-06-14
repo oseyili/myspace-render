@@ -372,6 +372,8 @@ const [currentPage, setCurrentPage] = useState("home");
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
   const [paying, setPaying] = useState(false);
+  const [liveRateLoading, setLiveRateLoading] = useState(false);
+  const [liveRateNotice, setLiveRateNotice] = useState("");
 
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
@@ -553,6 +555,11 @@ const [currentPage, setCurrentPage] = useState("home");
 
       setHotels(found);
 
+      setTimeout(() => {
+        const target = document.getElementById("hotel-results");
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+
       if (!found.length) {
         setNotice(`No matching hotels were returned for ${city}, ${country}. Try another nearby city, or check that backend supplier inventory/city maps are loaded.`);
       }
@@ -562,6 +569,121 @@ const [currentPage, setCurrentPage] = useState("home");
       setLoading(false);
     }
   }
+  async function refreshSelectedHotelLiveRates(hotelToRefresh) {
+    const readyHotel = selectedHotelWithRoom(hotelToRefresh);
+    setSelectedHotel(readyHotel);
+    setLiveRateNotice("");
+
+    const selectedHotelId = readyHotel?.hotelId || readyHotel?.hotel_id || readyHotel?.id || readyHotel?.code || "";
+    const selectedHotelName = readyHotel?.name || readyHotel?.hotel_name || "";
+    const selectedCountry = readyHotel?.country || country || "";
+    const selectedCity = readyHotel?.city || city || "";
+
+    if (!selectedHotelName && !selectedHotelId) {
+      setLiveRateNotice("Selected hotel saved. Live rate check needs a valid hotel name or hotel ID.");
+      return;
+    }
+
+    try {
+      setLiveRateLoading(true);
+
+      const params = new URLSearchParams({
+        country: selectedCountry,
+        city: selectedCity,
+        hotelId: selectedHotelId,
+        hotel_id: selectedHotelId,
+        hotelName: selectedHotelName,
+        hotel_name: selectedHotelName,
+        checkIn,
+        checkOut,
+        check_in: checkIn,
+        check_out: checkOut,
+        checkin: checkIn,
+        checkout: checkOut,
+        guests: String(guests),
+        rooms: String(rooms),
+        currency,
+        limit: "25",
+      });
+
+      const endpoints = [
+        `${API_BASE}/api/compare-prices?${params.toString()}`,
+        `${API_BASE}/api/multi-supplier-hotels?${params.toString()}`,
+        `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
+        `${API_BASE}/api/hotels/search?${params.toString()}`,
+      ];
+
+      let refreshedHotel = null;
+
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url, { cache: "no-store" });
+          const data = await res.json();
+
+          if (!res.ok) continue;
+
+          const offer = data?.customer_offer || data?.best_offer || data?.offer || null;
+          const list = Array.isArray(data?.hotels) ? data.hotels : [];
+          const matched = list.find((item) => {
+            const itemId = String(item?.hotelId || item?.hotel_id || item?.id || item?.code || "").toLowerCase();
+            const itemName = String(item?.name || item?.hotel_name || "").toLowerCase();
+            const wantedId = String(selectedHotelId || "").toLowerCase();
+            const wantedName = String(selectedHotelName || "").toLowerCase();
+
+            return (
+              (wantedId && itemId && itemId === wantedId) ||
+              (wantedName && itemName && (itemName === wantedName || itemName.includes(wantedName) || wantedName.includes(itemName)))
+            );
+          }) || list[0];
+
+          if (offer) {
+            refreshedHotel = {
+              ...readyHotel,
+              price: safeNumber(offer.amount || offer.price || readyHotel.price),
+              currency: offer.currency || readyHotel.currency || currency,
+              selectedRoom: {
+                ...(readyHotel.selectedRoom || {}),
+                price: safeNumber(offer.amount || offer.price || readyHotel.selectedRoom?.price || readyHotel.price),
+                convertedPrice: safeNumber(offer.amount || offer.price || readyHotel.selectedRoom?.convertedPrice || readyHotel.price),
+                displayCurrency: offer.currency || readyHotel.selectedRoom?.displayCurrency || readyHotel.currency || currency,
+                roomName: offer.roomName || offer.room_name || readyHotel.selectedRoom?.roomName || readyHotel.roomName || "Available room",
+                roomCode: offer.roomCode || offer.room_code || readyHotel.selectedRoom?.roomCode || readyHotel.roomCode || "STANDARD",
+                rate_source_id: offer.rate_source_id || data?.rate_source_id || readyHotel.selectedRoom?.rate_source_id || readyHotel.rate_source_id || "",
+                rate_source_timestamp: offer.rate_source_timestamp || data?.rate_source_timestamp || new Date().toISOString(),
+              },
+              rate_source_id: offer.rate_source_id || data?.rate_source_id || readyHotel.rate_source_id || "",
+              rate_source_timestamp: offer.rate_source_timestamp || data?.rate_source_timestamp || new Date().toISOString(),
+            };
+            break;
+          }
+
+          if (matched) {
+            refreshedHotel = selectedHotelWithRoom({ ...readyHotel, ...matched });
+            break;
+          }
+        } catch {}
+      }
+
+      if (refreshedHotel) {
+        setSelectedHotel(refreshedHotel);
+        setHotels((prev) =>
+          (prev || []).map((item) => (hotelKey(item) === hotelKey(readyHotel) ? { ...item, ...refreshedHotel } : item))
+        );
+        setLiveRateNotice("Live rate refreshed for the selected hotel.");
+      } else {
+        setLiveRateNotice("Selected hotel saved. Live rate could not be refreshed right now.");
+      }
+    } finally {
+      setLiveRateLoading(false);
+    }
+  }
+
+  function selectHotelAndRefreshLiveRates(hotelToSelect) {
+    const readyHotel = selectedHotelWithRoom(hotelToSelect);
+    setSelectedHotel(readyHotel);
+    refreshSelectedHotelLiveRates(readyHotel);
+  }
+
   async function secureReservation() {
     setNotice("");
 
@@ -680,6 +802,8 @@ const [currentPage, setCurrentPage] = useState("home");
     selectedRoomName,
     selectedRateSourceId,
     selectedRateSourceTimestamp,
+    liveRateLoading,
+    liveRateNotice,
     totalPrice,
     comparisons,
     destinationQuery,
@@ -700,6 +824,7 @@ const [currentPage, setCurrentPage] = useState("home");
     setCurrency,
     setHotels,
     setSelectedHotel,
+    selectHotelAndRefreshLiveRates,
     setCustomerName,
     setCustomerEmail,
     setCustomerPhone,
@@ -887,7 +1012,7 @@ function HotelsPage(props) {
 
       <section style={styles.contentGrid}>
         <main>
-          <h2 style={styles.title}>MORE STAY OPTIONS</h2>
+          <h2 id="hotel-results" style={styles.title}>MORE STAY OPTIONS</h2>
           <p style={styles.sectionText}>
             Select a hotel to refresh the booking summary, comparison box, travel support and alternative hotel options immediately.
           </p>
@@ -983,7 +1108,7 @@ function Field({ label, children }) {
   );
 }
 
-function HotelCard({ hotel, selectedHotel, setSelectedHotel, rooms, nights, currency, city, country }) {
+function HotelCard({ hotel, selectedHotel, setSelectedHotel, selectHotelAndRefreshLiveRates, rooms, nights, currency, city, country }) {
   const selectedReadyHotel = selectedHotelWithRoom(hotel);
   const price = hotelPrice(selectedReadyHotel);
   const curr = hotelCurrency(selectedReadyHotel, currency);
@@ -1013,7 +1138,7 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, rooms, nights, curr
         <div style={styles.priceLine}>{curr} {money(price)} <span style={styles.small}>per night</span></div>
         <div style={styles.small}>Estimated stay total: {curr} {money(total)}</div>
 
-        <button style={styles.darkBtn} onClick={() => setSelectedHotel(selectedReadyHotel)}>
+        <button style={styles.darkBtn} onClick={() => selectHotelAndRefreshLiveRates ? selectHotelAndRefreshLiveRates(selectedReadyHotel) : setSelectedHotel(selectedReadyHotel)}>
           Select Hotel
         </button>
       </div>
@@ -1034,6 +1159,8 @@ function BookingSummary(props) {
       ) : (
         <>
           <h3 style={styles.selectedName}>{props.selectedHotel.name}</h3>
+          {props.liveRateLoading ? <div style={styles.softBox}>Checking current live rate for this hotel...</div> : null}
+          {props.liveRateNotice ? <div style={styles.softBox}>{props.liveRateNotice}</div> : null}
           <div style={styles.muted}>{props.selectedHotel.city || props.city}, {props.selectedHotel.country || props.country}</div>
           <div style={styles.small}>Board Basis: {props.selectedRoomName}</div>
 
@@ -1125,7 +1252,7 @@ function AlternativeHotels(props) {
                 <h3 style={styles.altName}>{hotel.name || "Nearby hotel"}</h3>
                 <div style={styles.muted}>{hotel.city || props.city}, {hotel.country || props.country}</div>
                 <div style={styles.priceLine}>{curr} {money(price)}</div>
-                <button style={styles.darkBtn} onClick={() => props.setSelectedHotel(selectedReadyHotel)}>
+                <button style={styles.darkBtn} onClick={() => props.selectHotelAndRefreshLiveRates ? props.selectHotelAndRefreshLiveRates(selectedReadyHotel) : props.setSelectedHotel(selectedReadyHotel)}>
                   View This Stay
                 </button>
               </div>
@@ -2013,6 +2140,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
