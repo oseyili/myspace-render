@@ -489,8 +489,8 @@ const [currentPage, setCurrentPage] = useState("home");
       });
 
       const endpoints = [
-        `${API_BASE}/api/compare-prices?${params.toString()}`,
         `${API_BASE}/api/multi-supplier-hotels?${params.toString()}`,
+        `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
         `${API_BASE}/api/hotels/search?${params.toString()}`,
         `${API_BASE}/search?${params.toString()}`,
       ];
@@ -607,9 +607,9 @@ const [currentPage, setCurrentPage] = useState("home");
       });
 
       const endpoints = [
+        `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
+        `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
         `${API_BASE}/api/multi-supplier-hotels?${params.toString()}`,
-        `${API_BASE}/api/multi-supplier-hotels?${params.toString()}`,
-        `${API_BASE}/api/compare-prices?${params.toString()}`,
         `${API_BASE}/api/hotels/search?${params.toString()}`,
       ];
 
@@ -1296,7 +1296,7 @@ function ComparePortal(props) {
         currency: selectedCurrency,
       });
 
-      const res = await fetch(`${API_BASE}/api/multi-supplier-hotels?${params.toString()}`, {
+      const res = await fetch(`${API_BASE}/api/customer-global-hotels?${params.toString()}`, {
         cache: "no-store",
       });
 
@@ -2140,6 +2140,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
