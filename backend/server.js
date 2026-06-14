@@ -6990,6 +6990,7 @@ app.get("/api/live-rate-cascade", async (req, res) => {
       if (!allowedLiveSource || liveSourceName.includes("catalogue") || liveSourceName.includes("plain search") || liveSourceName.includes("existing inventory")) {
         return null;
       }
+<<<<<<< HEAD
       var liveSourceName = norm(sourceName);
       var allowedLiveSource =
         liveSourceName.includes("supplier") ||
@@ -7002,6 +7003,8 @@ app.get("/api/live-rate-cascade", async (req, res) => {
       if (!allowedLiveSource || liveSourceName.includes("catalogue") || liveSourceName.includes("plain search") || liveSourceName.includes("existing inventory")) {
         return null;
       }
+=======
+>>>>>>> parent of b060500 (Prevent placeholder catalogue from winning live rate cascade)
       const candidates = [];
 
       if (offer && number(offer.amount || offer.price) > 0) {
@@ -7256,5 +7259,8 @@ app.listen(PORT, "0.0.0.0", () => {
 
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> parent of b060500 (Prevent placeholder catalogue from winning live rate cascade)
