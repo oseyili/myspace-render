@@ -658,8 +658,24 @@ const [currentPage, setCurrentPage] = useState("home");
           }
 
           if (matched) {
-            refreshedHotel = selectedHotelWithRoom({ ...readyHotel, ...matched });
-            break;
+            const matchedRoom = Array.isArray(matched.rooms) && matched.rooms.length ? matched.rooms[0] : {};
+            const matchedPrice = Number(
+              matched.price ||
+              matched.convertedPrice ||
+              matched.displayPrice ||
+              matched.amount ||
+              matched.total ||
+              matchedRoom.price ||
+              matchedRoom.convertedPrice ||
+              matchedRoom.displayPrice ||
+              matchedRoom.amount ||
+              0
+            );
+
+            if (Number.isFinite(matchedPrice) && matchedPrice > 0) {
+              refreshedHotel = selectedHotelWithRoom({ ...readyHotel, ...matched });
+              break;
+            }
           }
         } catch {}
       }
@@ -669,7 +685,18 @@ const [currentPage, setCurrentPage] = useState("home");
         setHotels((prev) =>
           (prev || []).map((item) => (hotelKey(item) === hotelKey(readyHotel) ? { ...item, ...refreshedHotel } : item))
         );
-        setLiveRateNotice("Live rate refreshed for the selected hotel.");
+        const confirmedAmount = Number(
+          refreshedHotel?.selectedRoom?.convertedPrice ||
+          refreshedHotel?.selectedRoom?.price ||
+          refreshedHotel?.price ||
+          0
+        );
+
+        if (Number.isFinite(confirmedAmount) && confirmedAmount > 0) {
+          setLiveRateNotice("Live rate refreshed for the selected hotel.");
+        } else {
+          setLiveRateNotice("No current live rate was found for this hotel yet.");
+        }
       } else {
         setLiveRateNotice("Selected hotel saved. Live rate could not be refreshed right now.");
       }
@@ -2140,6 +2167,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
