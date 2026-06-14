@@ -1071,7 +1071,12 @@ function SearchBox(props) {
   return (
     <>
       <Field label="Country">
-        <select style={styles.input} value={props.country} onChange={(e) => props.setCountry(e.target.value)}>
+        <select style={styles.input} value={props.country} onChange={(e) => {
+          props.setCountry(e.target.value);
+          props.setCity("");
+          props.setHotels([]);
+          props.setSelectedHotel(null);
+        }}>
           <option value="">Select country</option>
           {props.countries.map((item) => (
             <option key={item.country} value={item.country}>{item.country}</option>
@@ -1091,7 +1096,7 @@ function SearchBox(props) {
           }}
         >
           <option value="">{props.country ? "Select city" : "Select country first"}</option>
-          {props.cities.map((item) => (
+          {(props.countries.find((x) => x.country === props.country)?.cities || []).map((item) => (
             <option key={item} value={item}>{item}</option>
           ))}
         </select>
@@ -2167,6 +2172,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
