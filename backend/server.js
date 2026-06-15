@@ -7108,7 +7108,7 @@ app.get("/api/live-rate-cascade", async (req, res) => {
       var allowedLiveSource =
         liveSourceName.includes("supplier") ||
         liveSourceName.includes("webbeds") ||
-        liveSourceName.includes("hotelbeds") ||
+        
         liveSourceName.includes("selected hotel live") ||
         liveSourceName.includes("multi supplier") ||
         liveSourceName.includes("customer global");
@@ -7120,7 +7120,7 @@ app.get("/api/live-rate-cascade", async (req, res) => {
       var allowedLiveSource =
         liveSourceName.includes("supplier") ||
         liveSourceName.includes("webbeds") ||
-        liveSourceName.includes("hotelbeds") ||
+        
         liveSourceName.includes("selected hotel live") ||
         liveSourceName.includes("multi supplier") ||
         liveSourceName.includes("customer global");
@@ -7358,7 +7358,7 @@ app.get("/api/live-rate-correct-source", async (req, res) => {
 
       if (src.includes("catalogue") || src.includes("placeholder") || src.includes("existing supplier inventory") || src.includes("myspace internal")) return false;
 
-      return src.includes("webbeds") || src.includes("hotelbeds") || src.includes("ratehawk") || src.includes("worldota") || src.includes("live");
+      return src.includes("webbeds") || src.includes("ratehawk") || src.includes("worldota") || src.includes("live");
     }
 
     function match(h) {
@@ -7394,8 +7394,6 @@ app.get("/api/live-rate-correct-source", async (req, res) => {
       ["webbeds-by-hotel-id", "/api/webbeds/search-by-hotel-ids?" + params.toString() + "&hotelIds=" + encodeURIComponent(hotelId.replace(/^WEBBEDS-/i, "").replace(/[^0-9,]/g, ""))],
       ["webbeds-city-live", "/api/live-webbeds-hotels?" + params.toString()],
       ["webbeds-search-live", "/api/webbeds/search?" + params.toString()],
-      ["hotelbeds-search-if-present", "/api/hotelbeds/search?" + params.toString()],
-      ["hotelbeds-availability-if-present", "/api/hotelbeds/availability?" + params.toString()],
       ["multi-supplier-live-only-filtered", "/api/multi-supplier-hotels?" + params.toString()]
     ];
 
@@ -7512,7 +7510,7 @@ app.get("/api/live-rate-correct-source", async (req, res) => {
     return res.status(404).json({
       ok: false,
       source: "correct_live_supplier_source",
-      message: "No real WebBeds or Hotelbeds live rate was found for this selected hotel.",
+      message: "No verified live supplier rate was found for this selected hotel.",
       attempts
     });
   } catch (err) {
@@ -7540,6 +7538,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
