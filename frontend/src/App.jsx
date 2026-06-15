@@ -456,10 +456,6 @@ const [currentPage, setCurrentPage] = useState("home");
   }
 
   async function searchHotels() {
-    const controller = new AbortController();
-    const oneSecondTimer = setTimeout(() => {
-      try { controller.abort(); } catch {}
-    }, 1000);
     setNotice("");
     setSelectedHotel(null);
     setHotels([]);
@@ -496,7 +492,7 @@ const [currentPage, setCurrentPage] = useState("home");
 
       const results = await Promise.allSettled(
         endpoints.map((url) =>
-          fetch(url, { cache: "no-store", signal: controller.signal })
+          fetch(url, { cache: "no-store" })
             .then((res) => res.json())
             .catch(() => ({ hotels: [] }))
         )
@@ -616,7 +612,7 @@ const [currentPage, setCurrentPage] = useState("home");
 
       for (const url of endpoints) {
         try {
-          const res = await fetch(url, { cache: "no-store", signal: controller.signal });
+          const res = await fetch(url, { cache: "no-store" });
           const data = await res.json();
 
           if (!res.ok) continue;
@@ -1125,7 +1121,7 @@ function SearchBox(props) {
       </Field>
 
       <button style={styles.primaryBtn} onClick={props.searchHotels}>
-        {props.loading ? "Searching live rates..." : "Find Hotels"}
+        {props.loading ? "Finding Hotels..." : "Find Hotels"}
       </button>
     </>
   );
@@ -2171,7 +2167,6 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
-
 
 
 
