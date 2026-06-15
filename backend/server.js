@@ -6154,6 +6154,55 @@ async function hotelbedsSearchHotelsFromRequest(req) {
   return Array.isArray(result.hotels) ? result.hotels : [];
 }
 
+
+// MSH PUBLIC COUNTRY CITY API START
+function mshPublicCountryCityList() {
+  const rows = Array.isArray(destinations) ? destinations : [];
+
+  const blocked = typeof isSanctionedCountry === "function"
+    ? isSanctionedCountry
+    : function () { return false; };
+
+  const map = new Map();
+
+  for (const item of rows) {
+    const country = clean(item.country || item.Country || item.countryName || item.destinationCountry || "");
+    const city = clean(item.city || item.City || item.destination || item.name || item.destinationName || "");
+
+    if (!country || !city) continue;
+    if (blocked(country)) continue;
+
+    if (!map.has(country)) map.set(country, new Set());
+    map.get(country).add(city);
+  }
+
+  return Array.from(map.entries())
+    .map(([country, cities]) => ({
+      country,
+      cities: Array.from(cities).sort((a, b) => a.localeCompare(b))
+    }))
+    .filter((item) => item.country && item.cities.length)
+    .sort((a, b) => a.country.localeCompare(b.country));
+}
+
+app.get("/api/countries", (req, res) => {
+  const countries = mshPublicCountryCityList();
+  res.json({
+    ok: true,
+    count: countries.length,
+    countries
+  });
+});
+
+app.get("/api/public-countries", (req, res) => {
+  const countries = mshPublicCountryCityList();
+  res.json({
+    ok: true,
+    count: countries.length,
+    countries
+  });
+});
+// MSH PUBLIC COUNTRY CITY API END
 app.get("/api/hotelbeds/status", (req, res) => {
   const cfg = hotelbedsConfig();
   res.json({
@@ -7818,6 +7867,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
