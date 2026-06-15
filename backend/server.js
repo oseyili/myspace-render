@@ -6003,6 +6003,55 @@ function hotelbedsDestinationCode(country, city) {
   return clean(fallback[`${wantedCountry}|${wantedCity}`] || fallback[wantedCity] || hotelbedsConfig().defaultDestination).toUpperCase();
 }
 
+const HOTELBEDS_IMAGE_CACHE = new Map();
+
+async function hotelbedsContentImageUrl(hotelCode) {
+  const code = clean(hotelCode || "");
+  if (!code) return "";
+
+  if (HOTELBEDS_IMAGE_CACHE.has(code)) return HOTELBEDS_IMAGE_CACHE.get(code);
+
+  try {
+    const cfg = hotelbedsConfig();
+    if (!cfg.ready) return "";
+
+    const url = `${cfg.baseUrl}/hotel-content-api/1.0/hotels/${encodeURIComponent(code)}/details?language=ENG&useSecondaryLanguage=false`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Api-key": cfg.apiKey,
+        "X-Signature": hotelbedsSignature(),
+        Accept: "application/json"
+      }
+    });
+
+    if (!response.ok) {
+      HOTELBEDS_IMAGE_CACHE.set(code, "");
+      return "";
+    }
+
+    const data = await response.json();
+    const images = Array.isArray(data?.hotel?.images) ? data.hotel.images : [];
+    const first = images.find((x) => clean(x?.path || x?.url || ""));
+
+    const rawPath = clean(first?.path || first?.url || "");
+    if (!rawPath) {
+      HOTELBEDS_IMAGE_CACHE.set(code, "");
+      return "";
+    }
+
+    const finalUrl = /^https?:\/\//i.test(rawPath)
+      ? rawPath
+      : `https://photos.hotelbeds.com/giata/original/${rawPath.replace(/^\/+/, "")}`;
+
+    HOTELBEDS_IMAGE_CACHE.set(code, finalUrl);
+    return finalUrl;
+  } catch {
+    HOTELBEDS_IMAGE_CACHE.set(code, "");
+    return "";
+  }
+}
 function hotelbedsImageUrl(hotel) {
   const image = Array.isArray(hotel?.images) && hotel.images.length ? hotel.images[0] : null;
   const pathValue = clean(image?.path || image?.url || "");
@@ -6122,14 +6171,14 @@ async function hotelbedsAvailabilitySearch(query) {
   }
 
   const rawHotels = Array.isArray(data?.hotels?.hotels) ? data.hotels.hotels : [];
-  const hotels = rawHotels.map((hotel) => {
+  const hotels = (await Promise.all(rawHotels.map(async (hotel) => {
     const best = hotelbedsBestRoom(hotel);
     if (!best) return null;
 
     const hotelName = clean(hotel?.name || hotel?.hotelName || "");
     if (!hotelName) return null;
 
-    const image = hotelbedsImageUrl(hotel) || hotelbedsCatalogueImage(hotel, country, city);
+    const image = hotelbedsImageUrl(hotel) || await hotelbedsContentImageUrl(hotel.code || hotel.id) || hotelbedsCatalogueImage(hotel, country, city);
     const roomName = clean(best.room?.name || "Available room");
     const displayCurrency = clean(best.rate?.currency || currency).toUpperCase();
 
@@ -6176,7 +6225,7 @@ async function hotelbedsAvailabilitySearch(query) {
         }
       }]
     };
-  }).filter(Boolean);
+  }))).filter(Boolean);
 
   return { ok: true, source: "hotelbeds_live_supplier", destination, count: hotels.length, hotels, rawCount: rawHotels.length };
 }
@@ -7681,6 +7730,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
