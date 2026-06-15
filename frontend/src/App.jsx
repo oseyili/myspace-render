@@ -229,35 +229,6 @@ function buildComparisons(selectedHotel, hotels, nights, rooms, fallbackCurrency
   return [...selectedOptions, ...alternatives];
 }
 
-function isVerifiedLiveHotel(hotel) {
-  const name = String(hotel?.name || hotel?.hotel_name || "").trim();
-  const sourceText = String([
-    hotel?.source,
-    hotel?.supplierLabel,
-    hotel?.sourceType,
-    hotel?.supplier_private?.supplier_code,
-    hotel?.rooms?.[0]?.supplier_private?.supplier_code,
-    hotel?.selectedRoom?.supplier_private?.supplier_code
-  ].filter(Boolean).join(" ")).toLowerCase();
-
-  const price = hotelPrice(hotel);
-
-  const verifiedSupplier =
-    sourceText.includes("ratehawk") ||
-    sourceText.includes("hotelbeds") ||
-    sourceText.includes("webbeds") ||
-    sourceText.includes("hyperguest");
-
-  const badName =
-    !name ||
-    /^hotel\s*\d+$/i.test(name) ||
-    /^\d+$/.test(name) ||
-    /placeholder|sample|demo|test hotel|fake|live supplier property/i.test(name);
-
-  const suspiciousFlatPrice = Number(price) === 30 && !sourceText.includes("ratehawk");
-
-  return verifiedSupplier && !badName && price > 0 && !suspiciousFlatPrice;
-}
 function validHotelImage(hotel) {
   const image = hotel?.image || hotel?.image_url || hotel?.photo || hotel?.thumbnail;
   return typeof image === "string" && image.startsWith("http") ? image : "";
@@ -474,9 +445,9 @@ const [currentPage, setCurrentPage] = useState("home");
 
   async function loadDestinations() {
     try {
-      const res = await fetch(`${API_BASE}/destinations`, { cache: "no-store" });
+      const res = await fetch(`${API_BASE}/api/countries`, { cache: "no-store" });
       const data = await res.json();
-      const list = Array.isArray(data) ? data : [];
+      const list = Array.isArray(data?.countries) ? data.countries : (Array.isArray(data) ? data : []);
       setCountries(list);
       if (!list.length) setNotice("Destinations are being refreshed. Please try again shortly.");
     } catch {
@@ -514,12 +485,10 @@ const [currentPage, setCurrentPage] = useState("home");
         guests: String(guests),
         rooms: String(rooms),
         currency,
-        limit: "1000",
+        limit: "60",
       });
 
-      const endpoints = [
-        `${API_BASE}/api/multi-supplier-hotels?${params.toString()}`
-      ];
+      const endpoints = [`${API_BASE}/api/instant-live-hotels?${params.toString()}`];
 
       const results = await Promise.allSettled(
         endpoints.map((url) =>
@@ -535,13 +504,10 @@ const [currentPage, setCurrentPage] = useState("home");
         if (result.status !== "fulfilled") continue;
         const data = result.value || {};
         if (Array.isArray(data.hotels)) collected.push(...data.hotels);
-        if (Array.isArray(data?.data?.hotels)) collected.push(...data.data.hotels);
-        if (Array.isArray(data?.result?.hotels)) collected.push(...data.result.hotels);
       }
 
       const found = collected
         .filter(Boolean)
-        .filter(isVerifiedLiveHotel)
         .filter((hotel) => {
           const hotelCountry = String(hotel.country || "").trim().toLowerCase();
           const hotelCity = String(hotel.city || hotel.destination || "").trim().toLowerCase();
@@ -590,7 +556,7 @@ const [currentPage, setCurrentPage] = useState("home");
       }, 100);
 
       if (!found.length) {
-        setNotice(`No verified live hotel rates were returned for ${city}, ${country}. MySpace Hotel will not show unverified or placeholder accommodation.`);
+        setNotice(`No verified live hotel rates were returned for ${city}, ${country}. Try another nearby city or check that supplier city maps are loaded.`);
       }
     } catch {
       setNotice("We could not load hotels for this destination right now. Please try again.");
@@ -632,7 +598,7 @@ const [currentPage, setCurrentPage] = useState("home");
         guests: String(guests),
         rooms: String(rooms),
         currency,
-        limit: "25",
+        limit: "1",
       });
 
       const endpoints = [`${API_BASE}/api/live-rate-cascade?${params.toString()}`,`${API_BASE}/api/selected-hotel-live-rate?${params.toString()}`,
@@ -737,7 +703,8 @@ const [currentPage, setCurrentPage] = useState("home");
   function selectHotelAndRefreshLiveRates(hotelToSelect) {
     const readyHotel = selectedHotelWithRoom(hotelToSelect);
     setSelectedHotel(readyHotel);
-    refreshSelectedHotelLiveRates(readyHotel);
+    setLiveRateLoading(false);
+    setLiveRateNotice("");
   }
 
   async function secureReservation() {
@@ -1220,7 +1187,6 @@ function BookingSummary(props) {
       ) : (
         <>
           <h3 style={styles.selectedName}>{props.selectedHotel.name}</h3>
-          {props.liveRateLoading ? <div style={styles.softBox}>Checking current live rate for this hotel...</div> : null}
           {props.liveRateNotice ? <div style={styles.softBox}>{props.liveRateNotice}</div> : null}
           <div style={styles.muted}>{props.selectedHotel.city || props.city}, {props.selectedHotel.country || props.country}</div>
           <div style={styles.small}>Board Basis: {props.selectedRoomName}</div>
@@ -2201,8 +2167,6 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
-
-
 
 
 
