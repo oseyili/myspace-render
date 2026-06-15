@@ -5924,6 +5924,277 @@ function mergeUniqueHotelsByKey(hotels) {
   return merged;
 }
 
+
+// MSH HOTELBEDS LIVE CONNECTOR START
+function hotelbedsConfig() {
+  const baseUrl = clean(process.env.HOTELBEDS_BASE_URL || "https://api.test.hotelbeds.com").replace(/\/$/, "");
+  const apiKey = clean(process.env.HOTELBEDS_API_KEY);
+  const secret = clean(process.env.HOTELBEDS_SECRET);
+  const defaultDestination = clean(process.env.HOTELBEDS_DEFAULT_DESTINATION || "");
+  return {
+    baseUrl,
+    apiKey,
+    secret,
+    defaultDestination,
+    ready: Boolean(baseUrl && apiKey && secret)
+  };
+}
+
+function hotelbedsSignature() {
+  const cfg = hotelbedsConfig();
+  const timestamp = Math.floor(Date.now() / 1000);
+  return crypto.createHash("sha256").update(cfg.apiKey + cfg.secret + timestamp).digest("hex");
+}
+
+function hotelbedsDestinationCode(country, city) {
+  const wantedCountry = clean(country).toLowerCase();
+  const wantedCity = clean(city).toLowerCase();
+
+  try {
+    const map = JSON.parse(process.env.HOTELBEDS_DESTINATIONS || "{}");
+
+    const keys = [
+      `${wantedCountry}|${wantedCity}`,
+      wantedCity,
+      clean(city),
+      clean(country)
+    ];
+
+    for (const key of keys) {
+      if (map[key]) return clean(map[key]).toUpperCase();
+    }
+  } catch {}
+
+  const fallback = {
+    "united kingdom|london": "LON",
+    "london": "LON",
+    "united states|los angeles": "LAX",
+    "los angeles": "LAX",
+    "united states|new york": "NYC",
+    "new york": "NYC",
+    "france|paris": "PAR",
+    "paris": "PAR",
+    "united arab emirates|dubai": "DXB",
+    "dubai": "DXB",
+    "united arab emirates|abu dhabi": "AUH",
+    "abu dhabi": "AUH"
+  };
+
+  return clean(fallback[`${wantedCountry}|${wantedCity}`] || fallback[wantedCity] || hotelbedsConfig().defaultDestination).toUpperCase();
+}
+
+function hotelbedsImageUrl(hotel) {
+  const image = Array.isArray(hotel?.images) && hotel.images.length ? hotel.images[0] : null;
+  const pathValue = clean(image?.path || image?.url || "");
+  if (!pathValue) return "";
+  if (/^https?:\/\//i.test(pathValue)) return pathValue;
+  return `https://photos.hotelbeds.com/giata/original/${pathValue.replace(/^\/+/, "")}`;
+}
+
+function hotelbedsBestRoom(hotel) {
+  const rooms = Array.isArray(hotel?.rooms) ? hotel.rooms : [];
+  const candidates = [];
+
+  for (const room of rooms) {
+    const rates = Array.isArray(room?.rates) ? room.rates : [];
+    for (const rate of rates) {
+      const amount = number(rate?.net || rate?.sellingRate || rate?.hotelSellingRate || 0);
+      if (amount > 0) {
+        candidates.push({ room, rate, amount });
+      }
+    }
+  }
+
+  candidates.sort((a, b) => a.amount - b.amount);
+  return candidates[0] || null;
+}
+
+async function hotelbedsAvailabilitySearch(query) {
+  const cfg = hotelbedsConfig();
+
+  if (!cfg.ready) {
+    return {
+      ok: false,
+      hotels: [],
+      status: 400,
+      message: "Hotelbeds is not configured."
+    };
+  }
+
+  const country = clean(query.country || "");
+  const city = clean(query.city || "");
+  const currency = clean(query.currency || "GBP").toUpperCase();
+  const destination = clean(query.destination || query.destinationCode || hotelbedsDestinationCode(country, city)).toUpperCase();
+
+  if (!destination) {
+    return {
+      ok: false,
+      hotels: [],
+      status: 400,
+      message: "No Hotelbeds destination code is mapped for this search."
+    };
+  }
+
+  const checkIn = clean(query.checkIn || query.checkin || query.check_in || tomorrowISOForRatehawk(14));
+  const checkOut = clean(query.checkOut || query.checkout || query.check_out || tomorrowISOForRatehawk(15));
+  const guests = Math.max(1, Number(query.guests || 2));
+  const rooms = Math.max(1, Number(query.rooms || 1));
+
+  const body = {
+    stay: {
+      checkIn,
+      checkOut
+    },
+    occupancies: [
+      {
+        rooms,
+        adults: guests,
+        children: 0
+      }
+    ],
+    destination: {
+      code: destination
+    },
+    filter: {
+      maxHotels: Math.max(1, Math.min(Number(query.limit || 100), 1000))
+    }
+  };
+
+  const response = await fetch(`${cfg.baseUrl}/hotel-api/1.0/hotels`, {
+    method: "POST",
+    headers: {
+      "Api-key": cfg.apiKey,
+      "X-Signature": hotelbedsSignature(),
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    return {
+      ok: false,
+      hotels: [],
+      status: response.status,
+      message: data?.error?.message || data?.message || "Hotelbeds availability request failed.",
+      data
+    };
+  }
+
+  const rawHotels = Array.isArray(data?.hotels?.hotels) ? data.hotels.hotels : [];
+  const hotels = rawHotels.map((hotel) => {
+    const best = hotelbedsBestRoom(hotel);
+    if (!best) return null;
+
+    const roomName = clean(best.room?.name || "Available room");
+    const hotelName = clean(hotel?.name || hotel?.hotelName || "");
+    if (!hotelName) return null;
+
+    return {
+      hotelId: `HOTELBEDS-${hotel.code || hotel.id || hotelName}`,
+      hotel_id: `HOTELBEDS-${hotel.code || hotel.id || hotelName}`,
+      id: `HOTELBEDS-${hotel.code || hotel.id || hotelName}`,
+      code: `HOTELBEDS-${hotel.code || hotel.id || hotelName}`,
+      supplier_hotel_id: clean(hotel.code || hotel.id || ""),
+      name: hotelName,
+      hotel_name: hotelName,
+      city,
+      country,
+      destinationCode: destination,
+      price: best.amount,
+      convertedPrice: best.amount,
+      displayPrice: best.amount,
+      currency: clean(best.rate?.currency || currency).toUpperCase(),
+      displayCurrency: clean(best.rate?.currency || currency).toUpperCase(),
+      availableToBook: true,
+      image: hotelbedsImageUrl(hotel),
+      images: hotelbedsImageUrl(hotel) ? [hotelbedsImageUrl(hotel)] : [],
+      source: "hotelbeds_live_supplier",
+      supplierLabel: "Hotelbeds live rate",
+      supplier_private: {
+        supplier_code: "HOTELBEDS",
+        destination_code: destination,
+        supplier_hotel_id: clean(hotel.code || hotel.id || "")
+      },
+      rooms: [
+        {
+          roomCode: clean(best.room?.code || best.rate?.rateKey || "STANDARD"),
+          roomName,
+          room_name: roomName,
+          board: clean(best.rate?.boardName || best.rate?.boardCode || "Available room"),
+          price: best.amount,
+          convertedPrice: best.amount,
+          displayCurrency: clean(best.rate?.currency || currency).toUpperCase(),
+          rate_source_id: clean(best.rate?.rateKey || hotel.code || ""),
+          rate_source_timestamp: nowISO(),
+          supplier_private: {
+            supplier_code: "HOTELBEDS",
+            destination_code: destination,
+            rate_key: clean(best.rate?.rateKey || "")
+          }
+        }
+      ]
+    };
+  }).filter(Boolean);
+
+  return {
+    ok: true,
+    source: "hotelbeds_live_supplier",
+    destination,
+    count: hotels.length,
+    hotels,
+    rawCount: rawHotels.length
+  };
+}
+
+async function hotelbedsSearchHotelsFromRequest(req) {
+  const result = await hotelbedsAvailabilitySearch(req.query || {});
+  return Array.isArray(result.hotels) ? result.hotels : [];
+}
+
+app.get("/api/hotelbeds/status", (req, res) => {
+  const cfg = hotelbedsConfig();
+  res.json({
+    ok: true,
+    configured: cfg.ready,
+    hasApiKey: Boolean(cfg.apiKey),
+    hasSecret: Boolean(cfg.secret),
+    baseUrl: cfg.baseUrl,
+    defaultDestination: cfg.defaultDestination,
+    message: cfg.ready ? "Hotelbeds connector is configured." : "Hotelbeds connector is not ready."
+  });
+});
+
+app.get("/api/hotelbeds/search", async (req, res) => {
+  try {
+    const result = await hotelbedsAvailabilitySearch(req.query || {});
+    res.status(result.ok ? 200 : result.status || 400).json(result);
+  } catch (err) {
+    res.status(500).json({
+      ok: false,
+      source: "hotelbeds_live_supplier",
+      message: "Hotelbeds search failed.",
+      error: err.message
+    });
+  }
+});
+
+app.get("/api/hotelbeds/availability", async (req, res) => {
+  try {
+    const result = await hotelbedsAvailabilitySearch(req.query || {});
+    res.status(result.ok ? 200 : result.status || 400).json(result);
+  } catch (err) {
+    res.status(500).json({
+      ok: false,
+      source: "hotelbeds_live_supplier",
+      message: "Hotelbeds availability failed.",
+      error: err.message
+    });
+  }
+});
+// MSH HOTELBEDS LIVE CONNECTOR END
 app.get("/api/multi-supplier-hotels", async (req, res) => {
   try {
     const query = new URLSearchParams(req.query).toString();
@@ -5934,6 +6205,13 @@ app.get("/api/multi-supplier-hotels", async (req, res) => {
       .catch(() => ({ hotels: [] }));
 
     const localHotels = Array.isArray(localResult.hotels) ? localResult.hotels : [];
+
+    let hotelbedsHotels = [];
+    try {
+      hotelbedsHotels = await hotelbedsSearchHotelsFromRequest(req);
+    } catch (err) {
+      hotelbedsHotels = [];
+    }
 
     let webbedsHotels = [];
     try {
@@ -6134,6 +6412,7 @@ function ratehawkHotelName(value) {
         source: hotel.source || "existing_supplier_inventory",
         supplierLabel: hotel.supplierLabel || "Existing supplier inventory"
       })),
+      ...hotelbedsHotels,
       ...webbedsHotels,
       ...(ratehawkConfig().env === "production" && !ratehawkConfig().baseUrl.includes("sandbox") ? ratehawkHotels : [])
     ]);
@@ -6168,6 +6447,7 @@ function ratehawkHotelName(value) {
       source: "multi_supplier",
       suppliers: {
         existing: localHotels.length,
+        hotelbeds: hotelbedsHotels.length,
         webbeds: webbedsHotels.length,
         ratehawk: ratehawkHotels.length
       },
@@ -7538,6 +7818,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
