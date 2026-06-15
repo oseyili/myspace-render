@@ -229,6 +229,35 @@ function buildComparisons(selectedHotel, hotels, nights, rooms, fallbackCurrency
   return [...selectedOptions, ...alternatives];
 }
 
+function isVerifiedLiveHotel(hotel) {
+  const name = String(hotel?.name || hotel?.hotel_name || "").trim();
+  const sourceText = String([
+    hotel?.source,
+    hotel?.supplierLabel,
+    hotel?.sourceType,
+    hotel?.supplier_private?.supplier_code,
+    hotel?.rooms?.[0]?.supplier_private?.supplier_code,
+    hotel?.selectedRoom?.supplier_private?.supplier_code
+  ].filter(Boolean).join(" ")).toLowerCase();
+
+  const price = hotelPrice(hotel);
+
+  const verifiedSupplier =
+    sourceText.includes("ratehawk") ||
+    sourceText.includes("hotelbeds") ||
+    sourceText.includes("webbeds") ||
+    sourceText.includes("hyperguest");
+
+  const badName =
+    !name ||
+    /^hotel\s*\d+$/i.test(name) ||
+    /^\d+$/.test(name) ||
+    /placeholder|sample|demo|test hotel|fake|live supplier property/i.test(name);
+
+  const suspiciousFlatPrice = Number(price) === 30 && !sourceText.includes("ratehawk");
+
+  return verifiedSupplier && !badName && price > 0 && !suspiciousFlatPrice;
+}
 function validHotelImage(hotel) {
   const image = hotel?.image || hotel?.image_url || hotel?.photo || hotel?.thumbnail;
   return typeof image === "string" && image.startsWith("http") ? image : "";
@@ -488,7 +517,9 @@ const [currentPage, setCurrentPage] = useState("home");
         limit: "1000",
       });
 
-      const endpoints = [`${API_BASE}/api/live-rate-correct-source?${params.toString()}`];
+      const endpoints = [
+        `${API_BASE}/api/multi-supplier-hotels?${params.toString()}`
+      ];
 
       const results = await Promise.allSettled(
         endpoints.map((url) =>
@@ -504,10 +535,13 @@ const [currentPage, setCurrentPage] = useState("home");
         if (result.status !== "fulfilled") continue;
         const data = result.value || {};
         if (Array.isArray(data.hotels)) collected.push(...data.hotels);
+        if (Array.isArray(data?.data?.hotels)) collected.push(...data.data.hotels);
+        if (Array.isArray(data?.result?.hotels)) collected.push(...data.result.hotels);
       }
 
       const found = collected
         .filter(Boolean)
+        .filter(isVerifiedLiveHotel)
         .filter((hotel) => {
           const hotelCountry = String(hotel.country || "").trim().toLowerCase();
           const hotelCity = String(hotel.city || hotel.destination || "").trim().toLowerCase();
@@ -556,7 +590,7 @@ const [currentPage, setCurrentPage] = useState("home");
       }, 100);
 
       if (!found.length) {
-        setNotice(`No matching hotels were returned for ${city}, ${country}. Try another nearby city, or check that backend supplier inventory/city maps are loaded.`);
+        setNotice(`No verified live hotel rates were returned for ${city}, ${country}. MySpace Hotel will not show unverified or placeholder accommodation.`);
       }
     } catch {
       setNotice("We could not load hotels for this destination right now. Please try again.");
@@ -2167,6 +2201,9 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
+
+
 
 
 

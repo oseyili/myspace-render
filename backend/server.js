@@ -5940,9 +5940,7 @@ app.get("/api/multi-supplier-hotels", async (req, res) => {
       const city = clean(req.query.city || "");
       const currency = clean(req.query.currency || "GBP").toUpperCase();
 
-      const cityId =
-        findWebbedsCityCodeFromCache(city) ||
-        webbedsCityIdFromName(city);
+      const cityId = findWebbedsCityCodeFromCache(city) || webbedsCityIdFromName(city);
 
       if (cityId && typeof buildWebbedsSearchXml === "function") {
         const built = buildWebbedsSearchXml({
@@ -5987,54 +5985,181 @@ app.get("/api/multi-supplier-hotels", async (req, res) => {
       webbedsHotels = [];
     }
 
+    function ratehawkRegionIdForSearch(country, city) {
+      const key = `${String(country || "").trim().toLowerCase()}|${String(city || "").trim().toLowerCase()}`;
+      const cityOnly = String(city || "").trim().toLowerCase();
+
+      try {
+        const custom = JSON.parse(process.env.RATEHAWK_REGION_MAP_JSON || "{}");
+        if (custom[key]) return Number(custom[key]);
+        if (custom[cityOnly]) return Number(custom[cityOnly]);
+      } catch {}
+
+      const builtIn = {
+        "united states|los angeles": 2011,
+        "usa|los angeles": 2011,
+        "united states of america|los angeles": 2011,
+        "los angeles": 2011
+      };
+
+      return Number(builtIn[key] || builtIn[cityOnly] || process.env.RATEHAWK_DEFAULT_REGION_ID || 0);
+    }
+
+    function isCustomerSafeHotelName(name) {
+  const value = String(name || "").trim().toLowerCase();
+
+  if (!value) return false;
+
+  const blocked =
+    /villa|vacation|estate|house|home|cottage|museum|hostel|rental|private homes?|apartment|apartments|residence|residences|condo|studio|loft|guest room|room only|bnb|bed and breakfast/i;
+
+  const allowed =
+    /hotel|inn|motel|resort|suites|suite|aparthotel|serviced apartment|serviced apartments|apart hotel|apart-hotel/i;
+
+  if (blocked.test(value) && !allowed.test(value)) return false;
+
+  if (/rud\s+\d+/i.test(value)) return false;
+
+  return allowed.test(value);
+}
+function ratehawkHotelName(value) {
+      const raw = clean(value || "");
+      if (!raw) return "RateHawk live hotel";
+      return raw
+        .replace(/_/g, " ")
+        .replace(/\s+/g, " ")
+        .replace(/\b\w/g, (m) => m.toUpperCase());
+    }
+
+    function ratehawkBestAmount(rate) {
+      const payment = rate?.payment_options?.payment_types?.[0] || {};
+      const values = [
+        payment.show_amount,
+        payment.amount,
+        Array.isArray(rate?.daily_prices) ? rate.daily_prices[0] : 0
+      ];
+
+      for (const value of values) {
+        const n = Number(value || 0);
+        if (Number.isFinite(n) && n > 0) return n;
+      }
+
+      return 0;
+    }
+
+    let ratehawkHotels = [];
+    try {
+      const country = clean(req.query.country || "");
+      const city = clean(req.query.city || "");
+      const requestedCurrency = clean(req.query.currency || "USD").toUpperCase();
+      const currency = clean(process.env.RATEHAWK_SEARCH_CURRENCY || "USD").toUpperCase();
+      const checkin = clean(req.query.checkin || req.query.checkIn || tomorrowISOForRatehawk(14));
+      const checkout = clean(req.query.checkout || req.query.checkOut || tomorrowISOForRatehawk(15));
+      const guests = Math.max(1, Number(req.query.guests || 2));
+      const regionId = ratehawkRegionIdForSearch(country, city);
+
+      if (regionId && ratehawkConfig().ready) {
+        const result = await ratehawkPost("/api/b2b/v3/search/serp/region/", {
+          checkin,
+          checkout,
+          residency: clean(req.query.residency || "gb").toLowerCase(),
+          language: clean(req.query.language || "en"),
+          guests: [{ adults: guests, children: [] }],
+          region_id: regionId,
+          currency
+        });
+
+        const hotels = Array.isArray(result?.data?.data?.hotels) ? result.data.data.hotels : [];
+
+        ratehawkHotels = hotels.map((hotel) => {
+          const rates = Array.isArray(hotel.rates) ? hotel.rates : [];
+          const bestRate = rates
+            .map((rate) => ({ rate, amount: ratehawkBestAmount(rate) }))
+            .filter((x) => x.amount > 0)
+            .sort((a, b) => a.amount - b.amount)[0];
+
+          if (!bestRate) return null;
+
+          const rate = bestRate.rate;
+          const payment = rate?.payment_options?.payment_types?.[0] || {};
+          const roomName = clean(rate.room_name || rate?.room_data_trans?.main_name || "Available room");
+          const code = clean(hotel.id || hotel.hid || "");
+          const safeName = ratehawkHotelName(hotel.id || `RateHawk ${hotel.hid}`);
+
+          return {
+            hotelId: `RATEHAWK-${hotel.hid || code}`,
+            hotel_id: `RATEHAWK-${hotel.hid || code}`,
+            id: `RATEHAWK-${hotel.hid || code}`,
+            code: `RATEHAWK-${hotel.hid || code}`,
+            supplier_hotel_id: clean(hotel.hid || code),
+            name: safeName,
+            hotel_name: safeName,
+            city,
+            country,
+            price: bestRate.amount,
+            convertedPrice: bestRate.amount,
+            displayPrice: bestRate.amount,
+            currency: clean(payment.show_currency_code || payment.currency_code || currency).toUpperCase(),
+            displayCurrency: clean(payment.show_currency_code || payment.currency_code || currency).toUpperCase(),
+            availableToBook: true,
+            image: "",
+            images: [],
+            source: "ratehawk_live_supplier",
+            supplierLabel: "RateHawk live rate",
+            supplier_private: { supplier_code: "RATEHAWK", region_id: regionId },
+            rooms: [
+              {
+                roomCode: clean(rate.match_hash || "STANDARD"),
+                roomName,
+                room_name: roomName,
+                board: clean(rate.meal || "Available room"),
+                price: bestRate.amount,
+                convertedPrice: bestRate.amount,
+                displayCurrency: clean(payment.show_currency_code || payment.currency_code || currency).toUpperCase(),
+                rate_source_id: clean(rate.match_hash || hotel.hid || code),
+                rate_source_timestamp: nowISO(),
+                supplier_private: { supplier_code: "RATEHAWK", region_id: regionId }
+              }
+            ]
+          };
+        }).filter(Boolean).filter((hotel) => isCustomerSafeHotelName(hotel.name || hotel.hotel_name));
+      }
+    } catch (err) {
+      ratehawkHotels = [];
+    }
+
     let merged = mergeUniqueHotelsByKey([
       ...localHotels.map((hotel) => ({
         ...hotel,
         source: hotel.source || "existing_supplier_inventory",
         supplierLabel: hotel.supplierLabel || "Existing supplier inventory"
       })),
-      ...webbedsHotels
+      ...webbedsHotels,
+      ...ratehawkHotels
     ]);
 
     merged = merged.filter((hotel) => {
       const livePrice = number(hotel.price || hotel.total || hotel.convertedPrice || 0);
       const displayName = clean(hotel.name || hotel.hotel_name || "");
+      const supplierText = clean([
+        hotel.source,
+        hotel.supplierLabel,
+        hotel.supplier_private?.supplier_code
+      ].join(" ")).toLowerCase();
+
+      const isRatehawk = supplierText.includes("ratehawk");
       const hasRealName =
         displayName &&
-        !/^Live supplier property/i.test(displayName) &&
-        !/^Hotel\s+\d+$/i.test(displayName);
+        !/^Hotel\s+\d+$/i.test(displayName) &&
+        !/^\d+$/.test(displayName);
 
-      const hasRealImage = Boolean(clean(hotel.image));
-
-      return livePrice > 0 && hotel.availableToBook !== false && hasRealName && hasRealImage;
+      return livePrice > 0 && hotel.availableToBook !== false && (hasRealName || isRatehawk);
     });
 
     merged.sort((a, b) => {
       const aPrice = number(a.price || a.total || 0);
       const bPrice = number(b.price || b.total || 0);
-
-      const aHasRealName =
-        clean(a.name || a.hotel_name) &&
-        !/^Live supplier property/i.test(clean(a.name || a.hotel_name)) &&
-        !/^Hotel\s+\d+$/i.test(clean(a.name || a.hotel_name));
-
-      const bHasRealName =
-        clean(b.name || b.hotel_name) &&
-        !/^Live supplier property/i.test(clean(b.name || b.hotel_name)) &&
-        !/^Hotel\s+\d+$/i.test(clean(b.name || b.hotel_name));
-
-      const aHasImage = Boolean(clean(a.image));
-      const bHasImage = Boolean(clean(b.image));
-
-      const aPriced = aPrice > 0;
-      const bPriced = bPrice > 0;
-
-      const aScore = (aHasRealName ? 100 : 0) + (aHasImage ? 50 : 0) + (aPriced ? 25 : 0);
-      const bScore = (bHasRealName ? 100 : 0) + (bHasImage ? 50 : 0) + (bPriced ? 25 : 0);
-
-      if (aScore !== bScore) return bScore - aScore;
-
-      if (aPriced && bPriced) return aPrice - bPrice;
+      if (aPrice > 0 && bPrice > 0) return aPrice - bPrice;
       return 0;
     });
 
@@ -6043,7 +6168,8 @@ app.get("/api/multi-supplier-hotels", async (req, res) => {
       source: "multi_supplier",
       suppliers: {
         existing: localHotels.length,
-        webbeds: webbedsHotels.length
+        webbeds: webbedsHotels.length,
+        ratehawk: ratehawkHotels.length
       },
       count: merged.length,
       hotels: merged
@@ -7232,7 +7358,7 @@ app.get("/api/live-rate-correct-source", async (req, res) => {
 
       if (src.includes("catalogue") || src.includes("placeholder") || src.includes("existing supplier inventory") || src.includes("myspace internal")) return false;
 
-      return src.includes("webbeds") || src.includes("hotelbeds") || src.includes("live");
+      return src.includes("webbeds") || src.includes("hotelbeds") || src.includes("ratehawk") || src.includes("worldota") || src.includes("live");
     }
 
     function match(h) {
@@ -7281,7 +7407,7 @@ app.get("/api/live-rate-correct-source", async (req, res) => {
       const candidates = result.hotels
         .filter((h) => p(h) > 0)
         .filter((h) => realSupplier(h, sourceName))
-        .filter((h) => match(h) || sourceName.includes("webbeds-city") || sourceName.includes("webbeds-search"))
+        .filter((h) => match(h) || (!hotelId && !hotelName) || sourceName.includes("webbeds-city") || sourceName.includes("webbeds-search") || sourceName.includes("multi-supplier"))
         .sort((a, b) => p(a) - p(b));
 
       attempts.push({
@@ -7295,6 +7421,44 @@ app.get("/api/live-rate-correct-source", async (req, res) => {
 
       if (!candidates.length) continue;
 
+      if (!hotelId && !hotelName && candidates.length) {
+        const hotels = candidates.map((h) => {
+          const r = Array.isArray(h.rooms) && h.rooms.length ? h.rooms[0] : {};
+          const amount = p(h);
+          return {
+            ...h,
+            price: amount,
+            convertedPrice: amount,
+            displayPrice: amount,
+            currency: clean(r.displayCurrency || r.currency || h.currency || currency).toUpperCase(),
+            displayCurrency: clean(r.displayCurrency || r.currency || h.currency || currency).toUpperCase(),
+            availableToBook: true,
+            sourceType: sourceName,
+            availabilityMode: "live_rate",
+            customerBadge: "Live hotel rate",
+            selectedRoom: {
+              roomCode: clean(r.roomCode || r.room_code || "STANDARD"),
+              roomName: clean(r.roomName || r.room_name || "Available room"),
+              board: clean(r.board || "Available room"),
+              price: amount,
+              convertedPrice: amount,
+              displayCurrency: clean(r.displayCurrency || r.currency || h.currency || currency).toUpperCase(),
+              rate_source_id: clean(r.rate_source_id || h.rate_source_id || ""),
+              rate_source_timestamp: clean(r.rate_source_timestamp || h.rate_source_timestamp || nowISO()),
+              source_health: "verified"
+            }
+          };
+        });
+
+        return res.json({
+          ok: true,
+          source: "correct_live_supplier_source",
+          winning_source: sourceName,
+          count: hotels.length,
+          hotels,
+          attempts
+        });
+      }
       const h = candidates[0];
       const r = Array.isArray(h.rooms) && h.rooms.length ? h.rooms[0] : {};
       const amount = p(h);
@@ -7376,6 +7540,10 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
+
+
+
 
 
 
