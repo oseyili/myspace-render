@@ -6135,7 +6135,7 @@ function ratehawkHotelName(value) {
         supplierLabel: hotel.supplierLabel || "Existing supplier inventory"
       })),
       ...webbedsHotels,
-      ...ratehawkHotels
+      ...(ratehawkConfig().env === "production" && !ratehawkConfig().baseUrl.includes("sandbox") ? ratehawkHotels : [])
     ]);
 
     merged = merged.filter((hotel) => {
@@ -7540,6 +7540,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
