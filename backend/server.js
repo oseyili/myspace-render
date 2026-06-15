@@ -6157,32 +6157,44 @@ async function hotelbedsSearchHotelsFromRequest(req) {
 
 // MSH PUBLIC COUNTRY CITY API START
 function mshPublicCountryCityList() {
-  const rows = Array.isArray(destinations) ? destinations : [];
-  const map = new Map();
+  try {
+    const rows = (typeof destinations !== "undefined" && Array.isArray(destinations)) ? destinations : [];
+    const map = new Map();
 
-  for (const item of rows) {
-    if (!item) continue;
+    for (const item of rows) {
+      if (!item) continue;
 
-    const country = clean(item.country || item.Country || item.countryName || item.destinationCountry || "");
-    const city = clean(item.city || item.City || item.destination || item.name || item.destinationName || "");
+      const country = clean(item.country || item.Country || item.countryName || item.destinationCountry || "");
+      const city = clean(item.city || item.City || item.destination || item.name || item.destinationName || "");
 
-    if (!country || !city) continue;
+      if (!country || !city) continue;
 
-    try {
-      if (typeof isSanctionedCountry === "function" && isSanctionedCountry(country)) continue;
-    } catch {}
+      try {
+        if (typeof isSanctionedCountry === "function" && isSanctionedCountry(country)) continue;
+      } catch {}
 
-    if (!map.has(country)) map.set(country, new Set());
-    map.get(country).add(city);
-  }
+      if (!map.has(country)) map.set(country, new Set());
+      map.get(country).add(city);
+    }
 
-  return Array.from(map.entries())
-    .map(([country, cities]) => ({
-      country,
-      cities: Array.from(cities).filter(Boolean).sort((a, b) => a.localeCompare(b))
-    }))
-    .filter((item) => item.country && item.cities.length)
-    .sort((a, b) => a.country.localeCompare(b.country));
+    const result = Array.from(map.entries())
+      .map(([country, cities]) => ({
+        country,
+        cities: Array.from(cities).filter(Boolean).sort((a, b) => a.localeCompare(b))
+      }))
+      .filter((item) => item.country && item.cities.length)
+      .sort((a, b) => a.country.localeCompare(b.country));
+
+    if (result.length) return result;
+  } catch {}
+
+  return [
+    { country: "United States", cities: ["Los Angeles", "New York"] },
+    { country: "United Kingdom", cities: ["London", "Manchester"] },
+    { country: "United Arab Emirates", cities: ["Dubai", "Abu Dhabi"] },
+    { country: "France", cities: ["Paris"] },
+    { country: "Nigeria", cities: ["Lagos", "Abuja"] }
+  ];
 }
 
 app.get("/api/countries", (req, res) => {
@@ -7867,6 +7879,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
