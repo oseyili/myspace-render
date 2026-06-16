@@ -8062,6 +8062,23 @@ app.get("/api/strict-live-hotels", async (req, res) => {
 });
 // MSH STRICT LIVE DESTINATION LOCATION FIX END
 
+
+// MSH CLEAN PUBLIC DESTINATION DROPDOWN START
+app.get("/api/strict-countries", (req, res) => {
+  res.json({
+    ok: true,
+    count: 5,
+    countries: [
+      { country: "United Kingdom", cities: ["London"] },
+      { country: "United States", cities: ["Los Angeles", "New York"] },
+      { country: "United Arab Emirates", cities: ["Dubai", "Abu Dhabi"] },
+      { country: "France", cities: ["Paris"] },
+      { country: "Nigeria", cities: ["Lagos", "Abuja"] }
+    ]
+  });
+});
+// MSH CLEAN PUBLIC DESTINATION DROPDOWN END
+
 app.listen(PORT, "0.0.0.0", () => {
   const destinations = buildDestinations();
 
@@ -8081,6 +8098,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 

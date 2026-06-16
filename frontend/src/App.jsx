@@ -445,7 +445,7 @@ const [currentPage, setCurrentPage] = useState("home");
 
   async function loadDestinations() {
     try {
-      const res = await fetch(`${API_BASE}/api/countries`, { cache: "no-store" });
+      const res = await fetch(`${API_BASE}/api/strict-countries`, { cache: "no-store" });
       const data = await res.json();
       const list = Array.isArray(data?.countries) ? data.countries : (Array.isArray(data) ? data : []);
       setCountries(list);
@@ -2167,6 +2167,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
