@@ -493,10 +493,6 @@ function publicHotel(h) {
     address: h.address,
     stars: h.stars,
     image: h.image,
-    images: Array.isArray(h.images) ? h.images : (h.image ? [h.image] : []),
-    image_url: h.image,
-    photo: h.image,
-    thumbnail: h.image,
     facilities: h.facilities,
     rooms,
     availableToBook: h.availableToBook,
@@ -508,179 +504,18 @@ function publicHotel(h) {
   };
 }
 
-
-const MSH_BASE_DESTINATIONS = [
-  { country: "Albania", cities: ["Tirana"] },
-  { country: "Andorra", cities: ["Andorra la Vella"] },
-  { country: "Angola", cities: ["Luanda"] },
-  { country: "Argentina", cities: ["Buenos Aires", "Cordoba", "Mendoza"] },
-  { country: "Armenia", cities: ["Yerevan"] },
-  { country: "Aruba", cities: ["Oranjestad"] },
-  { country: "Australia", cities: ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide", "Gold Coast"] },
-  { country: "Austria", cities: ["Vienna", "Salzburg", "Innsbruck"] },
-  { country: "Azerbaijan", cities: ["Baku"] },
-  { country: "Bahamas", cities: ["Nassau"] },
-  { country: "Bahrain", cities: ["Manama"] },
-  { country: "Bangladesh", cities: ["Dhaka"] },
-  { country: "Barbados", cities: ["Bridgetown"] },
-  { country: "Belgium", cities: ["Brussels", "Antwerp", "Bruges"] },
-  { country: "Belize", cities: ["Belize City"] },
-  { country: "Benin", cities: ["Cotonou"] },
-  { country: "Bolivia", cities: ["La Paz", "Santa Cruz"] },
-  { country: "Bosnia and Herzegovina", cities: ["Sarajevo"] },
-  { country: "Botswana", cities: ["Gaborone"] },
-  { country: "Brazil", cities: ["Sao Paulo", "Rio de Janeiro", "Brasilia", "Salvador"] },
-  { country: "Brunei", cities: ["Bandar Seri Begawan"] },
-  { country: "Bulgaria", cities: ["Sofia", "Varna"] },
-  { country: "Cambodia", cities: ["Phnom Penh", "Siem Reap"] },
-  { country: "Cameroon", cities: ["Douala", "Yaounde"] },
-  { country: "Canada", cities: ["Toronto", "Vancouver", "Montreal", "Calgary", "Ottawa"] },
-  { country: "Cape Verde", cities: ["Praia"] },
-  { country: "Chile", cities: ["Santiago"] },
-  { country: "China", cities: ["Beijing", "Shanghai", "Guangzhou", "Shenzhen"] },
-  { country: "Colombia", cities: ["Bogota", "Cartagena", "Medellin"] },
-  { country: "Costa Rica", cities: ["San Jose"] },
-  { country: "Croatia", cities: ["Zagreb", "Split", "Dubrovnik"] },
-  { country: "Cyprus", cities: ["Nicosia", "Larnaca", "Paphos"] },
-  { country: "Czech Republic", cities: ["Prague", "Brno"] },
-  { country: "Denmark", cities: ["Copenhagen", "Aarhus"] },
-  { country: "Dominican Republic", cities: ["Santo Domingo", "Punta Cana"] },
-  { country: "Ecuador", cities: ["Quito", "Guayaquil"] },
-  { country: "Egypt", cities: ["Cairo", "Sharm El Sheikh", "Hurghada", "Luxor"] },
-  { country: "Estonia", cities: ["Tallinn"] },
-  { country: "Ethiopia", cities: ["Addis Ababa"] },
-  { country: "Finland", cities: ["Helsinki"] },
-  { country: "France", cities: ["Paris", "Nice", "Lyon", "Marseille", "Cannes"] },
-  { country: "Gambia", cities: ["Banjul"] },
-  { country: "Georgia", cities: ["Tbilisi", "Batumi"] },
-  { country: "Germany", cities: ["Berlin", "Munich", "Frankfurt", "Hamburg", "Cologne"] },
-  { country: "Ghana", cities: ["Accra", "Kumasi"] },
-  { country: "Greece", cities: ["Athens", "Thessaloniki", "Santorini", "Mykonos", "Crete"] },
-  { country: "Grenada", cities: ["St George's"] },
-  { country: "Guatemala", cities: ["Guatemala City"] },
-  { country: "Honduras", cities: ["Tegucigalpa"] },
-  { country: "Hong Kong", cities: ["Hong Kong"] },
-  { country: "Hungary", cities: ["Budapest"] },
-  { country: "Iceland", cities: ["Reykjavik"] },
-  { country: "India", cities: ["New Delhi", "Mumbai", "Bengaluru", "Goa", "Chennai", "Hyderabad"] },
-  { country: "Indonesia", cities: ["Jakarta", "Bali", "Surabaya"] },
-  { country: "Ireland", cities: ["Dublin", "Cork", "Galway"] },
-  { country: "Israel", cities: ["Tel Aviv", "Jerusalem"] },
-  { country: "Italy", cities: ["Rome", "Milan", "Venice", "Florence", "Naples"] },
-  { country: "Ivory Coast", cities: ["Abidjan"] },
-  { country: "Jamaica", cities: ["Kingston", "Montego Bay"] },
-  { country: "Japan", cities: ["Tokyo", "Osaka", "Kyoto", "Sapporo"] },
-  { country: "Jordan", cities: ["Amman", "Aqaba"] },
-  { country: "Kazakhstan", cities: ["Almaty", "Astana"] },
-  { country: "Kenya", cities: ["Nairobi", "Mombasa"] },
-  { country: "Kuwait", cities: ["Kuwait City"] },
-  { country: "Laos", cities: ["Vientiane", "Luang Prabang"] },
-  { country: "Latvia", cities: ["Riga"] },
-  { country: "Lebanon", cities: ["Beirut"] },
-  { country: "Lithuania", cities: ["Vilnius"] },
-  { country: "Luxembourg", cities: ["Luxembourg"] },
-  { country: "Macau", cities: ["Macau"] },
-  { country: "Malaysia", cities: ["Kuala Lumpur", "Penang", "Langkawi", "Johor Bahru"] },
-  { country: "Maldives", cities: ["Male"] },
-  { country: "Malta", cities: ["Valletta", "St Julian's"] },
-  { country: "Mauritius", cities: ["Port Louis", "Grand Baie"] },
-  { country: "Mexico", cities: ["Mexico City", "Cancun", "Playa del Carmen", "Guadalajara"] },
-  { country: "Monaco", cities: ["Monaco"] },
-  { country: "Montenegro", cities: ["Podgorica", "Budva"] },
-  { country: "Morocco", cities: ["Marrakesh", "Casablanca", "Rabat", "Agadir"] },
-  { country: "Mozambique", cities: ["Maputo"] },
-  { country: "Namibia", cities: ["Windhoek"] },
-  { country: "Nepal", cities: ["Kathmandu"] },
-  { country: "Netherlands", cities: ["Amsterdam", "Rotterdam", "The Hague"] },
-  { country: "New Zealand", cities: ["Auckland", "Wellington", "Queenstown"] },
-  { country: "Nigeria", cities: ["Lagos", "Abuja", "Port Harcourt"] },
-  { country: "Norway", cities: ["Oslo", "Bergen"] },
-  { country: "Oman", cities: ["Muscat"] },
-  { country: "Pakistan", cities: ["Islamabad", "Karachi", "Lahore"] },
-  { country: "Panama", cities: ["Panama City"] },
-  { country: "Paraguay", cities: ["Asuncion"] },
-  { country: "Peru", cities: ["Lima", "Cusco"] },
-  { country: "Philippines", cities: ["Manila", "Cebu", "Boracay"] },
-  { country: "Poland", cities: ["Warsaw", "Krakow", "Gdansk"] },
-  { country: "Portugal", cities: ["Lisbon", "Porto", "Faro", "Madeira"] },
-  { country: "Qatar", cities: ["Doha"] },
-  { country: "Romania", cities: ["Bucharest", "Cluj-Napoca"] },
-  { country: "Rwanda", cities: ["Kigali"] },
-  { country: "Saudi Arabia", cities: ["Riyadh", "Jeddah", "Mecca", "Medina"] },
-  { country: "Senegal", cities: ["Dakar"] },
-  { country: "Serbia", cities: ["Belgrade"] },
-  { country: "Seychelles", cities: ["Victoria"] },
-  { country: "Singapore", cities: ["Singapore"] },
-  { country: "Slovakia", cities: ["Bratislava"] },
-  { country: "Slovenia", cities: ["Ljubljana", "Bled"] },
-  { country: "South Africa", cities: ["Johannesburg", "Cape Town", "Durban", "Pretoria"] },
-  { country: "South Korea", cities: ["Seoul", "Busan", "Incheon"] },
-  { country: "Spain", cities: ["Madrid", "Barcelona", "Valencia", "Seville", "Malaga"] },
-  { country: "Sri Lanka", cities: ["Colombo", "Kandy"] },
-  { country: "Sweden", cities: ["Stockholm", "Gothenburg"] },
-  { country: "Switzerland", cities: ["Zurich", "Geneva", "Lucerne"] },
-  { country: "Taiwan", cities: ["Taipei"] },
-  { country: "Tanzania", cities: ["Dar es Salaam", "Zanzibar"] },
-  { country: "Thailand", cities: ["Bangkok", "Phuket", "Chiang Mai", "Pattaya", "Krabi"] },
-  { country: "Togo", cities: ["Lome"] },
-  { country: "Trinidad and Tobago", cities: ["Port of Spain"] },
-  { country: "Tunisia", cities: ["Tunis", "Hammamet"] },
-  { country: "Turkey", cities: ["Istanbul", "Antalya", "Ankara", "Izmir"] },
-  { country: "U.S. Virgin Islands", cities: ["Charlotte Amalie"] },
-  { country: "Uganda", cities: ["Kampala"] },
-  { country: "Ukraine", cities: ["Kyiv", "Lviv"] },
-  { country: "United Arab Emirates", cities: ["Dubai", "Abu Dhabi", "Sharjah"] },
-  { country: "United Kingdom", cities: ["London", "Manchester", "Birmingham", "Edinburgh", "Glasgow", "Liverpool", "Bristol", "Leeds"] },
-  { country: "United States", cities: ["Los Angeles", "New York", "Las Vegas", "Miami", "Orlando", "Chicago", "San Francisco", "Washington", "Boston", "Seattle", "Honolulu"] },
-  { country: "Uruguay", cities: ["Montevideo"] },
-  { country: "Uzbekistan", cities: ["Tashkent"] },
-  { country: "Vietnam", cities: ["Ho Chi Minh City", "Hanoi", "Da Nang", "Hoi An"] },
-  { country: "Zambia", cities: ["Lusaka"] },
-  { country: "Zimbabwe", cities: ["Harare", "Victoria Falls"] }
-];
-
-function addDestination(map, country, city) {
-  const cleanCountry = clean(country);
-  const cleanCity = clean(city);
-  if (!cleanCountry || !cleanCity) return;
-  if (isBlockedCountry(cleanCountry)) return;
-  if (!map.has(cleanCountry)) map.set(cleanCountry, new Set());
-  map.get(cleanCountry).add(cleanCity);
-}
-
-function destinationsFromEnvironment() {
-  const rows = [];
-  try {
-    const parsed = JSON.parse(process.env.HOTELBEDS_DESTINATIONS || "{}");
-    for (const key of Object.keys(parsed || {})) {
-      const parts = key.split("|").map((x) => clean(x));
-      if (parts.length >= 2) rows.push({ country: parts[0], city: parts[1] });
-    }
-  } catch {}
-  try {
-    const parsed = JSON.parse(process.env.WEBBEDS_CITY_MAP || process.env.DOTW_CITY_MAP || "{}");
-    for (const key of Object.keys(parsed || {})) {
-      const parts = key.split("|").map((x) => clean(x));
-      if (parts.length >= 2) rows.push({ country: parts[0], city: parts[1] });
-      else if (parts[0]) rows.push({ country: "", city: parts[0] });
-    }
-  } catch {}
-  return rows;
-}
-
 function buildDestinations() {
   const map = new Map();
 
-  for (const item of MSH_BASE_DESTINATIONS) {
-    for (const city of item.cities || []) addDestination(map, item.country, city);
-  }
-
   for (const h of readHotels()) {
-    addDestination(map, h.country, h.city || h.destination);
-  }
+    const country = clean(h.country);
+    const city = clean(h.city);
 
-  for (const item of destinationsFromEnvironment()) {
-    if (item.country) addDestination(map, item.country, item.city);
+    if (!country || !city) continue;
+    if (isBlockedCountry(country)) continue;
+
+    if (!map.has(country)) map.set(country, new Set());
+    map.get(country).add(city);
   }
 
   return [...map.entries()]
@@ -688,10 +523,8 @@ function buildDestinations() {
       country,
       cities: [...citySet].sort((a, b) => a.localeCompare(b))
     }))
-    .filter((x) => x.country && x.cities.length)
     .sort((a, b) => a.country.localeCompare(b.country));
 }
-
 
 function fallbackHotels(country, city, currency) {
   const hotel = {
@@ -739,6 +572,8 @@ function internalSearchHotels(query) {
     if (b.availableToBook !== a.availableToBook) return Number(b.availableToBook) - Number(a.availableToBook);
     return a.name.localeCompare(b.name);
   });
+
+  if (!hotels.length && country && city) hotels = fallbackHotels(country, city, currency);
 
   return hotels.slice(0, 120);
 }
@@ -954,17 +789,6 @@ app.get("/api/public-countries", (req, res) => {
   res.json({
     ok: true,
     count: countries.length,
-    countries
-  });
-});
-
-app.get("/api/country-city-health", (req, res) => {
-  const countries = buildDestinations();
-  res.json({
-    ok: true,
-    count: countries.length,
-    cities: countries.reduce((sum, item) => sum + (Array.isArray(item.cities) ? item.cities.length : 0), 0),
-    source: "base destinations plus verified local/supplier maps",
     countries
   });
 });
@@ -6099,116 +5923,6 @@ app.get("/api/webbeds/search-by-hotel-ids", async (req, res) => {
 
 // MSH WEBBEDS DOTW XML CONNECTOR END
 
-
-// MSH INSTANT LIVE HOTEL CACHE START
-const MSH_FAST_LIVE_CACHE_FILE = path.join(DATA_DIR, "fast_live_rate_cache.json");
-
-function mshFastCacheKey(query) {
-  return [
-    clean(query.country || "").toLowerCase(),
-    clean(query.city || "").toLowerCase(),
-    clean(query.checkIn || query.checkin || query.check_in || "").toLowerCase(),
-    clean(query.checkOut || query.checkout || query.check_out || "").toLowerCase(),
-    clean(query.currency || "GBP").toUpperCase(),
-    clean(query.guests || "2"),
-    clean(query.rooms || "1")
-  ].join("|");
-}
-
-function mshFastReadCache() {
-  try {
-    if (!fs.existsSync(MSH_FAST_LIVE_CACHE_FILE)) return {};
-    const parsed = JSON.parse(fs.readFileSync(MSH_FAST_LIVE_CACHE_FILE, "utf8"));
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch {
-    return {};
-  }
-}
-
-function mshFastWriteCache(cache) {
-  try {
-    fs.writeFileSync(MSH_FAST_LIVE_CACHE_FILE, JSON.stringify(cache, null, 2), "utf8");
-  } catch {}
-}
-
-function mshFastCleanHotels(hotels) {
-  return (Array.isArray(hotels) ? hotels : [])
-    .filter(Boolean)
-    .filter((hotel) => Number(hotel.price || hotel.convertedPrice || hotel.displayPrice || 0) > 0)
-    .slice(0, 80);
-}
-
-async function mshFastRefreshHotelCache(query) {
-  const key = mshFastCacheKey(query);
-  try {
-    const result = await hotelbedsAvailabilitySearch({ ...query, limit: 80 });
-    const hotels = mshFastCleanHotels(result.hotels || []);
-    if (!hotels.length) return;
-
-    const cache = mshFastReadCache();
-    cache[key] = {
-      timestamp: Date.now(),
-      hotels
-    };
-    mshFastWriteCache(cache);
-  } catch {}
-}
-
-app.get("/api/instant-live-hotels", async (req, res) => {
-  const query = req.query || {};
-  const key = mshFastCacheKey(query);
-  const cache = mshFastReadCache();
-  const cached = cache[key];
-  const maxAgeMs = 30 * 60 * 1000;
-
-  if (cached && Array.isArray(cached.hotels) && cached.hotels.length && Date.now() - Number(cached.timestamp || 0) < maxAgeMs) {
-    setImmediate(() => mshFastRefreshHotelCache(query));
-    return res.json({
-      ok: true,
-      source: "instant_live_cache",
-      cached: true,
-      count: cached.hotels.length,
-      hotels: cached.hotels
-    });
-  }
-
-  const timeout = new Promise((resolve) => setTimeout(() => resolve(null), 1000));
-  const live = await Promise.race([
-    hotelbedsAvailabilitySearch({ ...query, limit: 80 }).catch(() => null),
-    timeout
-  ]);
-
-  const liveHotels = mshFastCleanHotels(live?.hotels || []);
-
-  if (liveHotels.length) {
-    cache[key] = {
-      timestamp: Date.now(),
-      hotels: liveHotels
-    };
-    mshFastWriteCache(cache);
-
-    return res.json({
-      ok: true,
-      source: "instant_live_supplier",
-      cached: false,
-      count: liveHotels.length,
-      hotels: liveHotels
-    });
-  }
-
-  setImmediate(() => mshFastRefreshHotelCache(query));
-
-  return res.json({
-    ok: true,
-    source: "instant_live_pending",
-    cached: false,
-    count: 0,
-    hotels: [],
-    message: "Live hotel availability is being refreshed. Please search again shortly."
-  });
-});
-// MSH INSTANT LIVE HOTEL CACHE END
-
 // MSH REAL MULTI SUPPLIER ORCHESTRATOR START
 function mergeUniqueHotelsByKey(hotels) {
   const seen = new Set();
@@ -6256,24 +5970,6 @@ function hotelbedsSignature() {
 function hotelbedsDestinationCode(country, city) {
   const wantedCountry = clean(country).toLowerCase();
   const wantedCity = clean(city).toLowerCase();
-
-  const forcedDestination = {
-    "united kingdom|london": "LON",
-    "london": "LON",
-    "united states|los angeles": "LAX",
-    "los angeles": "LAX",
-    "united states|new york": "NYC",
-    "new york": "NYC",
-    "france|paris": "PAR",
-    "paris": "PAR",
-    "united arab emirates|dubai": "DXB",
-    "dubai": "DXB",
-    "united arab emirates|abu dhabi": "AUH",
-    "abu dhabi": "AUH"
-  };
-
-  if (forcedDestination[`${wantedCountry}|${wantedCity}`]) return forcedDestination[`${wantedCountry}|${wantedCity}`];
-  if (forcedDestination[wantedCity]) return forcedDestination[wantedCity];
 
   try {
     const map = JSON.parse(process.env.HOTELBEDS_DESTINATIONS || "{}");
@@ -6448,7 +6144,7 @@ async function hotelbedsAvailabilitySearch(query) {
     stay: { checkIn, checkOut },
     occupancies: [{ rooms, adults: guests, children: 0 }],
     destination: { code: destination },
-    filter: { maxHotels: Math.max(1, Math.min(Number(query.limit || 40), 60)) }
+    filter: { maxHotels: Math.max(1, Math.min(Number(query.limit || 100), 1000)) }
   };
 
   const response = await fetch(`${cfg.baseUrl}/hotel-api/1.0/hotels`, {
@@ -6571,11 +6267,200 @@ app.get("/api/hotelbeds/availability", async (req, res) => {
 });
 // MSH HOTELBEDS LIVE CONNECTOR END
 
+
+// MSH FAST CUSTOMER LIVE SEARCH CACHE START
+const MSH_FAST_LIVE_CACHE_FILE = path.join(DATA_DIR, "fast_live_rate_cache.json");
+ensureFile(MSH_FAST_LIVE_CACHE_FILE, {});
+
+function mshFastNormText(value) {
+  return clean(value).toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function mshFastCanonicalCountry(value) {
+  const v = mshFastNormText(value);
+  if (["uk", "gb", "great britain", "england", "united kingdom"].includes(v)) return "United Kingdom";
+  if (["us", "usa", "america", "united states", "united states of america"].includes(v)) return "United States";
+  if (["uae", "united arab emirates"].includes(v)) return "United Arab Emirates";
+  return clean(value);
+}
+
+function mshFastCanonicalCity(value) {
+  const v = mshFastNormText(value);
+  if (["greater london", "city of london", "london uk", "london england", "london"].includes(v)) return "London";
+  if (["la", "los angeles", "los angeles ca"].includes(v)) return "Los Angeles";
+  if (["nyc", "new york city", "new york"].includes(v)) return "New York";
+  if (["dubai"].includes(v)) return "Dubai";
+  if (["abu dhabi", "abudhabi"].includes(v)) return "Abu Dhabi";
+  return clean(value);
+}
+
+function mshFastCacheKey(query, includeDates = true) {
+  const parts = [
+    mshFastCanonicalCountry(query.country || "").toLowerCase(),
+    mshFastCanonicalCity(query.city || query.destination || "").toLowerCase(),
+    clean(query.currency || "GBP").toUpperCase(),
+    clean(query.guests || "2"),
+    clean(query.rooms || "1")
+  ];
+  if (includeDates) {
+    parts.splice(2, 0,
+      clean(query.checkIn || query.checkin || query.check_in || ""),
+      clean(query.checkOut || query.checkout || query.check_out || "")
+    );
+  }
+  return parts.join("|");
+}
+
+function mshFastReadCache() {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(MSH_FAST_LIVE_CACHE_FILE, "utf8"));
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function mshFastWriteCache(cache) {
+  try {
+    fs.writeFileSync(MSH_FAST_LIVE_CACHE_FILE, JSON.stringify(cache, null, 2), "utf8");
+  } catch {}
+}
+
+function mshFastCleanHotels(hotels, query) {
+  const wantedCountry = mshFastCanonicalCountry(query.country || "");
+  const wantedCity = mshFastCanonicalCity(query.city || query.destination || "");
+  const seen = new Set();
+
+  return (Array.isArray(hotels) ? hotels : [])
+    .filter(Boolean)
+    .map((hotel) => ({
+      ...hotel,
+      country: clean(hotel.country || wantedCountry),
+      city: clean(hotel.city || hotel.destination || wantedCity),
+      image: clean(hotel.image || hotel.image_url || hotel.photo || hotel.thumbnail || ""),
+      images: Array.isArray(hotel.images) ? hotel.images : (hotel.image ? [hotel.image] : [])
+    }))
+    .filter((hotel) => {
+      const price = number(hotel.price || hotel.convertedPrice || hotel.displayPrice || hotel.total || 0);
+      const name = clean(hotel.name || hotel.hotel_name || "");
+      const source = clean([hotel.source, hotel.supplierLabel, hotel.supplier_private?.supplier_code].join(" ")).toLowerCase();
+      if (!(price > 0)) return false;
+      if (!name || /^hotel\s+\d+$/i.test(name) || /^webbeds property\s+\d+$/i.test(name) || /placeholder|sample|demo|fake|test hotel/i.test(name)) return false;
+      if (!(source.includes("hotelbeds") || source.includes("webbeds") || source.includes("ratehawk") || source.includes("live"))) return false;
+      const key = clean(hotel.hotelId || hotel.hotel_id || hotel.id || hotel.code || `${name}-${hotel.city}-${hotel.country}`).toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => number(a.price || a.convertedPrice || 0) - number(b.price || b.convertedPrice || 0))
+    .slice(0, Math.max(1, Math.min(Number(query.limit || 60), 120)));
+}
+
+async function mshFastSupplierSearch(query) {
+  const normalizedQuery = {
+    ...query,
+    country: mshFastCanonicalCountry(query.country || ""),
+    city: mshFastCanonicalCity(query.city || query.destination || "")
+  };
+
+  let hotelbedsHotels = [];
+  try {
+    const hb = await hotelbedsAvailabilitySearch({ ...normalizedQuery, limit: Math.max(20, Math.min(Number(query.limit || 60), 120)) });
+    hotelbedsHotels = Array.isArray(hb.hotels) ? hb.hotels : [];
+  } catch {}
+
+  let webbedsHotels = [];
+  try {
+    const cityId = findWebbedsCityCodeFromCache(normalizedQuery.city) || webbedsCityIdFromName(normalizedQuery.city);
+    if (cityId && typeof buildWebbedsSearchXml === "function") {
+      const currency = clean(normalizedQuery.currency || "GBP").toUpperCase();
+      const built = buildWebbedsSearchXml({
+        ...normalizedQuery,
+        cityId,
+        currencyId: webbedsCurrencyIdFromCode(currency),
+        nationalityId: webbedsCountryIdFromCode(normalizedQuery.nationality || "GB"),
+        residenceId: webbedsCountryIdFromCode(normalizedQuery.residence || "GB")
+      });
+      if (built.ok) {
+        const result = await webbedsPostXml(built.xml);
+        webbedsHotels = parseWebbedsHotels(result.text, currency).map((hotel) => ({
+          ...hotel,
+          city: normalizedQuery.city,
+          country: normalizedQuery.country,
+          source: "webbeds_live_supplier",
+          supplierLabel: "WebBeds live rate",
+          supplier_private: { ...(hotel.supplier_private || {}), supplier_code: "WEBBEDS" }
+        }));
+      }
+    }
+  } catch {}
+
+  return mshFastCleanHotels([...hotelbedsHotels, ...webbedsHotels], normalizedQuery);
+}
+
+async function mshFastRefreshHotelCache(query) {
+  const exactKey = mshFastCacheKey(query, true);
+  const cityKey = mshFastCacheKey(query, false);
+  const hotels = await mshFastSupplierSearch(query);
+  if (!hotels.length) return hotels;
+  const cache = mshFastReadCache();
+  const row = { timestamp: Date.now(), generated_at: nowISO(), hotels };
+  cache[exactKey] = row;
+  cache[cityKey] = row;
+  mshFastWriteCache(cache);
+  return hotels;
+}
+
+app.get("/api/instant-live-hotels", async (req, res) => {
+  const query = req.query || {};
+  const exactKey = mshFastCacheKey(query, true);
+  const cityKey = mshFastCacheKey(query, false);
+  const cache = mshFastReadCache();
+  const maxExactAge = 15 * 60 * 1000;
+  const maxCityAge = 45 * 60 * 1000;
+  const exact = cache[exactKey];
+  const cityCached = cache[cityKey];
+
+  if (exact && Array.isArray(exact.hotels) && exact.hotels.length && Date.now() - Number(exact.timestamp || 0) < maxExactAge) {
+    setImmediate(() => mshFastRefreshHotelCache(query).catch(() => {}));
+    return res.json({ ok: true, source: "instant_live_cache", cached: true, count: exact.hotels.length, hotels: exact.hotels });
+  }
+
+  if (cityCached && Array.isArray(cityCached.hotels) && cityCached.hotels.length && Date.now() - Number(cityCached.timestamp || 0) < maxCityAge) {
+    setImmediate(() => mshFastRefreshHotelCache(query).catch(() => {}));
+    return res.json({ ok: true, source: "instant_city_cache_background_refresh", cached: true, count: cityCached.hotels.length, hotels: cityCached.hotels });
+  }
+
+  const liveOrTimeout = await Promise.race([
+    mshFastRefreshHotelCache(query).catch(() => []),
+    new Promise((resolve) => setTimeout(() => resolve([]), 3500))
+  ]);
+
+  if (Array.isArray(liveOrTimeout) && liveOrTimeout.length) {
+    return res.json({ ok: true, source: "instant_live_supplier", cached: false, count: liveOrTimeout.length, hotels: liveOrTimeout });
+  }
+
+  return res.json({
+    ok: true,
+    source: "instant_live_refreshing",
+    cached: false,
+    count: 0,
+    hotels: [],
+    message: "Live rates are being refreshed for this destination. Please search again shortly."
+  });
+});
+// MSH FAST CUSTOMER LIVE SEARCH CACHE END
+
 app.get("/api/multi-supplier-hotels", async (req, res) => {
   try {
     const query = new URLSearchParams(req.query).toString();
 
-    const localHotels = [];
+    const localUrl = `http://127.0.0.1:${PORT}/search?${query}`;
+    const localResult = await fetch(localUrl, { cache: "no-store" })
+      .then((r) => r.json())
+      .catch(() => ({ hotels: [] }));
+
+    const localHotels = Array.isArray(localResult.hotels) ? localResult.hotels : [];
 
     let hotelbedsHotels = [];
     try {
@@ -6677,8 +6562,7 @@ app.get("/api/multi-supplier-hotels", async (req, res) => {
         /^Live supplier property/i.test(displayName) ||
         /^Hotel\s+\d+$/i.test(displayName) ||
         /^\d+$/.test(displayName) ||
-        /placeholder|sample|demo|fake|test hotel|webbeds property/i.test(displayName) ||
-        (/villa|vacation|private home|apartment|apartments|residence|condo|studio|loft|rental/i.test(displayName) && !/hotel|inn|motel|resort|suite|suites|aparthotel|serviced apartment/i.test(displayName));
+        /placeholder|sample|demo|fake|test hotel/i.test(displayName);
 
       return livePrice > 0 && hotel.availableToBook !== false && isVerifiedSupplier && !badName;
     });
@@ -8010,6 +7894,173 @@ app.get("/api/live-rate-correct-source", async (req, res) => {
   }
 });
 
+
+
+// MSH STRICT LIVE DESTINATION LOCATION FIX START
+const MSH_STRICT_LIVE_DESTINATIONS = [
+  { country: "United Kingdom", cities: ["London"] },
+  { country: "United States", cities: ["Los Angeles", "New York"] },
+  { country: "United Arab Emirates", cities: ["Dubai", "Abu Dhabi"] },
+  { country: "France", cities: ["Paris"] },
+  { country: "Nigeria", cities: ["Lagos", "Abuja"] }
+];
+
+function mshStrictNorm(v) {
+  return String(v || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function mshStrictDisplayCity(country, city) {
+  const c = mshStrictNorm(country);
+  const q = mshStrictNorm(city);
+
+  const aliases = {
+    "united kingdom|london": "London",
+    "united kingdom|greater london": "London",
+    "united kingdom|city of london": "London",
+    "united states|los angeles": "Los Angeles",
+    "united states|la": "Los Angeles",
+    "united states|new york": "New York",
+    "united states|nyc": "New York",
+    "united arab emirates|dubai": "Dubai",
+    "united arab emirates|abu dhabi": "Abu Dhabi",
+    "france|paris": "Paris",
+    "nigeria|lagos": "Lagos",
+    "nigeria|abuja": "Abuja"
+  };
+
+  return aliases[`${c}|${q}`] || city;
+}
+
+function mshStrictCountryCityAllowed(country, city) {
+  const c = mshStrictNorm(country);
+  const q = mshStrictNorm(mshStrictDisplayCity(country, city));
+
+  return MSH_STRICT_LIVE_DESTINATIONS.some((item) => {
+    if (mshStrictNorm(item.country) !== c) return false;
+    return item.cities.some((x) => mshStrictNorm(x) === q);
+  });
+}
+
+function mshStrictCleanHotelForQuery(hotel, query) {
+  const country = String(query.country || "").trim();
+  const city = mshStrictDisplayCity(country, query.city || "");
+
+  const price = Number(
+    hotel?.price ||
+    hotel?.convertedPrice ||
+    hotel?.displayPrice ||
+    hotel?.selectedRoom?.price ||
+    hotel?.selectedRoom?.convertedPrice ||
+    hotel?.rooms?.[0]?.price ||
+    hotel?.rooms?.[0]?.convertedPrice ||
+    0
+  );
+
+  const sourceText = mshStrictNorm([
+    hotel?.source,
+    hotel?.sourceType,
+    hotel?.supplier,
+    hotel?.supplierLabel,
+    hotel?.internalSupplierSettlement?.supplier,
+    hotel?.supplier_private?.supplier_code
+  ].join(" "));
+
+  const realLiveSource =
+    sourceText.includes("hotelbeds") ||
+    sourceText.includes("webbeds") ||
+    sourceText.includes("ratehawk") ||
+    sourceText.includes("worldota") ||
+    sourceText.includes("live supplier");
+
+  if (!realLiveSource || !Number.isFinite(price) || price <= 0) return null;
+
+  return {
+    ...hotel,
+    country,
+    city,
+    destination: city,
+    location: {
+      ...(hotel.location || {}),
+      country,
+      city
+    },
+    price,
+    convertedPrice: price,
+    displayPrice: price,
+    currency: String(hotel.currency || hotel.displayCurrency || query.currency || "GBP").toUpperCase(),
+    displayCurrency: String(hotel.displayCurrency || hotel.currency || query.currency || "GBP").toUpperCase(),
+    availableToBook: true,
+    customerBadge: "Live hotel rate",
+    availabilityMode: "live_rate"
+  };
+}
+
+app.get("/api/public-countries", (req, res) => {
+  res.json({
+    ok: true,
+    count: MSH_STRICT_LIVE_DESTINATIONS.length,
+    countries: MSH_STRICT_LIVE_DESTINATIONS
+  });
+});
+
+app.get("/api/countries", (req, res) => {
+  res.json({
+    ok: true,
+    count: MSH_STRICT_LIVE_DESTINATIONS.length,
+    countries: MSH_STRICT_LIVE_DESTINATIONS
+  });
+});
+
+app.get("/api/strict-live-hotels", async (req, res) => {
+  try {
+    const country = String(req.query.country || "").trim();
+    const city = mshStrictDisplayCity(country, String(req.query.city || "").trim());
+
+    if (!country || !city || !mshStrictCountryCityAllowed(country, city)) {
+      return res.json({
+        ok: true,
+        source: "strict_live_location_filter",
+        count: 0,
+        hotels: [],
+        message: "This destination is not yet enabled for verified live rates."
+      });
+    }
+
+    let result = { hotels: [] };
+
+    if (typeof hotelbedsAvailabilitySearch === "function") {
+      result = await hotelbedsAvailabilitySearch({
+        ...req.query,
+        country,
+        city,
+        currency: req.query.currency || "GBP",
+        limit: 80
+      });
+    }
+
+    const hotels = (Array.isArray(result.hotels) ? result.hotels : [])
+      .map((h) => mshStrictCleanHotelForQuery(h, { ...req.query, country, city }))
+      .filter(Boolean)
+      .slice(0, 80);
+
+    return res.json({
+      ok: true,
+      source: "strict_hotelbeds_live",
+      count: hotels.length,
+      hotels,
+      suppliers: { hotelbeds: hotels.length }
+    });
+  } catch (err) {
+    return res.json({
+      ok: false,
+      source: "strict_hotelbeds_live",
+      count: 0,
+      hotels: [],
+      message: err.message || "Live hotel search failed."
+    });
+  }
+});
+// MSH STRICT LIVE DESTINATION LOCATION FIX END
 
 app.listen(PORT, "0.0.0.0", () => {
   const destinations = buildDestinations();
