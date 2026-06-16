@@ -1,0 +1,46 @@
+﻿{
+  "updatedAt": "2026-06-16",
+  "note": "Only mapped destinations should be treated as live-rate ready. HyperGuest remains disabled until integration details arrive.",
+  "destinations": [
+    {
+      "country": "United Kingdom",
+      "city": "London",
+      "hotelbeds": { "destinationCode": "LON", "enabled": true },
+      "webbeds": { "enabled": true },
+      "ratehawk": { "enabled": false },
+      "hyperguest": { "enabled": false, "status": "waiting_for_integration_details" }
+    },
+    {
+      "country": "United States",
+      "city": "Los Angeles",
+      "hotelbeds": { "destinationCode": "LAX", "enabled": true },
+      "webbeds": { "enabled": true },
+      "ratehawk": { "enabled": false },
+      "hyperguest": { "enabled": false, "status": "waiting_for_integration_details" }
+    },
+    {
+      "country": "United States",
+      "city": "New York",
+      "hotelbeds": { "destinationCode": "NYC", "enabled": true },
+      "webbeds": { "enabled": true },
+      "ratehawk": { "enabled": false },
+      "hyperguest": { "enabled": false, "status": "waiting_for_integration_details" }
+    },
+    {
+      "country": "United Arab Emirates",
+      "city": "Dubai",
+      "hotelbeds": { "destinationCode": "DXB", "enabled": true },
+      "webbeds": { "enabled": true },
+      "ratehawk": { "enabled": false },
+      "hyperguest": { "enabled": false, "status": "waiting_for_integration_details" }
+    },
+    {
+      "country": "France",
+      "city": "Paris",
+      "hotelbeds": { "destinationCode": "PAR", "enabled": true },
+      "webbeds": { "enabled": true },
+      "ratehawk": { "enabled": false },
+      "hyperguest": { "enabled": false, "status": "waiting_for_integration_details" }
+    }
+  ]
+}
