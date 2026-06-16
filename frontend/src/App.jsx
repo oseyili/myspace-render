@@ -1,40 +1,4 @@
-﻿
-// MSH INTELLIGENT COUNTRY CITY VALIDATION START
-function mshCleanText(value) {
-  return String(value || "").trim();
-}
-
-function mshNormText(value) {
-  return mshCleanText(value).toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
-}
-
-function mshFindCountryRecord(countries, country) {
-  const wanted = mshNormText(country);
-  return (Array.isArray(countries) ? countries : []).find((item) => mshNormText(item.country) === wanted) || null;
-}
-
-function mshCitiesForCountry(countries, country) {
-  const found = mshFindCountryRecord(countries, country);
-  return Array.isArray(found?.cities) ? found.cities : [];
-}
-
-function mshIsValidCountryCity(countries, country, city) {
-  const cities = mshCitiesForCountry(countries, country);
-  const wantedCity = mshNormText(city);
-  return Boolean(wantedCity && cities.some((x) => mshNormText(x) === wantedCity));
-}
-
-function mshCountryCityWarning(countries, country, city) {
-  if (!country) return "Please choose a country first.";
-  if (!city) return "Please choose a city for the selected country.";
-  if (!mshIsValidCountryCity(countries, country, city)) {
-    return `${city} is not listed under ${country}. Please choose a city from the ${country} city list.`;
-  }
-  return "";
-}
-// MSH INTELLIGENT COUNTRY CITY VALIDATION END
-
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import ExperiencePage from "./ExperiencePage";
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
@@ -492,13 +456,6 @@ const [currentPage, setCurrentPage] = useState("home");
   }
 
   async function searchHotels() {
-    const cityWarning = mshCountryCityWarning(countries, form.country, form.city);
-    if (cityWarning) {
-      setNotice(cityWarning);
-      setHotels([]);
-      setSelectedHotel(null);
-      return;
-    }
     setNotice("");
     setSelectedHotel(null);
     setHotels([]);
@@ -514,7 +471,7 @@ const [currentPage, setCurrentPage] = useState("home");
     }
 
     try {
-      setLoading(true);
+      setHotels([]); setSelectedHotel(null); setLoading(true);
 
       const params = new URLSearchParams({
         country,
@@ -1135,7 +1092,7 @@ function SearchBox(props) {
           }}
         >
           <option value="">{props.country ? "Select city" : "Select country first"}</option>
-          {mshCitiesForCountry(props.countries, props.country).map((item) => (
+          {(props.countries.find((x) => x.country === props.country)?.cities || []).map((item) => (
             <option key={item} value={item}>{item}</option>
           ))}
         </select>
@@ -1950,7 +1907,7 @@ function PartnersPortal() {
           <input style={styles.input} placeholder="Phone number" value={form.phone} onChange={(e) => updateField("phone", e.target.value)} />
           <input style={styles.input} placeholder="Website" value={form.website} onChange={(e) => updateField("website", e.target.value)} />
           <input style={styles.input} placeholder="Company address" value={form.companyAddress} onChange={(e) => updateField("companyAddress", e.target.value)} />
-          <input style={styles.input} placeholder="Country / main operating market" value={form.country} onChange={(e) => { const nextCountry = e.target.value; updateField("country", nextCountry); updateField("city", ""); }} />
+          <input style={styles.input} placeholder="Country / main operating market" value={form.country} onChange={(e) => updateField("country", e.target.value); setHotels([]); setSelectedHotel(null); setNotice("")} />
 
           <select style={styles.input} value={form.partnershipType} onChange={(e) => updateField("partnershipType", e.target.value)}>
             <option>Hotel or accommodation provider</option>
