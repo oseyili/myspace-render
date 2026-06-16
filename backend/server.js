@@ -6451,6 +6451,167 @@ app.get("/api/instant-live-hotels", async (req, res) => {
 });
 // MSH FAST CUSTOMER LIVE SEARCH CACHE END
 
+
+// MSH SAFE SUPPLIER CONNECTIVITY PATCH START
+function mshSafeNorm(v) {
+  return String(v || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function mshSafeSameCountry(a, b) {
+  const x = mshSafeNorm(a);
+  const y = mshSafeNorm(b);
+  if (!x || !y) return false;
+  if (x === y) return true;
+  if (x === "united kingdom" && ["uk", "gb", "great britain", "england"].includes(y)) return true;
+  if (y === "united kingdom" && ["uk", "gb", "great britain", "england"].includes(x)) return true;
+  if (x === "united states" && ["usa", "us", "united states of america"].includes(y)) return true;
+  if (y === "united states" && ["usa", "us", "united states of america"].includes(x)) return true;
+  return false;
+}
+
+function mshSafeSameCity(a, b) {
+  const x = mshSafeNorm(a);
+  const y = mshSafeNorm(b);
+  if (!x || !y) return false;
+  if (x === y) return true;
+  if (x.includes(y) || y.includes(x)) return true;
+  return false;
+}
+
+function mshSafeSource(hotel) {
+  return mshSafeNorm([
+    hotel.source,
+    hotel.supplier,
+    hotel.supplierLabel,
+    hotel.provider,
+    hotel._supplier_name,
+    hotel._supplier_code,
+    hotel.supplier_private && hotel.supplier_private.supplier_code
+  ].filter(Boolean).join(" "));
+}
+
+function mshSafeIsLiveSupplierHotel(hotel) {
+  const src = mshSafeSource(hotel);
+  return (
+    src.includes("webbeds") ||
+    src.includes("hotelbeds") ||
+    src.includes("ratehawk") ||
+    src.includes("worldota") ||
+    src.includes("hyperguest")
+  );
+}
+
+function mshSafePrice(hotel) {
+  return Number(
+    hotel.price ||
+    hotel.convertedPrice ||
+    hotel.displayPrice ||
+    hotel.rooms?.[0]?.price ||
+    hotel.rooms?.[0]?.convertedPrice ||
+    0
+  );
+}
+
+function mshSafePublicHotel(hotel, queryCountry, queryCity, queryCurrency) {
+  const price = mshSafePrice(hotel);
+  if (!Number.isFinite(price) || price <= 0) return null;
+  if (!mshSafeIsLiveSupplierHotel(hotel)) return null;
+  if (!mshSafeSameCountry(hotel.country || hotel.location?.country, queryCountry)) return null;
+  if (!mshSafeSameCity(hotel.city || hotel.location?.city || hotel.destination, queryCity)) return null;
+
+  const currency = String(hotel.displayCurrency || hotel.currency || queryCurrency || "GBP").toUpperCase();
+
+  return {
+    ...hotel,
+    country: queryCountry,
+    city: queryCity,
+    destination: queryCity,
+    price,
+    convertedPrice: price,
+    displayPrice: price,
+    currency,
+    displayCurrency: currency,
+    availableToBook: true,
+    source_health: "verified",
+    customerBadge: "Live hotel rate"
+  };
+}
+
+function mshSafeSupplierCounts(hotels) {
+  const out = { hotelbeds: 0, webbeds: 0, ratehawk: 0, hyperguest: 0 };
+  for (const h of hotels || []) {
+    const src = mshSafeSource(h);
+    if (src.includes("hotelbeds")) out.hotelbeds += 1;
+    else if (src.includes("webbeds")) out.webbeds += 1;
+    else if (src.includes("ratehawk") || src.includes("worldota")) out.ratehawk += 1;
+    else if (src.includes("hyperguest")) out.hyperguest += 1;
+  }
+  return out;
+}
+
+function mshSafeMultiSupplierResponseGuard(req, res, next) {
+  const originalJson = res.json.bind(res);
+
+  res.json = function guardedJson(body) {
+    try {
+      if (body && Array.isArray(body.hotels)) {
+        const country = clean(req.query.country);
+        const city = clean(req.query.city);
+        const currency = clean(req.query.currency || "GBP").toUpperCase();
+
+        const seen = new Set();
+        const hotels = body.hotels
+          .map((hotel) => mshSafePublicHotel(hotel, country, city, currency))
+          .filter(Boolean)
+          .filter((hotel) => {
+            const key = mshSafeNorm(`${hotel.name || hotel.hotel_name}|${hotel.country}|${hotel.city}|${hotel.price}`);
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+
+        body.hotels = hotels;
+        body.count = hotels.length;
+        body.suppliers = {
+          ...(body.suppliers || {}),
+          ...mshSafeSupplierCounts(hotels)
+        };
+
+        if (!hotels.length) {
+          body.message = `No verified live hotel rates were returned for ${city}, ${country}. Try a nearby major city or check that supplier city maps are loaded.`;
+        }
+      }
+    } catch (err) {
+      body = {
+        ok: false,
+        count: 0,
+        hotels: [],
+        message: "Live hotel results could not be safely verified."
+      };
+    }
+
+    return originalJson(body);
+  };
+
+  next();
+}
+
+app.get("/api/health", (req, res) => {
+  res.json({
+    ok: true,
+    service: "MySpace Hotel",
+    timestamp: nowISO(),
+    suppliers: {
+      webbedsReady: Boolean(process.env.WEBBEDS_USERNAME || process.env.WEBBEDS_API_KEY || process.env.WEBBEDS_USER),
+      hotelbedsReady: Boolean(process.env.HOTELBEDS_API_KEY && process.env.HOTELBEDS_SECRET),
+      ratehawkReady: Boolean(process.env.RATEHAWK_ENABLED && process.env.RATEHAWK_KEY_ID && process.env.RATEHAWK_KEY_TOKEN),
+      hyperguestReady: Boolean(process.env.HYPERGUEST_API_KEY || process.env.HYPERGUEST_TOKEN)
+    }
+  });
+});
+// MSH SAFE SUPPLIER CONNECTIVITY PATCH END
+
+app.use("/api/multi-supplier-hotels", mshSafeMultiSupplierResponseGuard);
 app.get("/api/multi-supplier-hotels", async (req, res) => {
   try {
     const query = new URLSearchParams(req.query).toString();
@@ -8293,6 +8454,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
