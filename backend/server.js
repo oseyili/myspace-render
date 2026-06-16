@@ -6612,6 +6612,70 @@ app.get("/api/health", (req, res) => {
 // MSH SAFE SUPPLIER CONNECTIVITY PATCH END
 
 app.use("/api/multi-supplier-hotels", mshSafeMultiSupplierResponseGuard);
+
+// MSH WRONG LOCATION HOTEL BLOCKER START
+function mshBlockerNorm(v) {
+  return String(v || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+}
+
+const MSH_MAJOR_DESTINATION_WORDS = [
+  "london", "wembley", "shepherds bush", "st pauls", "piccadilly", "kensington", "hammersmith",
+  "new york", "brooklyn", "manhattan", "greenwich village",
+  "los angeles", "anaheim", "venice beach", "hollywood", "beverly",
+  "dubai", "abu dhabi", "paris", "lagos", "abuja"
+];
+
+function mshLooksWrongForDestination(hotel, country, city) {
+  const wantedCity = mshBlockerNorm(city);
+  const wantedCountry = mshBlockerNorm(country);
+  const name = mshBlockerNorm(hotel.name || hotel.hotel_name || "");
+  const address = mshBlockerNorm(hotel.address || hotel.area || "");
+
+  if (!wantedCity || !wantedCountry) return true;
+
+  const hotelCountry = mshBlockerNorm(hotel.country || hotel.location?.country || "");
+  const hotelCity = mshBlockerNorm(hotel.city || hotel.location?.city || hotel.destination || "");
+
+  if (hotelCountry && hotelCountry !== wantedCountry) return true;
+  if (hotelCity && hotelCity !== wantedCity && !hotelCity.includes(wantedCity) && !wantedCity.includes(hotelCity)) return true;
+
+  for (const word of MSH_MAJOR_DESTINATION_WORDS) {
+    const w = mshBlockerNorm(word);
+    if (w === wantedCity) continue;
+    if (name.includes(w) || address.includes(w)) return true;
+  }
+
+  return false;
+}
+
+function mshInstallWrongLocationBlocker(req, res, next) {
+  const originalJson = res.json.bind(res);
+
+  res.json = function safeLocationJson(body) {
+    try {
+      if (body && Array.isArray(body.hotels)) {
+        const country = String(req.query.country || "").trim();
+        const city = String(req.query.city || "").trim();
+
+        body.hotels = body.hotels.filter((hotel) => !mshLooksWrongForDestination(hotel, country, city));
+        body.count = body.hotels.length;
+
+        if (!body.count) {
+          body.message = `No verified live hotel rates were returned for ${city}, ${country}. Try a nearby major city.`;
+        }
+      }
+    } catch {
+      body = { ok: false, count: 0, hotels: [], message: "Hotel results could not be verified safely." };
+    }
+
+    return originalJson(body);
+  };
+
+  next();
+}
+// MSH WRONG LOCATION HOTEL BLOCKER END
+
+app.use("/api/multi-supplier-hotels", mshInstallWrongLocationBlocker);
 app.get("/api/multi-supplier-hotels", async (req, res) => {
   try {
     const query = new URLSearchParams(req.query).toString();
@@ -8454,6 +8518,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
