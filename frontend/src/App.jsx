@@ -160,6 +160,57 @@ function cleanList(list) {
   );
 }
 
+
+function mshNorm(value) {
+  return String(value || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function mshCountryRecord(countries, country) {
+  const wanted = mshNorm(country);
+  return (Array.isArray(countries) ? countries : []).find((item) => mshNorm(item.country) === wanted) || null;
+}
+
+function mshCitiesForCountry(countries, country) {
+  const found = mshCountryRecord(countries, country);
+  return cleanList(Array.isArray(found?.cities) ? found.cities : []);
+}
+
+function mshValidCountryCity(countries, country, city) {
+  if (!country || !city) return false;
+  const wantedCity = mshNorm(city);
+  return mshCitiesForCountry(countries, country).some((item) => mshNorm(item) === wantedCity);
+}
+
+function mshCustomerSafeHotelName(hotel) {
+  const name = String(hotel?.name || hotel?.hotel_name || "").trim();
+  if (!name) return "";
+  if (/^webbeds\s+property\s+\d+$/i.test(name)) return "";
+  if (/^hotelbeds\s+property\s+\d+$/i.test(name)) return "";
+  if (/^ratehawk\s+property\s+\d+$/i.test(name)) return "";
+  if (/^property\s+\d+$/i.test(name)) return "";
+  if (/^hotel\s+\d+$/i.test(name)) return "";
+  if (/^live\s+supplier\s+property/i.test(name)) return "";
+  return name;
+}
+
+function mshSameDestination(hotel, country, city) {
+  const hc = mshNorm(hotel?.country || hotel?.location?.country || "");
+  const hcity = mshNorm(hotel?.city || hotel?.destination || hotel?.location?.city || "");
+  const wc = mshNorm(country);
+  const wcity = mshNorm(city);
+  if (!hc || !hcity || !wc || !wcity) return false;
+  if (hc !== wc) return false;
+  return hcity === wcity || hcity.includes(wcity) || wcity.includes(hcity);
+}
+
+function mshUsableHotel(hotel, country, city) {
+  if (!hotel) return false;
+  if (!mshCustomerSafeHotelName(hotel)) return false;
+  if (!mshSameDestination(hotel, country, city)) return false;
+  if (hotel.availableToBook === false) return false;
+  return hotelPrice(hotel) > 0;
+}
+
 function normaliseCityName(value) {
   return String(value || "")
     .trim()
@@ -445,9 +496,9 @@ const [currentPage, setCurrentPage] = useState("home");
 
   async function loadDestinations() {
     try {
-      const res = await fetch(`${API_BASE}/api/global-countries`, { cache: "no-store" });
+      const res = await fetch(`${API_BASE}/destinations`, { cache: "no-store" });
       const data = await res.json();
-      const list = Array.isArray(data?.countries) ? data.countries : (Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
       setCountries(list);
       if (!list.length) setNotice("Destinations are being refreshed. Please try again shortly.");
     } catch {
@@ -465,13 +516,18 @@ const [currentPage, setCurrentPage] = useState("home");
       return;
     }
 
+    if (!mshValidCountryCity(countries, country, city)) {
+      setNotice(`${city} is not listed under ${country}. Please choose a city from the ${country} city list.`);
+      return;
+    }
+
     if (new Date(checkOut) <= new Date(checkIn)) {
       setNotice("Please choose a check-out date after your check-in date.");
       return;
     }
 
     try {
-      setHotels([]); setSelectedHotel(null); setLoading(true);
+      setLoading(true);
 
       const params = new URLSearchParams({
         country,
@@ -485,54 +541,27 @@ const [currentPage, setCurrentPage] = useState("home");
         guests: String(guests),
         rooms: String(rooms),
         currency,
-        limit: "60",
+        limit: "120",
       });
 
-      const endpoints = [`${API_BASE}/api/multi-supplier-hotels?${params.toString()}`];
+      const res = await fetch(`${API_BASE}/api/intelligent-hotels?${params.toString()}`, { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
 
-      const results = await Promise.allSettled(
-        endpoints.map((url) =>
-          fetch(url, { cache: "no-store" })
-            .then((res) => res.json())
-            .catch(() => ({ hotels: [] }))
-        )
-      );
-
-      const collected = [];
-
-      for (const result of results) {
-        if (result.status !== "fulfilled") continue;
-        const data = result.value || {};
-        if (Array.isArray(data.hotels)) collected.push(...data.hotels);
+      if (!res.ok || data?.ok === false) {
+        setNotice(data?.message || "Live hotel rates could not be loaded for this destination right now.");
+        setHotels([]);
+        return;
       }
 
-      const found = collected
-        .filter(Boolean)
-        .filter((hotel) => {
-          const hotelCountry = String(hotel.country || "").trim().toLowerCase();
-          const hotelCity = String(hotel.city || hotel.destination || "").trim().toLowerCase();
-          const wantedCountry = String(country || "").trim().toLowerCase();
-          const wantedCity = String(city || "").trim().toLowerCase();
-
-          if (wantedCountry && hotelCountry && hotelCountry !== wantedCountry) return false;
-
-          if (wantedCity && hotelCity) {
-            return (
-              hotelCity === wantedCity ||
-              hotelCity.includes(wantedCity) ||
-              wantedCity.includes(hotelCity)
-            );
-          }
-
-          return true;
-        })
+      const found = (Array.isArray(data.hotels) ? data.hotels : [])
+        .filter((hotel) => mshUsableHotel(hotel, country, city))
         .filter((hotel, index, list) => {
           const key = String(
             hotel?.hotelId ||
               hotel?.hotel_id ||
               hotel?.id ||
               hotel?.code ||
-              `${hotel?.name || hotel?.hotel_name || "hotel"}-${hotel?.city || ""}-${hotel?.country || ""}`
+              `${mshCustomerSafeHotelName(hotel)}-${hotel?.city || ""}-${hotel?.country || ""}-${hotelPrice(hotel)}`
           ).toLowerCase();
 
           return index === list.findIndex((x) => {
@@ -541,9 +570,8 @@ const [currentPage, setCurrentPage] = useState("home");
                 x?.hotel_id ||
                 x?.id ||
                 x?.code ||
-                `${x?.name || x?.hotel_name || "hotel"}-${x?.city || ""}-${x?.country || ""}`
+                `${mshCustomerSafeHotelName(x)}-${x?.city || ""}-${x?.country || ""}-${hotelPrice(x)}`
             ).toLowerCase();
-
             return xKey === key;
           });
         });
@@ -556,10 +584,11 @@ const [currentPage, setCurrentPage] = useState("home");
       }, 100);
 
       if (!found.length) {
-        setNotice(`No verified live hotel rates were returned for ${city}, ${country}. Try another nearby city or check that supplier city maps are loaded.`);
+        setNotice(data?.message || `No verified live hotel rates were returned for ${city}, ${country}. Try a nearby major city.`);
       }
     } catch {
       setNotice("We could not load hotels for this destination right now. Please try again.");
+      setHotels([]);
     } finally {
       setLoading(false);
     }
@@ -598,13 +627,13 @@ const [currentPage, setCurrentPage] = useState("home");
         guests: String(guests),
         rooms: String(rooms),
         currency,
-        limit: "1",
+        limit: "25",
       });
 
       const endpoints = [`${API_BASE}/api/live-rate-cascade?${params.toString()}`,`${API_BASE}/api/selected-hotel-live-rate?${params.toString()}`,
         `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
         `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
-        `${API_BASE}/api/multi-supplier-hotels?${params.toString()}`,
+        `${API_BASE}/api/intelligent-hotels?${params.toString()}`,
         `${API_BASE}/api/hotels/search?${params.toString()}`,
       ];
 
@@ -703,8 +732,7 @@ const [currentPage, setCurrentPage] = useState("home");
   function selectHotelAndRefreshLiveRates(hotelToSelect) {
     const readyHotel = selectedHotelWithRoom(hotelToSelect);
     setSelectedHotel(readyHotel);
-    setLiveRateLoading(false);
-    setLiveRateNotice("");
+    setLiveRateNotice("Selected live rate saved for checkout.");
   }
 
   async function secureReservation() {
@@ -1092,7 +1120,7 @@ function SearchBox(props) {
           }}
         >
           <option value="">{props.country ? "Select city" : "Select country first"}</option>
-          {(props.countries.find((x) => x.country === props.country)?.cities || []).map((item) => (
+          {mshCitiesForCountry(props.countries, props.country).map((item) => (
             <option key={item} value={item}>{item}</option>
           ))}
         </select>
@@ -1143,18 +1171,19 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, selectHotelAndRefre
   const total = price * Math.max(1, Number(rooms || 1)) * Math.max(1, Number(nights || 1));
   const selected = hotelKey(hotel) === hotelKey(selectedHotel);
   const image = validHotelImage(hotel);
+  const displayName = mshCustomerSafeHotelName(hotel) || "Verified hotel";
 
   return (
     <article style={selected ? styles.hotelCardSelected : styles.hotelCard}>
       {image ? (
-        <img src={image} alt={hotel.name || "Hotel"} style={styles.hotelImage} />
+        <img src={image} alt={displayName} style={styles.hotelImage} />
       ) : (
         <div style={styles.noImage}>Verified image unavailable</div>
       )}
 
       <div style={styles.hotelBody}>
         <div style={styles.greenBadge}>{selected ? "Selected Property" : "Recommended Property"}</div>
-        <h3 style={styles.hotelName}>{hotel.name || "Selected hotel"}</h3>
+        <h3 style={styles.hotelName}>{displayName}</h3>
         <div style={styles.muted}>{hotel.city || city}, {hotel.country || country}</div>
 
         <div style={styles.tagRow}>
@@ -1187,6 +1216,7 @@ function BookingSummary(props) {
       ) : (
         <>
           <h3 style={styles.selectedName}>{props.selectedHotel.name}</h3>
+          {props.liveRateLoading ? <div style={styles.softBox}>Checking current live rate for this hotel...</div> : null}
           {props.liveRateNotice ? <div style={styles.softBox}>{props.liveRateNotice}</div> : null}
           <div style={styles.muted}>{props.selectedHotel.city || props.city}, {props.selectedHotel.country || props.country}</div>
           <div style={styles.small}>Board Basis: {props.selectedRoomName}</div>
@@ -1907,7 +1937,7 @@ function PartnersPortal() {
           <input style={styles.input} placeholder="Phone number" value={form.phone} onChange={(e) => updateField("phone", e.target.value)} />
           <input style={styles.input} placeholder="Website" value={form.website} onChange={(e) => updateField("website", e.target.value)} />
           <input style={styles.input} placeholder="Company address" value={form.companyAddress} onChange={(e) => updateField("companyAddress", e.target.value)} />
-          <input style={styles.input} placeholder="Country / main operating market" value={form.country} onChange={(e) => updateField("country", e.target.value); setHotels([]); setSelectedHotel(null); setNotice("")} />
+          <input style={styles.input} placeholder="Country / main operating market" value={form.country} onChange={(e) => updateField("country", e.target.value)} />
 
           <select style={styles.input} value={form.partnershipType} onChange={(e) => updateField("partnershipType", e.target.value)}>
             <option>Hotel or accommodation provider</option>
@@ -2167,13 +2197,6 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
-
-
-
-
-
-
-
 
 
 
