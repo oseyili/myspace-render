@@ -251,40 +251,7 @@ function hotelPrice(hotel) {
 }
 
 function hotelCurrency(hotel, fallback = "GBP") {
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     hotel?.selectedRoom?.displayCurrency ||
     hotel?.currency ||
     hotel?.displayCurrency ||
@@ -306,40 +273,7 @@ function hotelRateSourceId(hotel) {
 }
 
 function hotelRateSourceTimestamp(hotel) {
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     hotel?.selectedRoom?.rate_source_timestamp ||
     hotel?.rate_source_timestamp ||
     hotel?.rooms?.[0]?.rate_source_timestamp ||
@@ -464,40 +398,7 @@ function KlookDynamicWidget({ city, country }) {
       "noopener,noreferrer"
     );
   };
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <section style={styles.klookPanel}>
       <div style={styles.panelHeader}>
         <div>
@@ -632,40 +533,7 @@ const [currentPage, setCurrentPage] = useState("home");
     const onHashChange = () => setRoute(currentRoute());
     window.addEventListener("hashchange", onHashChange);
     onHashChange();
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return () => window.removeEventListener("hashchange", onHashChange);
+return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
 
   useEffect(() => {
@@ -780,40 +648,7 @@ const [currentPage, setCurrentPage] = useState("home");
           if (wantedCountry && hotelCountry && hotelCountry !== wantedCountry) return false;
 
           if (wantedCity && hotelCity) {
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
               hotelCity === wantedCity ||
               hotelCity.includes(wantedCity) ||
               wantedCity.includes(hotelCity)
@@ -918,40 +753,7 @@ const [currentPage, setCurrentPage] = useState("home");
             const itemName = String(item?.name || item?.hotel_name || "").toLowerCase();
             const wantedId = String(selectedHotelId || "").toLowerCase();
             const wantedName = String(selectedHotelName || "").toLowerCase();
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
               (wantedId && itemId && itemId === wantedId) ||
               (wantedName && itemName && (itemName === wantedName || itemName.includes(wantedName) || wantedName.includes(itemName)))
             );
@@ -1184,40 +986,7 @@ const [currentPage, setCurrentPage] = useState("home");
     searchHotels,
     secureReservation,
   };
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <div style={styles.page}>
       <Header />
       {route === "hotels" && <HotelsPage {...appProps} />}
@@ -1264,40 +1033,7 @@ function InstallAppButton() {
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleInstalled);
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return () => {
+return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleInstalled);
     };
@@ -1315,40 +1051,7 @@ function InstallAppButton() {
   }
 
   if (installed) return null;
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <button
       type="button"
       onClick={installApp}
@@ -1369,40 +1072,7 @@ function InstallAppButton() {
   );
 }
 function Header() {
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <header style={styles.header}>
       <a style={styles.brand} href={routeUrl(ROUTES.hotels)}>
         <div style={styles.logo}>MYSPACE HOTEL</div>
@@ -1432,40 +1102,7 @@ function Header() {
 
 function HotelsPage(props) {
   const converted = convertCurrency(Number(props.fxAmount || 0), props.fxFrom, props.fxTo);
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <>
       <section style={styles.hero}>
         <div style={styles.heroInner}>
@@ -1551,40 +1188,7 @@ function HotelsPage(props) {
 }
 
 function SearchBox(props) {
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <>
       <Field label="Country">
         <select style={styles.input} value={props.country} onChange={(e) => {
@@ -1648,40 +1252,7 @@ function SearchBox(props) {
 }
 
 function Field({ label, children }) {
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <div style={styles.field}>
       <label style={styles.label}>{label}</label>
       {children}
@@ -1696,40 +1267,7 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, selectHotelAndRefre
   const total = price * Math.max(1, Number(rooms || 1)) * Math.max(1, Number(nights || 1));
   const selected = hotelKey(hotel) === hotelKey(selectedHotel);
   const image = validHotelImage(hotel);
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <article style={selected ? styles.hotelCardSelected : styles.hotelCard}>
       {image ? (
         <img src={image} alt={hotel.name || "Hotel"} style={styles.hotelImage} />
@@ -1760,40 +1298,7 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, selectHotelAndRefre
 }
 
 function BookingSummary(props) {
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <aside style={styles.summary}>
       <h2 style={styles.summaryTitle}>Booking Summary</h2>
       <div style={styles.muted}>
@@ -1843,40 +1348,7 @@ function BookingSummary(props) {
 
 function ComparePanel(props) {
   if (!props.selectedHotel) return null;
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <section style={styles.panel}>
       <div style={styles.panelHeader}>
         <div>
@@ -1909,40 +1381,7 @@ function AlternativeHotels(props) {
     .slice(0, 3);
 
   if (!props.selectedHotel || alternatives.length === 0) return null;
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <section style={styles.panel}>
       <div style={styles.kicker}>Available stays nearby</div>
       <h2 style={styles.titleSmall}>Other accommodation options in {props.city || "this destination"}</h2>
@@ -1953,40 +1392,7 @@ function AlternativeHotels(props) {
           const price = hotelPrice(selectedReadyHotel);
           const curr = hotelCurrency(selectedReadyHotel, props.currency);
           const image = validHotelImage(hotel);
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
             <article key={hotelKey(hotel) || idx} style={styles.altCard}>
               {image ? <img src={image} alt={hotel.name || "Hotel"} style={styles.altImage} /> : <div style={styles.altNoImage}>Image unavailable</div>}
               <div style={styles.altBody}>
@@ -2067,40 +1473,7 @@ function ComparePortal(props) {
   const bestCurrency = customerOffer?.currency || summary?.currency || selectedCurrency || "GBP";
   const hotelName = customerOffer?.hotelName || selectedHotelName || "Selected hotel";
   const roomName = customerOffer?.roomName || props.selectedRoomName || "Available room";
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <PortalShell title="Compare Prices" subtitle="Review your selected stay clearly before continuing to secure checkout." badge="Best price check">
       {!selected ? (
         <div style={styles.empty}>
@@ -2145,40 +1518,7 @@ function ComparePortal(props) {
 
 function RevenueAddOns(props) {
   if (!props.selectedHotel) return null;
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <section style={styles.panel}>
       <div style={styles.panelHeader}>
         <div>
@@ -2260,40 +1600,7 @@ function InsurancePortal(props) {
       setNotice("Insurance request could not be submitted right now.");
     }
   }
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <PortalShell title="Travel Insurance" subtitle="Add protection after choosing your stay, so your trip feels safer and easier to manage." badge="Trip protection">
       {notice ? <div style={styles.notice}>{notice}</div> : null}
       <div style={styles.cardGrid}>
@@ -2368,40 +1675,7 @@ function TransfersPortal(props) {
       setNotice("Transfer request could not be submitted right now.");
     }
   }
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <PortalShell title="Arrive Comfortably at Your Hotel" subtitle="Request airport pickup or hotel drop-off support around your selected stay." badge="Hotel Airport Transfers">
       {notice ? <div style={styles.notice}>{notice}</div> : null}
       <div style={styles.cardGrid}>
@@ -2427,40 +1701,7 @@ function AttractionsPortal(props) {
   const country = selected?.country || props.country || "";
   const query = [city, country].filter(Boolean).join(", ");
   const destinationReady = Boolean(city);
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <PortalShell
       title="Popular Experiences & Travel Essentials"
       subtitle={
@@ -2562,40 +1803,7 @@ function FeaturedHotelsPortal() {
       setNotice("Featured hotel request could not be submitted right now.");
     }
   }
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <PortalShell title="Hotel Partner Visibility" subtitle="Accommodation providers can request partnership and visibility opportunities with MySpace Hotel." badge="Hotel growth">
       <div style={styles.cardGrid}>
         <InfoCard title="Starter Visibility Request" text="Request introductory visibility for your property. Commercial terms are confirmed after review." />
@@ -2627,40 +1835,7 @@ function FeaturedHotelsPortal() {
 
 function GuidePortal({ destinationQuery }) {
   const query = destinationQuery || "selected destination";
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <PortalShell title="Destination Guide" subtitle="Plan safer and more enjoyable trips with practical destination support." badge="Travel planning">
       <div style={styles.cardGrid}>
         <GuideCard title="Emergency help" text="Find local police, ambulance, fire service and urgent assistance." href={mapSearch("emergency services", query)} />
@@ -2675,40 +1850,7 @@ function GuidePortal({ destinationQuery }) {
 }
 
 function AboutPortal() {
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <PortalShell title="About MySpace Hotel" subtitle="A customer-first accommodation platform built for clear choices, trusted stays and better travel planning." badge="About us">
       <div style={styles.cardGrid}>
         <InfoCard title="Who we serve" text="MySpace Hotel supports holidaymakers, business travellers, families and guests looking for clear accommodation choices." />
@@ -2721,40 +1863,7 @@ function AboutPortal() {
 }
 
 function FaqPortal() {
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <PortalShell title="Frequently Asked Questions" subtitle="Answers to common questions before guests continue with a reservation." badge="FAQ">
       <div style={styles.faqList}>
         <FaqItem q="How do I search for a hotel?" a="Select your country, city, dates, guests and rooms, then choose Search. Available hotel options will appear below the search box." />
@@ -2768,40 +1877,7 @@ function FaqPortal() {
 }
 
 function FaqItem({ q, a }) {
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <div style={styles.infoCard}>
       <h3 style={styles.cardTitle}>{q}</h3>
       <p style={styles.cardText}>{a}</p>
@@ -2846,40 +1922,7 @@ function ReviewsPortal({ reviewSent, setReviewSent }) {
       setReviewNotice("We could not send your review right now. Please try again.");
     }
   }
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <PortalShell title="Guest Reviews" subtitle="MySpace Hotel is built around confident travel decisions, helpful guidance and clear accommodation choices." badge="Guest experience">
       <div style={styles.cardGrid}>
         <InfoCard title="Business travel" text="A simple way to search trusted stays and compare accommodation options for professional trips." />
@@ -2903,40 +1946,7 @@ function ReviewsPortal({ reviewSent, setReviewSent }) {
 }
 
 function SupportPortal() {
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <PortalShell title="Support Centre" subtitle="Helpful customer support before, during and after your stay." badge="Customer support">
       <div style={styles.cardGrid}>
         <InfoCard title="Before your trip" text="Get help reviewing destinations, accommodation options, dates, room choices and travel needs before booking." />
@@ -2982,40 +1992,7 @@ function PartnersPortal() {
 
     setSent(true);
   }
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <PortalShell
       title="Industry Partnerships"
       subtitle="Apply to work with MySpace Hotel across accommodation, technology, transfers, insurance and destination services."
@@ -3093,40 +2070,7 @@ function BusinessPortal() {
 
     setPortalNotice("Business portal access is being prepared. Approved partner login credentials will be issued by MySpace Hotel.");
   }
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <main style={styles.businessPage}>
       <section style={styles.loginGrid}>
         <div>
@@ -3157,40 +2101,7 @@ function BusinessPortal() {
 }
 
 function PortalShell({ title, subtitle, badge, children }) {
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <main style={styles.portalPage}>
       <section style={styles.portalHero}>
         <div style={styles.pill}>{badge}</div>
@@ -3204,40 +2115,7 @@ function PortalShell({ title, subtitle, badge, children }) {
 }
 
 function Metric({ big, small }) {
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <div style={styles.metric}>
       <div style={styles.metricBig}>{big}</div>
       <div style={styles.muted}>{small}</div>
@@ -3246,40 +2124,7 @@ function Metric({ big, small }) {
 }
 
 function InfoCard({ title, text }) {
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <div style={styles.infoCard}>
       <h3 style={styles.cardTitle}>{title}</h3>
       <p style={styles.cardText}>{text}</p>
@@ -3288,40 +2133,7 @@ function InfoCard({ title, text }) {
 }
 
 function GuideCard({ title, text, href }) {
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <a style={styles.guideCard} href={href} target="_blank" rel="noreferrer">
       <h3 style={styles.cardTitle}>{title}</h3>
       <p style={styles.cardText}>{text}</p>
@@ -3331,40 +2143,7 @@ function GuideCard({ title, text, href }) {
 }
 
 function Footer() {
-  // AUTO LIVE RATE TRIGGER AFTER HOTEL SELECT
-  useEffect(() => {
-    if (!selectedHotel) return;
-
-    const hotelId =
-      selectedHotel.id ||
-      selectedHotel.hotelId ||
-      selectedHotel.code ||
-      selectedHotel.hotelCode ||
-      selectedHotel.supplierHotelId;
-
-    if (!hotelId) return;
-
-    if (typeof fetchLiveRates === "function") {
-      fetchLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof loadLiveRates === "function") {
-      loadLiveRates(selectedHotel);
-      return;
-    }
-
-    if (typeof fetchRatesForHotel === "function") {
-      fetchRatesForHotel(selectedHotel);
-      return;
-    }
-
-    if (typeof getLiveRates === "function") {
-      getLiveRates(selectedHotel);
-    }
-  }, [selectedHotel]);
-
-  return (
+return (
     <footer style={styles.footer}>
       <div style={styles.footerGrid}>
         <div>
@@ -3498,6 +2277,8 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
+
 
 
 
