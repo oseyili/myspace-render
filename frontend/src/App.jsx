@@ -1441,7 +1441,7 @@ function ComparePortal(props) {
       setLiveNotice("");
     } catch {
       setLiveCompare(null);
-      setLiveNotice("The live price comparison could not be refreshed right now. Please try again.");
+      setLiveNotice("Live price check is taking longer than expected. Please continue with guest details and MySpace Hotel will confirm the best available option before checkout.");
     } finally {
       setLiveLoading(false);
     }
@@ -2271,6 +2271,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
