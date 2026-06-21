@@ -6874,87 +6874,80 @@ function MSH_PUBLIC_MERGE_HOTELS(items) {
   return Array.from(map.values());
 }
 
+
 app.get("/api/customer-global-hotels", async (req, res) => {
   try {
     const country = MSH_PUBLIC_CLEAN_TEXT(req.query.country || "United Kingdom");
-    const requestedCity = MSH_PUBLIC_CLEAN_TEXT(req.query.city || "London");
+    const requestedCity = MSH_PUBLIC_CLEAN_TEXT(req.query.city || req.query.requestedCity || "London");
     const currency = MSH_PUBLIC_CLEAN_TEXT(req.query.currency || "GBP").toUpperCase();
     const checkIn = MSH_PUBLIC_CLEAN_TEXT(req.query.checkIn || req.query.checkin || "");
     const checkOut = MSH_PUBLIC_CLEAN_TEXT(req.query.checkOut || req.query.checkout || "");
     const guests = MSH_PUBLIC_CLEAN_TEXT(req.query.guests || "2");
     const rooms = MSH_PUBLIC_CLEAN_TEXT(req.query.rooms || "1");
-    const limit = Math.max(1, Math.min(Number(req.query.limit || 1000), 1000));
+    const limit = Math.max(1, Math.min(Number(req.query.limit || 40), 80));
 
-    const fixed = MSH_PUBLIC_CITY_PARENT(country, requestedCity);
-    const supplierCity = fixed.supplierCity || requestedCity;
-    const area = fixed.area || "";
+    const wantedCountry = MSH_PUBLIC_NORM(country);
+    const wantedCity = MSH_PUBLIC_NORM(requestedCity);
 
-    const supplierResult = await MSH_PUBLIC_TRY_SUPPLIER_SEARCH(req, {
-      country,
-      city: supplierCity,
-      currency,
-      checkIn,
-      checkOut,
-      guests,
-      rooms,
-      limit
-    });
-
-    const supplierHotels = supplierResult.hotels.map((hotel) =>
-      MSH_PUBLIC_NORMALISE_HOTEL(hotel, { country, city: supplierCity, area, currency }, "supplier_live")
-    );
-
-    const catalogueHotels = MSH_PUBLIC_CATALOGUE_SEARCH({
-      country,
-      city: supplierCity,
-      area,
-      currency,
-      limit
-    }).map((hotel) =>
-      MSH_PUBLIC_NORMALISE_HOTEL(hotel, { country, city: supplierCity, area, currency }, "catalogue")
-    );
-
-    const merged = MSH_PUBLIC_MERGE_HOTELS([...supplierHotels, ...catalogueHotels])
-      .sort((a, b) => {
-        const aLive = MSH_PUBLIC_PRICE(a) > 0 ? 1 : 0;
-        const bLive = MSH_PUBLIC_PRICE(b) > 0 ? 1 : 0;
-        if (bLive !== aLive) return bLive - aLive;
-        return MSH_PUBLIC_PRICE(a) - MSH_PUBLIC_PRICE(b);
+    const rows = MSH_PUBLIC_READ_LIVE_HOTELS()
+      .filter((hotel) => {
+        const hCountry = MSH_PUBLIC_NORM(hotel?.country || hotel?.location?.country || "");
+        const hCity = MSH_PUBLIC_NORM(hotel?.city || hotel?.location?.city || "");
+        if (wantedCountry && hCountry && hCountry !== wantedCountry) return false;
+        if (wantedCity && hCity && hCity !== wantedCity) return false;
+        return true;
       })
-      .slice(0, limit);
+      .slice(0, limit)
+      .map((hotel) => {
+        const hotelId = hotel.hotel_id || hotel.id || hotel.supplier_hotel_id || hotel.supplierHotelId || "";
+        const name = hotel.name || hotel.hotel_name || "Hotel";
+        const city = hotel.city || hotel.location?.city || requestedCity;
+        const outCountry = hotel.country || hotel.location?.country || country;
 
-    const customerHotels = merged.map((hotel) => {
-      const cleanHotel = { ...hotel };
-      delete cleanHotel.supplierName;
-      delete cleanHotel.supplierDisplay;
-      delete cleanHotel.supplierLabel;
-      return cleanHotel;
-    });
-
-    const liveCount = customerHotels.filter((h) => MSH_PUBLIC_PRICE(h) > 0).length;
-    const requestCount = customerHotels.length - liveCount;
+        return {
+          ...hotel,
+          id: hotelId,
+          hotel_id: hotelId,
+          hotelId,
+          name,
+          hotel_name: name,
+          country: outCountry,
+          city,
+          currency,
+          checkIn,
+          checkOut,
+          guests,
+          rooms,
+          live_rate_ready: false,
+          price: hotel.price || hotel.from_price || null,
+          customerMessage: "Select this hotel to check current live availability and rates."
+        };
+      });
 
     return res.json({
       ok: true,
-      source: "global_live_plus_catalogue",
+      source: "fast_live_hotels_catalogue",
       searched: {
         country,
         requestedCity,
-        supplierCity,
-        area
+        currency,
+        checkIn,
+        checkOut,
+        guests,
+        rooms
       },
-      suppliers: supplierResult.suppliers || {},
-      supplierStatus: supplierResult.supplierStatus || {},
-      livePricedHotels: liveCount,
-      requestAvailabilityHotels: requestCount,
-      count: customerHotels.length,
-      customerMessage: `${liveCount} live-priced hotels and ${requestCount} additional real properties loaded.`,
-      hotels: customerHotels
+      count: rows.length,
+      hotels: rows,
+      customerMessage: rows.length
+        ? "Hotels loaded from MySpace Hotel catalogue. Select a hotel to check live rates."
+        : "No matching hotels found for this destination."
     });
   } catch (err) {
     return res.status(500).json({
       ok: false,
-      message: "Hotel search failed."
+      source: "fast_live_hotels_catalogue",
+      message: "Hotel search failed.",
+      error: err.message
     });
   }
 });
