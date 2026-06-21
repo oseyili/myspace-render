@@ -582,8 +582,8 @@ const [currentPage, setCurrentPage] = useState("home");
       });
 
       const endpoints = [
-      `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
-      `${API_BASE}/api/customer-global-hotels?${params.toString()}`
+      `${API_BASE}/api/live-rate-cascade?${params.toString()}`,
+      `${API_BASE}/api/live-rate-cascade?${params.toString()}`
     ];
 
       const results = await Promise.allSettled(
@@ -663,6 +663,11 @@ const [currentPage, setCurrentPage] = useState("home");
   async function refreshSelectedHotelLiveRates(hotelToRefresh) {
     const readyHotel = selectedHotelWithRoom(hotelToRefresh);
     setSelectedHotel(readyHotel);
+setTimeout(() => {
+  try {
+    refreshLiveCompare();
+  } catch (e) {}
+}, 50);
     setLiveRateNotice("");
 
     const selectedHotelId = readyHotel?.hotelId || readyHotel?.hotel_id || readyHotel?.id || readyHotel?.code || "";
@@ -698,8 +703,8 @@ const [currentPage, setCurrentPage] = useState("home");
       });
 
       const endpoints = [
-      `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
-      `${API_BASE}/api/customer-global-hotels?${params.toString()}`
+      `${API_BASE}/api/live-rate-cascade?${params.toString()}`,
+      `${API_BASE}/api/live-rate-cascade?${params.toString()}`
     ];
 
       let refreshedHotel = null;
@@ -797,6 +802,11 @@ const [currentPage, setCurrentPage] = useState("home");
   function selectHotelAndRefreshLiveRates(hotelToSelect) {
     const readyHotel = selectedHotelWithRoom(hotelToSelect);
     setSelectedHotel(readyHotel);
+setTimeout(() => {
+  try {
+    refreshLiveCompare();
+  } catch (e) {}
+}, 50);
     setLiveRateLoading(false);
     setLiveRateNotice("");
   }
@@ -1417,7 +1427,7 @@ function ComparePortal(props) {
         currency: selectedCurrency,
       });
 
-      const res = await fetch(`${API_BASE}/api/live-rate-cascade?${params.toString()}`, {
+      const res = await fetch(`${API_BASE}/api/customer-global-hotels?${params.toString()}`, {
         cache: "no-store",
       });
 
@@ -2261,6 +2271,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
