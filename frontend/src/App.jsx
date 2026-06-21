@@ -652,7 +652,7 @@ const [currentPage, setCurrentPage] = useState("home");
       }, 100);
 
       if (!found.length) {
-        setNotice(`We could not confirm instant prices for this destination yet. Try a nearby city or request availability and we will confirm options before checkout.`);
+        setNotice("");
       }
     } catch {
       setNotice("We could not load hotels for this destination right now. Please try again.");
@@ -670,7 +670,7 @@ const [currentPage, setCurrentPage] = useState("home");
     const selectedCountry = readyHotel?.country || country || "";
     const selectedCity = readyHotel?.city || city || "";
 
-    if (!selectedHotelName && !selectedHotelId) {
+    if (!selectedHotelName || !selectedHotelId) {
       setLiveRateNotice("Selected hotel saved. Live rate check needs a valid hotel name or hotel ID.");
       return;
     }
@@ -2261,6 +2261,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
