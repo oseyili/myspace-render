@@ -1391,7 +1391,7 @@ function ComparePortal(props) {
   const [liveNotice, setLiveNotice] = useState("");
 
   const selected = props.selectedHotel;
-  const selectedHotelId = selected?.hotelId || selected?.hotel_id || "";
+  const selectedHotelId = selected?.hotelId || selected?.hotel_id || selected?.id || selected?.code || selected?.supplier_hotel_id || selected?.supplierHotelId || selected?.name || "";
   const selectedHotelName = selected?.name || selected?.hotel_name || "";
   const selectedCountry = selected?.country || props.country || "";
   const selectedCity = selected?.city || props.city || "";
@@ -2261,6 +2261,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
