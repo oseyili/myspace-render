@@ -7982,8 +7982,6 @@ function mshStrictCleanHotelForQuery(hotel, query) {
 }
 
 
-});
-
 app.get("/api/countries", (req, res) => {
   res.json({
     ok: true,
@@ -8133,7 +8131,6 @@ function mshCleanCustomerDestinations(countries) {
 }
 
 
-});
 
 
 });
