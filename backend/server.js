@@ -784,13 +784,7 @@ app.get("/api/countries", (req, res) => {
   });
 });
 
-app.get("/api/public-countries", (req, res) => {
-  const countries = buildDestinations();
-  res.json({
-    ok: true,
-    count: countries.length,
-    countries
-  });
+
 });
 
 
@@ -7988,12 +7982,7 @@ function mshStrictCleanHotelForQuery(hotel, query) {
   };
 }
 
-app.get("/api/public-countries", (req, res) => {
-  res.json({
-    ok: true,
-    count: MSH_STRICT_LIVE_DESTINATIONS.length,
-    countries: MSH_STRICT_LIVE_DESTINATIONS
-  });
+
 });
 
 app.get("/api/countries", (req, res) => {
@@ -8144,16 +8133,43 @@ function mshCleanCustomerDestinations(countries) {
   }).filter((row) => row.cities && row.cities.length);
 }
 
-app.get("/api/global-countries", (req, res) => {
-  const countries = mshCleanCustomerDestinations(mshGlobalCountryCityList());
-  res.json({ ok: true, count: countries.length, countries });
+
 });
+
+
+});
+
+
+function mshCustomerCityAllowList(country) {
+  const c = mshNormText(country);
+  const lists = {
+    "united kingdom": [
+      "London","Manchester","Birmingham","Liverpool","Leeds","Bristol","Edinburgh","Glasgow","Cardiff","Belfast",
+      "Newcastle upon Tyne","Sheffield","Nottingham","Leicester","Coventry","Southampton","Portsmouth","Brighton",
+      "Oxford","Cambridge","York","Bath","Exeter","Plymouth","Norwich","Reading","Milton Keynes","Aberdeen",
+      "Dundee","Inverness","Swansea","Derby","Chester","Blackpool","Bournemouth","Canterbury","Durham","Lincoln"
+    ]
+  };
+  return lists[c] || null;
+}
+
+function mshCleanCustomerDestinations(countries) {
+  return (countries || []).map((row) => {
+    const allow = mshCustomerCityAllowList(row.country);
+    if (!allow) return row;
+    return { ...row, cities: allow.map((city) => ({ city })) };
+  }).filter((row) => row.cities && row.cities.length);
+}
 
 app.get("/api/public-countries", (req, res) => {
   const countries = mshCleanCustomerDestinations(mshGlobalCountryCityList());
   res.json({ ok: true, count: countries.length, countries });
 });
 
+app.get("/api/global-countries", (req, res) => {
+  const countries = mshCleanCustomerDestinations(mshGlobalCountryCityList());
+  res.json({ ok: true, count: countries.length, countries });
+});
 function mshSupplierConfigured(name) {
   const n = mshNormText(name);
   if (n === "hotelbeds") return Boolean(process.env.HOTELBEDS_API_KEY && process.env.HOTELBEDS_SECRET);
@@ -8316,6 +8332,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
