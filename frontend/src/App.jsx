@@ -1215,10 +1215,16 @@ function SearchBox(props) {
             props.setSelectedHotel(null);
           }}
         >
-          <option value="">{props.country ? "Select city" : "Select country first"}</option>
-          {(props.countries.find((x) => x.country === props.country)?.cities || []).map((item) => (
-  <option key={item} value={item}>
-    {item}
+          <option value="">
+  {props.country ? "Select city" : "Select country first"}
+</option>
+
+{((props.countries.find((x) => x.country === props.country)?.cities) || []).map((item) => (
+  <option
+    key={String(item.city || item.name || item.label || item)}
+    value={String(item.city || item.name || item.label || item)}
+  >
+    {String(item.city || item.name || item.label || item)}
   </option>
 ))}
         </select>
