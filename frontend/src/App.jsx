@@ -1194,7 +1194,13 @@ function SearchBox(props) {
         }}>
           <option value="">Select country</option>
           {props.countries.map((item) => (
-            <option key={item.country} value={item.country}>{item.country}</option> )})}
+    <option
+      key={item.country}
+      value={item.country}
+    >
+      {item.country}
+    </option>
+))}
         </select>
       </Field>
 
@@ -1211,7 +1217,10 @@ function SearchBox(props) {
         >
           <option value="">{props.country ? "Select city" : "Select country first"}</option>
           {(props.countries.find((x) => x.country === props.country)?.cities || []).map((item) => (
-            <option key={item} value={item}>{item}</option> )})}
+  <option key={item} value={item}>
+    {item}
+  </option>
+))}
         </select>
       </Field>
 
