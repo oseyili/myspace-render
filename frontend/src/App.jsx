@@ -604,7 +604,10 @@ const [currentPage, setCurrentPage] = useState("home");
       const results = await Promise.allSettled(
         endpoints.map((url) =>
           fetch(url, { cache: "no-store" })
-            .then((res) => res.json())
+          .then((res) => {
+            if (!res.ok) throw new Error(`Hotel search failed ${res.status}`);
+            return res.json();
+          })
             .catch(() => ({ hotels: [] }))
         )
       );
@@ -2299,6 +2302,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
