@@ -6892,6 +6892,41 @@ function MSH_PUBLIC_MERGE_HOTELS(items) {
 }
 
 
+
+function MSH_IS_TRUE_HOTEL_FOR_CUSTOMER(hotel) {
+  const text = String([
+    hotel.name,
+    hotel.hotelName,
+    hotel.hotel_name,
+    hotel.propertyType,
+    hotel.type,
+    hotel.category,
+    hotel.description
+  ].filter(Boolean).join(" ")).toLowerCase();
+
+  const blocked = [
+    "apartment", "apartments", "apt", "flat", "house", "home",
+    "guest suite", "guesthouse", "guest house", "villa", "cottage",
+    "condo", "studio", "bnb", "b&b", "bed and breakfast",
+    "long stay", "monthly", "serviced apartment", "private room",
+    "entire", "airbnb", "rental"
+  ];
+
+  const allowed = [
+    "hotel", "resort", "inn", "motel", "lodge", "hostel",
+    "suites hotel", "apart hotel", "aparthotel"
+  ];
+
+  if (blocked.some((word) => text.includes(word))) return false;
+  if (allowed.some((word) => text.includes(word))) return true;
+
+  return false;
+}
+
+function MSH_FILTER_CUSTOMER_HOTELS_ONLY(list) {
+  return (Array.isArray(list) ? list : []).filter(MSH_IS_TRUE_HOTEL_FOR_CUSTOMER);
+}
+
 app.get("/api/customer-global-hotels", async (req, res) => {
   try {
     const country = MSH_PUBLIC_CLEAN_TEXT(req.query.country || "United Kingdom");
@@ -7691,7 +7726,7 @@ app.get("/api/live-rate-cascade", async (req, res) => {
         source: "live_rate_cascade",
         winning_source: found.result.sourceName,
         hotel: found.hotel,
-        hotels: [found.hotel],
+        hotels: MSH_FILTER_CUSTOMER_HOTELS_ONLY([found.hotel]),
         customer_offer: {
           hotelId: found.hotel.hotelId || found.hotel.hotel_id,
           hotelName: found.hotel.name || found.hotel.hotel_name,
@@ -8351,6 +8386,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
