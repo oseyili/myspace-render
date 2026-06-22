@@ -1275,7 +1275,7 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, selectHotelAndRefre
           <span style={styles.tag}>Destination guide</span>
         </div>
 
-        <div style={styles.priceLine}>{curr} {money(price)} <span style={styles.small}>per night</span></div>
+        <div style={styles.priceLine}>{curr} {money(price)} <span style={styles.small}></span></div>
         <div style={styles.small}>Estimated stay total: {curr} {money(total)}</div>
 
         <button style={styles.darkBtn} onClick={() => selectHotelAndRefreshLiveRates ? selectHotelAndRefreshLiveRates(selectedReadyHotel) : setSelectedHotel(selectedReadyHotel)}>
@@ -2279,6 +2279,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
