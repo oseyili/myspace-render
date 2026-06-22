@@ -1329,7 +1329,7 @@ function BookingSummary(props) {
           <div style={styles.totalBox}>
             <div style={styles.totalLabel}>Estimated stay total</div>
             <div style={styles.totalPrice}>{props.selectedCurrency} {money(props.totalPrice)}</div>
-            <div style={styles.small}>Based on selected hotel, nights and rooms.</div>
+            <div style={styles.small}>Price confirmed before secure checkout.</div>
           </div>
 
           <div style={styles.customerBox}>
@@ -2302,6 +2302,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
