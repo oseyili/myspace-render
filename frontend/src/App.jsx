@@ -582,8 +582,8 @@ const [currentPage, setCurrentPage] = useState("home");
       });
 
       const endpoints = [
-      `${API_BASE}/api/live-rate-cascade?${params.toString()}`,
-      `${API_BASE}/api/live-rate-cascade?${params.toString()}`
+      `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
+      `${API_BASE}/api/customer-global-hotels?${params.toString()}`
     ];
 
       const results = await Promise.allSettled(
@@ -703,8 +703,8 @@ setTimeout(() => {
       });
 
       const endpoints = [
-      `${API_BASE}/api/live-rate-cascade?${params.toString()}`,
-      `${API_BASE}/api/live-rate-cascade?${params.toString()}`
+      `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
+      `${API_BASE}/api/customer-global-hotels?${params.toString()}`
     ];
 
       let refreshedHotel = null;
@@ -2271,6 +2271,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
