@@ -621,7 +621,8 @@ const [currentPage, setCurrentPage] = useState("home");
       }
 
       const found = collected
-        .filter(Boolean)
+      .filter((hotel) => Number(hotel?.price || hotel?.convertedPrice || hotel?.displayPrice || hotel?.selectedRoom?.price || hotel?.rooms?.[0]?.price || hotel?.rooms?.[0]?.convertedPrice || 0) > 0)
+      .filter(Boolean)
         .filter((hotel) => {
           const hotelCountry = String(hotel.country || "").trim().toLowerCase();
           const hotelCity = String(hotel.city || hotel.destination || "").trim().toLowerCase();
@@ -2302,6 +2303,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
