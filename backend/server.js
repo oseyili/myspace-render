@@ -25,9 +25,11 @@ app.use((req, res, next) => {
     "http://127.0.0.1:5173"
   ]);
 
-  if (allowed.has(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  }
+  if (origin) {
+  res.setHeader("Access-Control-Allow-Origin", origin);
+} else {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+}
 
   res.setHeader("Vary", "Origin");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
@@ -39,7 +41,6 @@ app.use((req, res, next) => {
 });
 const PORT = process.env.PORT || 5050;
 
-app.use(cors({ origin: true, credentials: true }));
 app.use((req, res, next) => {
   if (req.originalUrl === "/api/stripe/webhook") return next();
   return express.json({ limit: "25mb" })(req, res, next);
@@ -8350,6 +8351,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
