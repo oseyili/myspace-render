@@ -8133,7 +8133,6 @@ function mshCleanCustomerDestinations(countries) {
 
 
 
-});
 
 
 function mshCustomerCityAllowList(country) {
