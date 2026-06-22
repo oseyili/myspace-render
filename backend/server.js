@@ -6900,33 +6900,36 @@ function MSH_IS_TRUE_HOTEL_FOR_CUSTOMER(hotel) {
     hotel.hotel_name,
     hotel.propertyType,
     hotel.type,
-    hotel.category,
-    hotel.description
+    hotel.category
   ].filter(Boolean).join(" ")).toLowerCase();
 
   const blocked = [
-    "apartment", "apartments", "apt", "flat", "house", "home",
-    "guest suite", "guesthouse", "guest house", "villa", "cottage",
-    "condo", "studio", "bnb", "b&b", "bed and breakfast",
-    "long stay", "monthly", "serviced apartment", "private room",
-    "entire", "airbnb", "rental"
-  ];
-
-  const allowed = [
-    "hotel", "resort", "inn", "motel", "lodge", "hostel",
-    "suites hotel", "apart hotel", "aparthotel"
+    "for sale", "real estate", "estate agent", "buy ", "mortgage",
+    "monthly rental", "monthly rent", "long term", "long-term",
+    "private room", "shared room", "room in house",
+    "entire home", "entire house", "apartment for rent",
+    "flat for rent", "student accommodation"
   ];
 
   if (blocked.some((word) => text.includes(word))) return false;
-  if (allowed.some((word) => text.includes(word))) return true;
 
-  return false;
+  const wanted = [
+    "hotel", "resort", "inn", "motel", "lodge", "hostel",
+    "guest house", "guesthouse", "b&b", "bed and breakfast",
+    "serviced apartment", "aparthotel", "apart hotel", "suites"
+  ];
+
+  return wanted.some((word) => text.includes(word));
 }
 
 function MSH_FILTER_CUSTOMER_HOTELS_ONLY(list) {
-  return (Array.isArray(list) ? list : []).filter(MSH_IS_TRUE_HOTEL_FOR_CUSTOMER);
+  const output = [];
+  for (const hotel of (Array.isArray(list) ? list : [])) {
+    if (MSH_IS_TRUE_HOTEL_FOR_CUSTOMER(hotel)) output.push(hotel);
+    if (output.length >= 80) break;
+  }
+  return output;
 }
-
 app.get("/api/customer-global-hotels", async (req, res) => {
   try {
     const country = MSH_PUBLIC_CLEAN_TEXT(req.query.country || "United Kingdom");
@@ -8386,6 +8389,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
