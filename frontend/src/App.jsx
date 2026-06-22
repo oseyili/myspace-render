@@ -5,6 +5,14 @@ const API_BASE =
   import.meta.env.VITE_API_BASE_URL ||
   "http://127.0.0.1:5050";
 
+
+const safeText = (value) => {
+  if (value == null) return "";
+  if (typeof value === "string" || typeof value === "number") return String(value);
+  if (typeof value === "object") return String(value.city || value.name || value.country || value.label || "");
+  return String(value);
+};
+
 const STRIPE_PAYMENT_LINK =
   import.meta.env.VITE_STRIPE_PAYMENT_LINK ||
   import.meta.env.VITE_PUBLIC_STRIPE_PAYMENT_LINK ||
@@ -1725,7 +1733,7 @@ function AttractionsPortal(props) {
             </div>
           </section>
 
-          <KlookDynamicWidget city={city} country={country} />
+          <KlookDynamicWidget city={safeText(city)} country={country} />
         </>
       )}
     </PortalShell>
@@ -1805,7 +1813,7 @@ function FeaturedHotelsPortal() {
       <form style={styles.form} onSubmit={submit}>
         <input style={styles.input} placeholder="Hotel name" value={hotelName} onChange={(e) => setHotelName(e.target.value)} />
         <input style={styles.input} placeholder="Country" value={country} onChange={(e) => setCountry(e.target.value)} />
-        <input style={styles.input} placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
+        <input style={styles.input} placeholder="City" value={safeText(city)} onChange={(e) => setCity(e.target.value)} />
         <input style={styles.input} placeholder="Contact name" value={contactName} onChange={(e) => setContactName(e.target.value)} />
         <input style={styles.input} type="email" placeholder="Contact email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
         <input style={styles.input} placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
@@ -2271,6 +2279,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
