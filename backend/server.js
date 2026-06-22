@@ -8119,8 +8119,38 @@ function mshGlobalCountryCityList() {
     .sort((a, b) => a.country.localeCompare(b.country));
 }
 
+
+function mshCustomerCityAllowList(country) {
+  const c = mshNormText(country);
+  const lists = {
+    "united kingdom": [
+      "London","Manchester","Birmingham","Liverpool","Leeds","Bristol","Edinburgh","Glasgow","Cardiff","Belfast",
+      "Newcastle upon Tyne","Sheffield","Nottingham","Leicester","Coventry","Southampton","Portsmouth","Brighton",
+      "Oxford","Cambridge","York","Bath","Exeter","Plymouth","Norwich","Reading","Milton Keynes","Aberdeen",
+      "Dundee","Inverness","Swansea","Derby","Chester","Blackpool","Bournemouth","Canterbury","Durham","Lincoln"
+    ]
+  };
+  return lists[c] || null;
+}
+
+function mshCleanCustomerDestinations(countries) {
+  return (countries || []).map((row) => {
+    const allow = mshCustomerCityAllowList(row.country);
+    if (!allow) return row;
+    return {
+      ...row,
+      cities: allow.map((city) => ({ city }))
+    };
+  }).filter((row) => row.cities && row.cities.length);
+}
+
 app.get("/api/global-countries", (req, res) => {
-  const countries = mshGlobalCountryCityList();
+  const countries = mshCleanCustomerDestinations(mshGlobalCountryCityList());
+  res.json({ ok: true, count: countries.length, countries });
+});
+
+app.get("/api/public-countries", (req, res) => {
+  const countries = mshCleanCustomerDestinations(mshGlobalCountryCityList());
   res.json({ ok: true, count: countries.length, countries });
 });
 
@@ -8286,6 +8316,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
