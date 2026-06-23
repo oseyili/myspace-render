@@ -7025,6 +7025,63 @@ function MSH_FINAL_CUSTOMER_RESULTS(list, query) {
   return out;
 }
 
+function MSH_PUBLIC_HOTEL_TEXT(hotel) {
+  return String([
+    hotel && hotel.name,
+    hotel && hotel.hotelName,
+    hotel && hotel.hotel_name,
+    hotel && hotel.propertyType,
+    hotel && hotel.type,
+    hotel && hotel.category,
+    hotel && hotel.description
+  ].filter(Boolean).join(" ")).toLowerCase();
+}
+
+function MSH_PUBLIC_HOTEL_PRICE(hotel) {
+  return Number(
+    (hotel && hotel.price) ||
+    (hotel && hotel.convertedPrice) ||
+    (hotel && hotel.displayPrice) ||
+    (hotel && hotel.selectedRoom && hotel.selectedRoom.price) ||
+    (hotel && hotel.selectedRoom && hotel.selectedRoom.convertedPrice) ||
+    (hotel && hotel.rooms && hotel.rooms[0] && hotel.rooms[0].price) ||
+    (hotel && hotel.rooms && hotel.rooms[0] && hotel.rooms[0].convertedPrice) ||
+    0
+  );
+}
+
+function MSH_PUBLIC_IS_HOTEL(hotel) {
+  const text = MSH_PUBLIC_HOTEL_TEXT(hotel);
+
+  const hotelWords = ["hotel", "resort", "inn", "motel", "lodge", "guest house", "guesthouse", "b&b", "bed and breakfast", "aparthotel"];
+  const blockedWords = ["apartment", "apartments", "flat", "flats", "duplex", "villa", "home", "house", "condo", "penthouse", "loft", "studio", "residence", "entire", "long stay", "monthly", "rental"];
+
+  if (blockedWords.some((word) => text.includes(word))) return false;
+  return hotelWords.some((word) => text.includes(word));
+}
+
+function MSH_PUBLIC_CLEAN_CUSTOMER_HOTELS(list) {
+  const clean = [];
+
+  for (const hotel of (Array.isArray(list) ? list : [])) {
+    const price = MSH_PUBLIC_HOTEL_PRICE(hotel);
+    if (!MSH_PUBLIC_IS_HOTEL(hotel)) continue;
+    if (!Number.isFinite(price) || price <= 0) continue;
+
+    clean.push({
+      ...hotel,
+      price,
+      convertedPrice: price,
+      displayPrice: price,
+      availableToBook: true
+    });
+
+    if (clean.length >= 80) break;
+  }
+
+  return clean;
+}
+
 app.get("/api/customer-global-hotels", async (req, res) => {
   try {
     const country = MSH_PUBLIC_CLEAN_TEXT(req.query.country || "United Kingdom");
@@ -8484,6 +8541,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 

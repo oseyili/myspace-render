@@ -1172,7 +1172,7 @@ function HotelsPage(props) {
           ) : null}
 
           <div style={styles.hotelGrid}>
-            {props.hotels.map((hotel, idx) => (
+            {customerVisibleHotels(props.hotels, props.propertyType).map((hotel, idx) => (
               <HotelCard key={hotelKey(hotel) || idx} hotel={hotel} idx={idx} {...props} />
             ))}
           </div>
@@ -1276,6 +1276,40 @@ function SearchBox(props) {
       </button>
     </>
   );
+}
+
+function customerHotelText(hotel) {
+  return String([
+    hotel?.name,
+    hotel?.hotelName,
+    hotel?.hotel_name,
+    hotel?.propertyType,
+    hotel?.type,
+    hotel?.category,
+    hotel?.description
+  ].filter(Boolean).join(" ")).toLowerCase();
+}
+
+function isCustomerHotelResult(hotel, propertyType = "hotels") {
+  const text = customerHotelText(hotel);
+  const mode = String(propertyType || "hotels").toLowerCase();
+
+  const hotelWords = ["hotel", "resort", "inn", "motel", "lodge", "guest house", "guesthouse", "b&b", "bed and breakfast", "aparthotel"];
+  const nonHotelWords = ["apartment", "apartments", "flat", "flats", "duplex", "villa", "home", "house", "condo", "penthouse", "loft", "studio", "residence", "entire", "long stay", "monthly", "rental"];
+
+  if (mode === "all") return true;
+  if (mode === "homes") return false;
+  if (mode === "serviced") return text.includes("aparthotel") || text.includes("serviced apartment");
+
+  if (nonHotelWords.some((word) => text.includes(word))) return false;
+  return hotelWords.some((word) => text.includes(word));
+}
+
+function customerVisibleHotels(list, propertyType = "hotels") {
+  return (Array.isArray(list) ? list : [])
+    .filter((hotel) => isCustomerHotelResult(hotel, propertyType))
+    .filter((hotel) => Number(hotelPrice(hotel)) > 0)
+    .slice(0, 80);
 }
 
 function Field({ label, children }) {
@@ -2318,6 +2352,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
