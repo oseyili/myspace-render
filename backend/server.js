@@ -4350,7 +4350,7 @@ function parseWebbedsHotels(xml, currencyCode) {
   const hotels = [];
   const hotelBlocks = String(xml || "").match(/<hotel[\s\S]*?<\/hotel>/gi) || [];
 
-  for (const hotelBlock of hotelBlocks.slice(0, 80)) {
+  for (const hotelBlock of hotelBlocks.slice(0, 30)) {
     const hotelId = extractXmlAttr(hotelBlock, "hotelid");
     const roomBlocks = hotelBlock.match(/<roomType[\s\S]*?<\/roomType>/gi) || [];
 
@@ -5152,7 +5152,7 @@ function parseWebbedsHotels(xml, currencyCode) {
   const hotels = [];
   const hotelBlocks = String(xml || "").match(/<hotel[\s\S]*?<\/hotel>/gi) || [];
 
-  for (const hotelBlock of hotelBlocks.slice(0, 80)) {
+  for (const hotelBlock of hotelBlocks.slice(0, 30)) {
     const hotelId = extractXmlAttr(hotelBlock, "hotelid");
     const roomBlocks = hotelBlock.match(/<roomType[\s\S]*?<\/roomType>/gi) || [];
 
@@ -7009,7 +7009,7 @@ function MSH_FINAL_CUSTOMER_RESULTS(list, query) {
     if (!MSH_MATCH_CUSTOMER_PROPERTY_TYPE(hotel, mode)) continue;
 
     const price = MSH_CUSTOMER_PRICE(hotel);
-    if (!Number.isFinite(price) || price <= 0) continue;
+    if (!Number.isFinite(price) || price < 0) continue;
 
     out.push({
       ...hotel,
@@ -7066,7 +7066,7 @@ function MSH_PUBLIC_CLEAN_CUSTOMER_HOTELS(list) {
   for (const hotel of (Array.isArray(list) ? list : [])) {
     const price = MSH_PUBLIC_HOTEL_PRICE(hotel);
     if (!MSH_PUBLIC_IS_HOTEL(hotel)) continue;
-    if (!Number.isFinite(price) || price <= 0) continue;
+    if (!Number.isFinite(price) || price < 0) continue;
 
     clean.push({
       ...hotel,
@@ -7076,7 +7076,7 @@ function MSH_PUBLIC_CLEAN_CUSTOMER_HOTELS(list) {
       availableToBook: true
     });
 
-    if (clean.length >= 80) break;
+    if (clean.length >= 30) break;
   }
 
   return clean;
@@ -8227,14 +8227,14 @@ app.get("/api/strict-live-hotels", async (req, res) => {
         country,
         city,
         currency: req.query.currency || "GBP",
-        limit: 80
+        limit: 30
       });
     }
 
     const hotels = (Array.isArray(result.hotels) ? result.hotels : [])
       .map((h) => mshStrictCleanHotelForQuery(h, { ...req.query, country, city }))
       .filter(Boolean)
-      .slice(0, 80);
+      .slice(0, 30);
 
     return res.json({
       ok: true,
@@ -8469,17 +8469,17 @@ app.get("/api/global-live-hotels", async (req, res) => {
     let allHotels = [];
 
     if (mshSupplierConfigured("hotelbeds") && typeof hotelbedsAvailabilitySearch === "function") {
-      const hb = await hotelbedsAvailabilitySearch({ ...req.query, country, city, currency, limit: 80 }).catch(() => ({ hotels: [] }));
+      const hb = await hotelbedsAvailabilitySearch({ ...req.query, country, city, currency, limit: 30 }).catch(() => ({ hotels: [] }));
       allHotels.push(...(Array.isArray(hb.hotels) ? hb.hotels : []));
     }
 
     if (mshSupplierConfigured("webbeds") && typeof webbedsHotels === "function") {
-      const wb = await webbedsHotels({ ...req.query, country, city, currency, limit: 80 }).catch(() => []);
+      const wb = await webbedsHotels({ ...req.query, country, city, currency, limit: 30 }).catch(() => []);
       allHotels.push(...(Array.isArray(wb) ? wb : []));
     }
 
     if (mshSupplierConfigured("ratehawk") && typeof ratehawkHotels === "function") {
-      const rh = await ratehawkHotels({ ...req.query, country, city, currency, limit: 80 }).catch(() => []);
+      const rh = await ratehawkHotels({ ...req.query, country, city, currency, limit: 30 }).catch(() => []);
       allHotels.push(...(Array.isArray(rh) ? rh : []));
     }
 
@@ -8495,7 +8495,7 @@ app.get("/api/global-live-hotels", async (req, res) => {
         seen.add(key);
         return true;
       })
-      .slice(0, 80);
+      .slice(0, 30);
 
     return res.json({
       ok: true,
@@ -8541,6 +8541,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
