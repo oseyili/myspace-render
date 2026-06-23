@@ -6930,6 +6930,101 @@ function MSH_FILTER_CUSTOMER_HOTELS_ONLY(list) {
   }
   return output;
 }
+
+function MSH_CUSTOMER_PROPERTY_MODE(query) {
+  return String(query.propertyType || query.property_type || query.type || "hotels").toLowerCase();
+}
+
+function MSH_CUSTOMER_TEXT(hotel) {
+  return String([
+    hotel.name,
+    hotel.hotelName,
+    hotel.hotel_name,
+    hotel.propertyType,
+    hotel.type,
+    hotel.category,
+    hotel.description
+  ].filter(Boolean).join(" ")).toLowerCase();
+}
+
+function MSH_CUSTOMER_PRICE(hotel) {
+  return Number(
+    hotel.price ||
+    hotel.convertedPrice ||
+    hotel.displayPrice ||
+    hotel?.selectedRoom?.price ||
+    hotel?.selectedRoom?.convertedPrice ||
+    hotel?.rooms?.[0]?.price ||
+    hotel?.rooms?.[0]?.convertedPrice ||
+    0
+  );
+}
+
+function MSH_IS_CUSTOMER_HOTEL_ONLY(hotel) {
+  const text = MSH_CUSTOMER_TEXT(hotel);
+
+  const allow = [
+    "hotel", "resort", "inn", "motel", "lodge", "guest house", "guesthouse",
+    "b&b", "bed and breakfast", "aparthotel", "apart hotel", "suites"
+  ];
+
+  const block = [
+    "apartment", "apartments", "flat", "flats", "residence", "residences",
+    "duplex", "villa", "home", "house", "condo", "penthouse", "loft",
+    "studio", "private room", "shared room", "entire home", "entire place",
+    "long stay", "long-stay", "monthly", "rental", "for rent", "for sale"
+  ];
+
+  if (block.some((x) => text.includes(x))) return false;
+  return allow.some((x) => text.includes(x));
+}
+
+function MSH_MATCH_CUSTOMER_PROPERTY_TYPE(hotel, mode) {
+  const text = MSH_CUSTOMER_TEXT(hotel);
+  const selected = String(mode || "hotels").toLowerCase();
+
+  if (selected === "all") return true;
+
+  if (selected === "serviced") {
+    return text.includes("serviced apartment") || text.includes("aparthotel") || text.includes("apart hotel");
+  }
+
+  if (selected === "homes") {
+    return ["villa", "home", "house", "flat", "apartment", "residence"].some((x) => text.includes(x));
+  }
+
+  if (selected === "hotel_resort") {
+    return MSH_IS_CUSTOMER_HOTEL_ONLY(hotel) || text.includes("resort");
+  }
+
+  return MSH_IS_CUSTOMER_HOTEL_ONLY(hotel);
+}
+
+function MSH_FINAL_CUSTOMER_RESULTS(list, query) {
+  const mode = MSH_CUSTOMER_PROPERTY_MODE(query || {});
+  const out = [];
+
+  for (const hotel of (Array.isArray(list) ? list : [])) {
+    if (!hotel) continue;
+    if (!MSH_MATCH_CUSTOMER_PROPERTY_TYPE(hotel, mode)) continue;
+
+    const price = MSH_CUSTOMER_PRICE(hotel);
+    if (!Number.isFinite(price) || price <= 0) continue;
+
+    out.push({
+      ...hotel,
+      price,
+      convertedPrice: price,
+      displayPrice: price,
+      availableToBook: true
+    });
+
+    if (out.length >= 80) break;
+  }
+
+  return out;
+}
+
 app.get("/api/customer-global-hotels", async (req, res) => {
   try {
     const country = MSH_PUBLIC_CLEAN_TEXT(req.query.country || "United Kingdom");
@@ -7729,7 +7824,7 @@ app.get("/api/live-rate-cascade", async (req, res) => {
         source: "live_rate_cascade",
         winning_source: found.result.sourceName,
         hotel: found.hotel,
-        hotels: MSH_FILTER_CUSTOMER_HOTELS_ONLY([found.hotel]),
+        hotels: MSH_FINAL_CUSTOMER_RESULTS([found.hotel], req.query),
         customer_offer: {
           hotelId: found.hotel.hotelId || found.hotel.hotel_id,
           hotelName: found.hotel.name || found.hotel.hotel_name,
@@ -8389,6 +8484,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 

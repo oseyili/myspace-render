@@ -467,6 +467,7 @@ const [currentPage, setCurrentPage] = useState("home");
   const [guests, setGuests] = useState(2);
   const [rooms, setRooms] = useState(1);
   const [currency, setCurrency] = useState("GBP");
+  const [propertyType, setPropertyType] = useState("hotels");
   const [stayType, setStayType] = useState("hotels");
   const [hotels, setHotels] = useState([]);
   const [selectedHotel, setSelectedHotel] = useState(() => {
@@ -593,7 +594,9 @@ const [currentPage, setCurrentPage] = useState("home");
         guests: String(guests),
         rooms: String(rooms),
         currency,
-        limit: "60",
+      propertyType,
+      property_type: propertyType,
+      limit: "80",
       });
 
       const endpoints = [
@@ -1188,6 +1191,19 @@ function HotelsPage(props) {
 function SearchBox(props) {
   return (
     <>
+            <Field label="Property Type">
+        <select style={styles.input} value={props.propertyType || "hotels"} onChange={(e) => {
+          props.setPropertyType(e.target.value);
+          props.setHotels([]);
+          props.setSelectedHotel(null);
+        }}>
+          <option value="hotels">Hotels only</option>
+          <option value="hotel_resort">Hotels + resorts</option>
+          <option value="serviced">Serviced apartments</option>
+          <option value="homes">Villas & homes</option>
+          <option value="all">All accommodation</option>
+        </select>
+      </Field>
       <Field label="Country">
         <select style={styles.input} value={props.country} onChange={(e) => {
           props.setCountry(e.target.value);
@@ -2302,6 +2318,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
