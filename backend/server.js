@@ -7118,6 +7118,47 @@ function MSH_PUBLIC_CLEAN_CUSTOMER_HOTELS(list) {
   return clean;
 }
 
+function mshCustomerWantsHotelOnly(query) {
+  const v = String(query.propertyType || query.type || "hotel").toLowerCase();
+  return v.includes("hotel");
+}
+
+function mshIsRealCustomerHotelOnly(hotel) {
+  const text = String([
+    hotel?.name,
+    hotel?.hotel_name,
+    hotel?.property_name,
+    hotel?.category,
+    hotel?.type,
+    hotel?.propertyType,
+    hotel?.accommodation_type
+  ].filter(Boolean).join(" ")).toLowerCase();
+
+  const reject = [
+    "apartment", "apartments", "flat", "flats", "home", "house", "guest house",
+    "guesthouse", "villa", "residence", "residences", "bnb", "b&b",
+    "bed and breakfast", "holiday home", "vacation rental", "private room",
+    "homestay", "hostel", "lodge", "cottage", "duplex", "studio"
+  ];
+
+  if (reject.some((word) => text.includes(word))) return false;
+
+  const accept = [
+    "hotel", "resort", "inn", "suites", "suite hotel", "collection",
+    "marriott", "hilton", "hyatt", "radisson", "novotel", "ibis",
+    "mercure", "premier inn", "travelodge", "holiday inn", "sheraton",
+    "doubletree", "crowne plaza", "dorchester", "intercontinental"
+  ];
+
+  return accept.some((word) => text.includes(word));
+}
+
+function mshFilterCustomerHotelsOnly(list, query) {
+  const source = Array.isArray(list) ? list : [];
+  if (!mshCustomerWantsHotelOnly(query || {})) return source;
+  return source.filter(mshIsRealCustomerHotelOnly);
+}
+
 app.get("/api/customer-global-hotels", async (req, res) => {
   try {
     const country = MSH_PUBLIC_CLEAN_TEXT(req.query.country || "United Kingdom");
@@ -8577,6 +8618,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("CUSTOMER SUPPORT: READY");
   console.log("====================================");
 });
+
 
 
 
