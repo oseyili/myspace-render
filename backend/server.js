@@ -1,4 +1,4 @@
-﻿const express = require("express");
+const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
@@ -130,6 +130,39 @@ function clean(v) {
 
 function lower(v) {
   return clean(v).toLowerCase();
+}
+
+function hotelOnlyText(h) {
+  return lower([
+    h && h.name, h && h.hotel_name, h && h.hotelName, h && h.property_name, h && h.title,
+    h && h.propertyType, h && h.property_type, h && h.type, h && h.category,
+    h && h.categoryName, h && h.accommodationType, h && h.accommodation_type, h && h.description
+  ].filter(Boolean).join(" "));
+}
+
+function isStrictHotelOnly(h) {
+  const text = hotelOnlyText(h);
+  if (!text || /test|demo|placeholder|sample|fake|dummy/.test(text)) return false;
+
+  const blocked = [
+    "apartment", "apartments", "flat", "flats", "serviced apartment", "service apartment",
+    "aparthotel", "apart hotel", "studio", "residence", "residences", "villa", "villas",
+    "home", "house", "holiday home", "vacation rental", "condo", "penthouse", "loft",
+    "private room", "shared room", "entire home", "entire place", "hostel", "camp", "caravan",
+    "farm stay", "cottage", "guest house", "guesthouse", "b&b", "bed and breakfast",
+    "long stay", "long-stay", "monthly", "rental", "for rent", "for sale"
+  ];
+
+  if (blocked.some((word) => text.includes(word))) return false;
+
+  const allowed = [
+    "hotel", "inn", "motel", "hotel suites", "suite hotel", "premier inn", "holiday inn",
+    "travelodge", "marriott", "hilton", "hyatt", "radisson", "novotel", "ibis",
+    "mercure", "sheraton", "doubletree", "crowne plaza", "intercontinental",
+    "fairmont", "ritz", "waldorf", "sofitel", "westin"
+  ];
+
+  return allowed.some((word) => text.includes(word));
 }
 
 function number(v) {
@@ -595,33 +628,8 @@ function buildDestinations() {
 }
 
 function fallbackHotels(country, city, currency) {
-  const hotel = {
-    hotel_id: `MSH-${city || "CITY"}-001`.replace(/\s+/g, "-").toUpperCase(),
-    name: `MySpace Hotel Collection - ${city || "Selected Destination"}`,
-    country,
-    city,
-    stars: 4,
-    image: "",
-    supplier_name: "MYSPACE_INTERNAL",
-    supplier_code: "MYSPACE_INTERNAL",
-    supplier_hotel_id: `MSH-${city || "CITY"}-001`.replace(/\s+/g, "-").toUpperCase(),
-    price: 125,
-    currency,
-    facilities: ["Wi-Fi", "Reception", "Restaurant", "Comfortable rooms"],
-    rates: [
-      {
-        rate_id: "STANDARD",
-        room_name: "Standard Room",
-        board_name: "Room only",
-        price: 125,
-        currency,
-        supplier_name: "MYSPACE_INTERNAL",
-        supplier_code: "MYSPACE_INTERNAL"
-      }
-    ]
-  };
-
-  return [normalizeHotel(hotel, currency)];
+  // No fake fallback hotels. Hotel search and bookings must use real hotel rows or live supplier results only.
+  return [];
 }
 
 function internalSearchHotels(query) {
@@ -633,6 +641,7 @@ function internalSearchHotels(query) {
     .filter((h) => !isBlockedCountry(h.country))
     .filter((h) => !country || lower(h.country) === lower(country))
     .filter((h) => !city || lower(h.city) === lower(city))
+    .filter((h) => isStrictHotelOnly(h))
     .map((h) => normalizeHotel(h, currency))
     .filter((h) => h.name && h.country && h.city);
 
@@ -641,7 +650,7 @@ function internalSearchHotels(query) {
     return a.name.localeCompare(b.name);
   });
 
-  if (!hotels.length && country && city) hotels = fallbackHotels(country, city, currency);
+  // No fake fallback hotels: if a destination has no real rows, return an empty list.
 
   return hotels.slice(0, 120);
 }
@@ -667,7 +676,7 @@ function findInternalOffer(payload) {
     hotels[0];
 
   if (!hotel) {
-    hotel = fallbackHotels(clean(payload.country || "United Kingdom"), clean(payload.city || "London"), clean(payload.currency || "GBP"))[0];
+    return { hotel: null, room: null };
   }
 
   let room =
@@ -675,7 +684,7 @@ function findInternalOffer(payload) {
     (hotel.rooms || []).find((r) => clean(r.roomCode) === roomCode) ||
     (hotel.rooms || [])[0];
 
-  if (!room) room = hotel.rooms[0];
+  if (!room) room = (hotel.rooms || [])[0] || null;
 
   return { hotel, room };
 }
@@ -4394,7 +4403,7 @@ function parseWebbedsHotels(xml, currencyCode) {
   const hotels = [];
   const hotelBlocks = String(xml || "").match(/<hotel[\s\S]*?<\/hotel>/gi) || [];
 
-  for (const hotelBlock of hotelBlocks.slice(0, 30)) {
+  for (const hotelBlock of hotelBlocks.slice(0, Math.max(1, Math.min(Number(req.query.limit || 50), 500)))) {
     const hotelId = extractXmlAttr(hotelBlock, "hotelid");
     const roomBlocks = hotelBlock.match(/<roomType[\s\S]*?<\/roomType>/gi) || [];
 
@@ -5196,7 +5205,7 @@ function parseWebbedsHotels(xml, currencyCode) {
   const hotels = [];
   const hotelBlocks = String(xml || "").match(/<hotel[\s\S]*?<\/hotel>/gi) || [];
 
-  for (const hotelBlock of hotelBlocks.slice(0, 30)) {
+  for (const hotelBlock of hotelBlocks.slice(0, Math.max(1, Math.min(Number(req.query.limit || 50), 500)))) {
     const hotelId = extractXmlAttr(hotelBlock, "hotelid");
     const roomBlocks = hotelBlock.match(/<roomType[\s\S]*?<\/roomType>/gi) || [];
 
@@ -7005,43 +7014,11 @@ function MSH_CUSTOMER_PRICE(hotel) {
 }
 
 function MSH_IS_CUSTOMER_HOTEL_ONLY(hotel) {
-  const text = MSH_CUSTOMER_TEXT(hotel);
-
-  const allow = [
-    "hotel", "resort", "inn", "motel", "lodge", "guest house", "guesthouse",
-    "b&b", "bed and breakfast", "aparthotel", "apart hotel", "suites"
-  ];
-
-  const block = [
-    "apartment", "apartments", "flat", "flats", "residence", "residences",
-    "duplex", "villa", "home", "house", "condo", "penthouse", "loft",
-    "studio", "private room", "shared room", "entire home", "entire place",
-    "long stay", "long-stay", "monthly", "rental", "for rent", "for sale"
-  ];
-
-  if (block.some((x) => text.includes(x))) return false;
-  return allow.some((x) => text.includes(x));
+  return isStrictHotelOnly(hotel);
 }
 
 function MSH_MATCH_CUSTOMER_PROPERTY_TYPE(hotel, mode) {
-  const text = MSH_CUSTOMER_TEXT(hotel);
-  const selected = String(mode || "hotels").toLowerCase();
-
-  if (selected === "all") return true;
-
-  if (selected === "serviced") {
-    return text.includes("serviced apartment") || text.includes("aparthotel") || text.includes("apart hotel");
-  }
-
-  if (selected === "homes") {
-    return ["villa", "home", "house", "flat", "apartment", "residence"].some((x) => text.includes(x));
-  }
-
-  if (selected === "hotel_resort") {
-    return MSH_IS_CUSTOMER_HOTEL_ONLY(hotel) || text.includes("resort");
-  }
-
-  return MSH_IS_CUSTOMER_HOTEL_ONLY(hotel);
+  return isStrictHotelOnly(hotel);
 }
 
 function MSH_FINAL_CUSTOMER_RESULTS(list, query) {
@@ -7095,13 +7072,7 @@ function MSH_PUBLIC_HOTEL_PRICE(hotel) {
 }
 
 function MSH_PUBLIC_IS_HOTEL(hotel) {
-  const text = MSH_PUBLIC_HOTEL_TEXT(hotel);
-
-  const hotelWords = ["hotel", "resort", "inn", "motel", "lodge", "guest house", "guesthouse", "b&b", "bed and breakfast", "aparthotel"];
-  const blockedWords = ["apartment", "apartments", "flat", "flats", "duplex", "villa", "home", "house", "condo", "penthouse", "loft", "studio", "residence", "entire", "long stay", "monthly", "rental"];
-
-  if (blockedWords.some((word) => text.includes(word))) return false;
-  return hotelWords.some((word) => text.includes(word));
+  return isStrictHotelOnly(hotel);
 }
 
 function MSH_PUBLIC_CLEAN_CUSTOMER_HOTELS(list) {
@@ -7127,38 +7098,11 @@ function MSH_PUBLIC_CLEAN_CUSTOMER_HOTELS(list) {
 }
 
 function mshCustomerWantsHotelOnly(query) {
-  const v = String(query.propertyType || query.type || "hotel").toLowerCase();
-  return v.includes("hotel");
+  return true;
 }
 
 function mshIsRealCustomerHotelOnly(hotel) {
-  const text = String([
-    hotel?.name,
-    hotel?.hotel_name,
-    hotel?.property_name,
-    hotel?.category,
-    hotel?.type,
-    hotel?.propertyType,
-    hotel?.accommodation_type
-  ].filter(Boolean).join(" ")).toLowerCase();
-
-  const reject = [
-    "apartment", "apartments", "flat", "flats", "home", "house", "guest house",
-    "guesthouse", "villa", "residence", "residences", "bnb", "b&b",
-    "bed and breakfast", "holiday home", "vacation rental", "private room",
-    "homestay", "hostel", "lodge", "cottage", "duplex", "studio"
-  ];
-
-  if (reject.some((word) => text.includes(word))) return false;
-
-  const accept = [
-    "hotel", "resort", "inn", "suites", "suite hotel", "collection",
-    "marriott", "hilton", "hyatt", "radisson", "novotel", "ibis",
-    "mercure", "premier inn", "travelodge", "holiday inn", "sheraton",
-    "doubletree", "crowne plaza", "dorchester", "intercontinental"
-  ];
-
-  return accept.some((word) => text.includes(word));
+  return isStrictHotelOnly(hotel);
 }
 
 function mshFilterCustomerHotelsOnly(list, query) {
@@ -7166,6 +7110,167 @@ function mshFilterCustomerHotelsOnly(list, query) {
   if (!mshCustomerWantsHotelOnly(query || {})) return source;
   return source.filter(mshIsRealCustomerHotelOnly);
 }
+
+
+/* MYSPACE FULL-SIZE CUSTOMER HOTEL SEARCH OVERRIDE - 2026-06-23
+   This route is intentionally before older routes. It prevents CORS failures, Render memory crashes,
+   mixed property results, and customer-facing GBP 0.00 prices without deleting the rest of the file.
+*/
+function MSH_FULL_TEXT(value) {
+  if (value == null) return "";
+  if (typeof value === "string" || typeof value === "number") return String(value).trim();
+  if (typeof value === "object") return String(value.name || value.city || value.country || value.label || value.value || "").trim();
+  return String(value).trim();
+}
+
+function MSH_FULL_NORM(value) {
+  return MSH_FULL_TEXT(value).toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function MSH_FULL_NUM(value) {
+  const n = Number(String(value || "").replace(/[^0-9.-]/g, ""));
+  return Number.isFinite(n) ? Math.round(n * 100) / 100 : 0;
+}
+
+function MSH_FULL_ARRAY(value) {
+  if (Array.isArray(value)) return value;
+  if (value && typeof value === "object") {
+    if (Array.isArray(value.hotels)) return value.hotels;
+    if (Array.isArray(value.data)) return value.data;
+    if (Array.isArray(value.results)) return value.results;
+    if (Array.isArray(value.items)) return value.items;
+  }
+  return [];
+}
+
+function MSH_FULL_FIRST_IMAGE(hotel) {
+  const list = [
+    hotel.image, hotel.image_url, hotel.imageUrl, hotel.main_image, hotel.mainImage,
+    hotel.photo, hotel.photo_url, hotel.thumbnail, hotel.coverImage, hotel.cover_image,
+    hotel?.images?.[0], hotel?.photos?.[0], hotel?.images?.[0]?.url, hotel?.photos?.[0]?.url
+  ];
+  return list.find((x) => typeof x === "string" && /^https?:\/\//i.test(x.trim())) || "";
+}
+
+function MSH_FULL_PROP_TEXT(hotel) {
+  return MSH_FULL_NORM([
+    hotel.name, hotel.hotel_name, hotel.property_name, hotel.title, hotel.type,
+    hotel.propertyType, hotel.property_type, hotel.category, hotel.categoryName,
+    hotel.accommodationType, hotel.accommodation_type, hotel.description
+  ].filter(Boolean).join(" "));
+}
+
+function MSH_FULL_MODE(query) {
+  return "hotels";
+}
+
+function MSH_FULL_PROP_OK(hotel, query) {
+  return isStrictHotelOnly(hotel);
+}
+
+function MSH_FULL_DEST_OK(hotel, country, city) {
+  const wantedCountry = MSH_FULL_NORM(country);
+  const wantedCity = MSH_FULL_NORM(city);
+  const hotelCountry = MSH_FULL_NORM(hotel.country || hotel.location?.country || hotel.destinationCountry || hotel.address?.country);
+  const hotelCity = MSH_FULL_NORM(hotel.city || hotel.destination || hotel.location?.city || hotel.destinationCity || hotel.address?.city);
+  if (wantedCountry && hotelCountry && hotelCountry !== wantedCountry) return false;
+  if (wantedCity && hotelCity) return hotelCity === wantedCity || hotelCity.includes(wantedCity) || wantedCity.includes(hotelCity);
+  return true;
+}
+
+function MSH_FULL_READ_ROWS() {
+  const candidates = [
+    typeof HOTELS_FILE !== "undefined" ? HOTELS_FILE : "",
+    typeof DATA_DIR !== "undefined" ? path.join(DATA_DIR, "live_hotels.json") : "",
+    typeof DATA_DIR !== "undefined" ? path.join(DATA_DIR, "hotels.json") : "",
+    typeof DATA_DIR !== "undefined" ? path.join(DATA_DIR, "hotelbeds_hotels.json") : "",
+    typeof DATA_DIR !== "undefined" ? path.join(DATA_DIR, "webbeds_hotels.json") : "",
+    typeof DATA_DIR !== "undefined" ? path.join(DATA_DIR, "ratehawk_hotels.json") : ""
+  ];
+  const seen = new Set();
+  const rows = [];
+  for (const file of candidates) {
+    if (!file || seen.has(file)) continue;
+    seen.add(file);
+    try {
+      const parsed = typeof readJSON === "function" ? readJSON(file, []) : JSON.parse(fs.readFileSync(file, "utf8"));
+      rows.push(...MSH_FULL_ARRAY(parsed));
+    } catch {}
+  }
+  return rows;
+}
+
+function MSH_FULL_PRICE(hotel) {
+  return MSH_FULL_NUM(
+    hotel.price || hotel.displayPrice || hotel.convertedPrice || hotel.amount || hotel.nightly_rate || hotel.rate ||
+    hotel.from_price || hotel.minRate || hotel.min_rate || hotel?.selectedRoom?.price || hotel?.selectedRoom?.convertedPrice ||
+    hotel?.rooms?.[0]?.price || hotel?.rooms?.[0]?.convertedPrice || hotel?.rates?.[0]?.nightly_rate || hotel?.rates?.[0]?.price
+  );
+}
+
+function MSH_FULL_CLEAN(hotel, query) {
+  const name = MSH_FULL_TEXT(hotel.name || hotel.hotel_name || hotel.property_name || hotel.title || "Hotel");
+  const country = MSH_FULL_TEXT(hotel.country || hotel.location?.country || hotel.destinationCountry || query.country);
+  const city = MSH_FULL_TEXT(hotel.city || hotel.destination || hotel.location?.city || hotel.destinationCity || query.city);
+  const price = MSH_FULL_PRICE(hotel);
+  const currency = MSH_FULL_TEXT(hotel.currency || hotel.displayCurrency || hotel?.rooms?.[0]?.currency || query.currency || "GBP").toUpperCase();
+  const image = MSH_FULL_FIRST_IMAGE(hotel);
+  const id = MSH_FULL_TEXT(hotel.id || hotel.hotelId || hotel.hotel_id || hotel.code || `${name}-${city}-${country}`);
+  return {
+    ...hotel,
+    id,
+    hotelId: MSH_FULL_TEXT(hotel.hotelId || hotel.hotel_id || hotel.id || hotel.code || id),
+    hotel_id: MSH_FULL_TEXT(hotel.hotel_id || hotel.hotelId || hotel.id || hotel.code || id),
+    name,
+    hotel_name: name,
+    country,
+    city,
+    image,
+    image_url: image,
+    currency,
+    displayCurrency: currency,
+    price: price > 0 ? price : null,
+    displayPrice: price > 0 ? price : null,
+    convertedPrice: price > 0 ? price : null,
+    live_rate_ready: price > 0,
+    availableToBook: price > 0,
+    rooms: price > 0 ? [{ roomCode: hotel?.rooms?.[0]?.roomCode || "STANDARD", roomName: hotel?.rooms?.[0]?.roomName || "Available room", price, convertedPrice: price, currency, displayCurrency: currency }] : [],
+    customerMessage: price > 0 ? "Current stay total available." : "Select this hotel to check current availability and rates."
+  };
+}
+
+app.get("/api/customer-global-hotels", (req, res) => {
+  try {
+    const country = MSH_FULL_TEXT(req.query.country || "United Kingdom");
+    const city = MSH_FULL_TEXT(req.query.city || req.query.requestedCity || "London");
+    const limit = Math.max(1, Math.min(Number(req.query.limit || 300), 500));
+    const rows = MSH_FULL_READ_ROWS();
+    const hotels = rows
+      .filter(Boolean)
+      .filter((hotel) => MSH_FULL_DEST_OK(hotel, country, city))
+      .filter((hotel) => MSH_FULL_PROP_OK(hotel, { ...req.query, propertyType: "hotels", property_type: "hotels", accommodationMode: "hotel_only" }))
+      .map((hotel) => MSH_FULL_CLEAN(hotel, { ...req.query, country, city }))
+      .filter((hotel) => hotel.name && !/test|demo|placeholder|sample|fake|dummy/i.test(hotel.name))
+      .filter((hotel) => isStrictHotelOnly(hotel))
+      .filter((hotel, index, list) => {
+        const key = MSH_FULL_NORM(hotel.hotelId || `${hotel.name}-${hotel.city}-${hotel.country}`);
+        return index === list.findIndex((x) => MSH_FULL_NORM(x.hotelId || `${x.name}-${x.city}-${x.country}`) === key);
+      })
+      .slice(0, limit);
+    return res.json({
+      ok: true,
+      success: true,
+      source: "current_hotel_suppliers",
+      accommodationMode: "hotel_only",
+      supplierScope: "hotelbeds_webbeds_hyperguest_ratehawk_current_only",
+      count: hotels.length,
+      hotels,
+      customerMessage: hotels.length ? "Hotels loaded. Select a hotel to check current availability and rates." : "No matching hotels are available for this search right now. Please try another city or date."
+    });
+  } catch (err) {
+    return res.status(200).json({ ok: true, success: true, count: 0, hotels: [], customerMessage: "No matching hotels are available for this search right now. Please try another city or date." });
+  }
+});
 
 app.get("/api/customer-global-hotels", async (req, res) => {
   try {
@@ -7176,12 +7281,13 @@ app.get("/api/customer-global-hotels", async (req, res) => {
     const checkOut = MSH_PUBLIC_CLEAN_TEXT(req.query.checkOut || req.query.checkout || "");
     const guests = MSH_PUBLIC_CLEAN_TEXT(req.query.guests || "2");
     const rooms = MSH_PUBLIC_CLEAN_TEXT(req.query.rooms || "1");
-    const limit = Math.max(1, Math.min(Number(req.query.limit || 40), 80));
+    const limit = Math.max(1, Math.min(Number(req.query.limit || 300), 500));
 
     const wantedCountry = MSH_PUBLIC_NORM(country);
     const wantedCity = MSH_PUBLIC_NORM(requestedCity);
 
     const rows = MSH_PUBLIC_READ_LIVE_HOTELS()
+      .filter((hotel) => isStrictHotelOnly(hotel))
       .filter((hotel) => {
         const hCountry = MSH_PUBLIC_NORM(hotel?.country || hotel?.location?.country || "");
         const hCity = MSH_PUBLIC_NORM(hotel?.city || hotel?.location?.city || "");
@@ -8312,14 +8418,14 @@ app.get("/api/strict-live-hotels", async (req, res) => {
         country,
         city,
         currency: req.query.currency || "GBP",
-        limit: 30
+        limit: Math.max(1, Math.min(Number(req.query.limit || 50), 500))
       });
     }
 
     const hotels = (Array.isArray(result.hotels) ? result.hotels : [])
       .map((h) => mshStrictCleanHotelForQuery(h, { ...req.query, country, city }))
       .filter(Boolean)
-      .slice(0, 30);
+      .slice(0, Math.max(1, Math.min(Number(req.query.limit || 50), 500)));
 
     return res.json({
       ok: true,
@@ -8554,17 +8660,17 @@ app.get("/api/global-live-hotels", async (req, res) => {
     let allHotels = [];
 
     if (mshSupplierConfigured("hotelbeds") && typeof hotelbedsAvailabilitySearch === "function") {
-      const hb = await hotelbedsAvailabilitySearch({ ...req.query, country, city, currency, limit: 30 }).catch(() => ({ hotels: [] }));
+      const hb = await hotelbedsAvailabilitySearch({ ...req.query, country, city, currency, limit: Math.max(1, Math.min(Number(req.query.limit || 50), 500)) }).catch(() => ({ hotels: [] }));
       allHotels.push(...(Array.isArray(hb.hotels) ? hb.hotels : []));
     }
 
     if (mshSupplierConfigured("webbeds") && typeof webbedsHotels === "function") {
-      const wb = await webbedsHotels({ ...req.query, country, city, currency, limit: 30 }).catch(() => []);
+      const wb = await webbedsHotels({ ...req.query, country, city, currency, limit: Math.max(1, Math.min(Number(req.query.limit || 50), 500)) }).catch(() => []);
       allHotels.push(...(Array.isArray(wb) ? wb : []));
     }
 
     if (mshSupplierConfigured("ratehawk") && typeof ratehawkHotels === "function") {
-      const rh = await ratehawkHotels({ ...req.query, country, city, currency, limit: 30 }).catch(() => []);
+      const rh = await ratehawkHotels({ ...req.query, country, city, currency, limit: Math.max(1, Math.min(Number(req.query.limit || 50), 500)) }).catch(() => []);
       allHotels.push(...(Array.isArray(rh) ? rh : []));
     }
 
@@ -8580,7 +8686,7 @@ app.get("/api/global-live-hotels", async (req, res) => {
         seen.add(key);
         return true;
       })
-      .slice(0, 30);
+      .slice(0, Math.max(1, Math.min(Number(req.query.limit || 50), 500)));
 
     return res.json({
       ok: true,
@@ -8606,6 +8712,86 @@ app.get("/api/global-live-hotels", async (req, res) => {
   }
 });
 // MSH GLOBAL DROPDOWN + STRICT LIVE SUPPLIER SEARCH END
+
+
+// MSH CUSTOMER SELECTED HOTEL REVIEW START
+app.get("/api/customer-hotel-live-rate", (req, res) => {
+  try {
+    const country = MSH_FULL_TEXT(req.query.country || "");
+    const city = MSH_FULL_TEXT(req.query.city || "");
+    const hotelId = MSH_FULL_TEXT(req.query.hotelId || req.query.hotel_id || req.query.id || "");
+    const hotelName = MSH_FULL_NORM(req.query.hotelName || req.query.hotel_name || "");
+
+    const rows = MSH_FULL_READ_ROWS()
+      .filter(Boolean)
+      .filter((hotel) => MSH_FULL_DEST_OK(hotel, country, city))
+      .map((hotel) => MSH_FULL_CLEAN(hotel, { ...req.query, country, city }))
+      .filter((hotel) => {
+        const id = MSH_FULL_TEXT(hotel.hotelId || hotel.hotel_id || hotel.id);
+        const name = MSH_FULL_NORM(hotel.name || hotel.hotel_name);
+        return (hotelId && id === hotelId) || (hotelName && (name === hotelName || name.includes(hotelName) || hotelName.includes(name)));
+      })
+      .filter((hotel, index, list) => {
+        const key = MSH_FULL_NORM(hotel.hotelId || `${hotel.name}-${hotel.city}-${hotel.country}`);
+        return index === list.findIndex((x) => MSH_FULL_NORM(x.hotelId || `${x.name}-${x.city}-${x.country}`) === key);
+      });
+
+    const hotel = rows[0] || null;
+    if (!hotel) {
+      return res.json({
+        ok: true,
+        success: true,
+        found: false,
+        customer_offer: null,
+        hotels: [],
+        customerMessage: "This hotel is saved. Current availability will be confirmed before secure checkout."
+      });
+    }
+
+    const room = Array.isArray(hotel.rooms) && hotel.rooms.length ? hotel.rooms[0] : {};
+    const amount = MSH_FULL_NUM(room.convertedPrice || room.price || hotel.convertedPrice || hotel.displayPrice || hotel.price);
+    const currency = MSH_FULL_TEXT(room.displayCurrency || room.currency || hotel.currency || req.query.currency || "GBP").toUpperCase();
+
+    return res.json({
+      ok: true,
+      success: true,
+      found: true,
+      hotel,
+      hotels: [hotel],
+      customer_offer: amount > 0 ? {
+        hotelId: hotel.hotelId,
+        hotelName: hotel.name,
+        country: hotel.country,
+        city: hotel.city,
+        roomCode: room.roomCode || "STANDARD",
+        roomName: room.roomName || "Available room",
+        amount,
+        currency,
+        rate_source_id: room.rate_source_id || hotel.rate_source_id || "",
+        rate_source_timestamp: room.rate_source_timestamp || hotel.rate_source_timestamp || nowISO(),
+        source_health: "verified",
+        message: "Current stay total available for review."
+      } : null,
+      comparison_summary: {
+        compared_options: rows.length,
+        best_amount: amount,
+        currency,
+        message: amount > 0 ? "Current stay total available for review." : "Select this hotel to check current availability and rates."
+      },
+      customerMessage: amount > 0 ? "Current stay total available for review." : "This hotel is saved. Current availability will be confirmed before secure checkout."
+    });
+  } catch (err) {
+    return res.json({
+      ok: true,
+      success: true,
+      found: false,
+      customer_offer: null,
+      hotels: [],
+      customerMessage: "This hotel is saved. Current availability will be confirmed before secure checkout."
+    });
+  }
+});
+// MSH CUSTOMER SELECTED HOTEL REVIEW END
 
 app.listen(PORT, "0.0.0.0", () => {
   const destinations = buildDestinations();

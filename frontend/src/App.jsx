@@ -1,9 +1,9 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import ExperiencePage from "./ExperiencePage";
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
   import.meta.env.VITE_API_BASE_URL ||
-  "http://127.0.0.1:5050";
+  "https://myspace-hotel-backend.onrender.com";
 
 
 const safeText = (value) => {
@@ -469,6 +469,7 @@ const [currentPage, setCurrentPage] = useState("home");
   const [currency, setCurrency] = useState("GBP");
   const [propertyType, setPropertyType] = useState("hotels");
   const [stayType, setStayType] = useState("hotels");
+  const HOTEL_ONLY_MODE = "hotels";
   const [hotels, setHotels] = useState([]);
   const [selectedHotel, setSelectedHotel] = useState(() => {
     try {
@@ -594,87 +595,76 @@ const [currentPage, setCurrentPage] = useState("home");
         guests: String(guests),
         rooms: String(rooms),
         currency,
-      propertyType,
-      property_type: propertyType,
-      limit: "80",
+        propertyType: HOTEL_ONLY_MODE,
+        property_type: HOTEL_ONLY_MODE,
+        accommodationMode: "hotel_only",
+        supplierScope: "current_hotel_suppliers",
+        limit: "300",
       });
 
       const endpoints = [
-      `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
-      `${API_BASE}/api/customer-global-hotels?${params.toString()}`
-    ];
+        `${API_BASE}/api/global-live-hotels?${params.toString()}`,
+        `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
+        `${API_BASE}/api/multi-supplier-hotels?${params.toString()}`,
+        `${API_BASE}/api/hotels/search?${params.toString()}`,
+        `${API_BASE}/search?${params.toString()}`
+      ];
 
-      const results = await Promise.allSettled(
-        endpoints.map((url) =>
-          fetch(url, { cache: "no-store" })
-          .then((res) => {
-            if (!res.ok) throw new Error(`Hotel search failed ${res.status}`);
-            return res.json();
-          })
-            .catch(() => ({ hotels: [] }))
-        )
-      );
+      let data = null;
+      let found = [];
 
-      const collected = [];
+      for (const endpoint of endpoints) {
+        try {
+          const res = await fetch(endpoint, {
+            cache: "no-store",
+            mode: "cors",
+          });
 
-      for (const result of results) {
-        if (result.status !== "fulfilled") continue;
-        const data = result.value || {};
-        if (Array.isArray(data.hotels)) collected.push(...data.hotels);
-      }
+          const json = await res.json().catch(() => ({}));
+          const list = Array.isArray(json.hotels) ? json.hotels : [];
 
-      const found = collected
-      .filter(Boolean)
-        .filter((hotel) => {
-          const hotelCountry = String(hotel.country || "").trim().toLowerCase();
-          const hotelCity = String(hotel.city || hotel.destination || "").trim().toLowerCase();
-          const wantedCountry = String(country || "").trim().toLowerCase();
-          const wantedCity = String(city || "").trim().toLowerCase();
-
-          if (wantedCountry && hotelCountry && hotelCountry !== wantedCountry) return false;
-
-          if (wantedCity && hotelCity) {
-            return (
-              hotelCity === wantedCity ||
-              hotelCity.includes(wantedCity) ||
-              wantedCity.includes(hotelCity)
-            );
+          if (res.ok && list.length) {
+            data = json;
+            found = list;
+            break;
           }
 
-          return true;
-        })
-        .filter((hotel, index, list) => {
-          const key = String(
-            hotel?.hotelId ||
-              hotel?.hotel_id ||
-              hotel?.id ||
-              hotel?.code ||
-              `${hotel?.name || hotel?.hotel_name || "hotel"}-${hotel?.city || ""}-${hotel?.country || ""}`
+          if (!data && res.ok) data = json;
+        } catch {}
+      }
+
+      if (!data) throw new Error("Hotel search failed");
+
+      found = found.filter((hotel) => isCustomerHotelResult(hotel, HOTEL_ONLY_MODE));
+
+      found = found.filter((hotel, index, list) => {
+        const key = String(
+          hotel?.hotelId ||
+            hotel?.hotel_id ||
+            hotel?.id ||
+            hotel?.code ||
+            `${hotel?.name || hotel?.hotel_name || "hotel"}-${hotel?.city || ""}-${hotel?.country || ""}`
+        ).toLowerCase();
+
+        return index === list.findIndex((x) => {
+          const xKey = String(
+            x?.hotelId ||
+              x?.hotel_id ||
+              x?.id ||
+              x?.code ||
+              `${x?.name || x?.hotel_name || "hotel"}-${x?.city || ""}-${x?.country || ""}`
           ).toLowerCase();
-
-          return index === list.findIndex((x) => {
-            const xKey = String(
-              x?.hotelId ||
-                x?.hotel_id ||
-                x?.id ||
-                x?.code ||
-                `${x?.name || x?.hotel_name || "hotel"}-${x?.city || ""}-${x?.country || ""}`
-            ).toLowerCase();
-
-            return xKey === key;
-          });
+          return xKey === key;
         });
+      });
 
       setHotels(found);
+      setNotice(found.length ? "" : (data.customerMessage || "No matching hotels are available for this search right now. Please try another city or date."));
 
       setTimeout(() => {
         const target = document.getElementById("hotel-results");
         if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 100);
-
-      if (!found.length) {
-        setNotice("");
-      }
     } catch {
       setNotice("We could not load hotels for this destination right now. Please try again.");
     } finally {
@@ -684,11 +674,7 @@ const [currentPage, setCurrentPage] = useState("home");
   async function refreshSelectedHotelLiveRates(hotelToRefresh) {
     const readyHotel = selectedHotelWithRoom(hotelToRefresh);
     setSelectedHotel(readyHotel);
-setTimeout(() => {
-  try {
-    refreshLiveCompare();
-  } catch (e) {}
-}, 50);
+
     setLiveRateNotice("");
 
     const selectedHotelId = readyHotel?.hotelId || readyHotel?.hotel_id || readyHotel?.id || readyHotel?.code || "";
@@ -720,13 +706,18 @@ setTimeout(() => {
         guests: String(guests),
         rooms: String(rooms),
         currency,
+        propertyType: HOTEL_ONLY_MODE,
+        property_type: HOTEL_ONLY_MODE,
+        accommodationMode: "hotel_only",
+        supplierScope: "current_hotel_suppliers",
         limit: "1",
       });
 
       const endpoints = [
-      `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
-      `${API_BASE}/api/customer-global-hotels?${params.toString()}`
-    ];
+        `${API_BASE}/api/selected-hotel-live-rate?${params.toString()}`,
+        `${API_BASE}/api/customer-hotel-live-rate?${params.toString()}`,
+        `${API_BASE}/api/compare-prices?${params.toString()}`
+      ];
 
       let refreshedHotel = null;
 
@@ -821,15 +812,7 @@ setTimeout(() => {
   }
 
   function selectHotelAndRefreshLiveRates(hotelToSelect) {
-    const readyHotel = selectedHotelWithRoom(hotelToSelect);
-    setSelectedHotel(readyHotel);
-setTimeout(() => {
-  try {
-    refreshLiveCompare();
-  } catch (e) {}
-}, 50);
-    setLiveRateLoading(false);
-    setLiveRateNotice("");
+    refreshSelectedHotelLiveRates(hotelToSelect);
   }
 
   async function secureReservation() {
@@ -1076,7 +1059,7 @@ function Header() {
     <header style={styles.header}>
       <a style={styles.brand} href={routeUrl(ROUTES.hotels)}>
         <div style={styles.logo}>MYSPACE HOTEL</div>
-        <div style={styles.tagline}>Hotels, resorts, serviced apartments and worldwide travel support</div>
+        <div style={styles.tagline}>Hotels and worldwide travel support</div>
       </a>
 
       <nav style={styles.nav}>
@@ -1160,15 +1143,15 @@ function HotelsPage(props) {
 
       <section style={styles.contentGrid}>
         <main>
-          <h2 id="hotel-results" style={styles.title}>Available stays nearby</h2>
+          <h2 id="hotel-results" style={styles.title}>Available hotels nearby</h2>
           <p style={styles.sectionText}>
             Select a hotel to refresh the booking summary, comparison box, travel support and alternative hotel options immediately.
           </p>
 
-          {props.loading ? <div style={styles.empty}>Finding suitable accommodation for your destination...</div> : null}
+          {props.loading ? <div style={styles.empty}>Finding suitable hotels for your destination...</div> : null}
 
           {!props.loading && props.hotels.length === 0 ? (
-            <div style={styles.empty}>Choose a country, city and travel dates to discover available accommodation.</div>
+            <div style={styles.empty}>Choose a country, city and travel dates to discover available hotels.</div>
           ) : null}
 
           <div style={styles.hotelGrid}>
@@ -1191,19 +1174,6 @@ function HotelsPage(props) {
 function SearchBox(props) {
   return (
     <>
-            <Field label="Property Type">
-        <select style={styles.input} value={props.propertyType || "hotels"} onChange={(e) => {
-          props.setPropertyType(e.target.value);
-          props.setHotels([]);
-          props.setSelectedHotel(null);
-        }}>
-          <option value="hotels">Hotels only</option>
-          <option value="hotel_resort">Hotels + resorts</option>
-          <option value="serviced">Serviced apartments</option>
-          <option value="homes">Villas & homes</option>
-          <option value="all">All accommodation</option>
-        </select>
-      </Field>
       <Field label="Country">
         <select style={styles.input} value={props.country} onChange={(e) => {
           props.setCountry(e.target.value);
@@ -1292,24 +1262,32 @@ function customerHotelText(hotel) {
 
 function isCustomerHotelResult(hotel, propertyType = "hotels") {
   const text = customerHotelText(hotel);
-  const mode = String(propertyType || "hotels").toLowerCase();
 
-  const hotelWords = ["hotel", "resort", "inn", "motel", "lodge", "guest house", "guesthouse", "b&b", "bed and breakfast", "aparthotel"];
-  const nonHotelWords = ["apartment", "apartments", "flat", "flats", "duplex", "villa", "home", "house", "condo", "penthouse", "loft", "studio", "residence", "entire", "long stay", "monthly", "rental"];
+  const nonHotelWords = [
+    "apartment", "apartments", "flat", "flats", "serviced apartment", "service apartment",
+    "aparthotel", "apart hotel", "studio", "residence", "residences", "villa", "villas",
+    "home", "house", "holiday home", "vacation rental", "condo", "penthouse", "loft",
+    "private room", "shared room", "entire home", "entire place", "hostel", "camp", "caravan",
+    "farm stay", "cottage", "guest house", "guesthouse", "b&b", "bed and breakfast",
+    "long stay", "long-stay", "monthly", "rental", "for rent", "for sale"
+  ];
 
-  if (mode === "all") return true;
-  if (mode === "homes") return false;
-  if (mode === "serviced") return text.includes("aparthotel") || text.includes("serviced apartment");
+  const hotelWords = [
+    "hotel", "inn", "motel", "hotel suites", "suite hotel", "premier inn",
+    "holiday inn", "travelodge", "marriott", "hilton", "hyatt", "radisson",
+    "novotel", "ibis", "mercure", "sheraton", "doubletree", "crowne plaza",
+    "intercontinental", "fairmont", "ritz", "waldorf", "sofitel", "westin"
+  ];
 
+  if (!text || /test|demo|placeholder|sample|fake|dummy/.test(text)) return false;
   if (nonHotelWords.some((word) => text.includes(word))) return false;
   return hotelWords.some((word) => text.includes(word));
 }
 
 function customerVisibleHotels(list, propertyType = "hotels") {
   return (Array.isArray(list) ? list : [])
-    .filter((hotel) => isCustomerHotelResult(hotel, propertyType))
-    .filter((hotel) => Number(hotelPrice(hotel)) > 0)
-    .slice(0, 80);
+    .filter((hotel) => isCustomerHotelResult(hotel, "hotels"))
+    .slice(0, 300);
 }
 
 function Field({ label, children }) {
@@ -1338,7 +1316,7 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, selectHotelAndRefre
       )}
 
       <div style={styles.hotelBody}>
-        <div style={styles.greenBadge}>{selected ? "Selected Property" : "Recommended Property"}</div>
+        <div style={styles.greenBadge}>{selected ? "Selected Hotel" : "Recommended Hotel"}</div>
         <h3 style={styles.hotelName}>{hotel.name || "Selected hotel"}</h3>
         <div style={styles.muted}>{hotel.city || city}, {hotel.country || country}</div>
 
@@ -1378,7 +1356,7 @@ function BookingSummary(props) {
 
           <div style={styles.totalBox}>
             <div style={styles.totalLabel}>Estimated stay total</div>
-            <div style={styles.totalPrice}>{props.selectedCurrency} {money(props.totalPrice)}</div>
+            <div style={styles.totalPrice}>{props.totalPrice > 0 ? `${props.selectedCurrency} ${money(props.totalPrice)}` : "Check availability"}</div>
             <div style={styles.small}>Price confirmed before secure checkout.</div>
           </div>
 
@@ -1417,7 +1395,7 @@ function ComparePanel(props) {
         <div>
           <div style={styles.kicker}>Compare Prices</div>
           <h2 style={styles.titleSmall}>Compare your selected stay</h2>
-          <p style={styles.sectionText}>Review stay choices and Available stays nearby before continuing.</p>
+          <p style={styles.sectionText}>Review stay choices and Available hotels nearby before continuing.</p>
         </div>
         <a style={styles.primaryLink} href={routeUrl(ROUTES.compare)}>Open Compare Page</a>
       </div>
@@ -1447,7 +1425,7 @@ function AlternativeHotels(props) {
 
   return (
     <section style={styles.panel}>
-      <div style={styles.kicker}>Available stays nearby</div>
+      <div style={styles.kicker}>Available hotels nearby</div>
       <h2 style={styles.titleSmall}>Other accommodation options in {props.city || "this destination"}</h2>
 
       <div style={styles.altGrid}>
@@ -1806,7 +1784,7 @@ function AttractionsPortal(props) {
             </div>
           </section>
 
-          <KlookDynamicWidget city={cityText} country={country} />
+          <KlookDynamicWidget city={city} country={country} />
         </>
       )}
     </PortalShell>
@@ -1886,7 +1864,7 @@ function FeaturedHotelsPortal() {
       <form style={styles.form} onSubmit={submit}>
         <input style={styles.input} placeholder="Hotel name" value={hotelName} onChange={(e) => setHotelName(e.target.value)} />
         <input style={styles.input} placeholder="Country" value={country} onChange={(e) => setCountry(e.target.value)} />
-        <input style={styles.input} placeholder="City" value={cityText} onChange={(e) => setCity(e.target.value)} />
+        <input style={styles.input} placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
         <input style={styles.input} placeholder="Contact name" value={contactName} onChange={(e) => setContactName(e.target.value)} />
         <input style={styles.input} type="email" placeholder="Contact email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
         <input style={styles.input} placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
@@ -1940,7 +1918,7 @@ function FaqPortal() {
       <div style={styles.faqList}>
         <FaqItem q="How do I search for a hotel?" a="Select your country, city, dates, guests and rooms, then choose Search. Available hotel options will appear below the search box." />
         <FaqItem q="When is the final price confirmed?" a="The stay total is shown before checkout. Final payment details are confirmed securely before payment is completed." />
-        <FaqItem q="Can I compare hotels in the same destination?" a="Yes. After selecting a hotel, MySpace Hotel shows comparison choices and Available stays nearby where available." />
+        <FaqItem q="Can I compare hotels in the same destination?" a="Yes. After selecting a hotel, MySpace Hotel shows comparison choices and Available hotels nearby where available." />
         <FaqItem q="Can I add insurance, transfers or attractions?" a="Yes. Complete your hotel reservation first. Additional travel services can be requested afterwards through MySpace Hotel." />
         <FaqItem q="Can hotels or partners work with MySpace Hotel?" a="Yes. Accommodation providers and travel technology partners can use the Industry Partnerships page to contact MySpace Hotel." />
       </div>
