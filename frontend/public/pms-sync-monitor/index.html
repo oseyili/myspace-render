@@ -1,0 +1,233 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PMS Sync Monitor | MySpace Hotel</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#00112b;font-family:Arial,Helvetica,sans-serif;color:#0d2f7a}
+.wrapper{max-width:1450px;margin:0 auto;padding:32px}
+.panel{background:#f5f7fc;border-radius:34px;padding:36px}
+.brand{color:#d7a300;font-size:16px;font-weight:900;letter-spacing:10px;margin-bottom:18px}
+h1{margin:0;font-size:52px;line-height:1;color:#0d3f9b}
+.subtitle{margin-top:14px;font-size:18px;font-weight:700;color:#55627f}
+.auth{margin-top:26px;display:grid;grid-template-columns:1fr 1fr 180px 180px;gap:14px}
+input{width:100%;border-radius:16px;border:2px solid #d7ddea;padding:16px;font-size:16px;font-weight:700;background:#fff}
+button{border:none;border-radius:16px;background:#133f9f;color:#fff;padding:16px 22px;font-size:17px;font-weight:900;cursor:pointer}
+button.gold{background:#f6cc47;color:#000}
+.message{margin-top:22px;padding:18px;border-radius:18px;font-size:18px;font-weight:900}
+.ok{background:#cdeed5;color:#00612b}
+.error{background:#f3d2d2;color:#9a1111}
+.info{background:#dce8ff;color:#0d3f9b}
+.grid{margin-top:28px;display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.card{background:#e9edf6;border-radius:26px;padding:24px;min-height:145px}
+.card-title{font-size:13px;letter-spacing:3px;font-weight:900;color:#4d5f84}
+.card-value{margin-top:22px;font-size:44px;font-weight:900;color:#1140a0}
+.section{margin-top:28px;background:#e9edf6;border-radius:26px;padding:26px}
+.section-title{font-size:24px;font-weight:900;color:#0d3f9b;margin-bottom:18px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:12px;border-bottom:2px solid #d5dcea;font-size:15px;color:#0d3f9b}
+td{padding:12px;border-bottom:1px solid #d5dcea;font-size:14px;color:#1b2f54;vertical-align:top}
+.links{display:flex;flex-wrap:wrap;gap:14px;margin-top:26px}
+.links a{text-decoration:none;background:#041738;color:#fff;padding:16px 22px;border-radius:16px;font-weight:900;font-size:17px}
+@media(max-width:1000px){.auth,.grid{grid-template-columns:1fr}h1{font-size:38px}}
+</style>
+</head>
+<body>
+<div class="wrapper">
+<div class="panel">
+<div class="brand">MYSPACE HOTEL</div>
+<h1>PMS Sync Monitor</h1>
+<div class="subtitle">Live inventory, rate, reservation, partner connection and sync failure monitoring.</div>
+
+<div class="auth">
+<input id="partnerId" value="oracle-ohip" />
+<input id="partnerToken" value="MSH_ENTERPRISE_TOKEN_001" />
+<button class="gold" onclick="connectPartner()">Connect</button>
+<button onclick="runManualSync()">Run Sync Now</button>
+</div>
+
+<div id="message" class="message info">Connect first to monitor PMS synchronization.</div>
+
+<div class="grid">
+<div class="card"><div class="card-title">PARTNERS</div><div class="card-value" id="partners">-</div></div>
+<div class="card"><div class="card-title">INVENTORY SYNCS</div><div class="card-value" id="inventory">-</div></div>
+<div class="card"><div class="card-title">RATE SYNCS</div><div class="card-value" id="rates">-</div></div>
+<div class="card"><div class="card-title">RESERVATION SYNCS</div><div class="card-value" id="reservations">-</div></div>
+<div class="card"><div class="card-title">FAILURES</div><div class="card-value" id="failures">-</div></div>
+<div class="card"><div class="card-title">SYSTEM</div><div class="card-value">V3.2</div></div>
+<div class="card"><div class="card-title">MODE</div><div class="card-value">LIVE</div></div>
+<div class="card"><div class="card-title">INTERVAL</div><div class="card-value">1M</div></div>
+</div>
+
+<div class="section">
+<div class="section-title">Partner Connections</div>
+<table>
+<thead><tr><th>Partner</th><th>Name</th><th>Status</th><th>Last Sync</th></tr></thead>
+<tbody id="partnerRows"><tr><td colspan="4">Connect first.</td></tr></tbody>
+</table>
+</div>
+
+<div class="section">
+<div class="section-title">Latest Inventory Syncs</div>
+<table>
+<thead><tr><th>Time</th><th>Partner</th><th>Hotel</th><th>Available</th><th>Stop Sell</th></tr></thead>
+<tbody id="inventoryRows"><tr><td colspan="5">Connect first.</td></tr></tbody>
+</table>
+</div>
+
+<div class="section">
+<div class="section-title">Latest Rate Syncs</div>
+<table>
+<thead><tr><th>Time</th><th>Partner</th><th>Hotel</th><th>Rate Plan</th><th>Amount</th></tr></thead>
+<tbody id="rateRows"><tr><td colspan="5">Connect first.</td></tr></tbody>
+</table>
+</div>
+
+<div class="section">
+<div class="section-title">Latest Reservation Syncs</div>
+<table>
+<thead><tr><th>Time</th><th>Partner</th><th>Booking</th><th>Supplier Confirmation</th><th>Hotel</th></tr></thead>
+<tbody id="reservationRows"><tr><td colspan="5">Connect first.</td></tr></tbody>
+</table>
+</div>
+
+<div class="links">
+<a href="/partner-dashboard">Partner Dashboard</a>
+<a href="/pms-mapping">PMS Mapping</a>
+<a href="/developers">Developers</a>
+<a href="/api">API</a>
+<a href="/webhooks">Webhooks</a>
+<a href="/status">Status</a>
+<a href="https://myspace-hotel-backend.onrender.com/docs" target="_blank">Swagger Docs</a>
+</div>
+</div>
+</div>
+
+<script>
+const API_BASE = "https://myspace-hotel-backend.onrender.com";
+let JWT_TOKEN = "";
+
+function setMessage(text,type){
+  const message = document.getElementById("message");
+  message.className = "message " + type;
+  message.innerHTML = text;
+}
+
+async function connectPartner(){
+  const partnerId = document.getElementById("partnerId").value.trim();
+  const token = document.getElementById("partnerToken").value.trim();
+  setMessage("Connecting partner account...","info");
+
+  try{
+    const response = await fetch(API_BASE + "/api/auth/login", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ partner_id:partnerId, token:token })
+    });
+
+    const data = await response.json();
+
+    if(!response.ok || !data.ok || !data.jwt){
+      throw new Error(data.error || "Authentication failed");
+    }
+
+    JWT_TOKEN = data.jwt;
+    setMessage("Connected. PMS sync monitor active.","ok");
+    await loadAll();
+  }catch(error){
+    setMessage("Partner login failed. Confirm backend deployment and partner token.","error");
+    console.log(error);
+  }
+}
+
+async function api(path, options = {}){
+  const response = await fetch(API_BASE + path, {
+    cache:"no-store",
+    ...options,
+    headers:{
+      ...(options.headers || {}),
+      Authorization:"Bearer " + JWT_TOKEN
+    }
+  });
+  const data = await response.json();
+  if(!response.ok || !data.ok) throw new Error(data.error || "API failed");
+  return data;
+}
+
+async function loadAll(){
+  if(!JWT_TOKEN){
+    setMessage("Connect first.","error");
+    return;
+  }
+
+  const status = await api("/api/sync/status");
+  document.getElementById("partners").innerHTML = (status.partners || []).length;
+  document.getElementById("inventory").innerHTML = status.inventory_syncs || 0;
+  document.getElementById("rates").innerHTML = status.rate_syncs || 0;
+  document.getElementById("reservations").innerHTML = status.reservation_syncs || 0;
+  document.getElementById("failures").innerHTML = status.failures || 0;
+
+  document.getElementById("partnerRows").innerHTML = (status.partners || []).map(p => `
+    <tr><td>${p.partner_id || ""}</td><td>${p.name || ""}</td><td>${p.status || ""}</td><td>${p.last_sync || ""}</td></tr>
+  `).join("") || "<tr><td colspan='4'>No partner sync data yet.</td></tr>";
+
+  const inventory = await api("/api/sync/inventory");
+  document.getElementById("inventoryRows").innerHTML = (inventory.rows || []).slice(0,10).map(r => `
+    <tr>
+      <td>${r.synced_at || ""}</td>
+      <td>${r.partner || ""}</td>
+      <td>${r.payload?.hotel_name || r.payload?.hotel_id || ""}</td>
+      <td>${r.payload?.rooms_available ?? ""}</td>
+      <td>${String(r.payload?.stop_sell ?? "")}</td>
+    </tr>
+  `).join("") || "<tr><td colspan='5'>No inventory syncs yet.</td></tr>";
+
+  const rates = await api("/api/sync/rates");
+  document.getElementById("rateRows").innerHTML = (rates.rows || []).slice(0,10).map(r => `
+    <tr>
+      <td>${r.synced_at || ""}</td>
+      <td>${r.partner || ""}</td>
+      <td>${r.payload?.hotel_name || r.payload?.hotel_id || ""}</td>
+      <td>${r.payload?.rate_plan || ""}</td>
+      <td>${r.payload?.currency || ""} ${r.payload?.amount ?? ""}</td>
+    </tr>
+  `).join("") || "<tr><td colspan='5'>No rate syncs yet.</td></tr>";
+
+  const reservations = await api("/api/sync/reservations");
+  document.getElementById("reservationRows").innerHTML = (reservations.rows || []).slice(0,10).map(r => `
+    <tr>
+      <td>${r.synced_at || ""}</td>
+      <td>${r.partner || ""}</td>
+      <td>${r.payload?.booking_reference || ""}</td>
+      <td>${r.supplier_confirmation || ""}</td>
+      <td>${r.payload?.hotel_name || r.payload?.hotel_id || ""}</td>
+    </tr>
+  `).join("") || "<tr><td colspan='5'>No reservation syncs yet.</td></tr>";
+}
+
+async function runManualSync(){
+  if(!JWT_TOKEN){
+    setMessage("Connect first.","error");
+    return;
+  }
+
+  setMessage("Running manual PMS sync...","info");
+
+  try{
+    await api("/api/sync/run", { method:"POST" });
+    setMessage("Manual PMS sync completed.","ok");
+    await loadAll();
+  }catch(error){
+    setMessage("Manual PMS sync failed.","error");
+    console.log(error);
+  }
+}
+
+setInterval(() => {
+  if(JWT_TOKEN) loadAll().catch(() => {});
+}, 30000);
+</script>
+</body>
+</html>

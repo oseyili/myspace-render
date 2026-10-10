@@ -1,0 +1,15 @@
+﻿node_modules/
+dist/
+.env
+*.log
+*.zip
+*.txt
+*.json.bak
+backend-backup-*/
+repair-review-*/
+data/
+**/data/
+hyperquest-safe-investigation.txt
+supplier-*.json
+test-hyperguest.js
+server-for-*.js

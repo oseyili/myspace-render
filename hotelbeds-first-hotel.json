@@ -1,0 +1,47 @@
+﻿{
+    "hotelId":  "HOTELBEDS-49874",
+    "hotel_id":  "HOTELBEDS-49874",
+    "id":  "HOTELBEDS-49874",
+    "code":  "HOTELBEDS-49874",
+    "supplier_hotel_id":  "49874",
+    "name":  "Sheraton Park Hotel at the Anaheim Resort",
+    "hotel_name":  "Sheraton Park Hotel at the Anaheim Resort",
+    "city":  "Los Angeles",
+    "country":  "United States",
+    "destinationCode":  "LAX",
+    "price":  177.41,
+    "convertedPrice":  177.41,
+    "displayPrice":  177.41,
+    "currency":  "GBP",
+    "displayCurrency":  "GBP",
+    "availableToBook":  true,
+    "image":  "",
+    "images":  [
+
+               ],
+    "source":  "hotelbeds_live_supplier",
+    "supplierLabel":  "Hotelbeds live rate",
+    "supplier_private":  {
+                             "supplier_code":  "HOTELBEDS",
+                             "destination_code":  "LAX",
+                             "supplier_hotel_id":  "49874"
+                         },
+    "rooms":  [
+                  {
+                      "roomCode":  "DBL.2Q",
+                      "roomName":  "TWO QUEEN ROOM",
+                      "room_name":  "TWO QUEEN ROOM",
+                      "board":  "ROOM ONLY",
+                      "price":  177.41,
+                      "convertedPrice":  177.41,
+                      "displayCurrency":  "GBP",
+                      "rate_source_id":  "20260629|20260630|W|256|49874|DBL.2Q|FIT|RO||1~2~0||N@07~~229b1~941169518~N~~~NOR~~DC55C8EF7285450178155146405805AAUK00590000000001229b1",
+                      "rate_source_timestamp":  "2026-06-15T19:24:24.382Z",
+                      "supplier_private":  {
+                                               "supplier_code":  "HOTELBEDS",
+                                               "destination_code":  "LAX",
+                                               "rate_key":  "20260629|20260630|W|256|49874|DBL.2Q|FIT|RO||1~2~0||N@07~~229b1~941169518~N~~~NOR~~DC55C8EF7285450178155146405805AAUK00590000000001229b1"
+                                           }
+                  }
+              ]
+}

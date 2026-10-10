@@ -1,0 +1,40 @@
+﻿{
+    "ok":  true,
+    "count":  5,
+    "countries":  [
+                      {
+                          "country":  "United States",
+                          "cities":  [
+                                         "Los Angeles",
+                                         "New York"
+                                     ]
+                      },
+                      {
+                          "country":  "United Kingdom",
+                          "cities":  [
+                                         "London",
+                                         "Manchester"
+                                     ]
+                      },
+                      {
+                          "country":  "United Arab Emirates",
+                          "cities":  [
+                                         "Dubai",
+                                         "Abu Dhabi"
+                                     ]
+                      },
+                      {
+                          "country":  "France",
+                          "cities":  [
+                                         "Paris"
+                                     ]
+                      },
+                      {
+                          "country":  "Nigeria",
+                          "cities":  [
+                                         "Lagos",
+                                         "Abuja"
+                                     ]
+                      }
+                  ]
+}
