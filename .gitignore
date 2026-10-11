@@ -5,7 +5,11 @@ dist/
 *.zip
 *.txt
 *.json.bak
-backend-backup-*/
+backend-backup-*/node_modules/
+backend-backup-*/data/
+backend-backup-*/.env
+backend-backup-*/.env.*
+backend-backup-old-before-*/
 repair-review-*/
 data/
 **/data/
