@@ -1,0 +1,169 @@
+﻿const CONTENT_TIMEOUT_MS = Number(process.env.SUPPLIER_CONTENT_TIMEOUT_MS || 5000);
+
+function isFakeName(v) {
+  return /^verified\s+webbeds\s+hotel\s+\d+/i.test(String(v || "").trim());
+}
+
+function getHotelId(h) {
+  return String(
+    h?.webbedsHotelId ||
+    h?.supplier_hotel_id ||
+    h?.supplierHotelId ||
+    h?.hotelId ||
+    h?.hotel_id ||
+    h?.id ||
+    ""
+  ).replace(/^WEBBEDS-/i, "").trim();
+}
+
+function first(...values) {
+  return values.find(v => v !== undefined && v !== null && String(v).trim() !== "");
+}
+
+function imageUrl(img) {
+  if (!img) return "";
+  if (typeof img === "string") return img;
+  return first(img.url, img.href, img.link, img.imageUrl, img.fullUrl, img.thumbnail, "");
+}
+
+function normalizeWebBedsContent(raw) {
+  if (!raw || typeof raw !== "object") return null;
+
+  const src =
+    raw.hotel ||
+    raw.property ||
+    raw.data?.hotel ||
+    raw.data?.property ||
+    raw.data ||
+    raw;
+
+  const images = [
+    ...(Array.isArray(src.images) ? src.images : []),
+    ...(Array.isArray(src.photos) ? src.photos : []),
+    ...(Array.isArray(src.gallery) ? src.gallery : []),
+    src.image,
+    src.mainImage,
+    src.thumbnail
+  ].map(imageUrl).filter(Boolean);
+
+  const name = first(src.name, src.hotelName, src.hotel_name, src.propertyName, src.title);
+
+  if (!name || isFakeName(name)) return null;
+
+  return {
+    name: String(name).trim(),
+    hotel_name: String(name).trim(),
+    address: first(src.address, src.addressLine, src.location?.address, ""),
+    city: first(src.city, src.cityName, src.location?.city, ""),
+    country: first(src.country, src.countryName, src.location?.country, ""),
+    stars: first(src.stars, src.starRating, src.rating, src.category, ""),
+    latitude: first(src.latitude, src.lat, src.location?.lat, ""),
+    longitude: first(src.longitude, src.lng, src.location?.lng, ""),
+    image: images[0] || "",
+    images,
+    facilities: Array.isArray(src.facilities) ? src.facilities : Array.isArray(src.amenities) ? src.amenities : []
+  };
+}
+
+async function fetchJsonWithTimeout(url, options = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), CONTENT_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function resolveWebBedsContent(hotelId) {
+  if (!hotelId) return null;
+
+  const base = process.env.WEBBEDS_CONTENT_API_URL || process.env.WEBBEDS_HOTEL_CONTENT_URL || "";
+  const key = process.env.WEBBEDS_API_KEY || process.env.WEBBEDS_TOKEN || "";
+
+  if (!base || !key) return null;
+
+  const url = base.includes("{hotelId}")
+    ? base.replace("{hotelId}", encodeURIComponent(hotelId))
+    : `${base.replace(/\/$/, "")}/${encodeURIComponent(hotelId)}`;
+
+  const raw = await fetchJsonWithTimeout(url, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${key}`,
+      "x-api-key": key
+    }
+  });
+
+  return normalizeWebBedsContent(raw);
+}
+
+async function enrichHotel(h) {
+  if (!h || typeof h !== "object") return h;
+
+  const supplier = String(h.supplier_code || h.supplier || h.supplier_name || h.source || "").toLowerCase();
+  const isWebBeds = supplier.includes("webbeds") || supplier.includes("webbed");
+
+  if (!isWebBeds) return h;
+
+  const hotelId = getHotelId(h);
+  const content = await resolveWebBedsContent(hotelId);
+
+  if (!content) {
+    return {
+      ...h,
+      name: isFakeName(h.name) ? "" : h.name,
+      hotel_name: isFakeName(h.hotel_name) ? "" : h.hotel_name,
+      contentStatus: "supplier_content_missing",
+      bookableLiveRate: true
+    };
+  }
+
+  return {
+    ...h,
+    ...content,
+    contentStatus: "supplier_content_verified",
+    bookableLiveRate: true
+  };
+}
+
+async function enrichPayload(payload) {
+  if (!payload || typeof payload !== "object") return payload;
+
+  if (Array.isArray(payload)) {
+    return Promise.all(payload.map(enrichHotel));
+  }
+
+  const clone = { ...payload };
+
+  for (const key of ["hotels", "results", "items", "properties"]) {
+    if (Array.isArray(clone[key])) {
+      clone[key] = await Promise.all(clone[key].map(enrichHotel));
+      clone[key] = clone[key].filter(h => h && !/hotelbeds/i.test(JSON.stringify(h)));
+      clone.total = clone[key].length;
+    }
+  }
+
+  if (Array.isArray(clone.data)) {
+    clone.data = await Promise.all(clone.data.map(enrichHotel));
+    clone.data = clone.data.filter(h => h && !/hotelbeds/i.test(JSON.stringify(h)));
+    clone.total = clone.data.length;
+  }
+
+  clone.contentLayer = "active_suppliers_only";
+  clone.disabledSuppliers = ["Hotelbeds"];
+
+  return clone;
+}
+
+module.exports = {
+  enrichPayload,
+  enrichHotel,
+  resolveWebBedsContent
+};

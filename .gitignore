@@ -17,3 +17,5 @@ hyperquest-safe-investigation.txt
 supplier-*.json
 test-hyperguest.js
 server-for-*.js
+.env.*
+backend/legacy/

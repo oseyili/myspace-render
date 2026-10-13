@@ -1,0 +1,23 @@
+{
+  "name": "myspace-hotel-backend",
+  "version": "2.0.0",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check legacy/app.js && node --check services/search/searchOrchestrator.js && node --check services/supplierContentResolver.js && node --check models/universalHotel.js",
+    "smoke": "node tests/smoke-test.js"
+  },
+  "engines": {
+    "node": ">=20 <25"
+  },
+  "dependencies": {
+    "axios": "^1.19.0",
+    "cors": "^2.8.5",
+    "countries-list": "^3.4.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "nodemailer": "^6.10.0",
+    "stripe": "^17.7.0"
+  }
+}
