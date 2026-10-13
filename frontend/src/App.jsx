@@ -1,13 +1,83 @@
 import React, { useEffect, useMemo, useState } from "react";
 import ExperiencePage from "./ExperiencePage";
-import HotelSearchPage from "./HotelSearchPage";
 
-const API_BASE = (() => {
-  const configured = import.meta.env.VITE_API_BASE || import.meta.env.VITE_API_BASE_URL || "";
-  const host = typeof window !== "undefined" ? window.location.hostname : "";
-  if ((host === "localhost" || host === "127.0.0.1") && !configured) return "http://localhost:5050";
-  return configured || "https://myspace-hotel-backend.onrender.com";
-})();
+function myspaceHotelOnlyResult(item) {
+  const text = String([
+    item?.name,
+    item?.hotel_name,
+    item?.hotelName,
+    item?.property_name,
+    item?.title,
+    item?.propertyType,
+    item?.property_type,
+    item?.accommodationType,
+    item?.accommodation_type,
+    item?.type,
+    item?.category,
+    item?.description
+  ].filter(Boolean).join(" ")).toLowerCase();
+
+  const blockedStayTypes = [
+    "apartment",
+    "apartments",
+    "serviced apartment",
+    "service apartment",
+    "aparthotel",
+    "apart hotel",
+    "flat",
+    "studio",
+    "residence",
+    "villa",
+    "holiday home",
+    "vacation rental",
+    "house",
+    "hostel",
+    "guest house",
+    "guesthouse",
+    "bed and breakfast",
+    "b&b",
+    "cottage",
+    "camp",
+    "caravan",
+    "private room",
+    "shared room",
+    "entire home",
+    "entire place"
+  ];
+
+  if (blockedStayTypes.some((type) => text.includes(type))) {
+    return false;
+  }
+
+  const explicitType = String(
+    item?.propertyType ||
+    item?.property_type ||
+    item?.accommodationType ||
+    item?.accommodation_type ||
+    item?.type ||
+    ""
+  ).toLowerCase();
+
+  if (explicitType) {
+    return (
+      explicitType.includes("hotel") ||
+      explicitType.includes("inn") ||
+      explicitType.includes("motel")
+    );
+  }
+
+  return (
+    text.includes("hotel") ||
+    text.includes("inn") ||
+    text.includes("motel")
+  );
+}
+const API_BASE = String(
+  import.meta.env.VITE_API_BASE ||
+  import.meta.env.VITE_API_BASE_URL ||
+  "http://127.0.0.1:5050"
+).replace(/\/$/, "");
+
 
 const safeText = (value) => {
   if (value == null) return "";
@@ -47,7 +117,7 @@ const ROUTES = {
   insurance: "/#/insurance",
   transfers: "/#/transfers",
   attractions: "/#/attractions",
-  experiences: "/#/experiences",
+experiences: "/#/experiences",
   featured: "/#/featured-hotels",
   affiliates: "/#/affiliate-network",
   business: "/#/business-portal",
@@ -106,7 +176,7 @@ function currentRoute() {
   if (hash === "#/insurance") return "insurance";
   if (hash === "#/transfers") return "transfers";
   if (hash === "#/attractions") return "attractions";
-  if (hash === "#/experiences") return "experiences";
+if (hash === "#/experiences") return "experiences";
   if (hash === "#/featured-hotels") return "featured";
   if (hash === "#/affiliate-network") return "affiliates";
   if (hash === "#/business-portal") return "business";
@@ -121,41 +191,6 @@ function convertCurrency(amount, from, to) {
 function safeNumber(v) {
   const n = Number(v || 0);
   return Number.isFinite(n) ? n : 0;
-}
-
-async function fetchJsonWithTimeout(url, timeoutMs = 6000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const res = await fetch(url, { cache: "no-store", mode: "cors", signal: controller.signal });
-    const data = await res.json().catch(() => ({}));
-    return { ok: res.ok, data };
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-function exactCustomerLocation(hotel, wantedCountry, wantedCity) {
-  const c = String(wantedCountry || "").trim().toLowerCase();
-  const city = String(wantedCity || "").trim().toLowerCase();
-  const hotelCountry = String(hotel?.country || hotel?.countryName || hotel?.location?.country || "").trim().toLowerCase();
-  const hotelCity = String(hotel?.city || hotel?.cityName || hotel?.destination || hotel?.location?.city || "").trim().toLowerCase();
-  if (!c || !city) return true;
-  if (!hotelCountry || !hotelCity) return false;
-  const countryOk = hotelCountry === c || (c === "united kingdom" && ["uk", "gb", "great britain", "england"].includes(hotelCountry));
-  return countryOk && hotelCity === city;
-}
-
-function mergeHotelResults(existing, incoming) {
-  const out = [];
-  const seen = new Set();
-  for (const hotel of [...(existing || []), ...(incoming || [])]) {
-    const key = String(hotel?.hotelId || hotel?.hotel_id || hotel?.id || hotel?.code || `${hotel?.name || hotel?.hotel_name || "hotel"}-${hotel?.city || ""}-${hotel?.country || ""}`).toLowerCase();
-    if (!key || seen.has(key)) continue;
-    seen.add(key);
-    out.push(hotel);
-  }
-  return out;
 }
 
 function hotelKey(hotel) {
@@ -319,59 +354,19 @@ function klookAdIdForCity(city) {
 
 function buildComparisons(selectedHotel, hotels, nights, rooms, fallbackCurrency) {
   if (!selectedHotel) return [];
-
-  const baseNight = hotelPrice(selectedHotel);
-  const currency = hotelCurrency(selectedHotel, fallbackCurrency);
   const stayMultiplier = Math.max(1, Number(nights || 1)) * Math.max(1, Number(rooms || 1));
-  const selectedName = selectedHotel.name || "Selected hotel";
-
-  const selectedOptions = [
-    {
-      id: "best-value",
-      hotelName: selectedName,
-      label: "Best value stay",
-      text: "Clear price review before secure checkout.",
-      badge: "Best value",
-      currency,
-      total: baseNight * stayMultiplier,
-    },
-    {
-      id: "flexible",
-      hotelName: selectedName,
-      label: "Flexible stay option",
-      text: "A useful comparison for guests who want extra flexibility.",
-      badge: "Flexible",
-      currency,
-      total: baseNight * 1.08 * stayMultiplier,
-    },
-    {
-      id: "comfort",
-      hotelName: selectedName,
-      label: "Extra comfort stay",
-      text: "A higher-comfort comparison for longer or special trips.",
-      badge: "Comfort",
-      currency,
-      total: baseNight * 1.16 * stayMultiplier,
-    },
-  ];
-
-  const alternatives = (hotels || [])
-    .filter((h) => hotelKey(h) !== hotelKey(selectedHotel))
-    .slice(0, 4)
-    .map((hotel, idx) => {
-      const price = hotelPrice(hotel);
-      return {
-        id: `alt-${hotelKey(hotel) || idx}`,
-        hotelName: hotel.name || "Nearby hotel",
-        label: idx === 0 ? "Nearby alternative" : "Destination alternative",
-        text: `${hotel.city || selectedHotel.city || "Destination"}, ${hotel.country || selectedHotel.country || ""}`,
-        badge: "Compare",
-        currency: hotelCurrency(hotel, currency),
-        total: price * stayMultiplier,
-      };
-    });
-
-  return [...selectedOptions, ...alternatives];
+  return (hotels || [])
+    .filter((hotel) => hotelKey(hotel) !== hotelKey(selectedHotel) && hotelPrice(hotel) > 0)
+    .slice(0, 6)
+    .map((hotel, idx) => ({
+      id: `real-${hotelKey(hotel) || idx}`,
+      hotelName: hotel.name || hotel.hotel_name,
+      label: idx === 0 ? "Lowest priced alternative" : "Live hotel alternative",
+      text: `${hotel.city || selectedHotel.city || "Destination"}, ${hotel.country || selectedHotel.country || ""}`,
+      badge: hotel.supplier_name || hotel.supplierLabel || hotel.supplier_code || "Live supplier",
+      currency: hotelCurrency(hotel, fallbackCurrency),
+      total: hotelPrice(hotel) * stayMultiplier,
+    }));
 }
 
 function validHotelImage(hotel) {
@@ -489,12 +484,13 @@ function KlookDynamicWidget({ city, country }) {
 export default function App() {
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
+      navigator.serviceWorker.getRegistrations()
+        .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
+        .catch(() => {});
     }
   }, []);
-  
+
   const [route, setRoute] = useState(currentRoute());
-  const [currentPage, setCurrentPage] = useState("home");
 
   const [affiliateCode, setAffiliateCode] = useState("");
   const [countries, setCountries] = useState([]);
@@ -508,8 +504,8 @@ export default function App() {
   const [currency, setCurrency] = useState("GBP");
   const [propertyType, setPropertyType] = useState("hotels");
   const [stayType, setStayType] = useState("hotels");
-  const HOTEL_ONLY_MODE = "hotels";
   const [hotels, setHotels] = useState([]);
+  const [searched, setSearched] = useState(false);
   const [selectedHotel, setSelectedHotel] = useState(() => {
     try {
       const saved = localStorage.getItem("msh_selected_hotel");
@@ -523,7 +519,6 @@ export default function App() {
   const [paying, setPaying] = useState(false);
   const [liveRateLoading, setLiveRateLoading] = useState(false);
   const [liveRateNotice, setLiveRateNotice] = useState("");
-  const [visibleHotelCount, setVisibleHotelCount] = useState(25);
 
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
@@ -568,7 +563,6 @@ export default function App() {
     setCity("");
     setHotels([]);
     setSelectedHotel(null);
-    setVisibleHotelCount(25);
   }, [country, countries]);
 
   const nights = useMemo(() => nightsBetween(checkIn, checkOut), [checkIn, checkOut]);
@@ -594,36 +588,34 @@ export default function App() {
     [selectedHotel, hotels, nights, rooms, currency]
   );
 
- async function loadDestinations() {
-  const FALLBACK_COUNTRIES = [
-    { country: "United Kingdom", cities: ["London", "Manchester", "Birmingham", "Liverpool", "Edinburgh", "Glasgow"] },
-    { country: "United States", cities: ["New York", "Los Angeles", "Las Vegas", "Miami", "Orlando", "Chicago", "San Francisco"] },
-    { country: "United Arab Emirates", cities: ["Dubai", "Abu Dhabi"] },
-    { country: "France", cities: ["Paris", "Nice", "Lyon"] },
-    { country: "Nigeria", cities: ["Lagos", "Abuja"] },
-    { country: "Canada", cities: ["Toronto", "Vancouver", "Montreal", "Calgary", "Ottawa"] }
-  ];
+  async function loadDestinations() {
+    const endpoints = [
+      `${API_BASE}/api/platform/v3/destinations`,
+      `${API_BASE}/api/global-countries`,
+    ];
 
-  setCountries(FALLBACK_COUNTRIES);
-
-  try {
-    const res = await fetch(`${API_BASE}/api/global-countries`, { cache: "no-store" });
-    const data = await res.json();
-    const list = Array.isArray(data?.countries) ? data.countries : (Array.isArray(data) ? data : []);
-    if (list.length) {
-      setCountries(list);
-      setNotice("");
+    for (const url of endpoints) {
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) continue;
+        const list = Array.isArray(data?.countries) ? data.countries : (Array.isArray(data) ? data : []);
+        if (list.length) {
+          setCountries(list);
+          setNotice("");
+          return;
+        }
+      } catch {}
     }
-  } catch {
-    // Keep fallback list — no error shown
+
+    setNotice("We could not load destinations right now. Please refresh the page.");
   }
-}
 
   async function searchHotels() {
     setNotice("");
     setSelectedHotel(null);
     setHotels([]);
-    setVisibleHotelCount(25);
+    setSearched(true);
 
     if (!country || !city) {
       setNotice("Please select your country and city before searching.");
@@ -635,67 +627,91 @@ export default function App() {
       return;
     }
 
-    const params = new URLSearchParams({
-      country,
-      city,
-      checkIn,
-      checkOut,
-      check_in: checkIn,
-      check_out: checkOut,
-      checkin: checkIn,
-      checkout: checkOut,
-      guests: String(guests),
-      rooms: String(rooms),
-      currency,
-      propertyType: HOTEL_ONLY_MODE,
-      property_type: HOTEL_ONLY_MODE,
-      accommodationMode: "hotel_only",
-      supplierScope: "current_hotel_suppliers",
-      limit: "25",
-      offset: "0",
-    });
-
     try {
       setLoading(true);
 
-      const quickEndpoints = [
-        `${API_BASE}/api/fast-hotel-search?${params.toString()}`,
-        `${API_BASE}/api/hotels/search?${params.toString()}`,
+      const params = new URLSearchParams({
+        country,
+        city,
+        checkIn,
+        checkOut,
+        check_in: checkIn,
+        check_out: checkOut,
+        guests: String(guests),
+        adults: String(guests),
+        rooms: String(rooms),
+        currency,
+        propertyType,
+        property_type: propertyType,
+        limit: "80",
+      });
+
+      const endpoints = [
+        `${API_BASE}/api/platform/v3/search?${params.toString()}`,
+        `${API_BASE}/api/platform/v2/search?${params.toString()}`,
         `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
-        `${API_BASE}/search?${params.toString()}`,
       ];
 
-      let data = null;
-      let found = [];
+      let collected = [];
+      let lastError = null;
 
-      for (const endpoint of quickEndpoints) {
+      for (const url of endpoints) {
         try {
-          const result = await fetchJsonWithTimeout(endpoint, 5000);
-          const list = Array.isArray(result.data?.hotels) ? result.data.hotels : [];
-          if (result.ok && list.length) {
-            data = result.data;
-            found = list;
+          const res = await fetch(url, { cache: "no-store" });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data?.message || `Hotel search failed ${res.status}`);
+
+          const list = Array.isArray(data?.hotels)
+            ? data.hotels
+            : Array.isArray(data?.allHotels)
+              ? data.allHotels
+              : Array.isArray(data)
+                ? data
+                : [];
+
+          if (list.length) {
+            collected = list;
             break;
           }
-          if (!data && result.ok) data = result.data;
-        } catch {}
+        } catch (error) {
+          lastError = error;
+        }
       }
 
-      found = found
-        .filter((hotel) => isCustomerHotelResult(hotel, HOTEL_ONLY_MODE))
-        .filter((hotel) => exactCustomerLocation(hotel, country, city));
+      const wantedCountry = String(country).trim().toLowerCase();
+      const wantedCity = String(city).trim().toLowerCase();
+      const unique = new Map();
 
-      found = mergeHotelResults([], found);
+      for (const hotel of collected.filter(Boolean)) {
+        const hotelCountry = String(hotel?.country || hotel?.countryName || "").trim().toLowerCase();
+        const hotelCity = String(hotel?.city || hotel?.destination || hotel?.area || hotel?.zone || "").trim().toLowerCase();
 
+        if (hotelCountry && wantedCountry && hotelCountry !== wantedCountry) continue;
+        if (hotelCity && wantedCity && !(hotelCity === wantedCity || hotelCity.includes(wantedCity) || wantedCity.includes(hotelCity))) continue;
+
+        const key = String(
+          hotel?.hotelId ||
+          hotel?.hotel_id ||
+          hotel?.id ||
+          hotel?.code ||
+          `${hotel?.supplier_code || "supplier"}-${hotel?.name || hotel?.hotel_name || "hotel"}-${hotelCity}`
+        ).toLowerCase();
+
+        if (!unique.has(key)) unique.set(key, hotel);
+      }
+
+      const found = Array.from(unique.values());
       setHotels(found);
-      setNotice(found.length ? "" : (data?.customerMessage || "We could not find matching hotels for this destination right now. Please try another city or date."));
 
       setTimeout(() => {
-        const target = document.getElementById("hotel-results");
-        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+        document.getElementById("hotel-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 100);
 
-      loadCurrentHotelPrices(params, found);
+      if (!found.length) {
+        setNotice(lastError
+          ? "The hotel suppliers could not complete this search. Please try again."
+          : "No live hotel availability was found for these dates. Please try different dates.");
+      }
     } catch {
       setNotice("We could not load hotels for this destination right now. Please try again.");
     } finally {
@@ -703,77 +719,9 @@ export default function App() {
     }
   }
 
-  async function loadMoreHotels() {
-    if (!country || !city) return;
-    const nextOffset = hotels.length;
-    const params = new URLSearchParams({
-      country,
-      city,
-      checkIn,
-      checkOut,
-      check_in: checkIn,
-      check_out: checkOut,
-      guests: String(guests),
-      rooms: String(rooms),
-      currency,
-      propertyType: HOTEL_ONLY_MODE,
-      property_type: HOTEL_ONLY_MODE,
-      accommodationMode: "hotel_only",
-      supplierScope: "current_hotel_suppliers",
-      limit: "25",
-      offset: String(nextOffset),
-    });
-
-    const endpoints = [
-      `${API_BASE}/api/fast-hotel-search?${params.toString()}`,
-      `${API_BASE}/api/hotels/search?${params.toString()}`,
-      `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
-    ];
-
-    for (const endpoint of endpoints) {
-      try {
-        const result = await fetchJsonWithTimeout(endpoint, 5000);
-        const list = Array.isArray(result.data?.hotels) ? result.data.hotels : [];
-        const nextHotels = list
-          .filter((hotel) => isCustomerHotelResult(hotel, HOTEL_ONLY_MODE))
-          .filter((hotel) => exactCustomerLocation(hotel, country, city));
-        if (result.ok && nextHotels.length) {
-          const merged = mergeHotelResults(hotels, nextHotels);
-          setHotels(merged);
-          setVisibleHotelCount((count) => Math.min(count + 25, merged.length));
-          loadCurrentHotelPrices(params, nextHotels);
-          return;
-        }
-      } catch {}
-    }
-
-    setVisibleHotelCount((count) => Math.min(count + 25, hotels.length));
-  }
-
-  async function loadCurrentHotelPrices(params, existingHotels) {
-    const liveEndpoints = [
-      `${API_BASE}/api/global-live-hotels?${params.toString()}`,
-      `${API_BASE}/api/multi-supplier-hotels?${params.toString()}`,
-    ];
-
-    for (const endpoint of liveEndpoints) {
-      try {
-        const result = await fetchJsonWithTimeout(endpoint, 9000);
-        const liveHotels = (Array.isArray(result.data?.hotels) ? result.data.hotels : [])
-          .filter((hotel) => isCustomerHotelResult(hotel, HOTEL_ONLY_MODE))
-          .filter((hotel) => exactCustomerLocation(hotel, country, city));
-        if (result.ok && liveHotels.length) {
-          setHotels((prev) => mergeHotelResults(liveHotels, prev.length ? prev : existingHotels));
-          return;
-        }
-      } catch {}
-    }
-  }
-
   async function refreshSelectedHotelLiveRates(hotelToRefresh) {
     const readyHotel = selectedHotelWithRoom(hotelToRefresh);
     setSelectedHotel(readyHotel);
-
     setLiveRateNotice("");
 
     const selectedHotelId = readyHotel?.hotelId || readyHotel?.hotel_id || readyHotel?.id || readyHotel?.code || "";
@@ -805,17 +753,13 @@ export default function App() {
         guests: String(guests),
         rooms: String(rooms),
         currency,
-        propertyType: HOTEL_ONLY_MODE,
-        property_type: HOTEL_ONLY_MODE,
-        accommodationMode: "hotel_only",
-        supplierScope: "current_hotel_suppliers",
         limit: "1",
       });
 
       const endpoints = [
-        `${API_BASE}/api/selected-hotel-live-rate?${params.toString()}`,
-        `${API_BASE}/api/customer-hotel-live-rate?${params.toString()}`,
-        `${API_BASE}/api/compare-prices?${params.toString()}`
+        `${API_BASE}/api/platform/v3/search?${params.toString()}`,
+        `${API_BASE}/api/platform/v2/search?${params.toString()}`,
+        `${API_BASE}/api/customer-global-hotels?${params.toString()}`,
       ];
 
       let refreshedHotel = null;
@@ -828,7 +772,9 @@ export default function App() {
           if (!res.ok) continue;
 
           const offer = data?.customer_offer || data?.best_offer || data?.offer || null;
-          const list = Array.isArray(data?.hotels) ? data.hotels : [];
+          const list = Array.isArray(data?.hotels)
+            ? data.hotels
+            : (Array.isArray(data?.allHotels) ? data.allHotels : []);
           const matched = list.find((item) => {
             const itemId = String(item?.hotelId || item?.hotel_id || item?.id || item?.code || "").toLowerCase();
             const itemName = String(item?.name || item?.hotel_name || "").toLowerCase();
@@ -854,10 +800,10 @@ export default function App() {
                 roomName: offer.roomName || offer.room_name || readyHotel.selectedRoom?.roomName || readyHotel.roomName || "Available room",
                 roomCode: offer.roomCode || offer.room_code || readyHotel.selectedRoom?.roomCode || readyHotel.roomCode || "STANDARD",
                 rate_source_id: offer.rate_source_id || data?.rate_source_id || readyHotel.selectedRoom?.rate_source_id || readyHotel.rate_source_id || "",
-                rate_source_timestamp: offer.rate_source_timestamp || data?.rate_source_timestamp || readyHotel.selectedRoom?.rate_source_timestamp || readyHotel.rate_source_timestamp || new Date().toISOString(),
+                rate_source_timestamp: offer.rate_source_timestamp || data?.rate_source_timestamp || new Date().toISOString(),
               },
               rate_source_id: offer.rate_source_id || data?.rate_source_id || readyHotel.rate_source_id || "",
-              rate_source_timestamp: offer.rate_source_timestamp || data?.rate_source_timestamp || readyHotel.rate_source_timestamp || new Date().toISOString(),
+              rate_source_timestamp: offer.rate_source_timestamp || data?.rate_source_timestamp || new Date().toISOString(),
             };
             break;
           }
@@ -888,7 +834,9 @@ export default function App() {
       if (refreshedHotel) {
         setSelectedHotel(refreshedHotel);
         setHotels((prev) =>
-          (prev || []).map((item) => (hotelKey(item) === hotelKey(readyHotel) ? { ...item, ...refreshedHotel } : item))
+          (Array.isArray(prev) ? prev : []).map((item) =>
+            hotelKey(item) === hotelKey(readyHotel) ? { ...item, ...refreshedHotel } : item
+          )
         );
         const confirmedAmount = Number(
           refreshedHotel?.selectedRoom?.convertedPrice ||
@@ -911,7 +859,13 @@ export default function App() {
   }
 
   function selectHotelAndRefreshLiveRates(hotelToSelect) {
-    refreshSelectedHotelLiveRates(hotelToSelect);
+    const readyHotel = selectedHotelWithRoom(hotelToSelect);
+    setSelectedHotel(readyHotel);
+    setLiveRateNotice("");
+    refreshSelectedHotelLiveRates(readyHotel).catch(() => {
+      setLiveRateLoading(false);
+      setLiveRateNotice("Selected hotel saved. Live rate could not be refreshed right now.");
+    });
   }
 
   async function secureReservation() {
@@ -973,7 +927,10 @@ export default function App() {
         body: JSON.stringify(payload),
       });
 
-      const bookingData = await bookingRes.json();
+      const bookingData = await bookingRes.json().catch(() => ({}));
+      if (!bookingRes.ok) {
+        throw new Error(bookingData?.message || "The reservation could not be prepared.");
+      }
       const bookingRef = bookingData?.bookingRef || `MSH-${Date.now()}`;
 
       const checkoutRes = await fetch(`${API_BASE}/api/create-checkout-session`, {
@@ -987,7 +944,10 @@ export default function App() {
         }),
       });
 
-      const checkoutData = await checkoutRes.json();
+      const checkoutData = await checkoutRes.json().catch(() => ({}));
+      if (!checkoutRes.ok) {
+        throw new Error(checkoutData?.message || "Secure checkout could not be started.");
+      }
 
       if (checkoutData?.ok && checkoutData?.url) {
         window.location.href = checkoutData.url;
@@ -1000,12 +960,12 @@ export default function App() {
       }
 
       setNotice(checkoutData?.message || "Secure payment is not configured yet.");
-    } catch {
+    } catch (error) {
       if (STRIPE_PAYMENT_LINK) {
         window.location.href = STRIPE_PAYMENT_LINK;
         return;
       }
-      setNotice("Secure payment could not be started. Please try again.");
+      setNotice(error?.message || "Secure payment could not be started. Please try again.");
     } finally {
       setPaying(false);
     }
@@ -1021,6 +981,9 @@ export default function App() {
     guests,
     rooms,
     currency,
+    propertyType,
+    stayType,
+    searched,
     hotels,
     selectedHotel,
     notice,
@@ -1052,6 +1015,8 @@ export default function App() {
     setGuests,
     setRooms,
     setCurrency,
+    setPropertyType,
+    setStayType,
     setHotels,
     setSelectedHotel,
     selectHotelAndRefreshLiveRates,
@@ -1064,9 +1029,6 @@ export default function App() {
     setFxTo,
     searchHotels,
     secureReservation,
-    visibleHotelCount,
-    setVisibleHotelCount,
-    loadMoreHotels,
   };
 
   return (
@@ -1083,7 +1045,7 @@ export default function App() {
       {route === "insurance" && <InsurancePortal {...appProps} />}
       {route === "transfers" && <TransfersPortal {...appProps} />}
       {route === "attractions" && <AttractionsPortal {...appProps} />}
-      {route === "experiences" && <ExperiencePage />}
+{route === "experiences" && <ExperiencePage />}
       {route === "featured" && <FeaturedHotelsPortal />}
       {route === "affiliates" && <AffiliateNetworkUltraSafe />}
       {route === "business" && <BusinessPortal />}
@@ -1091,6 +1053,7 @@ export default function App() {
     </div>
   );
 }
+
 
 function InstallAppButton() {
   const [installPrompt, setInstallPrompt] = useState(null);
@@ -1155,13 +1118,12 @@ function InstallAppButton() {
     </button>
   );
 }
-
 function Header() {
   return (
     <header style={styles.header}>
       <a style={styles.brand} href={routeUrl(ROUTES.hotels)}>
         <div style={styles.logo}>MYSPACE HOTEL</div>
-        <div style={styles.tagline}>Hotels and worldwide travel support</div>
+        <div style={styles.tagline}>Hotels, resorts, serviced apartments and worldwide travel support</div>
       </a>
 
       <nav style={styles.nav}>
@@ -1245,36 +1207,26 @@ function HotelsPage(props) {
 
       <section style={styles.contentGrid}>
         <main>
-          <h2 id="hotel-results" style={styles.title}>Available hotels nearby</h2>
+          <h2 id="hotel-results" style={styles.title}>Available stays nearby</h2>
           <p style={styles.sectionText}>
             Select a hotel to refresh the booking summary, comparison box, travel support and alternative hotel options immediately.
           </p>
 
-          {props.loading ? <div style={styles.empty}>Finding the best hotels for your trip...</div> : null}
+          {props.loading ? <div style={styles.empty}>Finding suitable accommodation for your destination...</div> : null}
 
           {!props.loading && props.hotels.length === 0 ? (
-            <div style={styles.empty}>Choose a country, city and travel dates to discover available hotels.</div>
+            <div style={styles.empty}>
+              {props.searched
+                ? "No live hotel availability was found for this search. Please try different dates."
+                : "Choose a country, city and travel dates to discover available accommodation."}
+            </div>
           ) : null}
 
           <div style={styles.hotelGrid}>
-            {customerVisibleHotels(props.hotels, props.propertyType, props.country, props.city).slice(0, props.visibleHotelCount || 25).map((hotel, idx) => (
+            {customerVisibleHotels(props.hotels, props.propertyType).map((hotel, idx) => (
               <HotelCard key={hotelKey(hotel) || idx} hotel={hotel} idx={idx} {...props} />
             ))}
           </div>
-
-          {customerVisibleHotels(props.hotels, props.propertyType, props.country, props.city).length > (props.visibleHotelCount || 25) ? (
-            <div style={{ display: "flex", justifyContent: "center", margin: "28px 0" }}>
-              <button style={styles.primaryBtn} onClick={props.loadMoreHotels}>
-                Load more hotels
-              </button>
-            </div>
-          ) : props.hotels.length >= (props.visibleHotelCount || 25) ? (
-            <div style={{ display: "flex", justifyContent: "center", margin: "28px 0" }}>
-              <button style={styles.primaryBtn} onClick={props.loadMoreHotels}>
-                Show more hotels
-              </button>
-            </div>
-          ) : null}
 
           <ComparePanel {...props} />
           <AlternativeHotels {...props} />
@@ -1290,6 +1242,19 @@ function HotelsPage(props) {
 function SearchBox(props) {
   return (
     <>
+            <Field label="Property Type">
+        <select style={styles.input} value={props.propertyType || "hotels"} onChange={(e) => {
+          props.setPropertyType(e.target.value);
+          props.setHotels([]);
+          props.setSelectedHotel(null);
+        }}>
+          <option value="hotels">Hotels only</option>
+          <option value="hotel_resort">Hotels + resorts</option>
+          <option value="serviced">Serviced apartments</option>
+          <option value="homes">Villas & homes</option>
+          <option value="all">All accommodation</option>
+        </select>
+      </Field>
       <Field label="Country">
         <select style={styles.input} value={props.country} onChange={(e) => {
           props.setCountry(e.target.value);
@@ -1299,10 +1264,13 @@ function SearchBox(props) {
         }}>
           <option value="">Select country</option>
           {props.countries.map((item) => (
-            <option key={item.country} value={item.country}>
-              {item.country}
-            </option>
-          ))}
+    <option
+      key={item.country}
+      value={item.country}
+    >
+      {item.country}
+    </option>
+))}
         </select>
       </Field>
 
@@ -1318,16 +1286,17 @@ function SearchBox(props) {
           }}
         >
           <option value="">
-            {props.country ? "Select city" : "Select country first"}
-          </option>
-          {((props.countries.find((x) => x.country === props.country)?.cities) || []).map((item) => (
-            <option
-              key={String(item.city || item.name || item.label || item)}
-              value={String(item.city || item.name || item.label || item)}
-            >
-              {String(item.city || item.name || item.label || item)}
-            </option>
-          ))}
+  {props.country ? "Select city" : "Select country first"}
+</option>
+
+{((props.countries.find((x) => x.country === props.country)?.cities) || []).map((item) => (
+  <option
+    key={String(item.city || item.name || item.label || item)}
+    value={String(item.city || item.name || item.label || item)}
+  >
+    {String(item.city || item.name || item.label || item)}
+  </option>
+))}
         </select>
       </Field>
 
@@ -1354,7 +1323,7 @@ function SearchBox(props) {
       </Field>
 
       <button style={styles.primaryBtn} onClick={props.searchHotels}>
-        {props.loading ? "Finding hotels..." : "Search Hotels"}
+        {props.loading ? "Finding stays..." : "Search"}
       </button>
     </>
   );
@@ -1374,33 +1343,26 @@ function customerHotelText(hotel) {
 
 function isCustomerHotelResult(hotel, propertyType = "hotels") {
   const text = customerHotelText(hotel);
+  const mode = String(propertyType || "hotels").toLowerCase();
+  const supplierHotelId = String(hotel?.hotelId || hotel?.hotel_id || "").toUpperCase();
+  const liveSupplierHotel = /^(WEBBEDS|RATEHAWK|HYPERGUEST|HOTELBEDS)-/.test(supplierHotelId);
 
-  const nonHotelWords = [
-    "apartment", "apartments", "flat", "flats", "serviced apartment", "service apartment",
-    "aparthotel", "apart hotel", "studio", "residence", "residences", "villa", "villas",
-    "home", "house", "holiday home", "vacation rental", "condo", "penthouse", "loft",
-    "private room", "shared room", "entire home", "entire place", "hostel", "camp", "caravan",
-    "farm stay", "cottage", "guest house", "guesthouse", "b&b", "bed and breakfast",
-    "long stay", "long-stay", "monthly", "rental", "for rent", "for sale"
-  ];
+  const hotelWords = ["hotel", "resort", "inn", "motel", "lodge", "guest house", "guesthouse", "b&b", "bed and breakfast", "aparthotel"];
+  const nonHotelWords = ["apartment", "apartments", "flat", "flats", "duplex", "villa", "home", "house", "condo", "penthouse", "loft", "studio", "residence", "entire", "long stay", "monthly", "rental"];
 
-  const hotelWords = [
-    "hotel", "inn", "motel", "hotel suites", "suite hotel", "premier inn",
-    "holiday inn", "travelodge", "marriott", "hilton", "hyatt", "radisson",
-    "novotel", "ibis", "mercure", "sheraton", "doubletree", "crowne plaza",
-    "intercontinental", "fairmont", "ritz", "waldorf", "sofitel", "westin"
-  ];
+  if (mode === "all") return true;
+  if (mode === "homes") return nonHotelWords.some((word) => text.includes(word));
+  if (mode === "serviced") return text.includes("aparthotel") || text.includes("serviced apartment");
+  if (mode === "hotel_resort") return liveSupplierHotel || hotelWords.some((word) => text.includes(word));
 
-  if (!text || /test|demo|placeholder|sample|fake|dummy/.test(text)) return false;
   if (nonHotelWords.some((word) => text.includes(word))) return false;
-  return hotelWords.some((word) => text.includes(word));
+  return liveSupplierHotel || hotelWords.some((word) => text.includes(word));
 }
 
-function customerVisibleHotels(list, propertyType = "hotels", wantedCountry = "", wantedCity = "") {
+function customerVisibleHotels(list, propertyType = "hotels") {
   return (Array.isArray(list) ? list : [])
-    .filter((hotel) => isCustomerHotelResult(hotel, "hotels"))
-    .filter((hotel) => exactCustomerLocation(hotel, wantedCountry, wantedCity))
-    .slice(0, 300);
+    .filter((hotel) => isCustomerHotelResult(hotel, propertyType))
+    .slice(0, 80);
 }
 
 function Field({ label, children }) {
@@ -1429,7 +1391,8 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, selectHotelAndRefre
       )}
 
       <div style={styles.hotelBody}>
-        <div style={styles.greenBadge}>{selected ? "Selected Hotel" : "Recommended Hotel"}</div>
+        <div style={styles.greenBadge}>{selected ? "Selected Property" : "Recommended Property"}</div>
+        <div style={styles.small}>Live source: {hotel.supplier_name || hotel.supplierLabel || hotel.supplier_code || "Supplier"}</div>
         <h3 style={styles.hotelName}>{hotel.name || "Selected hotel"}</h3>
         <div style={styles.muted}>{hotel.city || city}, {hotel.country || country}</div>
 
@@ -1445,14 +1408,11 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, selectHotelAndRefre
             <div style={styles.small}>Estimated stay total: {curr} {money(total)}</div>
           </>
         ) : (
-          <>
-            <div style={styles.priceLine}>Checking today's price...</div>
-            <div style={styles.small}>Availability will be confirmed before checkout.</div>
-          </>
+          <div style={styles.softBox}>Check today&apos;s live price</div>
         )}
 
         <button style={styles.darkBtn} onClick={() => selectHotelAndRefreshLiveRates ? selectHotelAndRefreshLiveRates(selectedReadyHotel) : setSelectedHotel(selectedReadyHotel)}>
-          {price > 0 ? "Select Hotel" : "Check Availability"}
+          Select Hotel
         </button>
       </div>
     </article>
@@ -1478,7 +1438,7 @@ function BookingSummary(props) {
 
           <div style={styles.totalBox}>
             <div style={styles.totalLabel}>Estimated stay total</div>
-            <div style={styles.totalPrice}>{props.totalPrice > 0 ? `${props.selectedCurrency} ${money(props.totalPrice)}` : "Check availability"}</div>
+            <div style={styles.totalPrice}>{props.selectedCurrency} {money(props.totalPrice)}</div>
             <div style={styles.small}>Price confirmed before secure checkout.</div>
           </div>
 
@@ -1517,7 +1477,7 @@ function ComparePanel(props) {
         <div>
           <div style={styles.kicker}>Compare Prices</div>
           <h2 style={styles.titleSmall}>Compare your selected stay</h2>
-          <p style={styles.sectionText}>Review stay choices and Available hotels nearby before continuing.</p>
+          <p style={styles.sectionText}>Review stay choices and Available stays nearby before continuing.</p>
         </div>
         <a style={styles.primaryLink} href={routeUrl(ROUTES.compare)}>Open Compare Page</a>
       </div>
@@ -1547,8 +1507,8 @@ function AlternativeHotels(props) {
 
   return (
     <section style={styles.panel}>
-      <div style={styles.kicker}>Available hotels nearby</div>
-      <h2 style={styles.titleSmall}>Other hotel options in {props.city || "this destination"}</h2>
+      <div style={styles.kicker}>Available stays nearby</div>
+      <h2 style={styles.titleSmall}>Other accommodation options in {props.city || "this destination"}</h2>
 
       <div style={styles.altGrid}>
         {alternatives.map((hotel, idx) => {
@@ -2040,7 +2000,7 @@ function FaqPortal() {
       <div style={styles.faqList}>
         <FaqItem q="How do I search for a hotel?" a="Select your country, city, dates, guests and rooms, then choose Search. Available hotel options will appear below the search box." />
         <FaqItem q="When is the final price confirmed?" a="The stay total is shown before checkout. Final payment details are confirmed securely before payment is completed." />
-        <FaqItem q="Can I compare hotels in the same destination?" a="Yes. After selecting a hotel, MySpace Hotel shows comparison choices and Available hotels nearby where available." />
+        <FaqItem q="Can I compare hotels in the same destination?" a="Yes. After selecting a hotel, MySpace Hotel shows comparison choices and Available stays nearby where available." />
         <FaqItem q="Can I add insurance, transfers or attractions?" a="Yes. Complete your hotel reservation first. Additional travel services can be requested afterwards through MySpace Hotel." />
         <FaqItem q="Can hotels or partners work with MySpace Hotel?" a="Yes. Accommodation providers and travel technology partners can use the Industry Partnerships page to contact MySpace Hotel." />
       </div>
@@ -2098,7 +2058,7 @@ function ReviewsPortal({ reviewSent, setReviewSent }) {
   return (
     <PortalShell title="Guest Reviews" subtitle="MySpace Hotel is built around confident travel decisions, helpful guidance and clear accommodation choices." badge="Guest experience">
       <div style={styles.cardGrid}>
-        <InfoCard title="Business travel" text="A simple way to search trusted stays and compare hotel options for professional trips." />
+        <InfoCard title="Business travel" text="A simple way to search trusted stays and compare accommodation options for professional trips." />
         <InfoCard title="Family holidays" text="Destination guidance and clear stay totals help families plan with more confidence." />
         <InfoCard title="City breaks" text="Hotel search, local attractions and dining guidance make short trips easier to plan." />
       </div>
@@ -2122,7 +2082,7 @@ function SupportPortal() {
   return (
     <PortalShell title="Support Centre" subtitle="Helpful customer support before, during and after your stay." badge="Customer support">
       <div style={styles.cardGrid}>
-        <InfoCard title="Before your trip" text="Get help reviewing destinations, hotel options, dates, room choices and travel needs before booking." />
+        <InfoCard title="Before your trip" text="Get help reviewing destinations, accommodation options, dates, room choices and travel needs before booking." />
         <InfoCard title="During your stay" text="Access helpful guidance for local services, destination support and stay-related questions." />
         <InfoCard title="After your journey" text="Share your experience, request support and help us improve future guest journeys." />
         <InfoCard title="Contact MySpace Hotel" text="Reservations: reservations@myspace-hotel.com | General: info@myspace-hotel.com | Sales: sales@myspace-hotel.com | Accounts: accounts@myspace-hotel.com | Phone: +44 7707836674" />
@@ -2229,6 +2189,37 @@ function PartnersPortal() {
     </PortalShell>
   );
 }
+function AffiliateNetworkUltraSafe() {
+  return (
+    <PortalShell
+      title="Affiliate Network"
+      subtitle="Work with MySpace Hotel by referring customers through an approved affiliate partnership."
+      badge="Affiliate partnerships"
+    >
+      <div style={styles.cardGrid}>
+        <InfoCard
+          title="Customer referrals"
+          text="Approved partners can refer travellers to MySpace Hotel using a tracked referral code."
+        />
+        <InfoCard
+          title="Transparent attribution"
+          text="Referral codes are retained during the customer journey and attached to eligible booking requests."
+        />
+        <InfoCard
+          title="Apply to join"
+          text="Use the Industry Partnerships page to submit your company details and proposed marketing channels."
+        />
+      </div>
+      <div style={styles.panel}>
+        <h2 style={styles.titleSmall}>Become an affiliate partner</h2>
+        <p style={styles.sectionText}>
+          Applications are reviewed before access is issued. MySpace Hotel does not promise commissions until commercial terms have been agreed in writing.
+        </p>
+        <a style={styles.primaryLink} href={routeUrl(ROUTES.partners)}>Apply through Partnerships</a>
+      </div>
+    </PortalShell>
+  );
+}
 
 function BusinessPortal() {
   const [email, setEmail] = useState("");
@@ -2332,7 +2323,7 @@ function Footer() {
           <div style={styles.footerText}>General: info@myspace-hotel.com</div>
           <div style={styles.footerText}>Sales: sales@myspace-hotel.com</div>
           <div style={styles.footerText}>Accounts: accounts@myspace-hotel.com</div>
-          <div style={styles.footerText}>Phone: +44 7598604921</div>
+          <div style={styles.footerText}>Phone: +44 7707836674</div>
           <div style={styles.footerText}>Address: 17 Barleycorn Way, London E14 8DE</div>
         </div>
       </div>
