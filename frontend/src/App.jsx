@@ -1988,7 +1988,7 @@ function AboutPortal() {
         <InfoCard title="Who we serve" text="MySpace Hotel supports holidaymakers, business travellers, families and guests looking for clear accommodation choices." />
         <InfoCard title="What we provide" text="Guests can search hotels, compare stay value, review destination guidance and continue through a secure booking journey." />
         <InfoCard title="Our promise" text="We focus on customer-friendly language, clear totals, useful destination support and a professional booking experience." />
-        <InfoCard title="Business details" text="MySpace Hotel Ltd, 17 Barleycorn Way, London E14 8DE. Phone: +44 7707836674. Website: myspace-hotel.com." />
+        <InfoCard title="Business details" text="MySpace Hotel Ltd, 17 Barleycorn Way, London E14 8DE. Phone: +447598604921. Website: myspace-hotel.com." />
       </div>
     </PortalShell>
   );
@@ -2085,7 +2085,7 @@ function SupportPortal() {
         <InfoCard title="Before your trip" text="Get help reviewing destinations, accommodation options, dates, room choices and travel needs before booking." />
         <InfoCard title="During your stay" text="Access helpful guidance for local services, destination support and stay-related questions." />
         <InfoCard title="After your journey" text="Share your experience, request support and help us improve future guest journeys." />
-        <InfoCard title="Contact MySpace Hotel" text="Reservations: reservations@myspace-hotel.com | General: info@myspace-hotel.com | Sales: sales@myspace-hotel.com | Accounts: accounts@myspace-hotel.com | Phone: +44 7707836674" />
+        <InfoCard title="Contact MySpace Hotel" text="Reservations: reservations@myspace-hotel.com | General: info@myspace-hotel.com | Sales: sales@myspace-hotel.com | Accounts: accounts@myspace-hotel.com | Phone: +447598604921" />
       </div>
     </PortalShell>
   );
@@ -2323,7 +2323,7 @@ function Footer() {
           <div style={styles.footerText}>General: info@myspace-hotel.com</div>
           <div style={styles.footerText}>Sales: sales@myspace-hotel.com</div>
           <div style={styles.footerText}>Accounts: accounts@myspace-hotel.com</div>
-          <div style={styles.footerText}>Phone: +44 7707836674</div>
+          <div style={styles.footerText}>Phone: +447598604921</div>
           <div style={styles.footerText}>Address: 17 Barleycorn Way, London E14 8DE</div>
         </div>
       </div>
