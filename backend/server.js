@@ -73,7 +73,12 @@ try {
     console.error("[ROUTE ERROR] federatedHotelSearch function not found.");
   }
 } catch (e) {
-  console.error("[ROUTE ERROR] Could not register federated search:", e.message);
+  console.error("============================================");
+  console.error("[ROUTE ERROR] FEDERATED SEARCH FAILED");
+  console.error("[ROUTE ERROR] Message:", e.message);
+  console.error("[ROUTE ERROR] Name:", e.name);
+  console.error("[ROUTE ERROR] Stack:", e.stack);
+  console.error("============================================");
 }
 // ----------------------------------------
 
