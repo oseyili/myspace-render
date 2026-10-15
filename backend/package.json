@@ -17,6 +17,7 @@
     "countries-list": "^3.4.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "fast-xml-parser": "^5.11.2",
     "nodemailer": "^6.10.0",
     "stripe": "^17.7.0"
   }

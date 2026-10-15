@@ -62,6 +62,21 @@ if (!app || typeof app.listen !== "function") {
   process.exit(1);
 }
 
+// --- REGISTER FEDERATED SEARCH ROUTE ---
+try {
+  const federation = require("./supplierFederation");
+  if (federation && typeof federation.federatedHotelSearch === "function") {
+    app.post("/api/federated-search", federation.federatedHotelSearch);
+    app.get("/api/federated-search", federation.federatedHotelSearch);
+    console.log("[ROUTE] Registered /api/federated-search");
+  } else {
+    console.error("[ROUTE ERROR] federatedHotelSearch function not found.");
+  }
+} catch (e) {
+  console.error("[ROUTE ERROR] Could not register federated search:", e.message);
+}
+// ----------------------------------------
+
 const PORT = process.env.PORT || 5050;
 
 function envBool(v) {
