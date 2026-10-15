@@ -63,14 +63,22 @@ if (!app || typeof app.listen !== "function") {
 }
 
 // --- REGISTER FEDERATED SEARCH ROUTE ---
+console.log(">>> FEDERATION: Entering registration block");
 try {
+  console.log(">>> FEDERATION: About to require ./supplierFederation");
   const federation = require("./supplierFederation");
+  console.log(">>> FEDERATION: Required OK. Keys:", Object.keys(federation || {}).join(", "));
+  console.log(">>> FEDERATION: federatedHotelSearch type:", typeof federation.federatedHotelSearch);
   if (federation && typeof federation.federatedHotelSearch === "function") {
+    console.log(">>> FEDERATION: Registering POST /api/federated-search");
     app.post("/api/federated-search", federation.federatedHotelSearch);
+    console.log(">>> FEDERATION: Registering GET /api/federated-search");
     app.get("/api/federated-search", federation.federatedHotelSearch);
     console.log("[ROUTE] Registered /api/federated-search");
   } else {
     console.error("[ROUTE ERROR] federatedHotelSearch function not found.");
+    console.error("[ROUTE ERROR] federation is:", typeof federation);
+    console.error("[ROUTE ERROR] federation.federatedHotelSearch is:", typeof (federation || {}).federatedHotelSearch);
   }
 } catch (e) {
   console.error("============================================");
