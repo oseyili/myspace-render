@@ -1,4 +1,28 @@
 ﻿const { URLSearchParams } = require("url");
+const fs = require("fs");
+const path = require("path");
+
+// ============================================================
+// HOTEL IMAGE INDEX - loaded once at startup
+// ============================================================
+let hotelImagesIndex = {};
+try {
+  const imgPath = path.join(__dirname, "data", "hotel-images-index.json");
+  if (fs.existsSync(imgPath)) {
+    hotelImagesIndex = JSON.parse(fs.readFileSync(imgPath, "utf8"));
+    console.log("[Images] Loaded " + Object.keys(hotelImagesIndex).length + " hotel images");
+  } else {
+    console.warn("[Images] File not found: " + imgPath);
+  }
+} catch (e) {
+  console.warn("[Images] Could not load image index:", e.message);
+}
+
+function lookupImage(name) {
+  if (!name) return null;
+  return hotelImagesIndex[String(name).trim().toLowerCase()] || null;
+}
+
 
 function cleanText(v) {
   return String(v || "").trim();
@@ -26,6 +50,12 @@ function normalizeImage(img) {
     raw.mainImage,
     raw.thumbnail
   ].map(normalizeImage).filter(Boolean);
+
+  // Fallback: attach image from the local index if the supplier didn't provide one
+  if (images.length === 0 && name) {
+    const fallbackImage = lookupImage(name);
+    if (fallbackImage) images.push(fallbackImage);
+  }
 
   // Image lookup disabled (lookupImage not yet defined)
 
