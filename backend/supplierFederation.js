@@ -470,54 +470,67 @@ async function fetchHyperGuestStaticData() {
   }
 }
 async function fetchHyperGuestInventory(params) {
-  const url = process.env.HYPERGUEST_SEARCH_URL || "https://search-api.hyperguest.io/2.0/";
-  
-  // The email specifies using the developer credentials for basic auth
-  const user = "developer";
-  const password = process.env.HYPERGUEST_DEV_PASSWORD || ""; // We'll add this to .env
-  
-  // We can also try the token method if the user/pass fails, but let's start with what the email says.
-  const token = process.env.HYPERGUEST_API_KEY || process.env.HYPERGUEST_TOKEN || process.env.HYPERGUEST_AUTH_TOKEN;
+  const token = process.env.HYPERGUEST_AUTH_TOKEN || process.env.HYPERGUEST_API_KEY || process.env.HYPERGUEST_TOKEN;
+  const baseUrl = process.env.HYPERGUEST_SEARCH_URL || "https://search-api.hyperguest.io/2.0/";
+  if (!token || !baseUrl) return [];
 
-  if (!url) return [];
+  const fs = require("fs");
+  const path = require("path");
+  const cachePath = path.join(__dirname, "data", "hyperguest-static-cache.json");
+  if (!fs.existsSync(cachePath)) {
+    console.warn("[HyperGuest] Static cache not found at " + cachePath);
+    return [];
+  }
+  const staticCache = JSON.parse(fs.readFileSync(cachePath, "utf8"));
+  const byCity = staticCache.byCity || {};
 
-  // Format the search request body as HyperGuest expects
-  const body = {
-    "stay": {
-      "checkIn": params.checkIn,
-      "checkOut": params.checkOut
-    },
-    "occupancy": [
-      {
-        "adults": params.adults || 2,
-        "children": params.children || 0
-      }
-    ],
-    "propertyId": params.hotelId || params.hotel_id || params.destination || params.city, // Use destination as fallback
-    "currency": params.currency || "GBP",
-    "guestNationality": params.nationality || "GB",
-    "filters": {
-      "onlyAvailable": true
-    }
-  };
-
-  // Build the headers
-  let headers = {
-    "Accept-Encoding": "gzip, deflate",
-    "Content-Type": "application/json"
-  };
-
-  // Prefer Basic Auth using the developer user/pass from the email
-  if (user && password) {
-    const auth = Buffer.from(`${user}:${password}`).toString("base64");
-    headers["Authorization"] = `Basic ${auth}`;
-  } else if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  } else {
+  const cityKey = String(params.city || "").trim().toLowerCase();
+  const hotelIds = byCity[cityKey] || [];
+  if (!hotelIds.length) {
+    console.log("[HyperGuest] No hotels in cache for city: " + cityKey);
     return [];
   }
 
-  return postJson(url, headers, body);
+  const idsToQuery = hotelIds.slice(0, 50);
+
+  const nights = (() => {
+    const start = new Date(params.checkIn);
+    const end = new Date(params.checkOut);
+    const diff = Math.ceil((end - start) / 86400000);
+    return Number.isFinite(diff) && diff > 0 ? diff : 1;
+  })();
+
+  const q = new URLSearchParams({
+    hotelIds: idsToQuery.join(","),
+    checkIn: params.checkIn,
+    checkOut: params.checkOut,
+    nights: String(nights),
+    guests: String(params.adults || 2),
+    currency: String(params.currency || "GBP")
+  });
+
+  const url = baseUrl.replace(/\/$/, "") + "/?" + q.toString();
+  console.log("[HyperGuest] Requesting " + idsToQuery.length + " hotels for " + cityKey);
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Authorization": "Bearer " + token,
+      "Accept": "application/json",
+      "Accept-Encoding": "gzip, deflate"
+    }
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.warn("[HyperGuest] Failed " + res.status + ": " + text.slice(0, 200));
+    return [];
+  }
+
+  const data = await res.json();
+  const results = Array.isArray(data && data.results) ? data.results : [];
+  console.log("[HyperGuest] Returned " + results.length + " hotels");
+  return results;
 }
 
 async function federatedHotelSearch(req, res) {

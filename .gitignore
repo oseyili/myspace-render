@@ -11,11 +11,35 @@ backend-backup-*/.env
 backend-backup-*/.env.*
 backend-backup-old-before-*/
 repair-review-*/
-data/
-**/data/
+# data/ (removed)
+# **/data/ (removed)
 hyperquest-safe-investigation.txt
 supplier-*.json
 test-hyperguest.js
 server-for-*.js
 .env.*
-backend/legacy/
+# backend/legacy/ (removed)
+# ============================================================
+# CRITICAL: Data files needed for the app to work
+# These MUST be tracked in git so Render can deploy them
+# ============================================================
+!backend/data/
+!backend/data/hotelbeds-content-cache.json
+!backend/data/hotel-images-index.json
+!backend/data/hotelbeds-city-to-code.json
+!backend/data/hotelbeds-city-to-code.full-backup.json
+!backend/data/hotelbeds-destination-codes.json
+!backend/data/hotelbeds-city-to-code-from-feed.json
+!backend/legacy/
+!backend/legacy/*.js
+
+# Do not ignore specific scripts
+!backend/scripts/fetch-hotelbeds-content.js
+!backend/scripts/merge-content-to-images.js
+!backend/scripts/smart-priority-patch.js
+!backend/scripts/reduce-batch.js
+!backend/scripts/patch-lookupImage.js
+!backend/scripts/patch-fetcher-2.js
+!backend/scripts/uk-priority-patch.js
+!backend/scripts/verified-codes.json
+
