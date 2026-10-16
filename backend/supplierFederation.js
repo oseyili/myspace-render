@@ -529,8 +529,43 @@ async function fetchHyperGuestInventory(params) {
 
   const data = await res.json();
   const results = Array.isArray(data && data.results) ? data.results : [];
+
+  // Map HyperGuest shape to Hotelbeds-compatible shape
+  const mapped = results.map(h => {
+    const info = h.propertyInfo || {};
+    const firstRoom = Array.isArray(h.rooms) && h.rooms.length ? h.rooms[0] : null;
+    const minRate = firstRoom && firstRoom.rates && firstRoom.rates[0]
+      ? (firstRoom.rates[0].net || firstRoom.rates[0].amount || firstRoom.rates[0].price)
+      : null;
+    return {
+      code: h.propertyId,
+      hotelId: h.propertyId,
+      name: info.name,
+      categoryCode: info.starRating ? info.starRating + "EST" : "",
+      categoryName: info.starRating ? info.starRating + " STARS" : "",
+      destinationCode: params.destinationCode || "",
+      destinationName: info.cityName || "",
+      zoneName: info.regionName || "",
+      latitude: info.latitude,
+      longitude: info.longitude,
+      address: info.address || "",
+      city: info.cityName || "",
+      countryCode: info.countryCode || "",
+      rooms: firstRoom ? [{
+        roomName: firstRoom.roomTypeCode || "Available room",
+        boardName: firstRoom.boardName || "",
+        net: minRate,
+        currency: "GBP",
+        price: minRate,
+        rate_source_id: "hyperguest-" + h.propertyId
+      }] : [],
+      minRate: minRate,
+      maxRate: minRate,
+      currency: "GBP"
+    };
+  });
   console.log("[HyperGuest] Returned " + results.length + " hotels");
-  return results;
+  return mapped;
 }
 
 async function federatedHotelSearch(req, res) {
