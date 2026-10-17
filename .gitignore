@@ -43,3 +43,6 @@ server-for-*.js
 !backend/scripts/uk-priority-patch.js
 !backend/scripts/verified-codes.json
 
+
+# Ignore massive Hotelbeds cache file
+backend/data/hotelbeds-content-cache.json

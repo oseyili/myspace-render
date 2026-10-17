@@ -97,9 +97,22 @@ async function main() {
   const outPath = path.join(outDir, "hotelbeds-content-cache.json");
   const quotaPath = path.join(outDir, "hotelbeds-quota.json");
 
-  // 1. Load Cache
+  // 1. Load Cache (Merge all chunk files)
   let cache = {};
-  if (fs.existsSync(outPath)) {
+  const chunksDir = path.join(outDir, "chunks");
+  
+  if (fs.existsSync(chunksDir)) {
+    const chunkFiles = fs.readdirSync(chunksDir).filter(f => f.endsWith(".json"));
+    for (const file of chunkFiles) {
+      try {
+        const chunkData = JSON.parse(fs.readFileSync(path.join(chunksDir, file), "utf8"));
+        Object.assign(cache, chunkData);
+      } catch (e) {
+        console.error("Error reading chunk " + file + ": " + e.message);
+      }
+    }
+  } else if (fs.existsSync(outPath)) {
+    // Fallback for the very first run if chunks don't exist yet
     try { cache = JSON.parse(fs.readFileSync(outPath, "utf8")); } catch { cache = {}; }
   }
 
@@ -196,9 +209,24 @@ async function main() {
         hotelsAdded++;
       }
       
-      fs.writeFileSync(outPath, JSON.stringify(cache));
-      const sizeMB = (fs.statSync(outPath).size / 1024 / 1024).toFixed(2);
-      console.log("  Saved. Total cached: " + Object.keys(cache).length + " hotels (" + sizeMB + " MB)");
+      // Create chunks directory if it doesn't exist
+      if (!fs.existsSync(chunksDir)) fs.mkdirSync(chunksDir, { recursive: true });
+      
+      // Split into chunks of 10,000 hotels (approx 20MB each)
+      const allCodes = Object.keys(cache);
+      const CHUNK_SIZE = 10000;
+      let chunkIndex = 1;
+
+      for (let i = 0; i < allCodes.length; i += CHUNK_SIZE) {
+        const chunkCodes = allCodes.slice(i, i + CHUNK_SIZE);
+        const chunkData = {};
+        for (const code of chunkCodes) chunkData[code] = cache[code];
+        
+        const chunkPath = path.join(chunksDir, `part-${chunkIndex}.json`);
+        fs.writeFileSync(chunkPath, JSON.stringify(chunkData));
+        chunkIndex++;
+      }
+      console.log("  Saved. Total cached: " + allCodes.length + " hotels in " + (chunkIndex - 1) + " chunks.");
       
       await new Promise(r => setTimeout(r, 1000)); 
     } catch (e) {
