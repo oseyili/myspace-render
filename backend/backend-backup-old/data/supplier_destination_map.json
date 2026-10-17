@@ -1,0 +1,76 @@
+{
+  "updatedAt": "2026-06-16",
+  "note": "Active contracted supplier routing only: WebBeds, RateHawk and HyperGuest. No harvested or Hotelbeds inventory is permitted.",
+  "destinations": [
+    {
+      "country": "United Kingdom",
+      "city": "London",
+      "webbeds": {
+        "enabled": true
+      },
+      "ratehawk": {
+        "enabled": false
+      },
+      "hyperguest": {
+        "enabled": false,
+        "status": "waiting_for_integration_details"
+      }
+    },
+    {
+      "country": "United States",
+      "city": "Los Angeles",
+      "webbeds": {
+        "enabled": true
+      },
+      "ratehawk": {
+        "enabled": false
+      },
+      "hyperguest": {
+        "enabled": false,
+        "status": "waiting_for_integration_details"
+      }
+    },
+    {
+      "country": "United States",
+      "city": "New York",
+      "webbeds": {
+        "enabled": true
+      },
+      "ratehawk": {
+        "enabled": false
+      },
+      "hyperguest": {
+        "enabled": false,
+        "status": "waiting_for_integration_details"
+      }
+    },
+    {
+      "country": "United Arab Emirates",
+      "city": "Dubai",
+      "webbeds": {
+        "enabled": true
+      },
+      "ratehawk": {
+        "enabled": false
+      },
+      "hyperguest": {
+        "enabled": false,
+        "status": "waiting_for_integration_details"
+      }
+    },
+    {
+      "country": "France",
+      "city": "Paris",
+      "webbeds": {
+        "enabled": true
+      },
+      "ratehawk": {
+        "enabled": false
+      },
+      "hyperguest": {
+        "enabled": false,
+        "status": "waiting_for_integration_details"
+      }
+    }
+  ]
+}

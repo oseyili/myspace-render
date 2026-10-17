@@ -1,0 +1,456 @@
+﻿[
+  {
+    "hotelId": "HOTEL-001",
+    "hotel_id": "HOTEL-001",
+    "name": "Grand Plaza London",
+    "hotel_name": "Grand Plaza London",
+    "country": "United Kingdom",
+    "city": "London",
+    "price": 150.00,
+    "currency": "GBP",
+    "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=80",
+    "stars": "4.5",
+    "facilities": ["Free WiFi", "Restaurant", "Pool", "Gym", "Spa"],
+    "rates": [
+      {
+        "roomCode": "STANDARD",
+        "roomName": "Standard Room",
+        "board": "Room only",
+        "price": 150.00,
+        "currency": "GBP"
+      },
+      {
+        "roomCode": "DELUXE",
+        "roomName": "Deluxe Room",
+        "board": "Breakfast included",
+        "price": 220.00,
+        "currency": "GBP"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-002",
+    "hotel_id": "HOTEL-002",
+    "name": "Royal Garden Hotel",
+    "hotel_name": "Royal Garden Hotel",
+    "country": "United Kingdom",
+    "city": "London",
+    "price": 220.00,
+    "currency": "GBP",
+    "image": "https://images.unsplash.com/photo-1528740561666-dc2479dc08ab?w=500&q=80",
+    "stars": "4.8",
+    "facilities": ["Free WiFi", "Restaurant", "Pool", "Spa", "Gym", "Concierge"],
+    "rates": [
+      {
+        "roomCode": "DELUXE",
+        "roomName": "Deluxe Room",
+        "board": "Breakfast included",
+        "price": 220.00,
+        "currency": "GBP"
+      },
+      {
+        "roomCode": "SUITE",
+        "roomName": "Executive Suite",
+        "board": "Full Board",
+        "price": 350.00,
+        "currency": "GBP"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-003",
+    "hotel_id": "HOTEL-003",
+    "name": "The Shard View Hotel",
+    "hotel_name": "The Shard View Hotel",
+    "country": "United Kingdom",
+    "city": "London",
+    "price": 180.00,
+    "currency": "GBP",
+    "image": "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?w=500&q=80",
+    "stars": "4.2",
+    "facilities": ["Free WiFi", "Restaurant", "Bar", "City Views"],
+    "rates": [
+      {
+        "roomCode": "STANDARD",
+        "roomName": "Standard Room",
+        "board": "Room only",
+        "price": 180.00,
+        "currency": "GBP"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-004",
+    "hotel_id": "HOTEL-004",
+    "name": "Manchester City Centre Hotel",
+    "hotel_name": "Manchester City Centre Hotel",
+    "country": "United Kingdom",
+    "city": "Manchester",
+    "price": 120.00,
+    "currency": "GBP",
+    "image": "https://images.unsplash.com/photo-1584132967330-d5d10fe2f7f3?w=500&q=80",
+    "stars": "4.0",
+    "facilities": ["Free WiFi", "Restaurant", "Bar", "24hr Reception"],
+    "rates": [
+      {
+        "roomCode": "STANDARD",
+        "roomName": "Standard Double",
+        "board": "Room only",
+        "price": 120.00,
+        "currency": "GBP"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-005",
+    "hotel_id": "HOTEL-005",
+    "name": "Liverpool Waterfront Hotel",
+    "hotel_name": "Liverpool Waterfront Hotel",
+    "country": "United Kingdom",
+    "city": "Liverpool",
+    "price": 135.00,
+    "currency": "GBP",
+    "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=80",
+    "stars": "4.1",
+    "facilities": ["Free WiFi", "Restaurant", "Bar", "Water Views"],
+    "rates": [
+      {
+        "roomCode": "STANDARD",
+        "roomName": "Standard Room",
+        "board": "Room only",
+        "price": 135.00,
+        "currency": "GBP"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-006",
+    "hotel_id": "HOTEL-006",
+    "name": "Edinburgh Castle View Hotel",
+    "hotel_name": "Edinburgh Castle View Hotel",
+    "country": "United Kingdom",
+    "city": "Edinburgh",
+    "price": 160.00,
+    "currency": "GBP",
+    "image": "https://images.unsplash.com/photo-1528740561666-dc2479dc08ab?w=500&q=80",
+    "stars": "4.4",
+    "facilities": ["Free WiFi", "Restaurant", "Bar", "Castle Views"],
+    "rates": [
+      {
+        "roomCode": "STANDARD",
+        "roomName": "Standard Room",
+        "board": "Breakfast included",
+        "price": 160.00,
+        "currency": "GBP"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-007",
+    "hotel_id": "HOTEL-007",
+    "name": "Dubai Marina Resort",
+    "hotel_name": "Dubai Marina Resort",
+    "country": "United Arab Emirates",
+    "city": "Dubai",
+    "price": 450.00,
+    "currency": "AED",
+    "image": "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=500&q=80",
+    "stars": "5.0",
+    "facilities": ["Beach Access", "Pool", "Restaurant", "Spa", "Gym", "Kids Club"],
+    "rates": [
+      {
+        "roomCode": "OCEAN_VIEW",
+        "roomName": "Ocean View Suite",
+        "board": "Half Board",
+        "price": 450.00,
+        "currency": "AED"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-008",
+    "hotel_id": "HOTEL-008",
+    "name": "Abu Dhabi Palace Hotel",
+    "hotel_name": "Abu Dhabi Palace Hotel",
+    "country": "United Arab Emirates",
+    "city": "Abu Dhabi",
+    "price": 380.00,
+    "currency": "AED",
+    "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=80",
+    "stars": "4.9",
+    "facilities": ["Free WiFi", "Restaurant", "Pool", "Spa", "Gym", "Private Beach"],
+    "rates": [
+      {
+        "roomCode": "SUITE",
+        "roomName": "Royal Suite",
+        "board": "Full Board",
+        "price": 380.00,
+        "currency": "AED"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-009",
+    "hotel_id": "HOTEL-009",
+    "name": "Paris Central Hotel",
+    "hotel_name": "Paris Central Hotel",
+    "country": "France",
+    "city": "Paris",
+    "price": 180.00,
+    "currency": "EUR",
+    "image": "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?w=500&q=80",
+    "stars": "4.2",
+    "facilities": ["Free WiFi", "Restaurant", "Bar", "Room Service"],
+    "rates": [
+      {
+        "roomCode": "STANDARD",
+        "roomName": "Standard Double",
+        "board": "Room only",
+        "price": 180.00,
+        "currency": "EUR"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-010",
+    "hotel_id": "HOTEL-010",
+    "name": "Nice Beachfront Hotel",
+    "hotel_name": "Nice Beachfront Hotel",
+    "country": "France",
+    "city": "Nice",
+    "price": 160.00,
+    "currency": "EUR",
+    "image": "https://images.unsplash.com/photo-1584132967330-d5d10fe2f7f3?w=500&q=80",
+    "stars": "4.0",
+    "facilities": ["Free WiFi", "Restaurant", "Beach Access", "Bar"],
+    "rates": [
+      {
+        "roomCode": "STANDARD",
+        "roomName": "Standard Room",
+        "board": "Room only",
+        "price": 160.00,
+        "currency": "EUR"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-011",
+    "hotel_id": "HOTEL-011",
+    "name": "New York Times Square Hotel",
+    "hotel_name": "New York Times Square Hotel",
+    "country": "United States",
+    "city": "New York",
+    "price": 200.00,
+    "currency": "USD",
+    "image": "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=500&q=80",
+    "stars": "4.3",
+    "facilities": ["Free WiFi", "Restaurant", "Gym", "Business Center"],
+    "rates": [
+      {
+        "roomCode": "STANDARD",
+        "roomName": "Standard Room",
+        "board": "Room only",
+        "price": 200.00,
+        "currency": "USD"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-012",
+    "hotel_id": "HOTEL-012",
+    "name": "Los Angeles Hollywood Hotel",
+    "hotel_name": "Los Angeles Hollywood Hotel",
+    "country": "United States",
+    "city": "Los Angeles",
+    "price": 185.00,
+    "currency": "USD",
+    "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=80",
+    "stars": "4.1",
+    "facilities": ["Free WiFi", "Restaurant", "Pool", "Gym"],
+    "rates": [
+      {
+        "roomCode": "STANDARD",
+        "roomName": "Standard Room",
+        "board": "Room only",
+        "price": 185.00,
+        "currency": "USD"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-013",
+    "hotel_id": "HOTEL-013",
+    "name": "Miami Beach Resort",
+    "hotel_name": "Miami Beach Resort",
+    "country": "United States",
+    "city": "Miami",
+    "price": 210.00,
+    "currency": "USD",
+    "image": "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=500&q=80",
+    "stars": "4.4",
+    "facilities": ["Beach Access", "Pool", "Restaurant", "Bar", "Gym"],
+    "rates": [
+      {
+        "roomCode": "OCEAN_VIEW",
+        "roomName": "Ocean View Room",
+        "board": "Breakfast included",
+        "price": 210.00,
+        "currency": "USD"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-014",
+    "hotel_id": "HOTEL-014",
+    "name": "Las Vegas Strip Hotel",
+    "hotel_name": "Las Vegas Strip Hotel",
+    "country": "United States",
+    "city": "Las Vegas",
+    "price": 165.00,
+    "currency": "USD",
+    "image": "https://images.unsplash.com/photo-1584132967330-d5d10fe2f7f3?w=500&q=80",
+    "stars": "4.0",
+    "facilities": ["Free WiFi", "Restaurant", "Casino", "Pool", "Gym"],
+    "rates": [
+      {
+        "roomCode": "STANDARD",
+        "roomName": "Standard Room",
+        "board": "Room only",
+        "price": 165.00,
+        "currency": "USD"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-015",
+    "hotel_id": "HOTEL-015",
+    "name": "Toronto Downtown Hotel",
+    "hotel_name": "Toronto Downtown Hotel",
+    "country": "Canada",
+    "city": "Toronto",
+    "price": 175.00,
+    "currency": "CAD",
+    "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=80",
+    "stars": "4.2",
+    "facilities": ["Free WiFi", "Restaurant", "Gym", "Business Center"],
+    "rates": [
+      {
+        "roomCode": "STANDARD",
+        "roomName": "Standard Room",
+        "board": "Room only",
+        "price": 175.00,
+        "currency": "CAD"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-016",
+    "hotel_id": "HOTEL-016",
+    "name": "Vancouver Waterfront Hotel",
+    "hotel_name": "Vancouver Waterfront Hotel",
+    "country": "Canada",
+    "city": "Vancouver",
+    "price": 195.00,
+    "currency": "CAD",
+    "image": "https://images.unsplash.com/photo-1528740561666-dc2479dc08ab?w=500&q=80",
+    "stars": "4.5",
+    "facilities": ["Free WiFi", "Restaurant", "Water Views", "Gym", "Spa"],
+    "rates": [
+      {
+        "roomCode": "STANDARD",
+        "roomName": "Standard Room",
+        "board": "Breakfast included",
+        "price": 195.00,
+        "currency": "CAD"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-017",
+    "hotel_id": "HOTEL-017",
+    "name": "Lagos Victoria Island Hotel",
+    "hotel_name": "Lagos Victoria Island Hotel",
+    "country": "Nigeria",
+    "city": "Lagos",
+    "price": 25000.00,
+    "currency": "NGN",
+    "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=80",
+    "stars": "4.3",
+    "facilities": ["Free WiFi", "Restaurant", "Pool", "Gym", "Security"],
+    "rates": [
+      {
+        "roomCode": "STANDARD",
+        "roomName": "Standard Room",
+        "board": "Breakfast included",
+        "price": 25000.00,
+        "currency": "NGN"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-018",
+    "hotel_id": "HOTEL-018",
+    "name": "Abuja Central Hotel",
+    "hotel_name": "Abuja Central Hotel",
+    "country": "Nigeria",
+    "city": "Abuja",
+    "price": 28000.00,
+    "currency": "NGN",
+    "image": "https://images.unsplash.com/photo-1584132967330-d5d10fe2f7f3?w=500&q=80",
+    "stars": "4.4",
+    "facilities": ["Free WiFi", "Restaurant", "Pool", "Gym", "Conference Center"],
+    "rates": [
+      {
+        "roomCode": "STANDARD",
+        "roomName": "Standard Room",
+        "board": "Breakfast included",
+        "price": 28000.00,
+        "currency": "NGN"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-019",
+    "hotel_id": "HOTEL-019",
+    "name": "Nassau Paradise Island Resort",
+    "hotel_name": "Nassau Paradise Island Resort",
+    "country": "Bahamas",
+    "city": "Nassau",
+    "price": 350.00,
+    "currency": "BSD",
+    "image": "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=500&q=80",
+    "stars": "4.9",
+    "facilities": ["Beach Access", "Pool", "Restaurant", "Spa", "Gym", "Water Sports"],
+    "rates": [
+      {
+        "roomCode": "OCEAN_VIEW",
+        "roomName": "Ocean View Suite",
+        "board": "Full Board",
+        "price": 350.00,
+        "currency": "BSD"
+      }
+    ]
+  },
+  {
+    "hotelId": "HOTEL-020",
+    "hotel_id": "HOTEL-020",
+    "name": "Sydney Opera House View Hotel",
+    "hotel_name": "Sydney Opera House View Hotel",
+    "country": "Australia",
+    "city": "Sydney",
+    "price": 320.00,
+    "currency": "AUD",
+    "image": "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?w=500&q=80",
+    "stars": "4.6",
+    "facilities": ["Free WiFi", "Restaurant", "Water Views", "Gym"],
+    "rates": [
+      {
+        "roomCode": "STANDARD",
+        "roomName": "Standard Room",
+        "board": "Breakfast included",
+        "price": 320.00,
+        "currency": "AUD"
+      }
+    ]
+  }
+]

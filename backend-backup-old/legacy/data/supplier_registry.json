@@ -1,0 +1,65 @@
+[
+  {
+    "supplier_code": "HOTELBEDS",
+    "supplier_name": "Hotelbeds",
+    "supplier_type": "bedbank",
+    "status": "active",
+    "priority": 1,
+    "customer_visible": false,
+    "notes": "Primary hotel inventory and rate source."
+  },
+  {
+    "supplier_code": "WEBBEDS",
+    "supplier_name": "WebBeds",
+    "supplier_type": "bedbank",
+    "status": "contracted_pending_integration",
+    "priority": 2,
+    "customer_visible": false,
+    "notes": "Contract signed. Integration pending."
+  },
+  {
+    "supplier_code": "HYPERGUEST",
+    "supplier_name": "HyperGuest",
+    "supplier_type": "direct_connectivity",
+    "status": "contracted_pending_integration",
+    "priority": 3,
+    "customer_visible": false,
+    "notes": "Direct hotel connectivity partner."
+  },
+  {
+    "supplier_code": "HOTELRUNNER",
+    "supplier_name": "HotelRunner",
+    "supplier_type": "channel_connectivity",
+    "status": "onboarding",
+    "priority": 4,
+    "customer_visible": false,
+    "notes": "Partner onboarding requested."
+  },
+  {
+    "supplier_code": "SITEMINDER",
+    "supplier_name": "SiteMinder",
+    "supplier_type": "channel_manager",
+    "status": "onboarding",
+    "priority": 5,
+    "customer_visible": false,
+    "notes": "Channel manager partnership in progress."
+  },
+  {
+    "supplier_code": "DIRECT_CONTRACT",
+    "supplier_name": "Direct Hotel Contract",
+    "supplier_type": "direct_contract",
+    "status": "planned",
+    "priority": 6,
+    "customer_visible": false,
+    "notes": "For direct hotel agreements."
+  },
+  {
+    "supplier_code": "MYSPACE_INTERNAL",
+    "supplier_name": "MySpace Internal",
+    "supplier_type": "internal",
+    "status": "active",
+    "priority": 99,
+    "customer_visible": false,
+    "notes": "Internal fallback or manually controlled inventory."
+  }
+]
