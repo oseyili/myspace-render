@@ -4,69 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MySpace Hotel</title>
-      <style>
-      @media (max-width: 768px) {
-        /* Hide the marketing text and boxes on mobile */
-        .heroGrid > div:first-child { display: none !important; }
-        .promisePanel { display: none !important; }
-        .converterCard { display: none !important; }
-        .metrics { display: none !important; }
-        
-        /* Force the search box to the top and make it look like Booking.com */
-        .heroInner { padding: 10px !important; background: #0b1d51 !important; }
-        .searchCard { margin-top: 0 !important; padding: 15px !important; border-radius: 12px !important; }
-        
-        /* Stack inputs vertically */
-        .searchCard > div { display: flex !important; flex-direction: column !important; gap: 10px !important; }
-        .searchCard input, .searchCard select, .searchCard button { width: 100% !important; box-sizing: border-box !important; }
-        
-        /* Adjust the header for mobile */
-        .header { padding: 10px !important; flex-direction: column !important; }
-        .nav { display: none !important; } /* Hide nav links on mobile */
-      }
-    </style>
-    
-    <!-- Structured Data for Travel Agency (Booking Platform) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "TravelAgency",
-      "name": "MySpace Hotel",
-      "alternateName": "MySpace Hotel London",
-      "description": "MySpace Hotel is a UK-based online travel agency and booking platform offering hotels, resorts, and serviced apartments worldwide with secure reservation support.",
-      "url": "https://www.myspace-hotel.com",
-      "telephone": "+447598604921",
-      "email": "info@myspace-hotel.com",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "17 Barleycorn Way",
-        "addressLocality": "London",
-        "postalCode": "E14 8DE",
-        "addressCountry": "GB"
-      },
-      "areaServed": {
-        "@type": "Country",
-        "name": "United Kingdom"
-      },
-      "sameAs": [
-        "https://www.tripadvisor.co.uk/",
-        "https://www.facebook.com/",
-        "https://www.instagram.com/"
-      ],
-      "knowsAbout": [
-        "Hotel Booking",
-        "Travel Accommodation",
-        "Serviced Apartments",
-        "Resorts",
-        "Worldwide Travel Support"
-      ]
-    }
-    </script>
-</head>
+  </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
-
-

@@ -300,10 +300,9 @@ export default function App() {
       const params = new URLSearchParams({
         country, city, checkIn, checkOut, check_in: checkIn, check_out: checkOut,
         guests: String(guests), adults: String(guests), rooms: String(rooms),
-        currency, propertyType, property_type: propertyType, limit: "10", // ONLY ASK FOR 10 HOTELS
+        currency, propertyType, property_type: propertyType, limit: "80",
       });
 
-      // Put the fastest endpoint first. We only need one to respond.
       const endpoints = [
         `${API_BASE}/api/hotels/search?${params.toString()}`,
         `${API_BASE}/api/federated-search?${params.toString()}`
@@ -321,7 +320,7 @@ export default function App() {
               .then(data => {
                 const list = Array.isArray(data?.hotels) ? data.hotels : Array.isArray(data?.allHotels) ? data.allHotels : Array.isArray(data) ? data : [];
                 if (list.length === 0) throw new Error("Empty response");
-                return list.slice(0, 10); // DOUBLE CHECK: Only keep 10 in case the API ignored the limit
+                return list;
               })
           )
         );
@@ -613,22 +612,15 @@ function HotelsPage(props) {
   return (
     <>
       <style>{`
-        /* GLOBAL: Hide mobile search by default */
-        .mobile-search { display: none; }
-
         @media (max-width: 768px) {
-          /* Hide desktop elements on mobile */
-          .heroGrid, .promisePanel, .converterCard, .metrics, .mobile-hide, .desktop-search { display: none !important; }
+          .heroGrid, .promisePanel, .converterCard, .metrics, .mobile-hide { display: none !important; }
           .mobile-hide-summary { display: none !important; }
           .summary-visible-mobile { display: block !important; }
-          
-          /* Hide nav menu */
           header nav { display: none !important; }
           header { padding: 10px 15px !important; flex-direction: column !important; align-items: flex-start !important; border-bottom: none !important; }
-          
-          /* White background on mobile */
           .hero { background: #ffffff !important; padding: 0 !important; min-height: auto !important; }
           .heroInner { padding: 0 !important; }
+          .desktop-search { display: none !important; }
           
           /* Collapsed Search State */
           .mobile-search-collapsed {
@@ -639,17 +631,16 @@ function HotelsPage(props) {
             background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold;
           }
           
-          /* Expanded Search State */
           .mobile-search-expanded { display: flex !important; flex-direction: column; gap: 8px; background: #fff; padding: 15px; border-radius: 0; margin-top: 0; }
           .mobile-search-expanded input, .mobile-search-expanded select { padding: 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; width: 100%; box-sizing: border-box; margin: 0; }
           .mobile-search-row { display: flex; gap: 8px; width: 100%; }
           .mobile-search-row > * { flex: 1; min-width: 0; }
           .mobile-search-btn { background: #2750db; color: #fff; font-size: 16px; font-weight: bold; padding: 14px; border-radius: 8px; border: none; width: 100%; margin-top: 4px; }
           
-          /* Layout adjustments */
           .contentGrid { padding: 10px !important; margin-top: 0 !important; display: block !important; }
           #hotel-results { margin-top: 10px !important; font-size: 22px !important; margin-bottom: 10px !important; }
         }
+        .mobile-search { display: none; }
       `}</style>
 
       <section style={styles.hero} className="hero">
@@ -670,7 +661,6 @@ function HotelsPage(props) {
             </div>
           </div>
 
-          {/* DESKTOP SEARCH */}
           <div style={styles.searchCard} className="desktop-search">
             <SearchBox {...props} />
           </div>
@@ -685,7 +675,7 @@ function HotelsPage(props) {
               <button onClick={() => props.setHotels([])}>Edit search</button>
             </div>
           ) : (
-            <div className="mobile-search-expanded mobile-search">
+            <div className="mobile-search-expanded">
               <div className="mobile-search-row">
                 <select value={props.country} onChange={(e) => { props.setCountry(e.target.value); props.setCity(""); props.setHotels([]); }}>
                   <option value="">Where to?</option>
@@ -1660,7 +1650,3 @@ const styles = {
 
 
 
-
-
-
-// Rollback to working state

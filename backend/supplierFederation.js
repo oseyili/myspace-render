@@ -646,4 +646,3 @@ module.exports = {
   normalizeSupplierHotel,
   mergeHotels
 };
-
