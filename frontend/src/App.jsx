@@ -613,8 +613,8 @@ function HotelsPage(props) {
   return (
     <>
       <style>{`
-        /* GLOBAL: Hide mobile search by default */
-        .mobile-search { display: none; }
+        /* GLOBAL: Hide ALL mobile elements on desktop */
+        .mobile-search, .mobile-search-collapsed, .mobile-search-expanded { display: none !important; }
 
         @media (max-width: 768px) {
           /* Hide desktop elements on mobile */
@@ -832,7 +832,7 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, selectHotelAndRefre
   const total = price * Math.max(1, Number(rooms || 1)) * Math.max(1, Number(nights || 1));
   const selected = hotelKey(hotel) === hotelKey(selectedHotel);
   const image = validHotelImage(hotel);
-  const stars = Number(hotel.categoryName?.match(/\d+/)?.[0] || hotel.starRating || 3); // Fallback to 3 if not found
+  const stars = Number(hotel.categoryName?.match(/\d+/)?.[0] || hotel.starRating || 3);
   
   // Generate mock reviews for visual parity
   const reviewScore = (Math.random() * (9.8 - 7.5) + 7.5).toFixed(1);
@@ -841,21 +841,21 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, selectHotelAndRefre
 
   return (
     <article style={selected ? styles.hotelCardSelected : styles.hotelCard}>
-      <div style={{ display: "flex", gap: "16px", padding: "16px", flexDirection: window.innerWidth <= 768 ? "column" : "row" }}>
+      <div className="hotel-card-layout">
         
         {/* Image Section */}
-        <div style={{ width: window.innerWidth <= 768 ? "100%" : "240px", flexShrink: 0 }}>
+        <div className="hotel-card-image-container">
           {image ? (
-            <img src={image} alt={hotel.name} style={{ width: "100%", height: window.innerWidth <= 768 ? "180px" : "220px", objectFit: "cover", borderRadius: "12px" }} loading="lazy" />
+            <img src={image} alt={hotel.name || "Hotel"} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "12px" }} loading="lazy" />
           ) : (
-            <div style={{ width: "100%", height: window.innerWidth <= 768 ? "180px" : "220px", display: "flex", alignItems: "center", justifyContent: "center", background: "#e8eef8", borderRadius: "12px", fontWeight: 900, color: "#50678f" }}>Image unavailable</div>
+            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#e8eef8", borderRadius: "12px", fontWeight: 900, color: "#50678f", textAlign: "center", padding: "10px" }}>Image unavailable</div>
           )}
         </div>
 
         {/* Details Section */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", minWidth: 0 }}>
           <div>
-            <h3 style={{ fontSize: "22px", fontWeight: 900, color: "#0b1d51", margin: "0 0 4px 0" }}>{hotel.name}</h3>
+            <h3 style={{ fontSize: "20px", fontWeight: 900, color: "#0b1d51", margin: "0 0 4px 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{hotel.name || "Hotel"}</h3>
             <div style={{ display: "flex", gap: "4px", color: "#f1bf22", marginBottom: "8px" }}>
               {Array.from({ length: stars }).map((_, i) => <span key={i}>★</span>)}
             </div>
@@ -867,7 +867,6 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, selectHotelAndRefre
               {distance} km from centre
             </div>
 
-            {/* Tags */}
             <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
               <span style={{ background: "#ecfdf3", color: "#166534", padding: "4px 8px", borderRadius: "6px", fontSize: "12px", fontWeight: 900 }}>Free cancellation</span>
               <span style={{ background: "#f4f7fb", color: "#50678f", padding: "4px 8px", borderRadius: "6px", fontSize: "12px", fontWeight: 800 }}>No prepayment needed</span>
@@ -876,11 +875,6 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, selectHotelAndRefre
             <div style={{ fontSize: "14px", color: "#0b1d51", fontWeight: 800, marginBottom: "8px" }}>
               {hotelRoomName(selectedReadyHotel)}
             </div>
-            {hotel.facilities && (
-              <div style={{ fontSize: "13px", color: "#60708a", marginBottom: "12px" }}>
-                {hotel.facilities.slice(0, 4).join(" • ")}
-              </div>
-            )}
           </div>
 
           {/* Price and Rating Section */}
@@ -897,7 +891,7 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, selectHotelAndRefre
 
             <div style={{ textAlign: "right" }}>
               <div style={{ fontSize: "12px", color: "#60708a", fontWeight: 700 }}>{nights} night{nights === 1 ? "" : "s"}, {rooms} room{Number(rooms) === 1 ? "" : "s"}</div>
-              <div style={{ fontSize: "28px", fontWeight: 950, color: "#0b1d51" }}>{curr} {money(total)}</div>
+              <div style={{ fontSize: "26px", fontWeight: 950, color: "#0b1d51" }}>{curr} {money(total)}</div>
               <div style={{ fontSize: "13px", color: "#60708a", fontWeight: 700 }}>+ taxes and fees</div>
               
               <button style={{ marginTop: "10px", background: "#10b981", color: "#fff", border: "none", borderRadius: "8px", padding: "10px 20px", fontSize: "16px", fontWeight: 900, cursor: "pointer" }} onClick={() => selectHotelAndRefreshLiveRates ? selectHotelAndRefreshLiveRates(selectedReadyHotel) : setSelectedHotel(selectedReadyHotel)}>
@@ -909,7 +903,8 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, selectHotelAndRefre
       </div>
     </article>
   );
-}function BookingSummary(props) {
+}
+function BookingSummary(props) {
   return (
     <aside style={styles.summary}>
       <h2 style={styles.summaryTitle}>Booking Summary</h2>
@@ -1657,6 +1652,8 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
+
 
 
 
