@@ -597,68 +597,49 @@ function Header() {
 
 function HotelsPage(props) {
   const converted = convertCurrency(Number(props.fxAmount || 0), props.fxFrom, props.fxTo);
-  
-  // Detect mobile screens dynamically
-  const isMobile = window.innerWidth <= 768;
 
   return (
     <>
-      <section style={{ ...styles.hero, backgroundColor: isMobile ? "#0b1d51" : "linear-gradient(135deg,#ffffff,#eaf1ff)" }}>
+      <section style={styles.hero} className="hero">
         <div style={styles.heroInner}>
           
-          {/* DESKTOP ONLY: Marketing text and promise panel */}
-          {!isMobile && (
-            <div style={styles.heroGrid} className="heroGrid">
-              <div>
-                <div style={styles.pill}>Trusted accommodation for every journey</div>
-                <h1 style={styles.heroTitle}>{props.country ? `Find trusted hotels in ${props.country}` : "Find trusted hotels around the world"}</h1>
-                <p style={styles.heroText}>Search hotels, review full stay totals, compare value in the same destination and continue through a secure reservation journey.</p>
-              </div>
+          <div style={styles.heroGrid} className="heroGrid">
+            <div>
+              <div style={styles.pill}>Trusted accommodation for every journey</div>
+              <h1 style={styles.heroTitle}>{props.country ? `Find trusted hotels in ${props.country}` : "Find trusted hotels around the world"}</h1>
+              <p style={styles.heroText}>Search hotels, review full stay totals, compare value in the same destination and continue through a secure reservation journey.</p>
+            </div>
+            <div style={styles.promisePanel} className="promisePanel">
+              <h2 style={styles.panelMiniTitle}>Why guests choose MySpace Hotel</h2>
+              <div style={styles.promiseItem}>Clear stay totals before checkout</div>
+              <div style={styles.promiseItem}>Hotel comparison for better value</div>
+              <div style={styles.promiseItem}>Destination support before travel</div>
+              <div style={styles.promiseItem}>Customer-friendly booking journey</div>
+            </div>
+          </div>
+
           <div style={styles.searchCard} className="searchCard">
             <SearchBox {...props} />
           </div>
-                <h2 style={styles.panelMiniTitle}>Why guests choose MySpace Hotel</h2>
-                <div style={styles.promiseItem}>Clear stay totals before checkout</div>
-                <div style={styles.promiseItem}>Hotel comparison for better value</div>
-                <div style={styles.promiseItem}>Destination support before travel</div>
-                <div style={styles.promiseItem}>Customer-friendly booking journey</div>
-              </div>
+
+          <div style={styles.converterCard} className="converterCard">
+            <div>
+              <div style={styles.converterTitle}>Currency Converter</div>
+              <div style={styles.muted}>Indicative conversion for planning. Final payment currency is confirmed before checkout.</div>
             </div>
-          )}
-
-          {/* SEARCH BOX: Always visible, takes priority on mobile */}
-          <div style={{ 
-            ...styles.searchCard, 
-            marginTop: isMobile ? "0px" : "34px", 
-            padding: isMobile ? "15px" : "24px",
-            boxShadow: isMobile ? "none" : "0 10px 30px rgba(0,0,0,.08)",
-            background: isMobile ? "transparent" : "#fff"
-          }}>
-            <SearchBox {...props} />
+            <input style={styles.input} type="number" min="1" value={props.fxAmount} onChange={(e) => props.setFxAmount(e.target.value)} />
+            <select style={styles.input} value={props.fxFrom} onChange={(e) => props.setFxFrom(e.target.value)}>{Object.keys(FX).map((x) => <option key={x}>{x}</option>)}</select>
+            <select style={styles.input} value={props.fxTo} onChange={(e) => props.setFxTo(e.target.value)}>{Object.keys(FX).map((x) => <option key={x}>{x}</option>)}</select>
+            <div style={styles.convertResult}>{props.fxTo} {money(converted)}</div>
           </div>
-
-          {/* DESKTOP ONLY: Converter and metrics */}
-          {!isMobile && (
-            <>
-              <div style={styles.converterCard} className="converterCard">
-                <div>
-                  <div style={styles.converterTitle}>Currency Converter</div>
-                  <div style={styles.muted}>Indicative conversion for planning. Final payment currency is confirmed before checkout.</div>
-                </div>
-                <input style={styles.input} type="number" min="1" value={props.fxAmount} onChange={(e) => props.setFxAmount(e.target.value)} />
-                <select style={styles.input} value={props.fxFrom} onChange={(e) => props.setFxFrom(e.target.value)}>{Object.keys(FX).map((x) => <option key={x}>{x}</option>)}</select>
-                <select style={styles.input} value={props.fxTo} onChange={(e) => props.setFxTo(e.target.value)}>{Object.keys(FX).map((x) => <option key={x}>{x}</option>)}</select>
-                <div style={styles.convertResult}>{props.fxTo} {money(converted)}</div>
-              </div>
-              <div style={styles.metrics} className="metrics">
-                <Metric big="Clear" small="Stay totals" />
-                <Metric big="Compare" small="Hotel value" />
-                <Metric big="Protect" small="Insurance options" />
-                <Metric big="Transfer" small="Airport support" />
-                <Metric big="Explore" small="Travel experiences" />
-              </div>
-            </>
-          )}
+          
+          <div style={styles.metrics} className="metrics">
+            <Metric big="Clear" small="Stay totals" />
+            <Metric big="Compare" small="Hotel value" />
+            <Metric big="Protect" small="Insurance options" />
+            <Metric big="Transfer" small="Airport support" />
+            <Metric big="Explore" small="Travel experiences" />
+          </div>
         </div>
       </section>
       {props.notice ? <div style={styles.notice}>{props.notice}</div> : null}
