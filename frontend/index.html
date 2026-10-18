@@ -25,14 +25,15 @@
         .nav { display: none !important; } /* Hide nav links on mobile */
       }
     </style>
-    <!-- Structured Data for Brand Defense -->
+    
+    <!-- Structured Data for Travel Agency (Booking Platform) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Hotel",
-      "name": "MySpace Hotel London",
-      "alternateName": "MySpace Hotel",
-      "description": "MySpace Hotel is a trusted accommodation platform offering hotels, resorts, and serviced apartments with worldwide travel support.",
+      "@type": "TravelAgency",
+      "name": "MySpace Hotel",
+      "alternateName": "MySpace Hotel London",
+      "description": "MySpace Hotel is a UK-based online travel agency and booking platform offering hotels, resorts, and serviced apartments worldwide with secure reservation support.",
       "url": "https://www.myspace-hotel.com",
       "telephone": "+447598604921",
       "email": "info@myspace-hotel.com",
@@ -43,21 +44,22 @@
         "postalCode": "E14 8DE",
         "addressCountry": "GB"
       },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": 51.5074,
-        "longitude": -0.0218
+      "areaServed": {
+        "@type": "Country",
+        "name": "United Kingdom"
       },
       "sameAs": [
         "https://www.tripadvisor.co.uk/",
         "https://www.facebook.com/",
         "https://www.instagram.com/"
       ],
-      "priceRange": "££",
-      "starRating": {
-        "@type": "Rating",
-        "ratingValue": "4"
-      }
+      "knowsAbout": [
+        "Hotel Booking",
+        "Travel Accommodation",
+        "Serviced Apartments",
+        "Resorts",
+        "Worldwide Travel Support"
+      ]
     }
     </script>
 </head>
@@ -66,4 +68,5 @@
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
+
 
