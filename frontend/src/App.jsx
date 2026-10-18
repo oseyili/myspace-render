@@ -483,7 +483,11 @@ export default function App() {
     }
   }
 
+  const [visibleCount, setVisibleCount] = useState(20);
+  const loadMoreHotels = () => setVisibleCount(prev => prev + 20);
+
   const appProps = {
+    visibleCount, loadMoreHotels,
     countries, cities, country, city, checkIn, checkOut, guests, rooms, currency, propertyType, stayType,
     searched, hotels, selectedHotel, notice, loading, paying, nights, selectedCurrency, selectedRoomCode,
     selectedRoomName, selectedRateSourceId, selectedRateSourceTimestamp, liveRateLoading, liveRateNotice,
@@ -603,7 +607,7 @@ function HotelsPage(props) {
     <>
       <style>{`
         @media (max-width: 768px) {
-          .heroGrid, .promisePanel, .converterCard, .metrics { display: none !important; }
+          .heroGrid, .promisePanel, .converterCard, .metrics, .mobile-hide { display: none !important; }
           .hero { background: #0b1d51 !important; padding: 20px 15px !important; }
           .desktop-search { display: none !important; }
           
@@ -695,19 +699,32 @@ function HotelsPage(props) {
       {props.notice ? <div style={styles.notice}>{props.notice}</div> : null}
       <section style={styles.contentGrid}>
         <main>
-          <h2 id="hotel-results" style={styles.title}>Available stays nearby</h2>
-          <p style={styles.sectionText}>Select a hotel to refresh the booking summary, comparison box, travel support and alternative hotel options immediately.</p>
+          <h2 id="hotel-results" style={styles.title} className="mobile-hide">Available stays nearby</h2>
+          <p style={styles.sectionText} className="mobile-hide">Select a hotel to refresh the booking summary, comparison box, travel support and alternative hotel options immediately.</p>
+          
           {props.loading ? <div style={styles.empty}>Finding suitable accommodation for your destination...</div> : null}
+          
           {!props.loading && props.hotels.length === 0 ? (
             <div style={styles.empty}>
               {props.searched ? "No live hotel availability was found for this search. Please try different dates." : "Choose a country, city and travel dates to discover available accommodation."}
             </div>
           ) : null}
+          
           <div style={styles.hotelGrid}>
-            {customerVisibleHotels(props.hotels, props.propertyType).map((hotel, idx) => (
+            {customerVisibleHotels(props.hotels, props.propertyType).slice(0, props.visibleCount || 80).map((hotel, idx) => (
               <HotelCard key={hotelKey(hotel) || idx} hotel={hotel} idx={idx} {...props} />
             ))}
           </div>
+
+          {/* LOAD MORE BUTTON */}
+          {!props.loading && props.hotels.length > (props.visibleCount || 80) ? (
+            <div style={{ textAlign: "center", marginTop: 20, marginBottom: 20 }}>
+              <button style={{ padding: "12px 24px", background: "#fff", border: "1px solid #2750db", color: "#2750db", borderRadius: 8, fontWeight: "bold", cursor: "pointer" }} onClick={props.loadMoreHotels}>
+                Load more results
+              </button>
+            </div>
+          ) : null}
+
           <ComparePanel {...props} />
           <AlternativeHotels {...props} />
           <RevenueAddOns {...props} />
@@ -792,7 +809,7 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, selectHotelAndRefre
 
   return (
     <article style={selected ? styles.hotelCardSelected : styles.hotelCard}>
-      {image ? (<img src={image} alt={hotel.name || "Hotel"} style={styles.hotelImage} />) : (<div style={styles.noImage}>Verified image unavailable</div>)}
+      {image ? (<img src={image} alt={hotel.name || "Hotel"} style={styles.hotelImage} loading="lazy" />) : (<div style={styles.noImage}>Verified image unavailable</div>)}
       <div style={styles.hotelBody}>
         <div style={styles.greenBadge}>{selected ? "Selected Property" : "Recommended Property"}</div>
         <div style={styles.small}>Live source: {hotel.supplier_name || hotel.supplierLabel || hotel.supplier_code || "Supplier"}</div>
