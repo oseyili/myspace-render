@@ -518,25 +518,15 @@ export default function App() {
   return (
     <div style={styles.page}>
       <style>{`
-        @media (max-width: 768px) {
-          /* Hide the bulky text and white boxes */
-          .heroGrid, .promisePanel, .converterCard, .metrics {
-            display: none !important;
-          }
-          /* Force the background to dark blue */
-          .hero { background: #0b1d51 !important; }
-          /* Make the search box flat and stack the inputs */
-          .searchCard {
-            margin-top: 0 !important;
-            box-shadow: none !important;
-            background: transparent !important;
-            padding: 0 !important;
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 10px !important;
-          }
+        /* GLOBAL: Hide ALL mobile search elements by default */
+        .mobile-search, .mobile-search-collapsed, .mobile-search-expanded { display: none !important; }
+        
+        /* FORCE DESKTOP LAYOUT */
+        @media (min-width: 769px) {
+          .hotel-card-layout { display: flex !important; flex-direction: row !important; gap: 16px !important; }
+          .hotel-card-image-container { width: 240px !important; min-width: 240px !important; height: 220px !important; flex-shrink: 0 !important; }
         }
-      `}</style>
+      }</style>
       <Header />
       {route === "hotels" && <HotelsPage {...appProps} />}
       {route === "compare" && <ComparePortal {...appProps} />}
@@ -747,22 +737,12 @@ function HotelsPage(props) {
           ) : null}
           
           <div style={styles.hotelGrid}>
-            {customerVisibleHotels(props.hotels, props.propertyType).slice(0, props.visibleCount || 10).map((hotel, idx) => (
+            {customerVisibleHotels(props.hotels, props.propertyType).map((hotel, idx) => (
               <HotelCard key={hotelKey(hotel) || idx} hotel={hotel} idx={idx} {...props} />
             ))}
           </div>
 
-          {/* LOAD MORE BUTTON - Always show on mobile if we have results */}
-          {!props.loading && props.hotels.length > 0 ? (
-            <div style={{ textAlign: "center", marginTop: 20, marginBottom: 20 }}>
-              <button 
-                style={{ padding: "12px 24px", background: "#fff", border: "1px solid #2750db", color: "#2750db", borderRadius: 8, fontWeight: "bold", cursor: "pointer" }} 
-                onClick={props.loadMoreHotels}
-              >
-                Load more results
-              </button>
-            </div>
-          ) : null}
+
 
           <ComparePanel {...props} />
           <AlternativeHotels {...props} />
@@ -1665,6 +1645,8 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
+
 
 
 
