@@ -606,6 +606,11 @@ function HotelsPage(props) {
           .heroGrid, .promisePanel, .converterCard, .metrics { display: none !important; }
           .hero { background: #0b1d51 !important; padding: 20px 15px !important; }
           .desktop-search { display: none !important; }
+          
+          /* Hide the bulky nav menu and tighten the header */
+          header nav { display: none !important; }
+          header { padding: 10px 15px !important; flex-direction: column !important; align-items: flex-start !important; }
+          
           .mobile-search { display: flex !important; flex-direction: column; gap: 10px; background: #fff; padding: 15px; border-radius: 12px; }
           .mobile-search input, .mobile-search select { padding: 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; width: 100%; box-sizing: border-box; }
           .mobile-search-btn { background: #2750db; color: #fff; font-size: 18px; font-weight: bold; padding: 16px; border-radius: 8px; border: none; margin-top: 10px; }
