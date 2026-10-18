@@ -613,27 +613,37 @@ function HotelsPage(props) {
     <>
       <style>{`
         @media (max-width: 768px) {
+          /* 1. Hide Desktop & Unnecessary Elements */
           .heroGrid, .promisePanel, .converterCard, .metrics, .mobile-hide { display: none !important; }
           .mobile-hide-summary { display: none !important; }
           .summary-visible-mobile { display: block !important; }
+          
+          /* 2. Hide Nav Menu */
           header nav { display: none !important; }
-          header { padding: 10px 15px !important; flex-direction: column !important; align-items: flex-start !important; }
-          .hero { background: #0b1d51 !important; padding: 10px !important; min-height: auto !important; }
+          header { padding: 10px 15px !important; flex-direction: column !important; align-items: flex-start !important; border-bottom: none !important; }
+          
+          /* 3. Expand White Box to cover blue area */
+          .hero { background: #ffffff !important; padding: 0 !important; min-height: auto !important; }
           .heroInner { padding: 0 !important; }
           .desktop-search { display: none !important; }
-          .mobile-search { display: flex !important; flex-direction: column; gap: 8px; background: #fff; padding: 15px; border-radius: 12px; margin-top: 10px; }
-          .mobile-search input, .mobile-search select { padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; width: 100%; box-sizing: border-box; margin: 0; }
+          
+          /* 4. Perfect Mobile Search Box */
+          .mobile-search { display: flex !important; flex-direction: column; gap: 8px; background: #fff; padding: 15px; border-radius: 0; margin-top: 0; }
+          .mobile-search input, .mobile-search select { padding: 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; width: 100%; box-sizing: border-box; margin: 0; }
           .mobile-search-row { display: flex; gap: 8px; width: 100%; }
           .mobile-search-row > * { flex: 1; min-width: 0; }
           .mobile-search-btn { background: #2750db; color: #fff; font-size: 16px; font-weight: bold; padding: 14px; border-radius: 8px; border: none; width: 100%; margin-top: 4px; }
+          
+          /* 5. Remove gaps so results show instantly */
           .contentGrid { padding: 10px !important; margin-top: 0 !important; display: block !important; }
-          #hotel-results { margin-top: 10px !important; font-size: 24px !important; margin-bottom: 10px !important; }
+          #hotel-results { margin-top: 0 !important; font-size: 22px !important; margin-bottom: 10px !important; }
         }
         .mobile-search { display: none; }
       `}</style>
 
       <section style={styles.hero} className="hero">
         <div style={styles.heroInner}>
+          
           <div style={styles.heroGrid} className="heroGrid">
             <div>
               <div style={styles.pill}>Trusted accommodation for every journey</div>
@@ -649,10 +659,12 @@ function HotelsPage(props) {
             </div>
           </div>
 
+          {/* DESKTOP SEARCH */}
           <div style={styles.searchCard} className="desktop-search">
             <SearchBox {...props} />
           </div>
 
+          {/* MOBILE SEARCH - Booking.com Style */}
           <div className="mobile-search">
             <div className="mobile-search-row">
               <select value={props.country} onChange={(e) => { props.setCountry(e.target.value); props.setCity(""); props.setHotels([]); }}>
@@ -686,28 +698,11 @@ function HotelsPage(props) {
               {props.loading ? "Searching..." : "Search"}
             </button>
           </div>
-
-          <div style={styles.converterCard} className="converterCard">
-            <div>
-              <div style={styles.converterTitle}>Currency Converter</div>
-              <div style={styles.muted}>Indicative conversion for planning. Final payment currency is confirmed before checkout.</div>
-            </div>
-            <input style={styles.input} type="number" min="1" value={props.fxAmount} onChange={(e) => props.setFxAmount(e.target.value)} />
-            <select style={styles.input} value={props.fxFrom} onChange={(e) => props.setFxFrom(e.target.value)}>{Object.keys(FX).map((x) => <option key={x}>{x}</option>)}</select>
-            <select style={styles.input} value={props.fxTo} onChange={(e) => props.setFxTo(e.target.value)}>{Object.keys(FX).map((x) => <option key={x}>{x}</option>)}</select>
-            <div style={styles.convertResult}>{props.fxTo} {money(converted)}</div>
-          </div>
-          
-          <div style={styles.metrics} className="metrics">
-            <Metric big="Clear" small="Stay totals" />
-            <Metric big="Compare" small="Hotel value" />
-            <Metric big="Protect" small="Insurance options" />
-            <Metric big="Transfer" small="Airport support" />
-            <Metric big="Explore" small="Travel experiences" />
-          </div>
         </div>
       </section>
+      
       {props.notice ? <div style={styles.notice}>{props.notice}</div> : null}
+      
       <section style={styles.contentGrid}>
         <main>
           <h2 id="hotel-results" style={styles.title} className="mobile-hide">Available stays nearby</h2>
@@ -715,9 +710,9 @@ function HotelsPage(props) {
           
           {props.loading ? <div style={styles.empty}>Finding suitable accommodation for your destination...</div> : null}
           
-          {!props.loading && props.hotels.length === 0 ? (
+          {!props.loading && props.hotels.length === 0 && props.searched ? (
             <div style={styles.empty}>
-              {props.searched ? "No live hotel availability was found for this search. Please try different dates." : "Choose a country, city and travel dates to discover available accommodation."}
+              No live hotel availability was found for this search. Please try different dates.
             </div>
           ) : null}
           
@@ -1591,4 +1586,5 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
