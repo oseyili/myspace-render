@@ -305,21 +305,28 @@ export default function App() {
 
       const endpoints = [
         `${API_BASE}/api/federated-search?${params.toString()}`,
-        `${API_BASE}/api/hotels/search?${params.toString()}`,
-        // removed: fast-hotel-search
+        `${API_BASE}/api/hotels/search?${params.toString()}`
       ];
 
       let collected = [];
       let lastError = null;
 
-      for (const url of endpoints) {
-        try {
-          const res = await fetch(url, { cache: "no-store" });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data?.message || `Hotel search failed ${res.status}`);
-          const list = Array.isArray(data?.hotels) ? data.hotels : Array.isArray(data?.allHotels) ? data.allHotels : Array.isArray(data) ? data : [];
-          if (list.length) { collected = list; break; }
-        } catch (error) { lastError = error; }
+      // RACE THE ENDPOINTS: Take the first one that returns data, don't wait for the slow ones
+      try {
+        const results = await Promise.any(
+          endpoints.map(url => 
+            fetch(url, { cache: "no-store" })
+              .then(res => res.ok ? res.json() : Promise.reject(new Error(`Status ${res.status}`)))
+              .then(data => {
+                const list = Array.isArray(data?.hotels) ? data.hotels : Array.isArray(data?.allHotels) ? data.allHotels : Array.isArray(data) ? data : [];
+                if (list.length === 0) throw new Error("Empty response");
+                return list;
+              })
+          )
+        );
+        collected = results;
+      } catch (error) {
+        lastError = error;
       }
 
       const wantedCountry = String(country).trim().toLowerCase();
@@ -608,6 +615,9 @@ function HotelsPage(props) {
       <style>{`
         @media (max-width: 768px) {
           .heroGrid, .promisePanel, .converterCard, .metrics, .mobile-hide { display: none !important; }
+          /* Hide booking summary on mobile until a hotel is selected */
+          .mobile-hide-summary { display: none !important; }
+          .summary-visible-mobile { display: block !important; }
           .hero { background: #0b1d51 !important; padding: 20px 15px !important; }
           .desktop-search { display: none !important; }
           
@@ -729,7 +739,9 @@ function HotelsPage(props) {
           <AlternativeHotels {...props} />
           <RevenueAddOns {...props} />
         </main>
-        <BookingSummary {...props} />
+        <div className={props.selectedHotel ? "summary-visible-mobile" : "mobile-hide-summary"}>
+          <BookingSummary {...props} />
+        </div>
       </section>
     </>
   );
