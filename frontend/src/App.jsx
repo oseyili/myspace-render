@@ -597,9 +597,22 @@ function Header() {
 
 function HotelsPage(props) {
   const converted = convertCurrency(Number(props.fxAmount || 0), props.fxFrom, props.fxTo);
+  const isMobile = window.innerWidth <= 768;
 
   return (
     <>
+      <style>{`
+        @media (max-width: 768px) {
+          .heroGrid, .promisePanel, .converterCard, .metrics { display: none !important; }
+          .hero { background: #0b1d51 !important; padding: 20px 15px !important; }
+          .desktop-search { display: none !important; }
+          .mobile-search { display: flex !important; flex-direction: column; gap: 10px; background: #fff; padding: 15px; border-radius: 12px; }
+          .mobile-search input, .mobile-search select { padding: 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; width: 100%; box-sizing: border-box; }
+          .mobile-search-btn { background: #2750db; color: #fff; font-size: 18px; font-weight: bold; padding: 16px; border-radius: 8px; border: none; margin-top: 10px; }
+        }
+        .mobile-search { display: none; }
+      `}</style>
+
       <section style={styles.hero} className="hero">
         <div style={styles.heroInner}>
           
@@ -618,8 +631,40 @@ function HotelsPage(props) {
             </div>
           </div>
 
-          <div style={styles.searchCard} className="searchCard">
+          {/* DESKTOP SEARCH */}
+          <div style={styles.searchCard} className="desktop-search">
             <SearchBox {...props} />
+          </div>
+
+          {/* MOBILE SEARCH - Booking.com Style */}
+          <div className="mobile-search">
+            <select value={props.country} onChange={(e) => { props.setCountry(e.target.value); props.setCity(""); props.setHotels([]); }}>
+              <option value="">Where are you going?</option>
+              {props.countries.map((item) => (<option key={item.country} value={item.country}>{item.country}</option>))}
+            </select>
+
+            <select value={props.city} disabled={!props.country} onChange={(e) => props.setCity(e.target.value)}>
+              <option value="">{props.country ? "Select city" : "Select country first"}</option>
+              {((props.countries.find((x) => x.country === props.country)?.cities) || []).map((item) => (
+                <option key={String(item.city || item.name || item.label || item)} value={String(item.city || item.name || item.label || item)}>
+                  {String(item.city || item.name || item.label || item)}
+                </option>
+              ))}
+            </select>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <input type="date" value={props.checkIn} onChange={(e) => props.setCheckIn(e.target.value)} style={{ flex: 1 }} />
+              <input type="date" value={props.checkOut} onChange={(e) => props.setCheckOut(e.target.value)} style={{ flex: 1 }} />
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <input type="number" min="1" placeholder="Guests" value={props.guests} onChange={(e) => props.setGuests(e.target.value)} style={{ flex: 1 }} />
+              <input type="number" min="1" placeholder="Rooms" value={props.rooms} onChange={(e) => props.setRooms(e.target.value)} style={{ flex: 1 }} />
+            </div>
+
+            <button className="mobile-search-btn" onClick={props.searchHotels}>
+              {props.loading ? "Searching..." : "Search"}
+            </button>
           </div>
 
           <div style={styles.converterCard} className="converterCard">
