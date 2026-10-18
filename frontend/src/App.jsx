@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import ExperiencePage from "./ExperiencePage";
 
 function myspaceHotelOnlyResult(item) {
@@ -613,25 +613,19 @@ function HotelsPage(props) {
     <>
       <style>{`
         @media (max-width: 768px) {
-          /* 1. Hide unnecessary sections */
           .heroGrid, .promisePanel, .converterCard, .metrics, .mobile-hide { display: none !important; }
-          
-          /* 2. Hide nav menu */
+          .mobile-hide-summary { display: none !important; }
+          .summary-visible-mobile { display: block !important; }
           header nav { display: none !important; }
           header { padding: 10px 15px !important; flex-direction: column !important; align-items: flex-start !important; }
-          
-          /* 3. Tighten the layout */
           .hero { background: #0b1d51 !important; padding: 10px !important; min-height: auto !important; }
           .heroInner { padding: 0 !important; }
-          
-          /* 4. Perfect mobile search box */
-          .mobile-search { display: flex !important; flex-direction: column; gap: 8px; background: #fff; padding: 12px; border-radius: 12px; margin-top: 10px; }
+          .desktop-search { display: none !important; }
+          .mobile-search { display: flex !important; flex-direction: column; gap: 8px; background: #fff; padding: 15px; border-radius: 12px; margin-top: 10px; }
           .mobile-search input, .mobile-search select { padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; width: 100%; box-sizing: border-box; margin: 0; }
           .mobile-search-row { display: flex; gap: 8px; width: 100%; }
           .mobile-search-row > * { flex: 1; min-width: 0; }
           .mobile-search-btn { background: #2750db; color: #fff; font-size: 16px; font-weight: bold; padding: 14px; border-radius: 8px; border: none; width: 100%; margin-top: 4px; }
-          
-          /* 5. Pull results up immediately */
           .contentGrid { padding: 10px !important; margin-top: 0 !important; display: block !important; }
           #hotel-results { margin-top: 10px !important; font-size: 24px !important; margin-bottom: 10px !important; }
         }
@@ -640,7 +634,6 @@ function HotelsPage(props) {
 
       <section style={styles.hero} className="hero">
         <div style={styles.heroInner}>
-          
           <div style={styles.heroGrid} className="heroGrid">
             <div>
               <div style={styles.pill}>Trusted accommodation for every journey</div>
@@ -660,7 +653,6 @@ function HotelsPage(props) {
             <SearchBox {...props} />
           </div>
 
-          {/* MOBILE SEARCH - Booking.com Style */}
           <div className="mobile-search">
             <div className="mobile-search-row">
               <select value={props.country} onChange={(e) => { props.setCountry(e.target.value); props.setCity(""); props.setHotels([]); }}>
@@ -735,7 +727,6 @@ function HotelsPage(props) {
             ))}
           </div>
 
-          {/* LOAD MORE BUTTON */}
           {!props.loading && props.hotels.length > (props.visibleCount || 80) ? (
             <div style={{ textAlign: "center", marginTop: 20, marginBottom: 20 }}>
               <button style={{ padding: "12px 24px", background: "#fff", border: "1px solid #2750db", color: "#2750db", borderRadius: 8, fontWeight: "bold", cursor: "pointer" }} onClick={props.loadMoreHotels}>
@@ -754,9 +745,7 @@ function HotelsPage(props) {
       </section>
     </>
   );
-}
-
-function SearchBox(props) {
+}function SearchBox(props) {
   return (
     <>
       <Field label="Property Type">
