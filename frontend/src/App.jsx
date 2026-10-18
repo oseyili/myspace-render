@@ -300,9 +300,10 @@ export default function App() {
       const params = new URLSearchParams({
         country, city, checkIn, checkOut, check_in: checkIn, check_out: checkOut,
         guests: String(guests), adults: String(guests), rooms: String(rooms),
-        currency, propertyType, property_type: propertyType, limit: "80",
+        currency, propertyType, property_type: propertyType, limit: "10", // ONLY ASK FOR 10 HOTELS
       });
 
+      // Put the fastest endpoint first. We only need one to respond.
       const endpoints = [
         `${API_BASE}/api/hotels/search?${params.toString()}`,
         `${API_BASE}/api/federated-search?${params.toString()}`
@@ -320,7 +321,7 @@ export default function App() {
               .then(data => {
                 const list = Array.isArray(data?.hotels) ? data.hotels : Array.isArray(data?.allHotels) ? data.allHotels : Array.isArray(data) ? data : [];
                 if (list.length === 0) throw new Error("Empty response");
-                return list;
+                return list.slice(0, 10); // DOUBLE CHECK: Only keep 10 in case the API ignored the limit
               })
           )
         );
@@ -1647,6 +1648,7 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
 
 
 
