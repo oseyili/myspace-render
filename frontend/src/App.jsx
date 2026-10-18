@@ -304,8 +304,8 @@ export default function App() {
       });
 
       const endpoints = [
-        `${API_BASE}/api/federated-search?${params.toString()}`,
-        `${API_BASE}/api/hotels/search?${params.toString()}`
+        `${API_BASE}/api/hotels/search?${params.toString()}`,
+        `${API_BASE}/api/federated-search?${params.toString()}`
       ];
 
       let collected = [];
@@ -490,8 +490,8 @@ export default function App() {
     }
   }
 
-  const [visibleCount, setVisibleCount] = useState(20);
-  const loadMoreHotels = () => setVisibleCount(prev => prev + 20);
+  const [visibleCount, setVisibleCount] = useState(10);
+  const loadMoreHotels = () => setVisibleCount(prev => prev + 10);
 
   const appProps = {
     visibleCount, loadMoreHotels,
@@ -722,12 +722,12 @@ function HotelsPage(props) {
           ) : null}
           
           <div style={styles.hotelGrid}>
-            {customerVisibleHotels(props.hotels, props.propertyType).slice(0, props.visibleCount || 80).map((hotel, idx) => (
+            {customerVisibleHotels(props.hotels, props.propertyType).slice(0, props.visibleCount || 10).map((hotel, idx) => (
               <HotelCard key={hotelKey(hotel) || idx} hotel={hotel} idx={idx} {...props} />
             ))}
           </div>
 
-          {!props.loading && props.hotels.length > (props.visibleCount || 80) ? (
+          {!props.loading && props.hotels.length > (props.visibleCount || 10) ? (
             <div style={{ textAlign: "center", marginTop: 20, marginBottom: 20 }}>
               <button style={{ padding: "12px 24px", background: "#fff", border: "1px solid #2750db", color: "#2750db", borderRadius: 8, fontWeight: "bold", cursor: "pointer" }} onClick={props.loadMoreHotels}>
                 Load more results
@@ -1591,3 +1591,4 @@ const styles = {
   footerTitle: { fontSize: 18, fontWeight: 950, marginBottom: 10 },
   footerText: { fontSize: 16, lineHeight: 1.6, color: "#dbe7ff", fontWeight: 650 },
 };
+
