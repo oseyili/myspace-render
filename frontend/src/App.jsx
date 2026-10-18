@@ -492,7 +492,16 @@ export default function App() {
   }
 
   const [visibleCount, setVisibleCount] = useState(10);
-  const loadMoreHotels = () => setVisibleCount(prev => prev + 10);
+  const loadMoreHotels = () => {
+    // If we have more hotels in state than currently visible, show them
+    if (hotels.length > visibleCount) {
+      setVisibleCount(prev => prev + 10);
+    } else {
+      // If we've shown all 10, we need to fetch more from the API.
+      // For now, this will just re-trigger the search to get the next batch (if the backend supports pagination)
+      searchHotels(); 
+    }
+  };
 
   const appProps = {
     visibleCount, loadMoreHotels,
@@ -743,9 +752,13 @@ function HotelsPage(props) {
             ))}
           </div>
 
-          {!props.loading && props.hotels.length > (props.visibleCount || 10) ? (
+          {/* LOAD MORE BUTTON - Always show on mobile if we have results */}
+          {!props.loading && props.hotels.length > 0 ? (
             <div style={{ textAlign: "center", marginTop: 20, marginBottom: 20 }}>
-              <button style={{ padding: "12px 24px", background: "#fff", border: "1px solid #2750db", color: "#2750db", borderRadius: 8, fontWeight: "bold", cursor: "pointer" }} onClick={props.loadMoreHotels}>
+              <button 
+                style={{ padding: "12px 24px", background: "#fff", border: "1px solid #2750db", color: "#2750db", borderRadius: 8, fontWeight: "bold", cursor: "pointer" }} 
+                onClick={props.loadMoreHotels}
+              >
                 Load more results
               </button>
             </div>
