@@ -496,6 +496,26 @@ export default function App() {
 
   return (
     <div style={styles.page}>
+      <style>{`
+        @media (max-width: 768px) {
+          /* Hide the bulky text and white boxes */
+          .heroGrid, .promisePanel, .converterCard, .metrics {
+            display: none !important;
+          }
+          /* Force the background to dark blue */
+          .hero { background: #0b1d51 !important; }
+          /* Make the search box flat and stack the inputs */
+          .searchCard {
+            margin-top: 0 !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+          }
+        }
+      `}</style>
       <Header />
       {route === "hotels" && <HotelsPage {...appProps} />}
       {route === "compare" && <ComparePortal {...appProps} />}
@@ -588,13 +608,15 @@ function HotelsPage(props) {
           
           {/* DESKTOP ONLY: Marketing text and promise panel */}
           {!isMobile && (
-            <div style={styles.heroGrid}>
+            <div style={styles.heroGrid} className="heroGrid">
               <div>
                 <div style={styles.pill}>Trusted accommodation for every journey</div>
                 <h1 style={styles.heroTitle}>{props.country ? `Find trusted hotels in ${props.country}` : "Find trusted hotels around the world"}</h1>
                 <p style={styles.heroText}>Search hotels, review full stay totals, compare value in the same destination and continue through a secure reservation journey.</p>
               </div>
-              <div style={styles.promisePanel}>
+          <div style={styles.searchCard} className="searchCard">
+            <SearchBox {...props} />
+          </div>
                 <h2 style={styles.panelMiniTitle}>Why guests choose MySpace Hotel</h2>
                 <div style={styles.promiseItem}>Clear stay totals before checkout</div>
                 <div style={styles.promiseItem}>Hotel comparison for better value</div>
@@ -618,7 +640,7 @@ function HotelsPage(props) {
           {/* DESKTOP ONLY: Converter and metrics */}
           {!isMobile && (
             <>
-              <div style={styles.converterCard}>
+              <div style={styles.converterCard} className="converterCard">
                 <div>
                   <div style={styles.converterTitle}>Currency Converter</div>
                   <div style={styles.muted}>Indicative conversion for planning. Final payment currency is confirmed before checkout.</div>
@@ -628,7 +650,7 @@ function HotelsPage(props) {
                 <select style={styles.input} value={props.fxTo} onChange={(e) => props.setFxTo(e.target.value)}>{Object.keys(FX).map((x) => <option key={x}>{x}</option>)}</select>
                 <div style={styles.convertResult}>{props.fxTo} {money(converted)}</div>
               </div>
-              <div style={styles.metrics}>
+              <div style={styles.metrics} className="metrics">
                 <Metric big="Clear" small="Stay totals" />
                 <Metric big="Compare" small="Hotel value" />
                 <Metric big="Protect" small="Insurance options" />
