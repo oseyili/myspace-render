@@ -647,5 +647,3 @@ module.exports = {
   mergeHotels
 };
 
-
-
