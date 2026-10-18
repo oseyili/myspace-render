@@ -85,12 +85,35 @@
         }
       }
     </style>
+    <style id="hotel-card-grid-fix">
+      /* Force the hotel card to be a proper row on desktop */
+      @media (min-width: 769px) {
+        .hotel-card-layout {
+          display: flex !important;
+          flex-direction: row !important;
+          gap: 16px !important;
+        }
+        .hotel-card-image-container {
+          width: 240px !important;
+          min-width: 240px !important;
+          height: 220px !important;
+          flex-shrink: 0 !important;
+        }
+      }
+      
+      /* Clean up the details section so it doesn't overflow */
+      .hotel-card-layout > div:last-child {
+        min-width: 0 !important;
+        flex: 1 !important;
+      }
+    </style>
 </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
+
 
 
 
