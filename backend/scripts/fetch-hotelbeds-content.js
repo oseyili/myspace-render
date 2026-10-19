@@ -96,10 +96,10 @@ async function main() {
 
   const outPath = path.join(outDir, "hotelbeds-content-cache.json");
   const quotaPath = path.join(outDir, "hotelbeds-quota.json");
+  const chunksDir = path.join(outDir, "chunks");
 
   // 1. Load Cache (Merge all chunk files)
   let cache = {};
-  const chunksDir = path.join(outDir, "chunks");
   
   if (fs.existsSync(chunksDir)) {
     const chunkFiles = fs.readdirSync(chunksDir).filter(f => f.endsWith(".json"));
@@ -112,11 +112,10 @@ async function main() {
       }
     }
   } else if (fs.existsSync(outPath)) {
-    // Fallback for the very first run if chunks don't exist yet
     try { cache = JSON.parse(fs.readFileSync(outPath, "utf8")); } catch { cache = {}; }
   }
 
-  // 2. Load Quota (Resets daily)
+  // 2. Load Quota
   let quota = { date: new Date().toISOString().slice(0, 10), calls: 0 };
   if (fs.existsSync(quotaPath)) {
     try { 
@@ -139,52 +138,28 @@ async function main() {
   let callsMadeThisRun = 0;
   let hotelsAdded = 0;
 
-  // 3. Sort Cities: Prioritize 0-count cities, then cities that haven't reached a multiple of 1000
-  const sortedCities = [...PRIORITY_CITIES].sort((a, b) => {
-    let aCount = 0; let bCount = 0;
-    for (const key in cache) {
-      if (cache[key].destinationCode === a) aCount++;
-      if (cache[key].destinationCode === b) bCount++;
-    }
-    // 0 count goes first
-    if (aCount === 0 && bCount > 0) return -1;
-    if (bCount === 0 && aCount > 0) return 1;
-    // If both have >0, prioritize the one that needs pagination (not a multiple of 1000)
-    const aNeedsPaginate = aCount % 1000 !== 0;
-    const bNeedsPaginate = bCount % 1000 !== 0;
-    if (aNeedsPaginate && !bNeedsPaginate) return -1;
-    if (!aNeedsPaginate && bNeedsPaginate) return 1;
-    return 0;
-  });
+  // 3. EXCLUSIVE LONDON LOOP
+  const destinationCode = "LON";
+  
+  // Find current London count to determine where to start
+  let existingLondonCount = 0;
+  for (const key in cache) {
+    if (cache[key].destinationCode === destinationCode) existingLondonCount++;
+  }
+  
+  let from = existingLondonCount + 1;
+  let to = existingLondonCount + 1000;
 
-  for (const destinationCode of sortedCities) {
-    if (callsLeft <= 0) {
-      console.log("\nHit daily quota limit (" + MAX_DAILY_QUOTA + "). Stopping. Run again tomorrow.");
-      break;
-    }
+  console.log(`Starting fetch for London. Current count: ${existingLondonCount}`);
 
-    let existingCount = 0;
-    for (const key in cache) {
-      if (cache[key].destinationCode === destinationCode) existingCount++;
-    }
-
-    // If existingCount is exactly a multiple of 1000 (e.g., 0, 1000, 2000), we fetch the next batch.
-    // If it's NOT a multiple (e.g., 250), it means that city is fully exhausted. Skip it.
-    if (existingCount > 0 && existingCount % 1000 !== 0) {
-        console.log("\n>>> Skipping " + destinationCode + " (Fully cached: " + existingCount + " hotels)");
-        continue;
-    }
-
-    const from = existingCount + 1;
-    const to = existingCount + 1000;
-
+  while (callsLeft > 0) {
     console.log("\n>>> Fetching " + destinationCode + " (Range " + from + " to " + to + ")...");
     try {
       const result = await fetchHotelsByDestination(destinationCode, from, to);
       callsMadeThisRun++;
       callsLeft--;
       
-      // Save quota state immediately
+      // Save quota state
       quota.calls++;
       fs.writeFileSync(quotaPath, JSON.stringify(quota));
 
@@ -196,26 +171,30 @@ async function main() {
 
       console.log("  " + destinationCode + ": " + result.hotels.length + " hotels returned.");
       
-      // If 0 returned, it means we reached the end of this city's list
+      // If 0 returned, we have reached the end of London!
       if (result.hotels.length === 0) {
-          console.log("  Finished pagination for " + destinationCode + ".");
+          console.log("  Finished pagination for London. All available hotels fetched.");
+          break;
       }
 
+      // Add new hotels to cache (DO NOT OVERWRITE EXISTING)
       for (const h of result.hotels) {
         if (!h.code) continue;
         const key = String(h.code);
-        if (cache[key]) continue;
+        if (cache[key]) continue; // Skip if we already have it
         cache[key] = extractHotelDetails(h);
         hotelsAdded++;
       }
       
-      // Create chunks directory if it doesn't exist
+      // Save to chunks
       if (!fs.existsSync(chunksDir)) fs.mkdirSync(chunksDir, { recursive: true });
-      
-      // Split into chunks of 10,000 hotels (approx 20MB each)
       const allCodes = Object.keys(cache);
       const CHUNK_SIZE = 10000;
       let chunkIndex = 1;
+
+      // Clear old chunks so we don't have duplicates
+      const oldChunks = fs.readdirSync(chunksDir);
+      for (const old of oldChunks) fs.unlinkSync(path.join(chunksDir, old));
 
       for (let i = 0; i < allCodes.length; i += CHUNK_SIZE) {
         const chunkCodes = allCodes.slice(i, i + CHUNK_SIZE);
@@ -227,7 +206,11 @@ async function main() {
         chunkIndex++;
       }
       console.log("  Saved. Total cached: " + allCodes.length + " hotels in " + (chunkIndex - 1) + " chunks.");
-      
+
+      // Advance pagination for the next loop iteration
+      from += result.hotels.length;
+      to += result.hotels.length;
+
       await new Promise(r => setTimeout(r, 1000)); 
     } catch (e) {
       console.error("  " + destinationCode + " error: " + e.message);

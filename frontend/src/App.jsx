@@ -174,7 +174,6 @@ function KlookDynamicWidget({ city, country }) {
           <p style={styles.sectionText}>Discover selected tours, attractions, transfers and local experiences for the city chosen for your stay.</p>
         </div>
       </div>
-      <div style={styles.customerReminderBox}>Your hotel choice remains saved on MySpace Hotel while you explore experiences for your trip.</div>
       <div style={{ background: "#ffffff", border: "1px solid #d9efe9", borderRadius: 24, padding: 24, boxShadow: "0 10px 28px rgba(0,0,0,.06)" }}>
         <h3 style={{ margin: "0 0 8px", fontSize: 22, color: "#0f172a" }}>Experiences in {destinationLabel}</h3>
         <p style={{ margin: "0 0 18px", color: "#475569", lineHeight: 1.6 }}>Open city-matched activities through MySpace Hotel affiliate partners.</p>
@@ -585,23 +584,6 @@ function Header() {
         <div style={styles.logo}>MYSPACE HOTEL</div>
         <div style={styles.tagline}>Hotels, resorts, serviced apartments and worldwide travel support</div>
       </a>
-      <nav style={styles.nav}>
-        <a style={styles.navLink} href={routeUrl(ROUTES.hotels)}>Hotels</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.compare)}>Compare Prices</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.guide)}>Destination Guide</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.insurance)}>Insurance</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.transfers)}>Transfers</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.experiences)}>Experiences</a>
-        <a style={styles.goldLink} href={routeUrl(ROUTES.featured)}>Featured Hotels</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.about)}>About Us</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.faq)}>FAQ</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.reviews)}>Guest Reviews</a>
-        <a style={styles.navLink} href={routeUrl(ROUTES.support)}>Support</a>
-        <InstallAppButton />
-        <a style={styles.goldLink} href={routeUrl(ROUTES.partners)}>Partnerships</a>
-        <a style={styles.navLink} href="/affiliate-network.html">Affiliate Network</a>
-        <a style={styles.darkLink} href={routeUrl(ROUTES.business)}>Business Portal</a>
-      </nav>
     </header>
   );
 }
@@ -612,8 +594,56 @@ function HotelsPage(props) {
   return (
     <>
       <style>{`
+        /* GLOBAL: Hide mobile search by default */
+        .mobile-search, .mobile-search-collapsed, .mobile-search-expanded { display: none !important; }
+
+        /* HOTEL CARD (Base) */
+        .hotel-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 2px solid transparent; margin-bottom: 16px; }
+        .hotel-card.selected { border-color: #10b981; box-shadow: 0 4px 16px rgba(11, 29, 81, 0.15); }
+        .hotel-card-layout { display: flex; flex-direction: column; padding: 16px; gap: 16px; }
+        .hotel-card-image-container { width: 100%; height: 180px; flex-shrink: 0; }
+        .hotel-card-image { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+        .hotel-card-no-image { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #e8eef8; border-radius: 8px; font-weight: 700; color: #50678f; }
+        .hotel-card-details { display: flex; flex-direction: column; justify-content: space-between; flex: 1; min-width: 0; }
+        .hotel-card-title { font-size: 18px; font-weight: 800; color: #0b1d51; margin: 0 0 4px 0; line-height: 1.3; }
+        .hotel-card-stars { color: #f1bf22; font-size: 14px; margin-bottom: 8px; }
+        .hotel-card-location { font-size: 13px; color: #2750db; font-weight: 700; text-decoration: underline; margin-bottom: 4px; }
+        .hotel-card-distance { font-size: 12px; color: #166534; font-weight: 700; margin-bottom: 12px; }
+        .hotel-card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+        .tag-green { background: #ecfdf3; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+        .tag-grey { background: #f4f7fb; color: #50678f; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+        .hotel-card-room { font-size: 13px; color: #0b1d51; font-weight: 700; margin-bottom: 12px; }
+        .hotel-card-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 12px; }
+        .hotel-card-rating { display: flex; gap: 8px; align-items: center; }
+        .rating-score { background: #2750db; color: #fff; padding: 6px 8px; border-radius: 6px 6px 6px 0; font-weight: 800; font-size: 16px; }
+        .rating-text { font-weight: 800; font-size: 13px; color: #0b1d51; }
+        .rating-count { font-size: 11px; color: #60708a; }
+        .hotel-card-price { text-align: right; }
+        .price-nights { font-size: 11px; color: #60708a; font-weight: 700; }
+        .price-total { font-size: 22px; font-weight: 900; color: #0b1d51; line-height: 1.2; }
+        .price-taxes { font-size: 11px; color: #60708a; font-weight: 700; margin-bottom: 6px; }
+        .price-button { background: #10b981; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-size: 13px; font-weight: 800; cursor: pointer; width: 100%; }
+
+        /* DESKTOP LAYOUT */
+        @media (min-width: 769px) {
+          .hotel-card-layout { flex-direction: row !important; }
+          .hotel-card-image-container { width: 240px !important; height: 220px !important; }
+          .hotel-card-title { font-size: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+          .mobile-search-collapsed, .mobile-search-expanded { display: none !important; }
+          
+          /* Hide the Booking Summary on desktop to give the cards full width */
+          .mobile-hide-summary { display: none !important; }
+          .summary-visible-mobile { display: none !important; }
+          
+          /* Make the content grid single column */
+          .contentGrid { display: block !important; max-width: 1200px !important; margin: 0 auto !important; }
+          
+          /* Ensure the hotel grid expands */
+          .hotelGrid { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important; }
+        }
+
+        /* MOBILE LAYOUT */
         @media (max-width: 768px) {
-          .heroGrid, .promisePanel, .converterCard, .metrics, .mobile-hide { display: none !important; }
           .mobile-hide-summary { display: none !important; }
           .summary-visible-mobile { display: block !important; }
           header nav { display: none !important; }
@@ -645,27 +675,28 @@ function HotelsPage(props) {
 
       <section style={styles.hero} className="hero">
         <div style={styles.heroInner}>
-          
-          <div style={styles.heroGrid} className="heroGrid">
-            <div>
-              <div style={styles.pill}>Trusted accommodation for every journey</div>
-              <h1 style={styles.heroTitle}>{props.country ? `Find trusted hotels in ${props.country}` : "Find trusted hotels around the world"}</h1>
-              <p style={styles.heroText}>Search hotels, review full stay totals, compare value in the same destination and continue through a secure reservation journey.</p>
-            </div>
-            <div style={styles.promisePanel} className="promisePanel">
-              <h2 style={styles.panelMiniTitle}>Why guests choose MySpace Hotel</h2>
-              <div style={styles.promiseItem}>Clear stay totals before checkout</div>
-              <div style={styles.promiseItem}>Hotel comparison for better value</div>
-              <div style={styles.promiseItem}>Destination support before travel</div>
-              <div style={styles.promiseItem}>Customer-friendly booking journey</div>
-            </div>
-          </div>
+          <h1 style={{ 
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+            fontSize: 36, 
+            fontWeight: 800, 
+            color: "#0b1d51", 
+            marginBottom: 24, 
+            letterSpacing: "-0.5px" 
+          }}>
+            {props.country ? `Hotels in ${props.country}` : "Find trusted hotels worldwide"}
+          </h1>
 
-          <div style={styles.searchCard} className="desktop-search">
+          <div style={{ ...styles.searchCard, padding: 16, marginTop: 16 }} className="desktop-search">
             <SearchBox {...props} />
           </div>
 
-          {/* MOBILE SEARCH - Collapsed vs Expanded */}
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginTop: 16, color: "#50678f", fontSize: 14, fontWeight: 800 }}>
+            <span>✓ Clear stay totals</span>
+            <span>✓ Compare in same city</span>
+            <span>✓ Secure checkout</span>
+            <span>✓ Destination support</span>
+          </div>
+
           {props.hotels.length > 0 && !props.loading ? (
             <div className="mobile-search-collapsed">
               <div>
@@ -682,7 +713,6 @@ function HotelsPage(props) {
                   {props.countries.map((item) => (<option key={item.country} value={item.country}>{item.country}</option>))}
                 </select>
               </div>
-
               <div className="mobile-search-row">
                 <select value={props.city} disabled={!props.country} onChange={(e) => props.setCity(e.target.value)}>
                   <option value="">{props.country ? "Select city" : "Select country first"}</option>
@@ -693,17 +723,14 @@ function HotelsPage(props) {
                   ))}
                 </select>
               </div>
-
               <div className="mobile-search-row">
                 <input type="date" value={props.checkIn} onChange={(e) => props.setCheckIn(e.target.value)} />
                 <input type="date" value={props.checkOut} onChange={(e) => props.setCheckOut(e.target.value)} />
               </div>
-
               <div className="mobile-search-row">
                 <input type="number" min="1" placeholder="Guests" value={props.guests} onChange={(e) => props.setGuests(e.target.value)} />
                 <input type="number" min="1" placeholder="Rooms" value={props.rooms} onChange={(e) => props.setRooms(e.target.value)} />
               </div>
-
               <button className="mobile-search-btn" onClick={props.searchHotels}>
                 {props.loading ? "Searching..." : "Search"}
               </button>
@@ -717,8 +744,7 @@ function HotelsPage(props) {
       <section style={styles.contentGrid}>
         <main>
           <h2 id="hotel-results" style={styles.title} className="mobile-hide">Available stays nearby</h2>
-          <p style={styles.sectionText} className="mobile-hide">Select a hotel to refresh the booking summary, comparison box, travel support and alternative hotel options immediately.</p>
-          
+
           {props.loading ? <div style={styles.empty}>Finding suitable accommodation for your destination...</div> : null}
           
           {!props.loading && props.hotels.length === 0 && props.searched ? (
@@ -741,9 +767,8 @@ function HotelsPage(props) {
             </div>
           ) : null}
 
-          <ComparePanel {...props} />
-          <AlternativeHotels {...props} />
-          <RevenueAddOns {...props} />
+          <OtherOptions {...props} />
+          <AfterYouBook city={props.city} country={props.country} hasSelectedHotel={!!props.selectedHotel} />
         </main>
         <div className={props.selectedHotel ? "summary-visible-mobile" : "mobile-hide-summary"}>
           <BookingSummary {...props} />
@@ -752,42 +777,76 @@ function HotelsPage(props) {
     </>
   );
 }function SearchBox(props) {
+  const [advanced, setAdvanced] = useState(false);
+  
   return (
-    <>
-      <Field label="Property Type">
-        <select style={styles.input} value={props.propertyType || "hotels"} onChange={(e) => { props.setPropertyType(e.target.value); props.setHotels([]); props.setSelectedHotel(null); }}>
-          <option value="hotels">Hotels only</option>
-          <option value="hotel_resort">Hotels + resorts</option>
-          <option value="serviced">Serviced apartments</option>
-          <option value="homes">Villas & homes</option>
-          <option value="all">All accommodation</option>
-        </select>
-      </Field>
-      <Field label="Country">
-        <select style={styles.input} value={props.country} onChange={(e) => { props.setCountry(e.target.value); props.setCity(""); props.setHotels([]); props.setSelectedHotel(null); }}>
-          <option value="">Select country</option>
-          {props.countries.map((item) => (<option key={item.country} value={item.country}>{item.country}</option>))}
-        </select>
-      </Field>
-      <Field label="City">
-        <select style={styles.input} value={props.city} disabled={!props.country} onChange={(e) => { props.setCity(e.target.value); props.setHotels([]); props.setSelectedHotel(null); }}>
-          <option value="">{props.country ? "Select city" : "Select country first"}</option>
-          {((props.countries.find((x) => x.country === props.country)?.cities) || []).map((item) => (
-            <option key={String(item.city || item.name || item.label || item)} value={String(item.city || item.name || item.label || item)}>
-              {String(item.city || item.name || item.label || item)}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <Field label="Check-in"><input style={styles.input} type="date" value={props.checkIn} onChange={(e) => props.setCheckIn(e.target.value)} /></Field>
-      <Field label="Check-out"><input style={styles.input} type="date" value={props.checkOut} onChange={(e) => props.setCheckOut(e.target.value)} /></Field>
-      <Field label="Guests"><input style={styles.input} type="number" min="1" max="20" value={props.guests} onChange={(e) => props.setGuests(e.target.value)} /></Field>
-      <Field label="Rooms"><input style={styles.input} type="number" min="1" max="10" value={props.rooms} onChange={(e) => props.setRooms(e.target.value)} /></Field>
-      <Field label="Currency">
-        <select style={styles.input} value={props.currency} onChange={(e) => props.setCurrency(e.target.value)}>{Object.keys(FX).map((x) => <option key={x}>{x}</option>)}</select>
-      </Field>
-      <button style={styles.primaryBtn} onClick={props.searchHotels}>{props.loading ? "Finding stays..." : "Search"}</button>
-    </>
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {/* Row 1: Main Inputs */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "flex-end" }}>
+        <Field label="Country">
+          <select style={{ ...styles.input, padding: "10px 12px" }} value={props.country} onChange={(e) => { props.setCountry(e.target.value); props.setCity(""); props.setHotels([]); props.setSelectedHotel(null); }}>
+            <option value="">Select country</option>
+            {props.countries.map((item) => (<option key={item.country} value={item.country}>{item.country}</option>))}
+          </select>
+        </Field>
+        
+        <Field label="City">
+          <select style={{ ...styles.input, padding: "10px 12px" }} value={props.city} disabled={!props.country} onChange={(e) => { props.setCity(e.target.value); props.setHotels([]); props.setSelectedHotel(null); }}>
+            <option value="">{props.country ? "Select city" : "Select country first"}</option>
+            {((props.countries.find((x) => x.country === props.country)?.cities) || []).map((item) => (
+              <option key={String(item.city || item.name || item.label || item)} value={String(item.city || item.name || item.label || item)}>
+                {String(item.city || item.name || item.label || item)}
+              </option>
+            ))}
+          </select>
+        </Field>
+
+        <Field label="Check-in">
+          <input style={{ ...styles.input, padding: "10px 12px" }} type="date" value={props.checkIn} onChange={(e) => props.setCheckIn(e.target.value)} />
+        </Field>
+
+        <Field label="Check-out">
+          <input style={{ ...styles.input, padding: "10px 12px" }} type="date" value={props.checkOut} onChange={(e) => props.setCheckOut(e.target.value)} />
+        </Field>
+
+        <Field label="Guests / Rooms">
+          <div style={{ display: "flex", gap: 8 }}>
+            <input style={{ ...styles.input, padding: "10px 12px", width: 80 }} type="number" min="1" max="20" value={props.guests} onChange={(e) => props.setGuests(e.target.value)} placeholder="Guests" />
+            <input style={{ ...styles.input, padding: "10px 12px", width: 80 }} type="number" min="1" max="10" value={props.rooms} onChange={(e) => props.setRooms(e.target.value)} placeholder="Rooms" />
+          </div>
+        </Field>
+
+        <div style={{ display: "flex", gap: 12, flex: 1 }}>
+          <button style={{ ...styles.primaryBtn, padding: "12px 24px", flex: 1 }} onClick={props.searchHotels}>
+            {props.loading ? "Finding..." : "Search"}
+          </button>
+          
+          <button type="button" onClick={() => setAdvanced(!advanced)} style={{ background: "none", border: "none", color: "#2750db", fontWeight: 900, cursor: "pointer", fontSize: 14, whiteSpace: "nowrap", padding: "0 8px" }}>
+            {advanced ? "− Hide options" : "+ Options"}
+          </button>
+        </div>
+      </div>
+
+      {/* Row 2: Advanced Options (only shows if toggled) */}
+      {advanced && (
+        <div style={{ display: "flex", gap: 12, borderTop: "1px solid #e2e8f0", paddingTop: 12 }}>
+          <Field label="Property Type">
+            <select style={{ ...styles.input, padding: "10px 12px" }} value={props.propertyType || "hotels"} onChange={(e) => { props.setPropertyType(e.target.value); props.setHotels([]); props.setSelectedHotel(null); }}>
+              <option value="hotels">Hotels only</option>
+              <option value="hotel_resort">Hotels + resorts</option>
+              <option value="serviced">Serviced apartments</option>
+              <option value="homes">Villas & homes</option>
+              <option value="all">All accommodation</option>
+            </select>
+          </Field>
+          <Field label="Currency">
+            <select style={{ ...styles.input, padding: "10px 12px" }} value={props.currency} onChange={(e) => props.setCurrency(e.target.value)}>
+              {Object.keys(FX).map((x) => <option key={x}>{x}</option>)}
+            </select>
+          </Field>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -822,84 +881,42 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, selectHotelAndRefre
   const total = price * Math.max(1, Number(rooms || 1)) * Math.max(1, Number(nights || 1));
   const selected = hotelKey(hotel) === hotelKey(selectedHotel);
   const image = validHotelImage(hotel);
-  const stars = Number(hotel.categoryName?.match(/\d+/)?.[0] || hotel.starRating || 3); // Fallback to 3 if not found
-  
-  // Generate mock reviews for visual parity
-  const reviewScore = (Math.random() * (9.8 - 7.5) + 7.5).toFixed(1);
-  const reviewCount = Math.floor(Math.random() * 5000) + 100;
-  const distance = (Math.random() * 2 + 0.1).toFixed(1);
+  const stars = Number(hotel.categoryName?.match(/\d+/)?.[0] || hotel.starRating || 3);
 
   return (
-    <article style={selected ? styles.hotelCardSelected : styles.hotelCard}>
-      <div style={{ display: "flex", gap: "16px", padding: "16px", flexDirection: window.innerWidth <= 768 ? "column" : "row" }}>
-        
-        {/* Image Section */}
-        <div style={{ width: window.innerWidth <= 768 ? "100%" : "240px", flexShrink: 0 }}>
-          {image ? (
-            <img src={image} alt={hotel.name} style={{ width: "100%", height: window.innerWidth <= 768 ? "180px" : "220px", objectFit: "cover", borderRadius: "12px" }} loading="lazy" />
-          ) : (
-            <div style={{ width: "100%", height: window.innerWidth <= 768 ? "180px" : "220px", display: "flex", alignItems: "center", justifyContent: "center", background: "#e8eef8", borderRadius: "12px", fontWeight: 900, color: "#50678f" }}>Image unavailable</div>
-          )}
+    <article className={selected ? "hotel-card selected" : "hotel-card"}>
+      <div className="hotel-card-layout">
+        <div className="hotel-card-image-container">
+          {image ? <img src={image} alt={hotel.name} className="hotel-card-image" loading="lazy" /> : <div className="hotel-card-no-image">Image unavailable</div>}
         </div>
-
-        {/* Details Section */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <div className="hotel-card-details">
           <div>
-            <h3 style={{ fontSize: "22px", fontWeight: 900, color: "#0b1d51", margin: "0 0 4px 0" }}>{hotel.name}</h3>
-            <div style={{ display: "flex", gap: "4px", color: "#f1bf22", marginBottom: "8px" }}>
-              {Array.from({ length: stars }).map((_, i) => <span key={i}>★</span>)}
-            </div>
-            
-            <div style={{ fontSize: "14px", color: "#2750db", textDecoration: "underline", cursor: "pointer", marginBottom: "4px", fontWeight: 800 }}>
-              {hotel.city || city}, {hotel.country || country}
-            </div>
-            <div style={{ fontSize: "13px", color: "#166534", fontWeight: 800, marginBottom: "12px" }}>
-              {distance} km from centre
-            </div>
-
-            {/* Tags */}
-            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
-              <span style={{ background: "#ecfdf3", color: "#166534", padding: "4px 8px", borderRadius: "6px", fontSize: "12px", fontWeight: 900 }}>Free cancellation</span>
-              <span style={{ background: "#f4f7fb", color: "#50678f", padding: "4px 8px", borderRadius: "6px", fontSize: "12px", fontWeight: 800 }}>No prepayment needed</span>
-            </div>
-            
-            <div style={{ fontSize: "14px", color: "#0b1d51", fontWeight: 800, marginBottom: "8px" }}>
-              {hotelRoomName(selectedReadyHotel)}
-            </div>
-            {hotel.facilities && (
-              <div style={{ fontSize: "13px", color: "#60708a", marginBottom: "12px" }}>
-                {hotel.facilities.slice(0, 4).join(" • ")}
-              </div>
-            )}
+            <h3 className="hotel-card-title">{hotel.name || "Hotel"}</h3>
+            <div className="hotel-card-stars">{Array.from({ length: stars }).map((_, i) => <span key={i}>★</span>)}</div>
+            <div className="hotel-card-location">{hotel.city || city}, {hotel.country || country}</div>
+            <div className="hotel-card-distance">{(Math.random() * 2 + 0.1).toFixed(1)} km from centre</div>
+            <div className="hotel-card-tags"><span className="tag-green">Free cancellation</span><span className="tag-grey">No prepayment needed</span></div>
+            <div className="hotel-card-room">{hotelRoomName(selectedReadyHotel)}</div>
           </div>
-
-          {/* Price and Rating Section */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: "16px" }}>
-            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-              <div style={{ background: "#2750db", color: "#fff", padding: "8px 10px", borderRadius: "8px 8px 8px 0", fontWeight: 900, fontSize: "18px" }}>
-                {reviewScore}
-              </div>
-              <div>
-                <div style={{ fontWeight: 900, fontSize: "15px", color: "#0b1d51" }}>Very Good</div>
-                <div style={{ fontSize: "12px", color: "#60708a" }}>{reviewCount} reviews</div>
-              </div>
+          <div className="hotel-card-footer">
+            <div className="hotel-card-rating">
+              <div className="rating-score">{(Math.random() * (9.8 - 7.5) + 7.5).toFixed(1)}</div>
+              <div><div className="rating-text">Very Good</div><div className="rating-count">{Math.floor(Math.random() * 5000) + 100} reviews</div></div>
             </div>
-
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: "12px", color: "#60708a", fontWeight: 700 }}>{nights} night{nights === 1 ? "" : "s"}, {rooms} room{Number(rooms) === 1 ? "" : "s"}</div>
-              <div style={{ fontSize: "28px", fontWeight: 950, color: "#0b1d51" }}>{curr} {money(total)}</div>
-              <div style={{ fontSize: "13px", color: "#60708a", fontWeight: 700 }}>+ taxes and fees</div>
-              
-              <button style={{ marginTop: "10px", background: "#10b981", color: "#fff", border: "none", borderRadius: "8px", padding: "10px 20px", fontSize: "16px", fontWeight: 900, cursor: "pointer" }} onClick={() => selectHotelAndRefreshLiveRates ? selectHotelAndRefreshLiveRates(selectedReadyHotel) : setSelectedHotel(selectedReadyHotel)}>
-                {selected ? "Selected" : "View availability"}
-              </button>
+            <div className="hotel-card-price">
+              <div className="price-nights">{nights} night{nights === 1 ? "" : "s"}, {rooms} room{Number(rooms) === 1 ? "" : "s"}</div>
+              <div className="price-total">{curr} {money(total)}</div>
+              <div className="price-taxes">+ taxes and fees</div>
+              <button className="price-button" onClick={() => selectHotelAndRefreshLiveRates ? selectHotelAndRefreshLiveRates(selectedReadyHotel) : setSelectedHotel(selectedReadyHotel)}>{selected ? "Selected" : "View availability"}</button>
             </div>
           </div>
         </div>
       </div>
     </article>
   );
-}function BookingSummary(props) {
+}
+
+function BookingSummary(props) {
   return (
     <aside style={styles.summary}>
       <h2 style={styles.summaryTitle}>Booking Summary</h2>
@@ -936,47 +953,22 @@ function HotelCard({ hotel, selectedHotel, setSelectedHotel, selectHotelAndRefre
   );
 }
 
-function ComparePanel(props) {
+function OtherOptions(props) {
   if (!props.selectedHotel) return null;
-  return (
-    <section style={styles.panel}>
-      <div style={styles.panelHeader}>
-        <div>
-          <div style={styles.kicker}>Compare Prices</div>
-          <h2 style={styles.titleSmall}>Compare your selected stay</h2>
-          <p style={styles.sectionText}>Review stay choices and Available stays nearby before continuing.</p>
-        </div>
-        <a style={styles.primaryLink} href={routeUrl(ROUTES.compare)}>Open Compare Page</a>
-      </div>
-      <div style={styles.compareGrid}>
-        {props.comparisons.slice(0, 6).map((item) => (
-          <div key={item.id} style={styles.compareCard}>
-            <div style={styles.greenBadge}>{item.badge}</div>
-            <h3 style={styles.cardTitle}>{item.hotelName}</h3>
-            <div style={styles.strong}>{item.label}</div>
-            <p style={styles.cardText}>{item.text}</p>
-            <div style={styles.comparePrice}>{item.currency} {money(item.total)}</div>
-            <div style={styles.small}>Estimated stay total</div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function AlternativeHotels(props) {
-  const alternatives = (props.hotels || []).filter((hotel) => hotelKey(hotel) !== hotelKey(props.selectedHotel)).slice(0, 3);
-  if (!props.selectedHotel || alternatives.length === 0) return null;
+  const alternatives = (props.hotels || [])
+    .filter((h) => hotelKey(h) !== hotelKey(props.selectedHotel))
+    .slice(0, 2);
+  if (alternatives.length === 0) return null;
 
   return (
     <section style={styles.panel}>
-      <div style={styles.kicker}>Available stays nearby</div>
-      <h2 style={styles.titleSmall}>Other accommodation options in {props.city || "this destination"}</h2>
+      <div style={styles.kicker}>Other options</div>
+      <h2 style={styles.titleSmall}>Other stays in {props.city || "this destination"}</h2>
       <div style={styles.altGrid}>
         {alternatives.map((hotel, idx) => {
-          const selectedReadyHotel = selectedHotelWithRoom(hotel);
-          const price = hotelPrice(selectedReadyHotel);
-          const curr = hotelCurrency(selectedReadyHotel, props.currency);
+          const readyHotel = selectedHotelWithRoom(hotel);
+          const price = hotelPrice(readyHotel);
+          const curr = hotelCurrency(readyHotel, props.currency);
           const image = validHotelImage(hotel);
           return (
             <article key={hotelKey(hotel) || idx} style={styles.altCard}>
@@ -985,11 +977,29 @@ function AlternativeHotels(props) {
                 <h3 style={styles.altName}>{hotel.name || "Nearby hotel"}</h3>
                 <div style={styles.muted}>{hotel.city || props.city}, {hotel.country || props.country}</div>
                 <div style={styles.priceLine}>{curr} {money(price)}</div>
-                <button style={styles.darkBtn} onClick={() => props.selectHotelAndRefreshLiveRates ? props.selectHotelAndRefreshLiveRates(selectedReadyHotel) : props.setSelectedHotel(selectedReadyHotel)}>View This Stay</button>
+                <button style={styles.darkBtn} onClick={() => props.selectHotelAndRefreshLiveRates ? props.selectHotelAndRefreshLiveRates(readyHotel) : props.setSelectedHotel(readyHotel)}>View This Stay</button>
               </div>
             </article>
           );
         })}
+      </div>
+      <a style={{ ...styles.primaryLink, marginTop: 20, display: "inline-block" }} href={routeUrl(ROUTES.compare)}>Compare all prices</a>
+    </section>
+  );
+}
+
+function AfterYouBook({ city, country, hasSelectedHotel }) {
+  if (!hasSelectedHotel) return null;
+  const destination = [city, country].filter(Boolean).join(", ") || "your destination";
+  return (
+    <section style={styles.panel}>
+      <div style={styles.kicker}>After you book</div>
+      <h2 style={styles.titleSmall}>Enhance your stay</h2>
+      <p style={styles.sectionText}>Secure your hotel first — add extras afterwards.</p>
+      <div style={styles.cardGrid}>
+        <InfoCard title="Airport transfers" text={`Pickup and drop-off in ${destination}.`} />
+        <InfoCard title="Travel insurance" text="Cancellation, disruption and emergency cover." />
+        <InfoCard title="Tours & experiences" text={`Things to do in ${destination}.`} />
       </div>
     </section>
   );
@@ -1063,36 +1073,10 @@ function ComparePortal(props) {
               </div>
             </div>
           </section>
-          <RevenueAddOns {...props} />
-          <AlternativeHotels {...props} />
+          <OtherOptions {...props} />
         </>
       )}
     </PortalShell>
-  );
-}
-
-function RevenueAddOns(props) {
-  if (!props.selectedHotel) return null;
-  return (
-    <section style={styles.panel}>
-      <div style={styles.panelHeader}>
-        <div>
-          <div style={styles.kicker}>Enhance Your Stay</div>
-          <h2 style={styles.titleSmall}>Complete your hotel booking, then personalise your trip</h2>
-          <p style={styles.sectionText}>Secure your accommodation first. After booking, you can add airport transfers, travel insurance, sightseeing tours and destination experiences without losing your MySpace Hotel reservation.</p>
-        </div>
-      </div>
-      <div style={styles.cardGrid}>
-        <InfoCard title="Travel Insurance" text="Protect the trip with cancellation, travel disruption and emergency support options after your stay is reserved." />
-        <InfoCard title="Hotel Airport Transfers" text="Arrange airport pickup or hotel drop-off support after securing your accommodation." />
-        <InfoCard title="Tours & Experiences" text="Explore popular activities matched to your destination once your hotel booking is safely underway." />
-        <InfoCard title="Destination Support" text="Use MySpace Hotel guidance to plan your trip with more confidence before and after booking." />
-      </div>
-      <div style={styles.bookingFirstBox}>
-        <div style={styles.bookingFirstTitle}>Recommended next step</div>
-        <div style={styles.bookingFirstText}>Return to the booking summary and complete your hotel reservation first. Trip extras will remain available afterwards.</div>
-      </div>
-    </section>
   );
 }
 
@@ -1517,21 +1501,56 @@ function GuideCard({ title, text, href }) { return (<a style={styles.guideCard} 
 
 function Footer() {
   return (
-    <footer style={styles.footer}>
-      <div style={styles.footerGrid}>
-        <div>
-          <div style={styles.footerBrand}>MYSPACE HOTEL</div>
-          <div style={styles.footerText}>Trusted accommodation, clear pricing and travel support for guests worldwide.</div>
+    <footer style={{ background: "#071538", padding: "24px 20px", color: "#dbe7ff", borderTop: "1px solid #1a2d5e" }}>
+      <div style={{ maxWidth: 1500, margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+        
+        {/* LINE 1: Navigation Links */}
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 8 }}>
+          <a style={{ color: "#fff", textDecoration: "none", fontSize: 14, fontWeight: 800 }} href={routeUrl(ROUTES.hotels)}>Hotels</a>
+          <span style={{ color: "#30466e" }}>|</span>
+          <a style={{ color: "#fff", textDecoration: "none", fontSize: 14, fontWeight: 800 }} href={routeUrl(ROUTES.compare)}>Compare Prices</a>
+          <span style={{ color: "#30466e" }}>|</span>
+          <a style={{ color: "#fff", textDecoration: "none", fontSize: 14, fontWeight: 800 }} href={routeUrl(ROUTES.guide)}>Destination Guide</a>
+          <span style={{ color: "#30466e" }}>|</span>
+          <a style={{ color: "#fff", textDecoration: "none", fontSize: 14, fontWeight: 800 }} href={routeUrl(ROUTES.insurance)}>Insurance</a>
+          <span style={{ color: "#30466e" }}>|</span>
+          <a style={{ color: "#fff", textDecoration: "none", fontSize: 14, fontWeight: 800 }} href={routeUrl(ROUTES.transfers)}>Transfers</a>
+          <span style={{ color: "#30466e" }}>|</span>
+          <a style={{ color: "#fff", textDecoration: "none", fontSize: 14, fontWeight: 800 }} href={routeUrl(ROUTES.experiences)}>Experiences</a>
+          <span style={{ color: "#30466e" }}>|</span>
+          <a style={{ color: "#f1bf22", textDecoration: "none", fontSize: 14, fontWeight: 800 }} href={routeUrl(ROUTES.featured)}>Featured Hotels</a>
+          <span style={{ color: "#30466e" }}>|</span>
+          <a style={{ color: "#fff", textDecoration: "none", fontSize: 14, fontWeight: 800 }} href={routeUrl(ROUTES.about)}>About Us</a>
+          <span style={{ color: "#30466e" }}>|</span>
+          <a style={{ color: "#fff", textDecoration: "none", fontSize: 14, fontWeight: 800 }} href={routeUrl(ROUTES.faq)}>FAQ</a>
+          <span style={{ color: "#30466e" }}>|</span>
+          <a style={{ color: "#fff", textDecoration: "none", fontSize: 14, fontWeight: 800 }} href={routeUrl(ROUTES.reviews)}>Guest Reviews</a>
+          <span style={{ color: "#30466e" }}>|</span>
+          <a style={{ color: "#fff", textDecoration: "none", fontSize: 14, fontWeight: 800 }} href={routeUrl(ROUTES.support)}>Support</a>
+          <span style={{ color: "#30466e" }}>|</span>
+          <a style={{ color: "#f1bf22", textDecoration: "none", fontSize: 14, fontWeight: 800 }} href={routeUrl(ROUTES.partners)}>Partnerships</a>
+          <span style={{ color: "#30466e" }}>|</span>
+          <a style={{ color: "#fff", textDecoration: "none", fontSize: 14, fontWeight: 800 }} href="/affiliate-network.html">Affiliate Network</a>
+          <span style={{ color: "#30466e" }}>|</span>
+          <a style={{ color: "#fff", textDecoration: "none", fontSize: 14, fontWeight: 800 }} href={routeUrl(ROUTES.business)}>Business Portal</a>
         </div>
-        <div>
-          <div style={styles.footerTitle}>Contact Directory</div>
-          <div style={styles.footerText}>Reservations: reservations@myspace-hotel.com</div>
-          <div style={styles.footerText}>General: info@myspace-hotel.com</div>
-          <div style={styles.footerText}>Sales: sales@myspace-hotel.com</div>
-          <div style={styles.footerText}>Accounts: accounts@myspace-hotel.com</div>
-          <div style={styles.footerText}>Phone: +447598604921</div>
-          <div style={styles.footerText}>Address: 17 Barleycorn Way, London E14 8DE</div>
+
+        {/* LINE 2: Contact Info */}
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 16, fontSize: 13, fontWeight: 600, color: "#a4b8db" }}>
+          <span>Reservations: reservations@myspace-hotel.com</span>
+          <span>|</span>
+          <span>General: info@myspace-hotel.com</span>
+          <span>|</span>
+          <span>Sales: sales@myspace-hotel.com</span>
+          <span>|</span>
+          <span>Phone: +447598604921</span>
         </div>
+
+        {/* LINE 3: Copyright / Address */}
+        <div style={{ fontSize: 12, fontWeight: 500, color: "#60708a", textAlign: "center" }}>
+          Address: 17 Barleycorn Way, London E14 8DE &nbsp;•&nbsp; &copy; {new Date().getFullYear()} MySpace Hotel. All rights reserved.
+        </div>
+
       </div>
     </footer>
   );
@@ -1610,7 +1629,6 @@ const styles = {
   staySavedPanel: { marginTop: 30, background: "#fff", borderRadius: 28, padding: 28, boxShadow: "0 8px 25px rgba(0,0,0,.06)", display: "grid", gridTemplateColumns: "minmax(0,1fr) 320px", gap: 22, alignItems: "center", border: "2px solid #bbf7d0" },
   savedStayActions: { display: "grid", gap: 14 },
   klookPanel: { marginTop: 30, background: "#fff", borderRadius: 28, padding: 28, boxShadow: "0 8px 25px rgba(0,0,0,.06)", border: "1px solid #dce6f3" },
-  customerReminderBox: { marginTop: 18, background: "#ecfdf3", color: "#166534", borderRadius: 18, padding: 18, fontWeight: 950, lineHeight: 1.5, textAlign: "center" },
   panelHeader: { display: "flex", justifyContent: "space-between", gap: 20, flexWrap: "wrap", alignItems: "flex-start" },
   kicker: { color: "#2750db", fontWeight: 950, letterSpacing: ".04em", textTransform: "uppercase", fontSize: 13, marginBottom: 8 },
   compareGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))", gap: 16, marginTop: 20 },
