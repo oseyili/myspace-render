@@ -582,7 +582,6 @@ function Header() {
     <header style={styles.header}>
       <a style={styles.brand} href={routeUrl(ROUTES.hotels)}>
         <div style={styles.logo}>MYSPACE HOTEL</div>
-        <div style={styles.tagline}>Hotels, resorts, serviced apartments and worldwide travel support</div>
       </a>
     </header>
   );
@@ -594,7 +593,7 @@ function HotelsPage(props) {
   return (
     <>
       <style>{`
-        /* GLOBAL: Hide mobile search by default */
+        /* GLOBAL */
         .mobile-search, .mobile-search-collapsed, .mobile-search-expanded { display: none !important; }
 
         /* HOTEL CARD (Base) */
@@ -624,79 +623,87 @@ function HotelsPage(props) {
         .price-taxes { font-size: 11px; color: #60708a; font-weight: 700; margin-bottom: 6px; }
         .price-button { background: #10b981; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-size: 13px; font-weight: 800; cursor: pointer; width: 100%; }
 
-        /* DESKTOP LAYOUT */
+        /* DESKTOP */
         @media (min-width: 769px) {
           .hotel-card-layout { flex-direction: row !important; }
           .hotel-card-image-container { width: 240px !important; height: 220px !important; }
           .hotel-card-title { font-size: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
           .mobile-search-collapsed, .mobile-search-expanded { display: none !important; }
           
-          /* Hide the Booking Summary on desktop to give the cards full width */
-          .mobile-hide-summary { display: none !important; }
-          .summary-visible-mobile { display: none !important; }
+          /* The desktop title and trust strip are VISIBLE by default */
+          .mobile-hide { display: block !important; }
           
-          /* Make the content grid single column */
           .contentGrid { display: block !important; max-width: 1200px !important; margin: 0 auto !important; }
-          
-          /* Ensure the hotel grid expands */
           .hotelGrid { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important; }
         }
 
-        /* MOBILE LAYOUT */
+        /* MOBILE ONLY */
         @media (max-width: 768px) {
-          .mobile-hide-summary { display: none !important; }
-          .summary-visible-mobile { display: block !important; }
-          header nav { display: none !important; }
-          header { padding: 10px 15px !important; flex-direction: column !important; align-items: flex-start !important; border-bottom: none !important; }
-          .hero { background: #ffffff !important; padding: 0 !important; min-height: auto !important; }
-          .heroInner { padding: 0 !important; }
           .desktop-search { display: none !important; }
           
-          /* Collapsed Search State */
+          /* Hide the tagline */
+          header .brand div:nth-child(2) { display: none !important; }
+
+          /* Hide the desktop H1 and Desktop trust strip */
+          .mobile-hide { display: none !important; }
+          
+          /* Make the trust strip one line below the search */
+          .mobile-trust-strip { 
+            flex-wrap: nowrap !important; 
+            overflow-x: auto !important; 
+            gap: 12px !important; 
+            font-size: 11px !important; 
+            justify-content: center !important;
+            padding: 0 15px;
+          }
+          .mobile-trust-strip::-webkit-scrollbar { display: none; }
+          .mobile-trust-strip span { white-space: nowrap; }
+
+          /* Mobile Search Expanded */
+          .mobile-search-expanded { display: flex !important; flex-direction: column; gap: 10px; background: #fff; padding: 15px; border-radius: 12px; margin-top: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+          .mobile-search-expanded input, .mobile-search-expanded select { padding: 14px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 16px; width: 100%; box-sizing: border-box; margin: 0; }
+          .mobile-search-row { display: flex; gap: 10px; width: 100%; }
+          .mobile-search-row > * { flex: 1; min-width: 0; }
+          .mobile-search-btn { background: #2750db; color: #fff; font-size: 16px; font-weight: 900; padding: 14px; border-radius: 8px; border: none; width: 100%; margin-top: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+
+          /* Mobile Search Collapsed */
           .mobile-search-collapsed {
             display: flex !important; flex-direction: row; align-items: center; justify-content: space-between;
-            background: #2750db; color: #fff; padding: 12px 16px; border-radius: 0;
+            background: #2750db; color: #fff; padding: 12px 16px; border-radius: 8px; margin-top: 10px;
           }
-          .mobile-search-collapsed button {
-            background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold;
-          }
+          .mobile-search-collapsed button { background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; }
+
+          .contentGrid { padding: 10px !important; margin-top: 10px !important; display: block !important; background: #f4f7fb; }
+          #hotel-results { font-size: 22px !important; margin-bottom: 10px !important; }
           
-          .mobile-search-expanded { display: flex !important; flex-direction: column; gap: 8px; background: #fff; padding: 15px; border-radius: 0; margin-top: 0; }
-          .mobile-search-expanded input, .mobile-search-expanded select { padding: 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; width: 100%; box-sizing: border-box; margin: 0; }
-          .mobile-search-row { display: flex; gap: 8px; width: 100%; }
-          .mobile-search-row > * { flex: 1; min-width: 0; }
-          .mobile-search-btn { background: #2750db; color: #fff; font-size: 16px; font-weight: bold; padding: 14px; border-radius: 8px; border: none; width: 100%; margin-top: 4px; }
-          
-          .contentGrid { padding: 10px !important; margin-top: 0 !important; display: block !important; }
-          #hotel-results { margin-top: 10px !important; font-size: 22px !important; margin-bottom: 10px !important; }
+          /* Hide summary sidebar on mobile until a hotel is selected */
+          .mobile-hide-summary { display: none !important; }
+          .summary-visible-mobile { display: block !important; }
         }
-        .mobile-search { display: none; }
       `}</style>
 
       <section style={styles.hero} className="hero">
         <div style={styles.heroInner}>
-          <h1 style={{ 
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-            fontSize: 36, 
-            fontWeight: 800, 
-            color: "#0b1d51", 
-            marginBottom: 24, 
-            letterSpacing: "-0.5px" 
-          }}>
+          
+          {/* H1 (Hidden on mobile) */}
+          <h1 className="mobile-hide" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif", fontSize: 36, fontWeight: 800, color: "#0b1d51", marginBottom: 24, letterSpacing: "-0.5px" }}>
             {props.country ? `Hotels in ${props.country}` : "Find trusted hotels worldwide"}
           </h1>
 
+          {/* DESKTOP SEARCH */}
           <div style={{ ...styles.searchCard, padding: 16, marginTop: 16 }} className="desktop-search">
             <SearchBox {...props} />
           </div>
 
-          <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginTop: 16, color: "#50678f", fontSize: 14, fontWeight: 800 }}>
+          {/* DESKTOP TRUST STRIP */}
+          <div className="mobile-hide" style={{ display: "flex", gap: 24, flexWrap: "wrap", marginTop: 16, color: "#50678f", fontSize: 14, fontWeight: 800 }}>
             <span>✓ Clear stay totals</span>
             <span>✓ Compare in same city</span>
             <span>✓ Secure checkout</span>
             <span>✓ Destination support</span>
           </div>
 
+          {/* MOBILE SEARCH */}
           {props.hotels.length > 0 && !props.loading ? (
             <div className="mobile-search-collapsed">
               <div>
@@ -709,7 +716,7 @@ function HotelsPage(props) {
             <div className="mobile-search-expanded">
               <div className="mobile-search-row">
                 <select value={props.country} onChange={(e) => { props.setCountry(e.target.value); props.setCity(""); props.setHotels([]); }}>
-                  <option value="">Where to?</option>
+                  <option value="">Select country</option>
                   {props.countries.map((item) => (<option key={item.country} value={item.country}>{item.country}</option>))}
                 </select>
               </div>
@@ -736,6 +743,8 @@ function HotelsPage(props) {
               </button>
             </div>
           )}
+
+          
         </div>
       </section>
       
