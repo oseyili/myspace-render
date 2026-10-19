@@ -625,16 +625,18 @@ function HotelsPage(props) {
 
         /* DESKTOP */
         @media (min-width: 769px) {
-          .hotel-card-layout { flex-direction: row !important; }
-          .hotel-card-image-container { width: 240px !important; height: 220px !important; }
-          .hotel-card-title { font-size: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+          .hotel-card-layout { flex-direction: column !important; padding: 16px; }
+          .hotel-card-image-container { width: 100% !important; height: 220px !important; }
+          .hotel-card-title { font-size: 20px; white-space: normal !important; line-height: 1.3; margin-bottom: 8px; }
           .mobile-search-collapsed, .mobile-search-expanded { display: none !important; }
           
           /* The desktop title and trust strip are VISIBLE by default */
           .mobile-hide { display: block !important; }
           
           .contentGrid { display: block !important; max-width: 1200px !important; margin: 0 auto !important; }
-          .hotelGrid { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important; }
+          
+          /* Force exactly 3 columns on desktop for neat grid */
+          .hotelGrid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 24px !important; }
         }
 
         /* MOBILE ONLY */
@@ -695,13 +697,7 @@ function HotelsPage(props) {
             <SearchBox {...props} />
           </div>
 
-          {/* DESKTOP TRUST STRIP */}
-          <div className="mobile-hide" style={{ display: "flex", gap: 24, flexWrap: "wrap", marginTop: 16, color: "#50678f", fontSize: 14, fontWeight: 800 }}>
-            <span>✓ Clear stay totals</span>
-            <span>✓ Compare in same city</span>
-            <span>✓ Secure checkout</span>
-            <span>✓ Destination support</span>
-          </div>
+          
 
           {/* MOBILE SEARCH */}
           {props.hotels.length > 0 && !props.loading ? (
