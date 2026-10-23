@@ -1,8 +1,9 @@
-const express = require("express");
+﻿const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const { URLSearchParams } = require("url");
 
 try {
   require("dotenv").config();
@@ -92,7 +93,7 @@ app.use((req, res, next) => {
   return express.json({ limit: "25mb" })(req, res, next);
 });
 
-const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "..", "data");
 const HOTELS_FILE = path.join(DATA_DIR, "live_hotels.json");
 const BOOKINGS_FILE = path.join(DATA_DIR, "bookings.json");
 const PARTNERS_FILE = path.join(DATA_DIR, "partner_applications.json");
@@ -100,7 +101,35 @@ const FEEDBACK_FILE = path.join(DATA_DIR, "feedback.json");
 const SERVICE_ACTIVITY_FILE = path.join(DATA_DIR, "service_activity.json");
 const SUPPLIER_AUDIT_FILE = path.join(DATA_DIR, "supplier_rate_audit.json");
 
+
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+
+// MSH CHUNKS LOADER START
+(function loadChunks() {
+    // Cross-platform path resolution
+    const chunksDir = path.join(__dirname, "..", "data", "chunks");
+    if (fs.existsSync(chunksDir)) {
+        const chunkFiles = fs.readdirSync(chunksDir).filter(f => f.endsWith(".json"));
+        let loadedCount = 0;
+        global.mshChunkCache = {};
+        for (const file of chunkFiles) {
+            try {
+                const data = JSON.parse(fs.readFileSync(path.join(chunksDir, file), "utf8"));
+                for (const [key, hotel] of Object.entries(data)) {
+                    if (!global.mshChunkCache[key]) {
+                        global.mshChunkCache[key] = hotel;
+                        loadedCount++;
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to load chunk " + file + ": " + e.message);
+            }
+        }
+        console.log("[Chunks] Loaded " + loadedCount + " additional hotels from chunks folder.");
+    }
+})();
+// MSH CHUNKS LOADER END
+
 
 function ensureFile(file, fallback) {
   if (!fs.existsSync(file)) fs.writeFileSync(file, JSON.stringify(fallback, null, 2), "utf8");
@@ -187,7 +216,7 @@ function mshCanonicalCity(v, country = "") {
     if (n.includes("vancouver")) return "Vancouver";
     if (["mississauga", "brampton", "markham", "scarborough", "north york", "etobicoke", "vaughan"].includes(n)) return "Toronto";
     if (n.includes("toronto")) return "Toronto";
-    if (n.includes("montreal") || n.includes("montréal")) return "Montreal";
+    if (n.includes("montreal") || n.includes("montrÃ©al")) return "Montreal";
     if (n.includes("calgary")) return "Calgary";
     if (n.includes("ottawa")) return "Ottawa";
   }
@@ -603,7 +632,14 @@ function isBlockedCountry(country) {
 
 function readHotels() {
   const hotels = readJSON(HOTELS_FILE, []);
-  return Array.isArray(hotels) ? hotels : [];
+  const baseHotels = Array.isArray(hotels) ? hotels : [];
+  
+  // MSH READ HOTELS PATCHED
+  if (global.mshChunkCache) {
+      const chunkHotels = Object.values(global.mshChunkCache);
+      return [...baseHotels, ...chunkHotels];
+  }
+  return baseHotels;
 }
 
 function firstImage(h) {
@@ -4287,7 +4323,7 @@ app.post("/api/ancillary/hotels/feature", async (req, res) => {
 });
 // MSH REAL ANCILLARY EMAIL ROUTES END
 
-// MSH RATEHAWK SANDBOX CONNECTOR START
+// MSH RATEHAWK SANDBOX CONNECTOR (REPLACEMENT)
 function ratehawkConfig() {
   const enabled = String(process.env.RATEHAWK_ENABLED || "").toLowerCase() === "true";
   const baseUrl = clean(process.env.RATEHAWK_BASE_URL || "https://api-sandbox.worldota.net").replace(/\/$/, "");
@@ -4353,6 +4389,163 @@ async function ratehawkPost(pathname, body) {
   };
 }
 
+async function ratehawkGet(pathname) {
+  const cfg = ratehawkConfig();
+
+  if (!cfg.ready) {
+    return {
+      ok: false,
+      status: 400,
+      data: { message: "RateHawk is not configured." }
+    };
+  }
+
+  const url = `${cfg.baseUrl}${pathname}`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: ratehawkAuthHeader(),
+      Accept: "application/json",
+      "User-Agent": cfg.userAgent
+    }
+  });
+
+  const text = await response.text();
+  let data = {};
+
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = { raw: text.slice(0, 1000) };
+  }
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    data
+  };
+}
+
+const MSH_RATEHAWK_REGION_CACHE = new Map();
+
+function mshRatehawkRegionFromEnvMap(city) {
+  const raw = clean(process.env.RATEHAWK_REGION_MAP || "");
+  if (!raw) return 0;
+
+  const key = clean(city).toLowerCase();
+
+  // Try to find the exact city name in the raw string using regex (bypasses JSON.parse entirely)
+  // Matches: "los angeles": 2438 OR los angeles: 2438
+  const regex = new RegExp(`["']?(?:[a-z\\s]+\\|)?${key}["']?\\s*:\\s*(\\d+)`, "i");
+  const match = raw.match(regex);
+
+  if (match && match[1]) {
+    return Number(match[1]);
+  }
+
+  return 0;
+}
+
+async function mshRatehawkResolveRegionId(query) {
+  const direct = Number(
+    query.ratehawkRegionId ||
+    query.region_id ||
+    query.regionId ||
+    process.env.RATEHAWK_DEFAULT_REGION_ID ||
+    0
+  );
+  if (direct > 0) return direct;
+
+  const city = clean(query.city || "");
+  if (!city) return 0;
+
+  const envMapped = mshRatehawkRegionFromEnvMap(city);
+  if (envMapped > 0) return envMapped;
+
+  const cacheKey = city.toLowerCase();
+  if (MSH_RATEHAWK_REGION_CACHE.has(cacheKey)) return MSH_RATEHAWK_REGION_CACHE.get(cacheKey);
+
+  const cfg = ratehawkConfig();
+  if (!cfg.ready) return 0;
+
+  const attempt = async (pathname, payload) => {
+    try {
+      const res = await fetch(`${cfg.baseUrl}${pathname}`, {
+        method: "POST",
+        headers: {
+          Authorization: ratehawkAuthHeader(),
+          "Content-Type": "application/json",
+          "User-Agent": cfg.userAgent
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) {
+        console.log(`[RATEHAWK-REGION] ${pathname} -> HTTP ${res.status}`);
+        return null;
+      }
+      const data = await res.json().catch(() => ({}));
+      return data;
+    } catch (e) {
+      console.log(`[RATEHAWK-REGION] ${pathname} error: ${e.message}`);
+      return null;
+    }
+  };
+
+  const wantedNorm = city.toLowerCase();
+
+  const extractRegions = (data) => {
+    if (!data) return [];
+    if (Array.isArray(data.data)) return data.data;
+    if (Array.isArray(data.regions)) return data.regions;
+    if (data.data && Array.isArray(data.data.regions)) return data.data.regions;
+    if (Array.isArray(data.data?.data)) return data.data.data;
+    return [];
+  };
+
+  const pickRegion = (regions) => {
+    if (!Array.isArray(regions) || !regions.length) return 0;
+    const normed = regions.map((r) => ({
+      id: Number(r.region_id || r.id || 0),
+      name: clean(r.name || r.title || r.label || "").toLowerCase()
+    })).filter((r) => r.id > 0);
+
+    const exact = normed.find((r) => r.name === wantedNorm);
+    if (exact) return exact.id;
+
+    const starts = normed.find((r) => r.name.startsWith(wantedNorm + " ") || r.name.startsWith(wantedNorm + ","));
+    if (starts) return starts.id;
+
+    const contains = normed.find((r) => r.name.includes(wantedNorm));
+    if (contains) return contains.id;
+
+    return normed[0] ? normed[0].id : 0;
+  };
+
+  let regionId = 0;
+
+  const suggestPaths = [
+    "/api/b2b/v3/hotel/region/suggest",
+    "/api/b2b/v3/serp/regions/"
+  ];
+
+  for (const p of suggestPaths) {
+    const data = await attempt(p, {
+      language: "en",
+      query: city,
+      residency: clean(query.residency || "gb").toLowerCase(),
+      region_types: ["City", "Region", "Country", "MultiCity"]
+    });
+    const regions = extractRegions(data);
+    regionId = pickRegion(regions);
+    if (regionId > 0) break;
+  }
+
+  console.log(`[RATEHAWK-REGION] "${city}" -> ${regionId || "none"}`);
+  MSH_RATEHAWK_REGION_CACHE.set(cacheKey, regionId);
+  return regionId;
+}
+
 app.get("/api/ratehawk/status", (req, res) => {
   const cfg = ratehawkConfig();
 
@@ -4375,7 +4568,7 @@ app.get("/api/ratehawk/test", async (req, res) => {
     const checkout = clean(req.query.checkout || req.query.checkOut || tomorrowISOForRatehawk(15));
     const residency = clean(req.query.residency || "gb").toLowerCase();
     const language = clean(req.query.language || "en");
-    const regionId = Number(req.query.region_id || req.query.regionId || 2011);
+    const regionId = Number(req.query.region_id || req.query.regionId || process.env.RATEHAWK_DEFAULT_REGION_ID || 2011);
 
     const payload = {
       checkin,
@@ -4394,16 +4587,18 @@ app.get("/api/ratehawk/test", async (req, res) => {
 
     const result = await ratehawkPost("/api/b2b/v3/search/serp/region/", payload);
 
-    recordActivity("ratehawk_test", {
-      region_id: regionId,
-      checkin,
-      checkout,
-      residency,
-      language
-    }, {
-      ok: result.ok,
-      status: result.status
-    });
+    try {
+      recordActivity("ratehawk_test", {
+        region_id: regionId,
+        checkin,
+        checkout,
+        residency,
+        language
+      }, {
+        ok: result.ok,
+        status: result.status
+      });
+    } catch {}
 
     res.status(result.ok ? 200 : 502).json({
       ok: result.ok,
@@ -4420,13 +4615,32 @@ app.get("/api/ratehawk/test", async (req, res) => {
       result: result.data
     });
   } catch (err) {
-    recordActivity("ratehawk_test_error", {}, { error: err.message, stack: err.stack });
+    try { recordActivity("ratehawk_test_error", {}, { error: err.message, stack: err.stack }); } catch {}
 
     res.status(500).json({
       ok: false,
       message: "RateHawk test failed.",
       error: err.message, stack: err.stack
     });
+  }
+});
+
+app.get("/api/ratehawk/region-lookup", async (req, res) => {
+  try {
+    const city = clean(req.query.city || "");
+    if (!city) {
+      return res.status(400).json({ ok: false, message: "city query parameter is required." });
+    }
+    const regionId = await mshRatehawkResolveRegionId({ city, residency: req.query.residency || "gb" });
+    res.json({
+      ok: true,
+      city,
+      regionId,
+      found: regionId > 0,
+      message: regionId > 0 ? "Region ID resolved." : "Could not resolve region. Check logs or set RATEHAWK_DEFAULT_REGION_ID / RATEHAWK_REGION_MAP."
+    });
+  } catch (err) {
+    res.status(500).json({ ok: false, message: "Region lookup failed.", error: err.message });
   }
 });
 
@@ -4785,11 +4999,8 @@ function webbedsCountryIdFromCode(code) {
   return "88";
 }
 
-function webbedsCityIdFromName(city) {
-  const c = clean(city).toUpperCase();
-  if (c === "ABU DHABI") return "334";
-  return "";
-}
+
+
 
 app.get("/api/webbeds/search", async (req, res) => {
   try {
@@ -4847,32 +5058,53 @@ app.get("/api/webbeds/search", async (req, res) => {
   }
 });
 
-// MSH WEBBEDS CITY MAP CACHE
+// MSH WEBBEDS CITY MAP CACHE (REPLACEMENT)
+function mshXmlDecode(s) {
+  return String(s || "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(Number(d)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)));
+}
+
+function mshNormCity(v) {
+  return String(v || "")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/\s+-\s+[a-z ]+$/i, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function parseWebbedsCityMap(xml) {
   const map = {};
   const cities = [];
-  const cityBlocks = String(xml || "").match(/<city[\s\S]*?<\/city>/gi) || [];
+  const cityBlocks = String(xml || "").match(/<city\b[^>]*>[\s\S]*?<\/city>/gi) || [];
 
   for (const block of cityBlocks) {
-    const name = extractXmlTag(block, "name");
-    const code = extractXmlTag(block, "code");
+    const nameMatch = block.match(/<name\b[^>]*>([\s\S]*?)<\/name>/i);
+    const codeMatch = block.match(/<code\b[^>]*>([\s\S]*?)<\/code>/i);
+    if (!nameMatch || !codeMatch) continue;
 
+    const name = mshXmlDecode(nameMatch[1]).trim();
+    const code = mshXmlDecode(codeMatch[1]).trim();
     if (!name || !code) continue;
 
-    const key = clean(name).toUpperCase();
+    const key = name.toUpperCase();
     map[key] = code;
-
-    cities.push({
-      name,
-      key,
-      code
-    });
+    cities.push({ name, key, code });
   }
 
   cities.sort((a, b) => a.name.localeCompare(b.name));
 
   return {
     generated_at: nowISO(),
+    source_command: "getallcities",
     count: cities.length,
     map,
     cities
@@ -4887,20 +5119,25 @@ function loadWebbedsCityMap() {
   try {
     const file = webbedsCityMapFile();
     if (!fs.existsSync(file)) return null;
-    return JSON.parse(fs.readFileSync(file, "utf8"));
+    const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed;
   } catch {
     return null;
   }
 }
 
 function saveWebbedsCityMap(data) {
-  fs.writeFileSync(webbedsCityMapFile(), JSON.stringify(data, null, 2), "utf8");
+  try {
+    fs.writeFileSync(webbedsCityMapFile(), JSON.stringify(data, null, 2), "utf8");
+  } catch (err) {
+    console.error("[WEBBEDS] saveWebbedsCityMap failed:", err.message);
+  }
 }
 
 function findWebbedsCityCodeFromCache(city, country = "") {
-  const norm = (v) => clean(v).toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
-  const wantedCity = norm(city);
-  const wantedCountry = norm(country);
+  const wantedCity = mshNormCity(city);
+  const wantedCountry = mshNormCity(country);
   if (!wantedCity) return "";
 
   const cityMap = loadWebbedsCityMap();
@@ -4915,75 +5152,88 @@ function findWebbedsCityCodeFromCache(city, country = "") {
   if (Array.isArray(cityMap.cities)) candidates.push(...cityMap.cities);
   if (Array.isArray(cityMap.destinations)) candidates.push(...cityMap.destinations);
 
-  function getCode(x) {
-    return clean(x.code || x.cityCode || x.city_code || x.cityId || x.city_id || x.destinationCode || x.destination_code || x.id || "");
+  let best = null;
+
+  for (const x of candidates) {
+    const code = clean(x.code || x.cityCode || x.city_code || x.cityId || x.city_id || x.destinationCode || x.destination_code || x.id || "");
+    const name = clean(x.city || x.name || x.cityName || x.city_name || x.destination || x.destinationName || x.key || "");
+    if (!code || !name) continue;
+
+    const n = mshNormCity(name);
+    const c = mshNormCity(x.country || x.countryName || x.country_name || x.destinationCountry || "");
+
+    let score = 0;
+    if (n === wantedCity) score += 1000;
+    else if (n.startsWith(wantedCity + " ")) score += 700;
+    else if (n.includes(" " + wantedCity + " ")) score += 500;
+    else if (n.includes(wantedCity)) score += 300;
+    else continue;
+
+    if (wantedCountry && c && c === wantedCountry) score += 250;
+
+    if (!best || score > best.score) best = { code, score, name };
   }
 
-  function getName(x) {
-    return clean(x.city || x.name || x.cityName || x.city_name || x.destination || x.destinationName || x.key || "");
-  }
+  return best ? clean(best.code) : "";
+}
 
-  function getCountry(x) {
-    return clean(x.country || x.countryName || x.country_name || x.destinationCountry || "");
-  }
-
-  const scored = candidates
-    .map((x) => {
-      const code = getCode(x);
-      const name = getName(x);
-      if (!code || !name) return null;
-
-      const n = norm(name);
-      const c = norm(getCountry(x));
-      let score = 0;
-
-      if (n === wantedCity) score += 1000;
-      else if (n.startsWith(wantedCity + " ")) score += 700;
-      else if (n.includes(" " + wantedCity + " ")) score += 500;
-      else if (n.includes(wantedCity)) score += 300;
-
-      if (wantedCountry && c && c === wantedCountry) score += 250;
-
-      return score > 0 ? { code, score, name } : null;
-    })
-    .filter(Boolean)
-    .sort((a, b) => b.score - a.score);
-
-  return scored[0] ? clean(scored[0].code) : "";
+function webbedsCityIdFromName(city) {
+  const c = clean(city).toUpperCase();
+  const fallback = {
+    "ABU DHABI": "334"
+  };
+  return fallback[c] || "";
 }
 
 app.get("/api/webbeds/build-city-map", async (req, res) => {
   try {
-    const xml = buildWebbedsInternalCodeXml("getservingcities");
+    const command = clean(req.query.command || "getallcities").toLowerCase();
+    if (!["getallcities", "getservingcities"].includes(command)) {
+      return res.status(400).json({
+        ok: false,
+        message: "command must be getallcities or getservingcities"
+      });
+    }
+
+    const xml = buildWebbedsInternalCodeXml(command);
     const result = await webbedsPostXml(xml);
 
     if (!result.ok) {
       return res.status(502).json({
         ok: false,
-        message: "Could not download WebBeds serving cities.",
+        message: `Could not download WebBeds cities (${command}).`,
         status: result.status,
         responsePreview: result.text.slice(0, 2000)
       });
     }
 
     const parsed = parseWebbedsCityMap(result.text);
+    parsed.source_command = command;
+
+    if (!parsed.count) {
+      return res.status(502).json({
+        ok: false,
+        message: "Parser produced 0 cities. Inspect responsePreview.",
+        responsePreview: result.text.slice(0, 2000)
+      });
+    }
+
     saveWebbedsCityMap(parsed);
 
-    recordActivity("webbeds_build_city_map", {}, {
-      ok: true,
-      cities: parsed.count
-    });
+    try {
+      recordActivity("webbeds_build_city_map", { command }, { ok: true, cities: parsed.count });
+    } catch {}
 
     res.json({
       ok: true,
       file: "backend/data/webbeds-city-map.json",
+      command,
       count: parsed.count,
       generated_at: parsed.generated_at,
       examples: parsed.cities.slice(0, 20)
     });
   } catch (err) {
-    recordActivity("webbeds_build_city_map_error", {}, { error: err.message, stack: err.stack });
-
+    try { recordActivity("webbeds_build_city_map_error", {}, { error: err.message, stack: err.stack }); } catch {}
     res.status(500).json({
       ok: false,
       message: "WebBeds city map build failed.",
@@ -4999,17 +5249,35 @@ app.get("/api/webbeds/city-code", (req, res) => {
   if (!cityMap) {
     return res.status(404).json({
       ok: false,
-      message: "WebBeds city map has not been built yet. Run /api/webbeds/build-city-map first."
+      message: "WebBeds city map has not been built yet. Run /api/webbeds/build-city-map?command=getallcities first."
     });
   }
 
-  const code = findWebbedsCityCodeFromCache(city);
+  const code = findWebbedsCityCodeFromCache(city) || webbedsCityIdFromName(city);
 
   res.json({
     ok: Boolean(code),
     city,
     code,
+    cache_loaded: true,
+    cache_count: cityMap.count || 0,
+    cache_generated_at: cityMap.generated_at || null,
     message: code ? "City code found." : "City is not mapped yet."
+  });
+});
+
+app.get("/api/webbeds/debug-city", (req, res) => {
+  const city = clean(req.query.city || "");
+  const map = loadWebbedsCityMap();
+  res.json({
+    ok: true,
+    city,
+    cache_loaded: !!map,
+    cache_count: map ? map.count : 0,
+    cache_generated_at: map ? map.generated_at : null,
+    from_cache: findWebbedsCityCodeFromCache(city),
+    from_hardcode: webbedsCityIdFromName(city),
+    effective: findWebbedsCityCodeFromCache(city) || webbedsCityIdFromName(city)
   });
 });
 
@@ -5366,29 +5634,7 @@ async function mshGooglePlacesHotelImage(hotelName, city, country) { console.log
   }
 }
 // MSH GOOGLE PLACES HOTEL IMAGE END
-async function mshGooglePlacesHotelImage(hotelName, city, country) { console.log("[GOOGLE-IMAGE] lookup for:", hotelName, city, country);
-  const apiKey = String(process.env.GOOGLE_MAPS_API_KEY || process.env.GOOGLE_PLACES_API_KEY || "").trim();
-  if (!apiKey) return "";
-  if (!hotelName) return "";
-
-  const query = encodeURIComponent([hotelName, city, country].filter(Boolean).join(", "));
-
-  try {
-    const findUrl = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=" + query + "&inputtype=textquery&fields=place_id&key=" + apiKey;
-    const findRes = await fetch(findUrl).then(function(r){ return r.json(); }).catch(function(){ return {}; });
-    const placeId = (findRes && findRes.candidates && findRes.candidates[0] && findRes.candidates[0].place_id) || "";
-    if (!placeId) return "";
-
-    const detailsUrl = "https://maps.googleapis.com/maps/api/place/details/json?place_id=" + encodeURIComponent(placeId) + "&fields=photos&key=" + apiKey;
-    const detailsRes = await fetch(detailsUrl).then(function(r){ return r.json(); }).catch(function(){ return {}; });
-    const photoRef = (detailsRes && detailsRes.result && detailsRes.result.photos && detailsRes.result.photos[0] && detailsRes.result.photos[0].photo_reference) || "";
-    if (!photoRef) return "";
-
-    return "https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=" + encodeURIComponent(photoRef) + "&key=" + apiKey;
-  } catch (err) {
-    return "";
-  }
-}
+// NOTE: Duplicate mshGooglePlacesHotelImage definition removed to prevent bugs.
 
 function hotelbedsImageUrl(hotel) {
   const image = Array.isArray(hotel?.images) && hotel.images.length ? hotel.images[0] : null;
@@ -5510,7 +5756,6 @@ async function hotelbedsAvailabilitySearch(query) {
 
   const rawHotels = Array.isArray(data?.hotels?.hotels) ? data.hotels.hotels : [];
 
-  function mshImgFallback(hotelName) { return 'https://loremflickr.com/800/600/hotel?lock=' + encodeURIComponent((hotelName || 'hotel').replace(/[^a-zA-Z0-9]/g, '')); }
   const hotels = (await Promise.all(rawHotels.map(async (hotel) => {
     const best = hotelbedsBestRoom(hotel);
     if (!best) return null;
@@ -5518,16 +5763,12 @@ async function hotelbedsAvailabilitySearch(query) {
     const hotelName = clean(hotel?.name || hotel?.hotelName || "");
     if (!hotelName) return null;
 
-    let image = "";
-try {
-  image = await mshGooglePlacesHotelImage(hotelName, city, country); if (!image) { image = mshImgFallback(hotelName); }
-} catch (e) {
-  image = "";
-}
-if (!image) {
-  const label = encodeURIComponent((hotelName || "Hotel").slice(0, 24));
-  image = `https://placehold.co/600x400/0b1d51/ffffff/png?text=${label}`;
-}
+    // Use the official Hotelbeds image URL if available, otherwise use a clean static placeholder
+    let image = hotelbedsImageUrl(hotel); 
+    if (!image) {
+      const label = encodeURIComponent((hotelName || "Hotel").slice(0, 24));
+      image = `https://placehold.co/600x400/0b1d51/ffffff/png?text=${label}`;
+    }
     const roomName = clean(best.room?.name || "Available room");
     const displayCurrency = clean(best.rate?.currency || currency).toUpperCase();
     return {
@@ -5798,377 +6039,73 @@ app.get("/api/instant-live-hotels", async (req, res) => {
 });
 // MSH FAST CUSTOMER LIVE SEARCH CACHE END
 
+// ============================================================
+// BOOKING.COM STYLE HIGH-SPEED SEARCH ENGINE
+// ============================================================
+const MSH_SEARCH_CACHE = new Map();
+const MSH_CACHE_TTL = 15 * 60 * 1000; // 15 Minutes
+
+function mshGetCacheKey(query) {
+  const city = clean(query.city || "").toLowerCase();
+  const country = clean(query.country || "").toLowerCase();
+  const checkIn = clean(query.checkIn || query.checkin || query.check_in || "");
+  const checkOut = clean(query.checkOut || query.checkout || query.check_out || "");
+  const guests = clean(query.guests || "2");
+  const rooms = clean(query.rooms || "1");
+  const currency = clean(query.currency || "GBP").toUpperCase();
+  return `${city}|${country}|${checkIn}|${checkOut}|${guests}|${rooms}|${currency}`;
+}
+
 app.get("/api/multi-supplier-hotels", async (req, res) => {
+  const startTime = Date.now();
+  const cacheKey = mshGetCacheKey(req.query);
+
+  // 1. INSTANT CACHE CHECK
+  if (MSH_SEARCH_CACHE.has(cacheKey)) {
+    const cachedData = MSH_SEARCH_CACHE.get(cacheKey);
+    if (Date.now() - cachedData.timestamp < MSH_CACHE_TTL) {
+      console.log(`[FAST-SEARCH] Cache HIT for ${req.query.city} in ${Date.now() - startTime}ms`);
+      return res.json({ ok: true, source: "cache", ...cachedData.data });
+    } else {
+      MSH_SEARCH_CACHE.delete(cacheKey);
+    }
+  }
+
   try {
-    const query = new URLSearchParams(req.query).toString();
+    // 2. PURE LOCAL CHUNK FETCH (No supplier calls)
+    const params = new URLSearchParams(req.query).toString();
+    const localRes = await fetch(`http://127.0.0.1:${PORT}/search?${params}`, { cache: "no-store" });
+    const localData = await localRes.json().catch(() => ({}));
+    const localHotels = Array.isArray(localData.hotels) ? localData.hotels : [];
 
-    const localUrl = `http://127.0.0.1:${PORT}/search?${query}`;
-    const localResult = await fetch(localUrl, { cache: "no-store" })
-      .then((r) => r.json())
-      .catch(() => ({ hotels: [] }));
-
-    const localHotels = Array.isArray(localResult.hotels) ? localResult.hotels : [];
-
-    let hotelbedsHotels = [];
-    try {
-      hotelbedsHotels = await hotelbedsSearchHotelsFromRequest(req);
-    } catch {
-      hotelbedsHotels = [];
-    }
-
-    let webbedsHotels = [];
-    try {
-      const city = clean(req.query.city || "");
-      const currency = clean(req.query.currency || "GBP").toUpperCase();
-
-      const cityId = findWebbedsCityCodeFromCache(city) || webbedsCityIdFromName(city);
-
-      if (cityId && typeof buildWebbedsSearchXml === "function") {
-        const built = buildWebbedsSearchXml({
-          ...req.query,
-          cityId,
-          currencyId: webbedsCurrencyIdFromCode(currency),
-          nationalityId: webbedsCountryIdFromCode(req.query.nationality || "GB"),
-          residenceId: webbedsCountryIdFromCode(req.query.residence || "GB")
-        });
-
-        if (built.ok) {
-          const result = await webbedsPostXml(built.xml);
-          webbedsHotels = parseWebbedsHotels(result.text, currency).map((hotel) => {
-            const rawId = String(hotel.hotel_id || hotel.hotelId || "").replace("WEBBEDS-", "");
-            const hasRealName =
-              hotel.name &&
-              !/^Hotel\s+\d+$/i.test(String(hotel.name)) &&
-              !/^\d+$/.test(String(hotel.name));
-
-            const safeName = hasRealName ? hotel.name : `WebBeds property ${rawId}`;
-
-            return {
-              ...hotel,
-              name: safeName,
-              hotel_name: safeName,
-              city,
-              country:
-                city.toUpperCase() === "DUBAI" || city.toUpperCase() === "ABU DHABI"
-                  ? "United Arab Emirates"
-                  : clean(req.query.country || hotel.country || ""),
-              source: "webbeds_live_supplier",
-              supplierLabel: "WebBeds live rate",
-              supplier_private: {
-                ...(hotel.supplier_private || {}),
-                supplier_code: "WEBBEDS"
-              }
-            };
-          });
-        }
-      }
-    } catch {
-      webbedsHotels = [];
-    }
-
-    let ratehawkHotels = [];
-
-    try {
-      const cfg = ratehawkConfig();
-      const canUseRatehawkPublicly =
-        cfg.ready &&
-        cfg.env === "production" &&
-        !cfg.baseUrl.toLowerCase().includes("sandbox");
-
-      if (canUseRatehawkPublicly && typeof ratehawkPost === "function") {
-        ratehawkHotels = [];
-      }
-    } catch {
-      ratehawkHotels = [];
-    }
-
-    const liveSupplierHotels = [
-      ...hotelbedsHotels,
-      ...webbedsHotels,
-      ...ratehawkHotels
-    ];
-
-    let merged = mergeUniqueHotelsByKey(liveSupplierHotels);
-
-    merged = merged.filter((hotel) => {
-      const livePrice = number(hotel.price || hotel.total || hotel.convertedPrice || hotel.displayPrice || 0);
-      const displayName = clean(hotel.name || hotel.hotel_name || "");
-      const sourceText = clean([
-        hotel.source,
-        hotel.supplierLabel,
-        hotel.supplier_private?.supplier_code
-      ].join(" ")).toLowerCase();
-
-      const isVerifiedSupplier =
-        sourceText.includes("hotelbeds") ||
-        sourceText.includes("webbeds") ||
-        sourceText.includes("ratehawk");
-
-      const badName =
-        !displayName ||
-        /^Live supplier property/i.test(displayName) ||
-        /^Hotel\s+\d+$/i.test(displayName) ||
-        /^\d+$/.test(displayName) ||
-        /placeholder|sample|demo|fake|test hotel/i.test(displayName);
-
-      return livePrice > 0 && hotel.availableToBook !== false && isVerifiedSupplier && !badName;
-    });
-
-    merged.sort((a, b) => {
-      const aPrice = number(a.price || a.total || a.convertedPrice || 0);
-      const bPrice = number(b.price || b.total || b.convertedPrice || 0);
-      if (aPrice > 0 && bPrice > 0) return aPrice - bPrice;
-      return clean(a.name || a.hotel_name).localeCompare(clean(b.name || b.hotel_name));
-    });
-
-    res.json({
+    // 3. Format response
+    const finalResponse = {
       ok: true,
-      source: "multi_supplier",
+      source: "local_chunks_only",
       suppliers: {
         existing: localHotels.length,
-        hotelbeds: hotelbedsHotels.length,
-        webbeds: webbedsHotels.length,
-        ratehawk: ratehawkHotels.length
+        hotelbeds: 0,
+        webbeds: 0,
+        ratehawk: 0
       },
-      count: merged.length,
-      hotels: merged
-    });
+      count: localHotels.length,
+      hotels: localHotels
+    };
+
+    // 4. Save to cache
+    MSH_SEARCH_CACHE.set(cacheKey, { data: finalResponse, timestamp: Date.now() });
+
+    console.log(`[FAST-SEARCH] Served ${localHotels.length} local chunks for ${req.query.city} in ${Date.now() - startTime}ms`);
+    res.json(finalResponse);
+    
   } catch (err) {
     res.status(500).json({
       ok: false,
-      message: "Multi-supplier hotel search failed.",
+      message: "Local chunk search failed.",
       error: err.message, stack: err.stack
     });
   }
 });
-// MSH REAL MULTI SUPPLIER ORCHESTRATOR END
-
-function mergeUniqueHotelsByKey(hotels) {
-  const seen = new Set();
-  const merged = [];
-
-  for (const hotel of hotels || []) {
-    const name = clean(hotel.hotel_name || hotel.name || "");
-    const city = clean(hotel.city || "");
-    const country = clean(hotel.country || "");
-    const supplierKey = clean(hotel.rate_source_id || hotel.hotel_id || hotel.hotelId || name);
-
-    const key = `${name.toLowerCase()}|${city.toLowerCase()}|${country.toLowerCase()}|${supplierKey.toLowerCase()}`;
-
-    if (seen.has(key)) continue;
-    seen.add(key);
-    merged.push(hotel);
-  }
-
-  return merged;
-}
-
-// MSH SEPARATE AUTO LIVE RATE SEARCH ENGINE START
-function MSH_LIVE2_TEXT(v) { return String(v || "").trim(); }
-function MSH_LIVE2_NORM(v) { return MSH_LIVE2_TEXT(v).toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim(); }
-function MSH_LIVE2_NUM(v) { const n = Number(String(v || "").replace(/[^0-9.-]/g, "")); return Number.isFinite(n) && n > 0 ? Number(n.toFixed(2)) : 0; }
-function MSH_LIVE2_ROOM(h) { return Array.isArray(h && h.rooms) && h.rooms.length ? h.rooms[0] : {}; }
-function MSH_LIVE2_PRICE(h) {
-  const room = MSH_LIVE2_ROOM(h);
-  const rates = Array.isArray(h && h.rates) ? h.rates : [];
-  const rate = rates.find((r) => MSH_LIVE2_NUM(r.nightly_rate || r.amount || r.price || r.total || r.convertedPrice) > 0) || {};
-  const values = [
-    h && h.price, h && h.convertedPrice, h && h.displayPrice, h && h.amount, h && h.total, h && h.nightly_rate,
-    room.price, room.convertedPrice, room.displayPrice, room.amount, room.total, room.nightly_rate,
-    rate.nightly_rate, rate.amount, rate.price, rate.total, rate.convertedPrice
-  ];
-  for (const value of values) {
-    const price = MSH_LIVE2_NUM(value);
-    if (price > 0) return price;
-  }
-  return 0;
-}
-function MSH_LIVE2_CURRENCY(h, fallback) {
-  const room = MSH_LIVE2_ROOM(h);
-  const rates = Array.isArray(h && h.rates) ? h.rates : [];
-  const rate = rates[0] || {};
-  return MSH_LIVE2_TEXT(h && (h.currency || h.displayCurrency) || room.displayCurrency || room.currency || rate.currency || fallback || "GBP").toUpperCase();
-}
-function MSH_LIVE2_NAME(h) { return MSH_LIVE2_TEXT(h && (h.name || h.hotel_name || h.hotelName || h.property_name || h.title || "Hotel")); }
-function MSH_LIVE2_ID(h) { return MSH_LIVE2_TEXT(h && (h.hotelId || h.hotel_id || h.id || h.code || h.hotel_code || h.supplier_hotel_id || h.supplierHotelId || MSH_LIVE2_NAME(h))); }
-function MSH_LIVE2_CITY(h, fallback) { return MSH_LIVE2_TEXT(h && (h.city || h.cityName || h.destination || (h.location && h.location.city)) || fallback || ""); }
-function MSH_LIVE2_COUNTRY(h, fallback) { return MSH_LIVE2_TEXT(h && (h.country || h.countryName || (h.location && h.location.country)) || fallback || ""); }
-function MSH_LIVE2_IMAGE(h) { return typeof firstImage === "function" ? firstImage(h || {}) : MSH_LIVE2_TEXT(h && (h.image || h.image_url || h.main_image || h.photo || h.thumbnail)); }
-function MSH_LIVE2_HOTEL_ONLY(h) {
-  if (typeof isStrictHotelOnly === "function") {
-    try { if (!isStrictHotelOnly(h)) return false; } catch {}
-  }
-  const t = MSH_LIVE2_NORM([MSH_LIVE2_NAME(h), h && h.propertyType, h && h.property_type, h && h.type, h && h.category, h && h.description].filter(Boolean).join(" "));
-  if (!t || /(test|demo|placeholder|sample|fake|dummy|example)/.test(t)) return false;
-  if (/(apartment|apartments|serviced apartment|aparthotel|studio|residence|villa|holiday home|vacation rental|condo|penthouse|loft|hostel|camp|caravan|farm stay|cottage|guest house|guesthouse|bed and breakfast|\bb\s*b\b|rental)/.test(t)) return false;
-  return /(hotel|inn|motel|resort|lodge|suites|marriott|hilton|hyatt|radisson|novotel|ibis|mercure|sheraton|doubletree|crowne plaza|intercontinental|fairmont|ritz|waldorf|sofitel|westin|travelodge|premier inn|holiday inn)/.test(t);
-}
-function MSH_LIVE2_SAME_COUNTRY(actual, wanted) {
-  if (!MSH_LIVE2_TEXT(wanted)) return true;
-  if (typeof mshSameCountryForCustomer === "function") {
-    try { return mshSameCountryForCustomer(actual, wanted); } catch {}
-  }
-  const a = MSH_LIVE2_NORM(actual), b = MSH_LIVE2_NORM(wanted);
-  if (!a || !b) return true;
-  if (a === b) return true;
-  const uk = new Set(["united kingdom", "uk", "gb", "great britain", "england", "scotland", "wales", "northern ireland"]);
-  return uk.has(a) && uk.has(b);
-}
-function MSH_LIVE2_SAME_CITY(actual, wanted, country) {
-  if (!MSH_LIVE2_TEXT(wanted)) return true;
-  if (typeof mshSameCityForCustomer === "function") {
-    try { return mshSameCityForCustomer(actual, wanted, country); } catch {}
-  }
-  const a = MSH_LIVE2_NORM(actual), b = MSH_LIVE2_NORM(wanted);
-  return !!a && !!b && a === b;
-}
-function MSH_LIVE2_PUBLIC(h, query, source) {
-  let normalized = h || {};
-  try { if (typeof normalizeHotel === "function") normalized = normalizeHotel({ ...h }, query.currency || h.currency || "GBP"); } catch {}
-  try { if (typeof publicHotel === "function") normalized = publicHotel(normalized); } catch {}
-  const room = MSH_LIVE2_ROOM(normalized);
-  const price = MSH_LIVE2_PRICE(normalized);
-  const currency = MSH_LIVE2_CURRENCY(normalized, query.currency);
-  const rateId = MSH_LIVE2_TEXT(room.rate_source_id || normalized.rate_source_id || normalized.supplier_rate_id || normalized.rateKey || normalized.rate_key || makeRef("RATE"));
-  const timestamp = MSH_LIVE2_TEXT(room.rate_source_timestamp || normalized.rate_source_timestamp || normalized.updated_at || normalized.created_at || nowISO());
-  return {
-    ...normalized,
-    hotelId: MSH_LIVE2_ID(normalized),
-    hotel_id: MSH_LIVE2_ID(normalized),
-    name: MSH_LIVE2_NAME(normalized),
-    hotel_name: MSH_LIVE2_NAME(normalized),
-    country: MSH_LIVE2_COUNTRY(normalized, query.country),
-    city: MSH_LIVE2_CITY(normalized, query.city),
-    image: MSH_LIVE2_IMAGE(normalized),
-    price,
-    convertedPrice: price,
-    displayPrice: price,
-    currency,
-    displayCurrency: currency,
-    availableToBook: price > 0,
-    availabilityMode: price > 0 ? "current_rate" : "availability_check",
-    source: source || normalized.source || normalized.supplierLabel || "myspace_harvested_rates",
-    supplierLabel: normalized.supplierLabel || source || "MySpace Hotel rates",
-    rate_source_id: rateId,
-    rate_source_timestamp: timestamp,
-    source_health: price > 0 ? "verified" : "checking",
-    rooms: Array.isArray(normalized.rooms) && normalized.rooms.length ? normalized.rooms.map((r, index) => ({
-      roomCode: r.roomCode || r.room_code || r.rate_id || `ROOM-${index + 1}`,
-      roomName: r.roomName || r.room_name || r.rate_name || "Available room",
-      board: r.board || r.boardName || r.board_name || "Room details before checkout",
-      cancellation: r.cancellation || r.cancellationPolicy || "Cancellation information is shown before you complete your booking.",
-      taxes: r.taxes || "Applicable taxes and fees are shown before you complete your booking.",
-      price: MSH_LIVE2_NUM(r.price || r.convertedPrice || r.displayPrice || r.amount || price),
-      convertedPrice: MSH_LIVE2_NUM(r.convertedPrice || r.price || r.displayPrice || r.amount || price),
-      displayCurrency: MSH_LIVE2_TEXT(r.displayCurrency || r.currency || currency).toUpperCase(),
-      rate_source_id: r.rate_source_id || rateId,
-      rate_source_timestamp: r.rate_source_timestamp || timestamp,
-      source_health: r.source_health || (price > 0 ? "verified" : "checking")
-    })) : [{
-      roomCode: "STANDARD",
-      roomName: "Available room",
-      board: "Room details before checkout",
-      cancellation: "Cancellation information is shown before you complete your booking.",
-      taxes: "Applicable taxes and fees are shown before you complete your booking.",
-      price,
-      convertedPrice: price,
-      displayCurrency: currency,
-      rate_source_id: rateId,
-      rate_source_timestamp: timestamp,
-      source_health: price > 0 ? "verified" : "checking"
-    }]
-  };
-}
-function MSH_LIVE2_DEDUPE(hotels, query) {
-  const seen = new Set();
-  const rows = [];
-  for (const item of Array.isArray(hotels) ? hotels : []) {
-    if (!item) continue;
-    if (!MSH_LIVE2_HOTEL_ONLY(item)) continue;
-    if (!MSH_LIVE2_SAME_COUNTRY(MSH_LIVE2_COUNTRY(item, query.country), query.country)) continue;
-    if (!MSH_LIVE2_SAME_CITY(MSH_LIVE2_CITY(item, query.city), query.city, query.country)) continue;
-    const h = MSH_LIVE2_PUBLIC(item, query, item.source || item.supplierLabel);
-    const key = MSH_LIVE2_NORM(`${h.hotelId || h.hotel_id}|${h.name}|${h.city}|${h.country}`);
-    if (!key || seen.has(key)) continue;
-    seen.add(key);
-    rows.push(h);
-  }
-  rows.sort((a, b) => {
-    const ap = MSH_LIVE2_PRICE(a), bp = MSH_LIVE2_PRICE(b);
-    if (bp > 0 && ap <= 0) return 1;
-    if (ap > 0 && bp <= 0) return -1;
-    const ai = MSH_LIVE2_IMAGE(a) ? 1 : 0, bi = MSH_LIVE2_IMAGE(b) ? 1 : 0;
-    if (bi !== ai) return bi - ai;
-    return MSH_LIVE2_NAME(a).localeCompare(MSH_LIVE2_NAME(b));
-  });
-  return rows;
-}
-async function MSH_LIVE2_SUPPLIER_HOTELS(query) {
-  const results = [];
-  const limit = Math.max(25, Math.min(Number(query.limit || 100), 1000));
-  try {
-    if (typeof hotelbedsAvailabilitySearch === "function") {
-      const hb = await Promise.race([
-        hotelbedsAvailabilitySearch({ ...query, limit }).catch(() => ({ hotels: [] })),
-        new Promise((resolve) => setTimeout(() => resolve({ hotels: [] }), 8000))
-      ]);
-      results.push(...(Array.isArray(hb.hotels) ? hb.hotels.map((h) => ({ ...h, source: "hotelbeds_live_supplier", supplierLabel: "Hotelbeds live rate" })) : []));
-    }
-  } catch {}
-  try {
-    if (typeof findWebbedsCityCodeFromCache === "function" && typeof buildWebbedsSearchXml === "function" && typeof webbedsPostXml === "function" && typeof parseWebbedsHotels === "function") {
-      const cityId = findWebbedsCityCodeFromCache(query.city) || (typeof webbedsCityIdFromName === "function" ? webbedsCityIdFromName(query.city) : "");
-      if (cityId) {
-        const built = buildWebbedsSearchXml({
-          ...query,
-          cityId,
-          currencyId: typeof webbedsCurrencyIdFromCode === "function" ? webbedsCurrencyIdFromCode(query.currency || "GBP") : query.currency || "GBP",
-          nationalityId: typeof webbedsCountryIdFromCode === "function" ? webbedsCountryIdFromCode(query.nationality || "GB") : "",
-          residenceId: typeof webbedsCountryIdFromCode === "function" ? webbedsCountryIdFromCode(query.residence || "GB") : ""
-        });
-        if (built && built.ok) {
-          const wb = await Promise.race([
-            webbedsPostXml(built.xml).catch(() => ({ text: "" })),
-            new Promise((resolve) => setTimeout(() => resolve({ text: "" }), 8000))
-          ]);
-          const parsed = parseWebbedsHotels(wb.text || "", query.currency || "GBP");
-          results.push(...parsed.map((h) => ({ ...h, country: query.country || h.country, city: query.city || h.city, source: "webbeds_live_supplier", supplierLabel: "WebBeds live rate" })));
-        }
-      }
-    }
-  } catch {}
-  return results;
-}
-function MSH_LIVE2_CATALOGUE_HOTELS(query) {
-  try {
-    const rows = typeof readHotels === "function" ? readHotels() : [];
-    return (Array.isArray(rows) ? rows : []).filter((h) => {
-      if (typeof isBlockedCountry === "function" && isBlockedCountry(h.country)) return false;
-      if (!MSH_LIVE2_SAME_COUNTRY(MSH_LIVE2_COUNTRY(h), query.country)) return false;
-      if (!MSH_LIVE2_SAME_CITY(MSH_LIVE2_CITY(h), query.city, query.country)) return false;
-      return true;
-    }).map((h) => ({ ...h, source: h.source || "harvested_current_rates", supplierLabel: h.supplierLabel || "Current hotel rate" }));
-  } catch { return []; }
-}
-async function MSH_LIVE2_COLLECT(query) {
-  const catalogue = MSH_LIVE2_CATALOGUE_HOTELS(query);
-  const supplier = await MSH_LIVE2_SUPPLIER_HOTELS(query);
-  return MSH_LIVE2_DEDUPE([...supplier, ...catalogue], query);
-}
-function MSH_LIVE2_MATCH_SCORE(h, query) {
-  const wantedId = MSH_LIVE2_NORM(query.hotelId || query.hotel_id || query.id);
-  const wantedName = MSH_LIVE2_NORM(query.hotelName || query.hotel_name || query.name);
-  const id = MSH_LIVE2_NORM([h.hotelId, h.hotel_id, h.id, h.code, h.supplier_hotel_id].filter(Boolean).join(" "));
-  const name = MSH_LIVE2_NORM(MSH_LIVE2_NAME(h));
-  let score = 0;
-  if (wantedId && id && (id === wantedId || id.includes(wantedId) || wantedId.includes(id))) score += 1000;
-  if (wantedName && name && (name === wantedName || name.includes(wantedName) || wantedName.includes(name))) score += 900;
-  if (MSH_LIVE2_SAME_CITY(MSH_LIVE2_CITY(h), query.city, query.country)) score += 100;
-  if (MSH_LIVE2_PRICE(h) > 0) score += 500;
-  if (MSH_LIVE2_NORM(h.source || h.supplierLabel).includes("live")) score += 100;
-  return score;
-}
-
 app.get("/api/live-rate-engine-hotels", async (req, res) => {
   const query = {
     ...req.query,
@@ -6496,8 +6433,8 @@ function MSH_ALLSUP_CITY_ALIASES(v) {
     "prague": ["praha"],
     "lisbon": ["lisboa"],
     "athens": ["athina"],
-    "montreal": ["montréal"],
-    "sao paulo": ["são paulo"],
+    "montreal": ["montrÃ©al"],
+    "sao paulo": ["sÃ£o paulo"],
     "mexico city": ["ciudad de mexico", "cdmx"],
     "bangkok": ["krung thep"],
     "tokyo": ["tokyo to"],
@@ -6598,17 +6535,25 @@ function MSH_ALLSUP_DATA_FILES() {
   return [...names];
 }
 function MSH_ALLSUP_HARVESTED(query) {
-  const rows = [];
-  for (const file of MSH_ALLSUP_DATA_FILES()) {
-    try {
-      const parsed = typeof readJSON === "function" ? readJSON(file, []) : JSON.parse(fs.readFileSync(file, "utf8"));
-      const arr = MSH_ALLSUP_ARRAY(parsed);
-      const sourceFile = path.basename(file).replace(/\.json$/i, "");
-      rows.push(...arr.map((h) => ({ ...h, source: h.source || `${sourceFile}_harvested_current_rate` })));
-    } catch {}
-  }
-  return rows;
+    const rows = [];
+    
+    // 1. Load from global chunk cache (memory)
+    if (global.mshChunkCache) {
+        rows.push(...Object.values(global.mshChunkCache));
+    }
+
+    // 2. Load from data files on disk (fallback)
+    for (const file of MSH_ALLSUP_DATA_FILES()) {
+        try {
+            const parsed = typeof readJSON === "function" ? readJSON(file, []) : JSON.parse(fs.readFileSync(file, "utf8"));
+            const arr = MSH_ALLSUP_ARRAY(parsed);
+            const sourceFile = path.basename(file).replace(/\.json$/i, "");
+            rows.push(...arr.map((h) => ({ ...h, source: h.source || `${sourceFile}_harvested_current_rate` })));
+        } catch {}
+    }
+    return rows;
 }
+
 async function MSH_ALLSUP_LIVE_CONNECTORS(query) {
   const limit = Math.max(50, Math.min(Number(query.limit || 300), 1000));
   const tasks = [];
@@ -6621,7 +6566,7 @@ async function MSH_ALLSUP_LIVE_CONNECTORS(query) {
   if (typeof findWebbedsCityCodeFromCache === "function" && typeof buildWebbedsSearchXml === "function" && typeof webbedsPostXml === "function" && typeof parseWebbedsHotels === "function") {
     tasks.push((async () => {
       try {
-        const cityId = findWebbedsCityCodeFromCache(query.city) || (typeof webbedsCityIdFromName === "function" ? webbedsCityIdFromName(query.city) : "");
+        const cityId = findWebbedsCityCodeFromCache(query.city, query.country) || (typeof webbedsCityIdFromName === "function" ? webbedsCityIdFromName(query.city) : "");
         if (!cityId) return [];
         const built = buildWebbedsSearchXml({
           ...query,
@@ -6657,19 +6602,70 @@ async function MSH_ALLSUP_LIVE_CONNECTORS(query) {
 function MSH_ALLSUP_DEDUPE(rows, query) {
   const seen = new Set();
   const out = [];
+  
+  // Normalize the requested city for a loose match
+  const reqCity = MSH_ALLSUP_NORM(query.city);
+  const reqCountry = MSH_ALLSUP_NORM(query.country);
+
   for (const item of Array.isArray(rows) ? rows : []) {
     if (!item) continue;
+    
+    // 1. Basic checks
     if (!MSH_ALLSUP_HOTEL_ONLY(item)) continue;
     if (typeof isBlockedCountry === "function" && isBlockedCountry(MSH_ALLSUP_COUNTRY(item, query.country))) continue;
-    if (!MSH_ALLSUP_COUNTRY_OK(MSH_ALLSUP_COUNTRY(item, query.country), query.country)) continue;
-    if (!MSH_ALLSUP_CITY_OK(MSH_ALLSUP_CITY(item, query.city), query.city, query.country)) continue;
+    
+    // 2. LOOSE MATCHING FOR CHUNKS & WEBBEDS
+    // We add 'webbeds' to this list so it bypasses strict city/country string matching
+    const src = String(item.source || item.supplierLabel || "").toLowerCase();
+    const isLooseSource = src.includes('local_chunk_cache') || 
+                          src.includes('harvested_current_rates') || 
+                          src.includes('webbeds');
+    
+    if (!isLooseSource) {
+        // Strict matching for other live suppliers
+        if (!MSH_ALLSUP_COUNTRY_OK(MSH_ALLSUP_COUNTRY(item, query.country), query.country)) continue;
+        if (!MSH_ALLSUP_CITY_OK(MSH_ALLSUP_CITY(item, query.city), query.city, query.country)) continue;
+    } else {
+        // For chunks and WebBeds, only ensure there is some text overlap if the query has a city
+        const itemCity = MSH_ALLSUP_NORM(MSH_ALLSUP_CITY(item));
+        const itemCountry = MSH_ALLSUP_NORM(MSH_ALLSUP_COUNTRY(item));
+        
+        // If we have a requested city, check if it loosely matches
+        if (reqCity && reqCity.length > 2) {
+            const cityMatch = itemCity.includes(reqCity) || reqCity.includes(itemCity);
+            
+            // If it doesn't match, check the country as a fallback
+            if (!cityMatch) {
+                if (reqCountry && reqCountry.length > 2) {
+                    const countryMatch = itemCountry.includes(reqCountry) || reqCountry.includes(itemCountry);
+                    if (!countryMatch) continue; // Skip if neither city nor country matches
+                } else {
+                    continue; // Skip if city doesn't match and we have no country to fallback on
+                }
+            }
+        }
+        
+        // If we have a requested country but no requested city, check country
+        if (reqCountry && reqCountry.length > 2 && (!reqCity || reqCity.length <= 2)) {
+            const countryMatch = itemCountry.includes(reqCountry) || reqCountry.includes(itemCountry);
+            if (!countryMatch) continue;
+        }
+    }
+
     const hotel = MSH_ALLSUP_PUBLIC(item, query, item.source || item.supplierLabel);
     const key = MSH_ALLSUP_NORM(`${hotel.supplier_code}|${hotel.hotelId}|${hotel.name}|${hotel.city}|${hotel.country}`);
     if (!key || seen.has(key)) continue;
     seen.add(key);
     out.push(hotel);
   }
+  
   out.sort((a, b) => {
+    // 1. Chunks first â€” they have real images and are already in RAM
+    const aIsChunk = MSH_ALLSUP_NORM(a.source).includes("chunk") ? 1 : 0;
+    const bIsChunk = MSH_ALLSUP_NORM(b.source).includes("chunk") ? 1 : 0;
+    if (aIsChunk !== bIsChunk) return bIsChunk - aIsChunk;
+    
+    // 2. Then live suppliers with real prices
     const ap = MSH_ALLSUP_PRICE(a), bp = MSH_ALLSUP_PRICE(b);
     const al = MSH_ALLSUP_NORM(a.source).includes("live") ? 1 : 0;
     const bl = MSH_ALLSUP_NORM(b.source).includes("live") ? 1 : 0;
@@ -6678,6 +6674,7 @@ function MSH_ALLSUP_DEDUPE(rows, query) {
     if (bl !== al) return bl - al;
     return MSH_ALLSUP_NAME(a).localeCompare(MSH_ALLSUP_NAME(b));
   });
+  
   return out;
 }
 async function MSH_ALLSUP_COLLECT(query) {
@@ -6731,7 +6728,25 @@ async function MSH_ALLSUP_COLLECT(query) {
     addSupplier("Hotelbeds", "HOTELBEDS", MSH_SU_HOTELBEDS)
   ]);
   const liveDedupe = MSH_ALLSUP_DEDUPE(collected, query);
-  let harvested = MSH_ALLSUP_HARVESTED(query);
+  
+  // MSH CHUNK INJECTION: Pull from the in-memory chunk cache (loaded at startup)
+  // This is the Booking.com-style fast path â€” 106k+ hotels already in RAM.
+  let harvested = [];
+  if (global.mshChunkCache) {
+      const wantedCity = MSH_ALLSUP_NORM(query.city);
+      const wantedCountry = MSH_ALLSUP_NORM(query.country);
+      for (const h of Object.values(global.mshChunkCache)) {
+          const hCity = MSH_ALLSUP_NORM(h.city || h.destination || h.cityName || "");
+          const hCountry = MSH_ALLSUP_NORM(h.country || h.countryName || "");
+          const cityOk = !wantedCity || hCity.includes(wantedCity) || wantedCity.includes(hCity);
+          const countryOk = !wantedCountry || hCountry.includes(wantedCountry) || wantedCountry.includes(hCountry);
+          if (cityOk && countryOk) {
+              harvested.push({ ...h, source: "local_chunk_cache", supplier_code: h.supplier_code || "CHUNK" });
+          }
+      }
+      console.log(`[SUPPLIER GLOBAL] chunks matched ${harvested.length} for ${query.city}`);
+  }
+
   const harvestedDedupe = MSH_ALLSUP_DEDUPE(harvested, query);
   const merged = MSH_ALLSUP_DEDUPE([...liveDedupe, ...harvestedDedupe], query);
 
@@ -6946,7 +6961,7 @@ async function MSH_SU_WEBBEDS(query) {
 
     const cityId =
       MSH_SU_TEXT(query.cityId || query.city_id || query.destinationCode || "") ||
-      (typeof findWebbedsCityCodeFromCache === "function" ? findWebbedsCityCodeFromCache(cityName) : "") ||
+      (typeof findWebbedsCityCodeFromCache === "function" ? findWebbedsCityCodeFromCache(cityName, countryName) : "") ||
       (typeof webbedsCityIdFromName === "function" ? webbedsCityIdFromName(cityName) : "");
 
     if (!cityId) {
@@ -6988,8 +7003,57 @@ async function MSH_SU_WEBBEDS(query) {
     return [];
   }
 }
-function MSH_SU_RATEHAWK_REGION(query) { try { const map=JSON.parse(process.env.RATEHAWK_REGION_MAP||"{}"); const keys=[`${MSH_SU_NORM(query.country)}|${MSH_SU_NORM(query.city)}`, MSH_SU_NORM(query.city), MSH_SU_TEXT(query.city)]; for (const k of keys) if (map[k]) return Number(map[k]); } catch {} return Number(query.ratehawkRegionId || query.region_id || query.regionId || process.env.RATEHAWK_DEFAULT_REGION_ID || 0); }
-async function MSH_SU_RATEHAWK(query) { try { if (!(typeof ratehawkPost==="function" && typeof ratehawkConfig==="function")) return []; const cfg=ratehawkConfig(); if (!cfg.ready) return []; const region_id=MSH_SU_RATEHAWK_REGION(query); if (!region_id) return []; const guests=Math.max(1, Number(query.guests||2)); const payload={ checkin: MSH_SU_TEXT(query.checkIn||query.checkin||query.check_in||tomorrowISOForRatehawk(14)), checkout: MSH_SU_TEXT(query.checkOut||query.checkout||query.check_out||tomorrowISOForRatehawk(15)), residency: MSH_SU_TEXT(query.residency||"gb").toLowerCase(), language: MSH_SU_TEXT(query.language||"en"), guests:[{ adults: guests, children: [] }], region_id, currency: MSH_SU_TEXT(query.currency||"GBP").toUpperCase() }; const r=await Promise.race([ratehawkPost("/api/b2b/v3/search/serp/region/", payload), new Promise((resolve)=>setTimeout(()=>resolve({ok:false,data:{}}),6500))]); const hotels=MSH_SU_ARR(r?.data?.hotels || r?.data?.data?.hotels || r?.data?.result?.hotels || r?.data?.hotels_data || r?.data); return hotels.map((h)=>({ ...h, country:query.country||h.country, city:query.city||h.city, source:"ratehawk_live_supplier", supplier_code:"RATEHAWK" })); } catch { return []; } }
+function MSH_SU_RATEHAWK_REGION(query) {
+  try {
+    let raw = clean(process.env.RATEHAWK_REGION_MAP || "{}");
+    if (raw.startsWith("'") && raw.endsWith("'")) raw = raw.slice(1, -1);
+    if (raw.startsWith('"') && raw.endsWith('"')) raw = raw.slice(1, -1);
+    
+    const map = JSON.parse(raw);
+    const keys = [`${MSH_SU_NORM(query.country)}|${MSH_SU_NORM(query.city)}`, MSH_SU_NORM(query.city), MSH_SU_TEXT(query.city)];
+    for (const k of keys) if (map[k]) return Number(map[k]);
+  } catch {} 
+  return Number(query.ratehawkRegionId || query.region_id || query.regionId || process.env.RATEHAWK_DEFAULT_REGION_ID || 0);
+}
+async function MSH_SU_RATEHAWK(query) {
+  try {
+    if (!(typeof ratehawkPost === "function" && typeof ratehawkConfig === "function")) return [];
+    const cfg = ratehawkConfig();
+    if (!cfg.ready) return [];
+
+    let region_id = 0;
+    try {
+      if (typeof mshRatehawkResolveRegionId === "function") {
+        region_id = await mshRatehawkResolveRegionId(query);
+      }
+    } catch {}
+
+    if (!region_id) {
+      region_id = MSH_SU_RATEHAWK_REGION(query);
+    }
+
+    if (!region_id) return [];
+
+    const guests = Math.max(1, Number(query.guests || 2));
+    const payload = {
+      checkin: MSH_SU_TEXT(query.checkIn || query.checkin || query.check_in || tomorrowISOForRatehawk(14)),
+      checkout: MSH_SU_TEXT(query.checkOut || query.checkout || query.check_out || tomorrowISOForRatehawk(15)),
+      residency: MSH_SU_TEXT(query.residency || "gb").toLowerCase(),
+      language: MSH_SU_TEXT(query.language || "en"),
+      guests: [{ adults: guests, children: [] }],
+      region_id,
+      currency: MSH_SU_TEXT(query.currency || "GBP").toUpperCase()
+    };
+    const r = await Promise.race([
+      ratehawkPost("/api/b2b/v3/search/serp/region/", payload),
+      new Promise((resolve) => setTimeout(() => resolve({ ok: false, data: {} }), 6500))
+    ]);
+    const hotels = MSH_SU_ARR(r?.data?.hotels || r?.data?.data?.hotels || r?.data?.result?.hotels || r?.data?.hotels_data || r?.data);
+    return hotels.map((h) => ({ ...h, country: query.country || h.country, city: query.city || h.city, source: "ratehawk_live_supplier", supplier_code: "RATEHAWK" }));
+  } catch {
+    return [];
+  }
+}
 async function MSH_SU_HYPERGUEST(query) { try { const url=MSH_SU_TEXT(process.env.HYPERGUEST_SEARCH_URL || process.env.HYPERGUEST_AVAILABILITY_URL || ""); const token=MSH_SU_TEXT(process.env.HYPERGUEST_API_KEY || process.env.HYPERGUEST_TOKEN || ""); if (!url || !token) return []; const params=new URLSearchParams({ country:query.country||"", city:query.city||"", checkIn:query.checkIn||query.checkin||"", checkOut:query.checkOut||query.checkout||"", guests:String(query.guests||2), rooms:String(query.rooms||1), currency:query.currency||"GBP", propertyType:"hotel" }); const r=await Promise.race([fetch(`${url}${url.includes("?")?"&":"?"}${params.toString()}`,{headers:{Authorization:`Bearer ${token}`,Accept:"application/json"}}).then(x=>x.json()).catch(()=>({})), new Promise((resolve)=>setTimeout(()=>resolve({}),6500))]); return MSH_SU_ARR(r).map((h)=>({ ...h, country:query.country||h.country, city:query.city||h.city, source:"hyperguest_live_supplier", supplier_code:"HYPERGUEST" })); } catch { return []; } }
 function MSH_SU_QUERY(req) { return { ...req.query, country:MSH_SU_TEXT(req.query.country), city:MSH_SU_TEXT(req.query.city), currency:MSH_SU_TEXT(req.query.currency||"GBP").toUpperCase(), checkIn:MSH_SU_TEXT(req.query.checkIn||req.query.checkin||req.query.check_in), checkOut:MSH_SU_TEXT(req.query.checkOut||req.query.checkout||req.query.check_out), guests:MSH_SU_TEXT(req.query.guests||"2"), rooms:MSH_SU_TEXT(req.query.rooms||"1"), propertyType:"hotel", property_type:"hotel", accommodationMode:"hotel_only", supplierScope:"webbeds_ratehawk_hyperguest" }; }
 function MSH_SU_KEEP(h, query) { if (!h) return false; if (!MSH_SU_HOTEL_ONLY(h)) return false; if (!MSH_SU_COUNTRY_OK(MSH_SU_COUNTRY(h, query.country), query.country)) return false; if (!MSH_SU_CITY_OK(MSH_SU_CITY(h, query.city), query.city, query.country)) return false; return Boolean(MSH_SU_NAME(h)); }
@@ -7261,15 +7325,16 @@ app.get("/api/platform/v2/selected-live-rate", async (req, res) => {
       }
 
       const city = txt(query.city);
+      const country = txt(query.country);
       const currency = txt(query.currency || "GBP").toUpperCase();
 
       const cityId =
         txt(query.cityId || query.city_id || query.destinationCode || "") ||
-        (typeof findWebbedsCityCodeFromCache === "function" ? findWebbedsCityCodeFromCache(city) : "") ||
+        (typeof findWebbedsCityCodeFromCache === "function" ? findWebbedsCityCodeFromCache(city, country) : "") ||
         (typeof webbedsCityIdFromName === "function" ? webbedsCityIdFromName(city) : "");
 
       if (!cityId) {
-        console.log(`[MSH-LIVE] ${label} MISSING cityId for "${city}". Run /api/webbeds/build-city-map once.`);
+        console.log(`[MSH-LIVE] ${label} MISSING cityId for "${city}". Run /api/webbeds/build-city-map?command=getallcities once.`);
         return { code, label, hotels: [], status: "no_city_id", ms: Date.now() - started };
       }
 
@@ -7291,17 +7356,33 @@ app.get("/api/platform/v2/selected-live-rate", async (req, res) => {
         new Promise((resolve) => setTimeout(() => resolve({ text: "", status: 0, error: "timeout" }), 15000))
       ]);
 
-      console.log(`[MSH-LIVE] ${label} HTTP status=${r.status} error=${r.error || "none"} preview=${(r.text || "").slice(0, 300)}`);
+      console.log(`[MSH-LIVE] ${label} cityId=${cityId} HTTP status=${r.status} error=${r.error || "none"} preview=${(r.text || "").slice(0, 300)}`);
+
+      if (r.text && r.text.includes("<error>")) {
+        console.error(`[MSH-LIVE] WEBBEDS XML ERROR:`, r.text);
+      }
 
       const parsed = parseWebbedsHotels(r.text || "", currency);
       console.log(`[MSH-LIVE] ${label} parsed ${parsed.length} hotels in ${Date.now() - started}ms`);
 
-      const normalized = parsed.map((h) => normalizeSupplierHotel({ ...h, country: query.country, city: query.city }, query, code, label));
+      const normalized = parsed.map((h) => normalizeSupplierHotel({ ...h, country: country || h.country, city: city || h.city }, query, code, label));
       return { code, label, hotels: normalized, status: "ok", ms: Date.now() - started };
     } catch (e) {
       console.log(`[MSH-LIVE] ${label} FAILED: ${e.message}`);
       return { code, label, hotels: [], status: "error", error: e.message, ms: Date.now() - started };
     }
+  }
+
+  function mshRatehawkPriceFromRate(rate) {
+    if (!rate) return 0;
+    const direct = num(rate.price || rate.amount || rate.total || rate.nightly_rate || rate.net || rate.sellingRate);
+    if (direct > 0) return direct;
+    const opts = Array.isArray(rate.payment_options && rate.payment_options.payment_types) ? rate.payment_options.payment_types : [];
+    for (const p of opts) {
+      const v = num(p.amount || p.show_amount || p.total);
+      if (v > 0) return v;
+    }
+    return 0;
   }
 
   async function tryRateHawk(query) {
@@ -7319,13 +7400,24 @@ app.get("/api/platform/v2/selected-live-rate", async (req, res) => {
         return { code, label, hotels: [], status: "not_configured", ms: Date.now() - started };
       }
 
-      const regionId = Number(
-        query.ratehawkRegionId ||
-        query.region_id ||
-        query.regionId ||
-        process.env.RATEHAWK_DEFAULT_REGION_ID ||
-        0
-      );
+      let regionId = 0;
+      try {
+        if (typeof mshRatehawkResolveRegionId === "function") {
+          regionId = await mshRatehawkResolveRegionId(query);
+        }
+      } catch (e) {
+        console.log(`[MSH-LIVE] ${label} region resolver failed: ${e.message}`);
+      }
+
+      if (!regionId) {
+        regionId = Number(
+          query.ratehawkRegionId ||
+          query.region_id ||
+          query.regionId ||
+          process.env.RATEHAWK_DEFAULT_REGION_ID ||
+          0
+        );
+      }
 
       if (!regionId) {
         console.log(`[MSH-LIVE] ${label} MISSING region_id for "${query.city}". Set RATEHAWK_DEFAULT_REGION_ID or RATEHAWK_REGION_MAP.`);
@@ -7351,12 +7443,27 @@ app.get("/api/platform/v2/selected-live-rate", async (req, res) => {
         new Promise((resolve) => setTimeout(() => resolve({ ok: false, status: 0, data: {}, error: "timeout" }), 15000))
       ]);
 
-      console.log(`[MSH-LIVE] ${label} HTTP status=${r.status} error=${r.error || "none"}`);
+      console.log(`[MSH-LIVE] ${label} region=${regionId} HTTP status=${r.status} error=${r.error || "none"}`);
 
       const rows = arrayFromPayload(r && r.data);
       console.log(`[MSH-LIVE] ${label} parsed ${rows.length} hotels in ${Date.now() - started}ms`);
 
-      const normalized = rows.map((h) => normalizeSupplierHotel({ ...h, country: query.country, city: query.city }, query, code, label));
+      const normalized = rows.map((h) => {
+        const rates = Array.isArray(h.rates) ? h.rates : (Array.isArray(h.rooms) ? h.rooms : []);
+        const flatRates = rates.map((rate) => ({
+          ...rate,
+          price: mshRatehawkPriceFromRate(rate),
+          currency: rate.currency || (rate.payment_options && rate.payment_options.payment_types && rate.payment_options.payment_types[0] && rate.payment_options.payment_types[0].currency_code) || query.currency,
+          rate_source_id: rate.rate_key || rate.rateKey || rate.book_hash || rate.rate_source_id,
+          room_name: rate.room_name || rate.roomName || rate.name
+        })).filter((rate) => Number(rate.price || 0) > 0);
+
+        return normalizeSupplierHotel(
+          { ...h, rates: flatRates, rooms: flatRates, country: query.country, city: query.city },
+          query, code, label
+        );
+      });
+
       return { code, label, hotels: normalized, status: "ok", ms: Date.now() - started };
     } catch (e) {
       console.log(`[MSH-LIVE] ${label} FAILED: ${e.message}`);
@@ -7617,8 +7724,9 @@ app.get("/api/platform/v2/selected-live-rate", async (req, res) => {
 module.exports = { app };
 
 // ============================================================
-// STARTUP � runs only when this file is the entry point
+// STARTUP ï¿½ runs only when this file is the entry point
 // ============================================================
+
 if (require.main === module) {
   const server = app.listen(PORT, "0.0.0.0", () => {
     const hb = typeof hotelbedsConfig === "function" ? hotelbedsConfig() : { ready: false };
@@ -7632,7 +7740,13 @@ if (require.main === module) {
     console.log("STRIPE:", process.env.STRIPE_SECRET_KEY ? "READY" : "NOT CONFIGURED");
     console.log("MAIL:", process.env.RESEND_API_KEY || process.env.SMTP_HOST ? "READY" : "NOT CONFIGURED");
     console.log("====================================");
+
+    // Cache warmer removed: chunks are already loaded into global.mshChunkCache
+    // at startup by the loadChunks() IIFE above. No live supplier calls on boot.
+    // First search is served instantly from RAM via /api/multi-supplier-hotels.
+    console.log("[CACHE] Serving from RAM chunk cache. No live supplier calls on boot.");
   });
+
   server.on("error", (err) => {
     console.error("[FATAL] Server error:", err && err.stack || err);
     process.exit(1);
@@ -7644,3 +7758,4 @@ if (require.main === module) {
     }
   }, 10000);
 }
+
