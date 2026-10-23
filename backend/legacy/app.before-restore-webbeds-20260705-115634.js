@@ -824,13 +824,34 @@ function internalSearchHotels(query) {
   const city = clean(query.city);
   const currency = clean(query.currency || "GBP").toUpperCase();
 
-  let hotels = readHotels()
+  // FAST CITY INDEX
+  let sourceHotels = [];
+  const cityKey = mshCityNorm(city);
+  
+  if (cityKey && global.mshCityIndex && global.mshCityIndex[cityKey]) {
+    sourceHotels = global.mshCityIndex[cityKey];
+  } else {
+    sourceHotels = readHotels();
+  }
+
+  let hotels = sourceHotels
     .filter((h) => !isBlockedCountry(h.country))
     .filter((h) => !country || mshSameCountryForCustomer(h.country, country))
     .filter((h) => !city || mshSameCityForCustomer(h.city, city, country || h.country))
     .filter((h) => isStrictHotelOnly(h))
     .map((h) => normalizeHotel({ ...h, city: mshCanonicalCity(h.city, h.country) || h.city }, currency))
     .filter((h) => h.name && h.country && h.city);
+
+  hotels.sort((a, b) => {
+    if (b.availableToBook !== a.availableToBook) return Number(b.availableToBook) - Number(a.availableToBook);
+    return a.name.localeCompare(b.name);
+  });
+
+  const limit = Math.max(1, Math.min(number(query.limit || 25), 300));
+  const offset = Math.max(0, number(query.offset || 0));
+
+  return hotels.slice(offset, offset + limit);
+}
 
   hotels.sort((a, b) => {
     if (b.availableToBook !== a.availableToBook) return Number(b.availableToBook) - Number(a.availableToBook);
@@ -6074,9 +6095,9 @@ app.get("/api/multi-supplier-hotels", async (req, res) => {
   try {
     // 2. PURE LOCAL CHUNK FETCH (No supplier calls)
     const params = new URLSearchParams(req.query).toString();
-    const localRes = await fetch(`http://127.0.0.1:${PORT}/search?${params}`, { cache: "no-store" });
-    const localData = await localRes.json().catch(() => ({}));
-    const localHotels = Array.isArray(localData.hotels) ? localData.hotels : [];
+    // Direct function call used below
+    
+    const localHotels = searchHotels(req.query);
 
     // 3. Format response
     const finalResponse = {
@@ -7758,4 +7779,5 @@ if (require.main === module) {
     }
   }, 10000);
 }
+
 
