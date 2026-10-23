@@ -863,17 +863,6 @@ function internalSearchHotels(query) {
   return hotels.slice(offset, offset + limit);
 }
 
-  hotels.sort((a, b) => {
-    if (b.availableToBook !== a.availableToBook) return Number(b.availableToBook) - Number(a.availableToBook);
-    return a.name.localeCompare(b.name);
-  });
-
-  const limit = Math.max(1, Math.min(number(query.limit || 25), 300));
-  const offset = Math.max(0, number(query.offset || 0));
-
-  return hotels.slice(offset, offset + limit);
-}
-
 function searchHotels(query) {
   return internalSearchHotels(query).map(publicHotel);
 }
