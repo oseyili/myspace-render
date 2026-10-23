@@ -62,23 +62,33 @@ export default function HotelSearchPage() {
 
   async function loadCountries() {
     try {
-      const res = await fetch(`${API_BASE}/api/public-countries`, { cache: "no-store" });
+      const res = await fetch(`${API_BASE}/api/cache-stats`, { cache: "no-store" });
       const data = await res.json();
-      if (data.ok && Array.isArray(data.countries)) {
-        setCountries(data.countries);
-        if (data.countries.length > 0) {
-          setCountry(data.countries[0].country);
+      
+      if (data.ok && Array.isArray(data.table)) {
+        // Group the flat table by country
+        const grouped = {};
+        for (const row of data.table) {
+          if (!grouped[row.country]) grouped[row.country] = [];
+          grouped[row.country].push(row.city);
+        }
+        
+        // Convert to the format the component expects
+        const countryList = Object.keys(grouped)
+          .sort()
+          .map((country) => ({
+            country,
+            cities: grouped[country].sort()
+          }));
+        
+        setCountries(countryList);
+        if (countryList.length > 0) {
+          setCountry(countryList[0].country);
         }
       } else {
+        // Fallback only if the API fails
         setCountries([
-          { country: "United Kingdom", cities: ["London", "Manchester", "Birmingham", "Liverpool", "Edinburgh", "Glasgow"] },
-          { country: "United States", cities: ["New York", "Los Angeles", "Miami", "Las Vegas", "Chicago", "San Francisco"] },
-          { country: "Canada", cities: ["Toronto", "Vancouver", "Montreal", "Calgary", "Ottawa"] },
-          { country: "United Arab Emirates", cities: ["Dubai", "Abu Dhabi"] },
-          { country: "France", cities: ["Paris", "Nice", "Lyon", "Marseille"] },
-          { country: "Nigeria", cities: ["Lagos", "Abuja"] },
-          { country: "Bahamas", cities: ["Nassau"] },
-          { country: "Australia", cities: ["Sydney", "Melbourne", "Brisbane"] }
+          { country: "United Kingdom", cities: ["London", "Manchester", "Birmingham"] }
         ]);
         setCountry("United Kingdom");
       }
