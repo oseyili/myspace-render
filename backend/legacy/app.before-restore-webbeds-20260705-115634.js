@@ -1055,6 +1055,47 @@ app.get("/status", (req, res) => {
   });
 });
 
+
+app.get("/api/cache-stats", (req, res) => {
+  const countryMap = new Map();
+
+  if (global.mshChunkCache) {
+    for (const hotel of Object.values(global.mshChunkCache)) {
+      const country = clean(hotel.country || "Unknown");
+      const city = clean(hotel.city || hotel.destination || "Unknown");
+      if (!countryMap.has(country)) countryMap.set(country, new Map());
+      const cityMap = countryMap.get(country);
+      cityMap.set(city, (cityMap.get(city) || 0) + 1);
+    }
+  }
+
+  const table = [];
+  for (const [country, cityMap] of countryMap) {
+    for (const [city, count] of cityMap) {
+      table.push({ country, city, hotels: count });
+    }
+  }
+
+  table.sort((a, b) => {
+    if (a.country !== b.country) return a.country.localeCompare(b.country);
+    return b.hotels - a.hotels;
+  });
+
+  const totalCountries = countryMap.size;
+  const totalCities = table.length;
+  const totalHotels = table.reduce((sum, row) => sum + row.hotels, 0);
+
+  res.json({
+    ok: true,
+    generated_at: nowISO(),
+    totals: {
+      hotels: totalHotels,
+      countries: totalCountries,
+      cities: totalCities
+    },
+    table
+  });
+});
 app.get("/api/status", (req, res) => {
   const destinations = buildDestinations();
   res.json({
@@ -7793,5 +7834,6 @@ if (require.main === module) {
     }
   }, 10000);
 }
+
 
 
