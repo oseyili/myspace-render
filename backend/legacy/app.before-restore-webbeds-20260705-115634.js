@@ -112,6 +112,8 @@ if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
         const chunkFiles = fs.readdirSync(chunksDir).filter(f => f.endsWith(".json"));
         let loadedCount = 0;
         global.mshChunkCache = {};
+        global.mshCityIndex = {}; // FAST CITY INDEX
+        
         for (const file of chunkFiles) {
             try {
                 const data = JSON.parse(fs.readFileSync(path.join(chunksDir, file), "utf8"));
@@ -119,13 +121,21 @@ if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
                     if (!global.mshChunkCache[key]) {
                         global.mshChunkCache[key] = hotel;
                         loadedCount++;
+                        
+                        // BUILD THE FAST CITY INDEX
+                        const c = mshCityNorm(hotel.city || hotel.destination || "");
+                        if (c) {
+                            if (!global.mshCityIndex[c]) global.mshCityIndex[c] = [];
+                            global.mshCityIndex[c].push(hotel);
+                        }
                     }
                 }
             } catch (e) {
                 console.error("Failed to load chunk " + file + ": " + e.message);
             }
         }
-        console.log("[Chunks] Loaded " + loadedCount + " additional hotels from chunks folder.");
+        console.log("[Chunks] Loaded " + loadedCount + " additional hotels.");
+        console.log("[Chunks] Indexed " + Object.keys(global.mshCityIndex).length + " cities.");
     }
 })();
 // MSH CHUNKS LOADER END
