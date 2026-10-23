@@ -834,6 +834,47 @@ function internalSearchHotels(query) {
   const city = clean(query.city);
   const currency = clean(query.currency || "GBP").toUpperCase();
 
+  // FAST CITY INDEX — return directly if city matches the index
+  let sourceHotels = [];
+  const cityKey = mshCityNorm(city);
+  
+  if (cityKey && global.mshCityIndex && global.mshCityIndex[cityKey]) {
+    sourceHotels = global.mshCityIndex[cityKey];
+  } else if (cityKey && global.mshCityIndex) {
+    // Loose match for districts
+    for (const [key, bucket] of Object.entries(global.mshCityIndex)) {
+      if (key.includes(cityKey) || cityKey.includes(key)) {
+        sourceHotels.push(...bucket);
+      }
+    }
+  }
+
+  // If the index has hits, use them directly (no strict filter)
+  let hotels = sourceHotels.length > 0
+    ? sourceHotels.map((h) => normalizeHotel({ ...h, city: mshCanonicalCity(h.city, h.country) || h.city }, currency))
+    : readHotels()
+        .filter((h) => !isBlockedCountry(h.country))
+        .filter((h) => !country || mshSameCountryForCustomer(h.country, country))
+        .filter((h) => !city || mshSameCityForCustomer(h.city, city, country || h.country))
+        .filter((h) => isStrictHotelOnly(h))
+        .map((h) => normalizeHotel({ ...h, city: mshCanonicalCity(h.city, h.country) || h.city }, currency));
+
+  hotels = hotels.filter((h) => h.name && h.country && h.city);
+
+  hotels.sort((a, b) => {
+    if (b.availableToBook !== a.availableToBook) return Number(b.availableToBook) - Number(a.availableToBook);
+    return a.name.localeCompare(b.name);
+  });
+
+  const limit = Math.max(1, Math.min(number(query.limit || 25), 300));
+  const offset = Math.max(0, number(query.offset || 0));
+
+  return hotels.slice(offset, offset + limit);
+} {
+  const country = clean(query.country);
+  const city = clean(query.city);
+  const currency = clean(query.currency || "GBP").toUpperCase();
+
   // FAST CITY INDEX with LOOSE MATCHING for districts and neighbourhoods
   let sourceHotels = [];
   const cityKey = mshCityNorm(city);
