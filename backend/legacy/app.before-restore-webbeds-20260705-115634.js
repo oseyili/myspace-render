@@ -870,53 +870,8 @@ function internalSearchHotels(query) {
   const offset = Math.max(0, number(query.offset || 0));
 
   return hotels.slice(offset, offset + limit);
-} {
-  const country = clean(query.country);
-  const city = clean(query.city);
-  const currency = clean(query.currency || "GBP").toUpperCase();
-
-  // FAST CITY INDEX with LOOSE MATCHING for districts and neighbourhoods
-  let sourceHotels = [];
-  const cityKey = mshCityNorm(city);
-  
-  if (cityKey && global.mshCityIndex) {
-    // 1. Exact match first (fastest)
-    if (global.mshCityIndex[cityKey]) {
-      sourceHotels = global.mshCityIndex[cityKey];
-    } else {
-      // 2. Loose match for districts/neighbourhoods
-      // e.g. "sao pedro" will match "sao pedro" inside "lisbon sao pedro"
-      for (const [key, bucket] of Object.entries(global.mshCityIndex)) {
-        if (key.includes(cityKey) || cityKey.includes(key)) {
-          sourceHotels.push(...bucket);
-        }
-      }
-      // 3. If no loose match, fall back to all hotels
-      if (!sourceHotels.length) sourceHotels = readHotels();
-    }
-  } else {
-    sourceHotels = readHotels();
-  }
-
-  let hotels = sourceHotels
-    .filter((h) => !isBlockedCountry(h.country))
-    .filter((h) => !country || mshSameCountryForCustomer(h.country, country))
-    // Loosen the city filter too so district searches work
-    .filter((h) => !city || mshSameCityForCustomer(h.city, city, country || h.country) || 
-                    (city && h.city && mshCityNorm(h.city).includes(mshCityNorm(city))))
-    .filter((h) => isStrictHotelOnly(h))
-    .map((h) => normalizeHotel({ ...h, city: mshCanonicalCity(h.city, h.country) || h.city }, currency))
-    .filter((h) => h.name && h.country && h.city);
-
-  hotels.sort((a, b) => {
-    if (b.availableToBook !== a.availableToBook) return Number(b.availableToBook) - Number(a.availableToBook);
-    return a.name.localeCompare(b.name);
-  });
-
-  const limit = Math.max(1, Math.min(number(query.limit || 25), 300));
-  const offset = Math.max(0, number(query.offset || 0));
-
-  return hotels.slice(offset, offset + limit);
+} function searchHotels(query) {
+  return internalSearchHotels(query).map(publicHotel);
 }
 
 function searchHotels(query) {
