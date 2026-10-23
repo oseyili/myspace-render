@@ -1069,8 +1069,10 @@ app.get("/api/cache-stats", (req, res) => {
     }
   }
 
+  const filterCountry = clean(req.query.country).toLowerCase();
   const table = [];
   for (const [country, cityMap] of countryMap) {
+    if (filterCountry && country.toLowerCase() !== filterCountry) continue;
     for (const [city, count] of cityMap) {
       table.push({ country, city, hotels: count });
     }
@@ -7834,6 +7836,7 @@ if (require.main === module) {
     }
   }, 10000);
 }
+
 
 
 
